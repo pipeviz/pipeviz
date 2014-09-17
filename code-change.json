@@ -1,0 +1,20 @@
+{
+    "targets": [
+        {
+            "ipv4": "10.1.0.1"
+        },
+        {
+            "ipv4": "10.1.0.2"
+        }
+    ],
+    "app-state": {
+        "code-state": {
+            "commit-hash": "ab123ab123somegitsha1",
+            "make-functor": "make prod"
+        },
+        "data-state": {
+            "family": "prod",
+            "id": "12345678910 (timestamp)"
+        }
+    }
+}
