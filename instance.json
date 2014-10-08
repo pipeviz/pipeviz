@@ -8,7 +8,7 @@
                 {
                     "id": ["path"],
                     "path": "/usr/local/bin/app",
-                    "commit": "ab123ab123somegitsha1"
+                    "commit": "now123this456is789anewgithash"
                 },
             ],
             "runtimes": [
