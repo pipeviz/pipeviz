@@ -1,0 +1,26 @@
+.node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+.anchor-node {
+    display: none;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: .6;
+    stroke-width: 3px;
+}
+
+text {
+    font: 14px sans-serif;
+    pointer-events: none;
+}
+
+.node text {
+    text-anchor: middle;
+    letter-spacing: 0.1em;
+    stroke: orange;
+    fill: orange;
+}
