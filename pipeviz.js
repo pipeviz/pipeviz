@@ -36,44 +36,23 @@ var force = d3.layout.force()
     .size([width, height])
     .start();
 
-var link = svg.selectAll(".link")
-    .data(links)
+// Capture the vertex and edge set as top-level vars
+var n = svg.selectAll(".node")
+    l = svg.selectAll(".links")
+
+var link = l.data(links)
     .enter().append("line")
     .attr("class", "link")
     .style("stroke-width", function(d) {
         return (d.target == nlist[0] || d.source == nlist[1]) ? 0 : Math.sqrt(d.value);
     });
 
-//var nodes = svg.selectAll(".node")
-    //.data(nlist)
-    //.enter().append("circle")
-    //.attr("class", "node")
-    //.attr("r", 35)
-    //.style("fill", function (d) { return color(2); })
-    //.call(force.drag);
 
-//var anchors = svg.selectAll(".node")
-    //.data(nlist.splice(0, 2), function(d) { return d.index; })
-    //.enter().append("circle")
-    //.attr("class", "node")
-    //.attr("r", 1)
-    //.attr("x", function(d) { return d.x })
-    //.attr("y", function(d) { return d.y })
-    //.call(force.drag);
-
-//allnodes.filter(function(d) { return d.hasOwnProperty('type') })
-
-var nodes = svg.selectAll(".node")
-    .data(nlist, function(d, i) { return d.index; })
+var nodes = n.data(nlist, function(d, i) { return d.index; })
     .enter().append("g")
     .attr("class", "node")
     .call(force.drag);
 
-//var nodes = svg.selectAll(".node")
-    //.data(nlist)
-    //.enter().append("g")
-    //.attr("class", "node")
-    //.call(force.drag);
 
 nodes.append("circle")
     .attr("x", 0)
@@ -83,10 +62,10 @@ nodes.append("circle")
     })
     .attr("fill", color(2));
 
+// Put a label on non-anchor vars
 nodes.filter(function(d) {
     return !d.hasOwnProperty('type');
 }).append("text").text(function(d) { return d.id });
-//nodes.append("text").text(function(d) { return d.id });
 
 force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
@@ -95,6 +74,4 @@ force.on("tick", function() {
         .attr("y2", function(d) { return d.target.y; });
 
     nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-    //nodes.attr("cx", function(d) { return d.x; })
-        //.attr("cy", function(d) { return d.y; });
 });
