@@ -6,9 +6,12 @@ var svg = d3.select('body').append('svg')
     .attr('width', width)
     .attr('height', height);
 
-var nlist = [
+var alist = [
     {index: 0, type: "graph-anchor", id: "sink", fixed: true, y: height / 2, x: width - 20},
     {index: 1, type: "graph-anchor", id: "source", fixed: true, y: height / 2, x: 20},
+];
+
+var nlist = [
     {index: 2, id: "prod"},
     {index: 3, id: "stage"},
     {index: 4, id: "qa"},
@@ -17,23 +20,22 @@ var nlist = [
 ];
 
 var links = [
-    {source: nlist[2], target: nlist[0]},
+    {source: nlist[0], target: alist[0]},
+    {source: nlist[1], target: nlist[0]},
+    {source: nlist[2], target: nlist[1]},
     {source: nlist[3], target: nlist[2]},
-    {source: nlist[4], target: nlist[3]},
-    {source: nlist[5], target: nlist[4]},
-    {source: nlist[6], target: nlist[3]},
-    {source: nlist[1], target: nlist[5]},
-    {source: nlist[1], target: nlist[6]}
+    {source: nlist[4], target: nlist[1]},
+    {source: alist[1], target: nlist[3]},
+    {source: alist[1], target: nlist[4]}
 ];
 
 var force = d3.layout.force()
-    .nodes(nlist)
+    .nodes(nlist.concat(alist))
     .links(links)
     .charge(-3000)
     .linkDistance(150)
     .gravity(0)
     .size([width, height])
-    .start();
 
 // Capture the vertex and edge set as top-level vars
 var n = svg.selectAll(".node")
@@ -43,7 +45,7 @@ var link = l.data(links)
     .enter().append("line")
     .attr("class", "link")
     .style("stroke-width", function(d) {
-        return (d.target == nlist[0] || d.source == nlist[1]) ? 0 : 2;
+        return (d.target == alist[0] || d.source == alist[1]) ? 0 : 2;
     });
 
 var nodes = n.data(nlist, function(d, i) { return d.index; })
@@ -72,3 +74,5 @@ force.on("tick", function() {
 
     nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 });
+
+force.start();
