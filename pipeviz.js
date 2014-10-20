@@ -1,5 +1,6 @@
 var width = window.innerWidth
-    height = window.innerHeight;
+    height = window.innerHeight
+    color = d3.scale.category20();
 
 var svg = d3.select('body').append('svg')
     .attr('width', width)
@@ -25,8 +26,6 @@ var links = [
     {source: nlist[1], target: nlist[6]}
 ];
 
-var color = d3.scale.category20();
-
 var force = d3.layout.force()
     .nodes(nlist)
     .links(links)
@@ -44,15 +43,13 @@ var link = l.data(links)
     .enter().append("line")
     .attr("class", "link")
     .style("stroke-width", function(d) {
-        return (d.target == nlist[0] || d.source == nlist[1]) ? 0 : Math.sqrt(d.value);
+        return (d.target == nlist[0] || d.source == nlist[1]) ? 0 : 2;
     });
-
 
 var nodes = n.data(nlist, function(d, i) { return d.index; })
     .enter().append("g")
     .attr("class", "node")
     .call(force.drag);
-
 
 nodes.append("circle")
     .attr("x", 0)
