@@ -1,6 +1,14 @@
+svg {
+    background-color: #2E2633;
+}
+
 .node {
     stroke: #fff;
     stroke-width: 1.5px;
+}
+
+.node circle {
+    fill: #99173C;
 }
 
 .anchor {
@@ -16,11 +24,12 @@
 text {
     font: 14px sans-serif;
     pointer-events: none;
+    text-anchor: middle;
 }
 
 .node text {
-    text-anchor: middle;
     letter-spacing: 0.1em;
-    stroke: orange;
-    fill: orange;
+    alignment-baseline: middle;
+    stroke: #EFFFCD;
+    fill: #EFFFCD;
 }

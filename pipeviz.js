@@ -35,10 +35,11 @@ var force = d3.layout.force()
     .charge(-3000)
     .linkDistance(150)
     .gravity(0)
-    .size([width, height])
+    .size([width, height]);
 
 // Capture the vertex and edge set as top-level vars
 var n = svg.selectAll(".node")
+    a = svg.selectAll(".anchor-node")
     l = svg.selectAll(".links");
 
 var link = l.data(links)
@@ -47,6 +48,14 @@ var link = l.data(links)
         return (d.target == alist[0] || d.source == alist[1]) ? "link anchor" : "link";
     })
     .style("stroke-width", 2);
+
+var anchors = a.data(alist, function(d, i) { return d.index; })
+    .enter().append("g")
+    .attr("class", "anchor-node")
+
+anchors.append("circle")
+    .attr("x", 0)
+    .attr("y", 0);
 
 var nodes = n.data(nlist, function(d, i) { return d.index; })
     .enter().append("g")
@@ -57,13 +66,14 @@ nodes.append("circle")
     .attr("y", 0)
     .attr("r", function(d) {
         return d.type ? 1 : 35;
-    })
-    .attr("fill", color(2));
+    });
 
 // Put a label on non-anchor vars
 nodes.filter(function(d) {
     return !d.hasOwnProperty('type');
-}).append("text").text(function(d) { return d.id });
+}).append("text")
+    .attr("class", "instance-name")
+    .text(function(d) { return d.id });
 
 force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
@@ -72,6 +82,7 @@ force.on("tick", function() {
         .attr("y2", function(d) { return d.target.y; });
 
     nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    anchors.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 });
 
 force.start();
