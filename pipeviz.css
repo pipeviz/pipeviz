@@ -2,13 +2,17 @@ svg {
     background-color: #2E2633;
 }
 
-.node {
+.node.instance {
     stroke: #fff;
     stroke-width: 1.5px;
 }
 
-.node circle {
+.node.instance circle {
     fill: #99173C;
+}
+
+.node.commit circle {
+    fill: #555152;
 }
 
 .anchor {

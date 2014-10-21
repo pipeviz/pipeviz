@@ -27,7 +27,7 @@ var n = svg.selectAll(".node")
     a = svg.selectAll(".anchor-node")
     l = svg.selectAll(".links");
 
-d3.json("/fixtures/state1.json", function(err, res) {
+d3.json("/fixtures/state2.json", function(err, res) {
     res.cgraph.map(function(e) {
         g.setEdge(e[0], e[1]);
     });
@@ -99,6 +99,7 @@ d3.json("/fixtures/state1.json", function(err, res) {
             }
         }
 
+        // recursive call, the crux of this depth-first traversal
         g.successors(v).map(function(s) {
             walk(s);
         });
@@ -138,7 +139,7 @@ d3.json("/fixtures/state1.json", function(err, res) {
 
     var anchors = a.data(alist, function(d, i) { return d.commit; })
         .enter().append("g")
-        .attr("class", "anchor-node")
+        .attr("class", "node anchor")
 
         anchors.append("circle")
         .attr("x", 0)
@@ -146,7 +147,9 @@ d3.json("/fixtures/state1.json", function(err, res) {
 
     var node = n.data(nlist, function(d, i) { return d.commit; })
         .enter().append("g")
-        .attr("class", "node")
+        .attr("class", function(d) {
+            return d.type == 'commit' ? "node commit" : "node instance";
+        });
 
         node.append("circle")
         .attr("x", 0)
@@ -154,12 +157,11 @@ d3.json("/fixtures/state1.json", function(err, res) {
         .attr("r", function(d) {
             if (d.type == 'instance') { return 35; }
             else if (d.type == 'graph-anchor') { return 1; }
+            else if (d.type == 'commit') { return 20; }
         });
 
     // Put a label on non-anchor vars
-    node.filter(function(d) {
-            return d.type == 'instance';
-        }).append("text")
+    node.append("text")
         .attr("class", "instance-name")
         .text(function(d) { return d.name });
 
