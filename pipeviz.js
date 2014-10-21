@@ -39,19 +39,18 @@ var force = d3.layout.force()
 
 // Capture the vertex and edge set as top-level vars
 var n = svg.selectAll(".node")
-    l = svg.selectAll(".links")
+    l = svg.selectAll(".links");
 
 var link = l.data(links)
     .enter().append("line")
-    .attr("class", "link")
-    .style("stroke-width", function(d) {
-        return (d.target == alist[0] || d.source == alist[1]) ? 0 : 2;
-    });
+    .attr("class", function(d) {
+        return (d.target == alist[0] || d.source == alist[1]) ? "link anchor" : "link";
+    })
+    .style("stroke-width", 2);
 
 var nodes = n.data(nlist, function(d, i) { return d.index; })
     .enter().append("g")
     .attr("class", "node")
-    .call(force.drag);
 
 nodes.append("circle")
     .attr("x", 0)
