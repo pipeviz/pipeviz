@@ -163,6 +163,8 @@ d3.json("/fixtures/state2.json", function(err, res) {
         .attr("x", 0)
         .attr("y", 0)
         .attr("r", 35)
+        .on('mouseover', swell)
+        .on('mouseout', unswell)
 
     instances.append("text")
         .attr("class", "instance-name")
@@ -179,6 +181,8 @@ d3.json("/fixtures/state2.json", function(err, res) {
         .attr("x", 0)
         .attr("y", 0)
         .attr("r", 20)
+        .on('mouseover', swell)
+        .on('mouseout', unswell)
 
     commits.append("text")
         .attr("class", "instance-name")
@@ -200,4 +204,12 @@ d3.json("/fixtures/state2.json", function(err, res) {
     //for (var i = 0; i < 200; ++i) force.tick();
     //force.stop();
 });
+
+function swell(d) {
+    d3.select(this).attr('transform', 'scale(1.1)');
+}
+
+function unswell(d) {
+    d3.select(this).attr('transform', '');
+}
 
