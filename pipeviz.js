@@ -23,9 +23,13 @@ var force = d3.layout.force()
     .size([width, height]);
 
 // Capture the vertex and edge set as top-level vars
-var n = svg.selectAll(".node")
-    a = svg.selectAll(".anchor-node")
-    l = svg.selectAll(".links");
+var selectors = {
+    "instances": svg.selectAll(".node.instance"),
+    "commits": svg.selectAll(".node.commit"),
+    "links": svg.selectAll(".link.commit"),
+    "anchors": svg.selectAll(".node.anchor"),
+    "anchorlinks": svg.selectAll(".link.anchor")
+}
 
 d3.json("/fixtures/state2.json", function(err, res) {
     res.cgraph.map(function(e) {
@@ -129,41 +133,54 @@ d3.json("/fixtures/state2.json", function(err, res) {
     })
 
     force.nodes(nlist.concat(alist)).links(links);
-
-    var link = l.data(links)
+    var link = selectors.links.data(links)
         .enter().append("line")
         .attr("class", function(d) {
-            return (d.target == alist[0] || d.source == alist[1]) ? "link anchor" : "link";
+            return d.type == "anchor" ? "link anchor" : "link commit";
         })
-    .style("stroke-width", 2);
+    .style("stroke-width", function(d) {
+        return (d.path && d.path.length > 0) ? 4 * Math.sqrt(d.path.length) : 1;
+    });
 
-    var anchors = a.data(alist, function(d, i) { return d.commit; })
+    var anchors = selectors.anchors.data(alist, function(d, i) { return d.commit; })
         .enter().append("g")
-        .attr("class", "node anchor")
+        .attr("class", "node anchor");
 
         anchors.append("circle")
         .attr("x", 0)
         .attr("y", 0);
 
-    var node = n.data(nlist, function(d, i) { return d.commit; })
+    var instances = selectors.instances.data(nlist.reduce(function(r, v) {
+        if (v.type == "instance") { r.push(v) }
+        return r;
+    }, []), function(d, i) { return d.commit; })
         .enter().append("g")
-        .attr("class", function(d) {
-            return d.type == 'commit' ? "node commit" : "node instance";
-        });
+        .attr("class", "node instance");
 
-        node.append("circle")
+    instances.append("circle")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("r", function(d) {
-            if (d.type == 'instance') { return 35; }
-            else if (d.type == 'graph-anchor') { return 1; }
-            else if (d.type == 'commit') { return 20; }
-        });
+        .attr("r", 35)
 
-    // Put a label on non-anchor vars
-    node.append("text")
+    instances.append("text")
         .attr("class", "instance-name")
         .text(function(d) { return d.name });
+
+    var commits = selectors.commits.data(nlist.reduce(function(r, v) {
+        if (v.type == "commit") { r.push(v) }
+        return r;
+    }, []), function(d, i) { return d.commit; })
+        .enter().append("g")
+        .attr("class", "node commit");
+
+    commits.append("circle")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("r", 20)
+
+    commits.append("text")
+        .attr("class", "instance-name")
+        .text(function(d) { return d.commit.substring(0, 7) });
 
     force.on("tick", function() {
         link.attr("x1", function(d) { return d.source.x; })
@@ -171,30 +188,11 @@ d3.json("/fixtures/state2.json", function(err, res) {
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-        node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        instances.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        commits.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
         anchors.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     });
 
     force.start();
 });
-
-//var nlist = [
-    //{index: 2, id: "prod"},
-    //{index: 3, id: "stage"},
-    //{index: 4, id: "qa"},
-    //{index: 5, id: "dev1"},
-    //{index: 6, id: "dev2"}
-//];
-
-//var links = [
-    //{source: nlist[0], target: alist[0]},
-    //{source: nlist[1], target: nlist[0]},
-    //{source: nlist[2], target: nlist[1]},
-    //{source: nlist[3], target: nlist[2]},
-    //{source: nlist[4], target: nlist[1]},
-    //{source: alist[1], target: nlist[3]},
-    //{source: alist[1], target: nlist[4]}
-//];
-
-//force.nodes(nlist.concat(alist)).links(links);
 
