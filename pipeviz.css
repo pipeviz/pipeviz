@@ -2,6 +2,12 @@ svg {
     background-color: #2E2633;
 }
 
+body {
+    /*just be sloppy and sure for now*/
+    margin: 0;
+    padding: 0;
+}
+
 .node.instance {
     stroke: #fff;
     stroke-width: 1.5px;
