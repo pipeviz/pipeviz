@@ -19,7 +19,9 @@ var svg = d3.select('body').append('svg')
 var force = d3.layout.force()
     .charge(-3000)
     .linkDistance(150)
+    .chargeDistance(150)
     .gravity(0)
+    .friction(0.7)
     .size([width, height]);
 
 // Capture the vertex and edge set as top-level vars
@@ -194,5 +196,8 @@ d3.json("/fixtures/state2.json", function(err, res) {
     });
 
     force.start();
+    // uncomment to have it directly appear in place
+    //for (var i = 0; i < 200; ++i) force.tick();
+    //force.stop();
 });
 
