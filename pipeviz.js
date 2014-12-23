@@ -157,14 +157,15 @@ d3.json("/fixtures/state2.json", function(err, res) {
         return r;
     }, []), function(d, i) { return d.commit; })
         .enter().append("g")
-        .attr("class", "node instance");
+        .attr("class", "node instance")
+        .on('click', enterInstance);
 
     instances.append("circle")
         .attr("x", 0)
         .attr("y", 0)
         .attr("r", 35)
         .on('mouseover', swell)
-        .on('mouseout', unswell)
+        .on('mouseout', unswell);
 
     instances.append("text")
         .attr("class", "instance-name")
@@ -199,6 +200,50 @@ d3.json("/fixtures/state2.json", function(err, res) {
         anchors.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     });
 
+    function enterInstance(d) {
+        if (!d3.event.defaultPrevented) {
+            force.stop();
+            var dom_exp = this
+                data_exp = d;
+
+            // directly unswell the circle first
+            var circle = d3.select(this).select("circle")
+                .on("mouseover", null)
+                .on("mouseout", null)
+                .transition().duration(150).attr("transform", "");
+
+            // Add a new, nested svg to contain the new viz
+            var inner_svg = d3.select(this).append("svg")
+                //.attr("viewBox", "0 0 " + width + " " + height)
+                .attr('width', width)
+                .attr('height', height)
+                .classed("app-instance now");
+
+            d3.selectAll(".node, .link").filter(function (d, i) { return (d !== data_exp); })
+                .classed("offview", true); // CSS3 transition takes care of it
+
+            d3.select(this).select("circle").transition()
+                .duration(750)
+                .style("fill-opacity", 0);
+
+            d3.select(this).transition()
+                .duration(750)
+                .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+
+            d3.select(this).select("circle").transition()
+                .delay(600)
+                .duration(750)
+                .attr("r", height / 2)
+                .style("opacity", 0);
+
+            d3.select(this).select("text").transition()
+                .delay(600)
+                .duration(750)
+                .attr("transform", "scale(1.5)")
+                .attr("transform", "translate(" + width/2 + ",20)") // TODO non-stupid-fixed positioning
+        }
+    }
+
     force.start();
     // uncomment to have it directly appear in place
     //for (var i = 0; i < 200; ++i) force.tick();
@@ -206,10 +251,11 @@ d3.json("/fixtures/state2.json", function(err, res) {
 });
 
 function swell(d) {
-    d3.select(this).attr('transform', 'scale(1.1)');
+    d3.select(this).transition().duration(150).attr('transform', 'scale(1.1)');
 }
 
 function unswell(d) {
-    d3.select(this).attr('transform', '');
+    d3.select(this).transition().duration(150).attr('transform', '');
 }
+
 

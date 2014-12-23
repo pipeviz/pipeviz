@@ -8,6 +8,18 @@ body {
     padding: 0;
 }
 
+.node, .link {
+    opacity: 1;
+    -webkit-transition: opacity 0.25s ease-in-out;
+    -moz-transition: opacity 0.25s ease-in-out;
+    -ms-transition: opacity 0.25s ease-in-out;
+    -o-transition: opacity 0.25s ease-in-out;
+}
+
+.offview {
+    opacity: 0;
+}
+
 .node.instance {
     stroke: #fff;
     stroke-width: 1.5px;
@@ -43,3 +55,4 @@ text {
     stroke: #EFFFCD;
     fill: #EFFFCD;
 }
+
