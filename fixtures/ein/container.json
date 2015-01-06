@@ -9,7 +9,7 @@
                 "id": {
                     "commit": "a9a6b91d193cdbe60b316f01df9f6e068b9e82bc",
                 },
-                "nick": "ourapp"
+                "nick": "ourapp",
                 "type": "code",
                 "data states": {
                     "default db": {
