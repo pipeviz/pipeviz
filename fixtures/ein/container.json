@@ -1,0 +1,82 @@
+[
+    {
+        "ids": [ "hostname", "ipv4" ],
+        "type": "baremetal",
+        "hostname": "prod-web01",
+        "ipv4": [ "10.1.1.1", "10.1.1.2" ],
+        "logic states": {
+            "/usr/local/bin/app": {
+                "id": {
+                    "commit": "a9a6b91d193cdbe60b316f01df9f6e068b9e82bc",
+                },
+                "nick": "ourapp"
+                "type": "code",
+                "data states": {
+                    "default db": {
+                        "loc": {
+                            "hostname": "prod-db01",
+                            "port": 3306,
+                            "proto": "tcp",
+                        }
+                    }
+                },
+            },
+            "/usr/sbin/httpd": {
+                "id": {
+                    "version": "2.2.4"
+                },
+                "type": "binary",
+                "config": {
+                    "compiled modules": {
+                        "mod_php": {
+                            "loc": {
+                                "path": "/etc/httpd/modules/libphp.so"
+                            }
+                        }
+                    }
+                }
+            },
+            "/etc/httpd/modules/libphp.so": {
+                "type": "library",
+                "php-sapi": "apache",
+                "version": "5.5.13",
+                "config-opts": [ "json", "mysql", "posix" ]
+            }
+        },
+        "runtimes": [
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/local/bin/app"
+                    },
+                    {
+                        "path": "/usr/sbin/httpd"
+                    }
+                ],
+                "user": "www",
+                "group": "www",
+                "pid": 1234,
+                "cwd": "/var/run/app",
+                "listen": [
+                    {
+                        "type": "port",
+                        "proto": [ "TCP" ],
+                        "number": 80,
+                    }
+                ]
+            }
+        ],
+    },
+    {
+        "ids": [ "hostname", "ipv4" ],
+        "type": "vm",
+        "hostname": "prod-db01",
+        "ipv4": "10.1.1.3"
+    },
+    {
+        "ids": [ "hostname", "ipv4" ],
+        "type": "vm",
+        "hostname": "stage01",
+        "ipv4": [ "10.1.1.1", "10.1.1.2" ]
+    }
+]
