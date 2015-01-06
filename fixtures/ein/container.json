@@ -17,6 +17,7 @@
                             "hostname": "prod-db01",
                             "port": 3306,
                             "proto": "tcp",
+                            "schema": "app_db"
                         }
                     }
                 },
@@ -43,7 +44,7 @@
                 "config-opts": [ "json", "mysql", "posix" ]
             }
         },
-        "runtimes": [
+        "processes": [
             {
                 "logic states": [
                     {
@@ -71,7 +72,30 @@
         "ids": [ "hostname", "ipv4" ],
         "type": "vm",
         "hostname": "prod-db01",
-        "ipv4": "10.1.1.3"
+        "ipv4": "10.1.1.3",
+        "logic states": {
+            "/usr/libexec/mysqld": {
+                "id": {
+                    "version": "5.5.37"
+                },
+                "nick": "mysql",
+                "type": "binary",
+            }
+        },
+        "processes": [
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/libexec/mysqld"
+                    }
+                ],
+                "user": "mysql",
+                "group": "mysql",
+                "pid": 2345,
+                "data states": [
+                ]
+            }
+        ]
     },
     {
         "ids": [ "hostname", "ipv4" ],
