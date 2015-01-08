@@ -93,8 +93,7 @@
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 2345,
-                "data container namespace": "var/lib/mysql",
-                "data containers": [ "app_db" ],
+                "data spaces": "/var/lib/mysql",
                 "listen": [
                     {
                         "type": "port",
@@ -107,7 +106,10 @@
                     }
                 ]
             }
-        ]
+        ],
+        "data spaces": {
+            "/var/lib/mysql": [ "app_db" ]
+        }
     },
     {
         "ids": [ "hostname", "ipv4" ],
@@ -191,8 +193,7 @@
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 1129,
-                "data container namespace": "var/lib/mysql",
-                "data containers": [ "app_db" ],
+                "data spaces": "/var/lib/mysql",
                 "listen": [
                     {
                         "type": "port",
@@ -205,7 +206,10 @@
                     }
                 ]
             }
-        ]
+        ],
+        "data spaces": {
+            "/var/lib/mysql": [ "app_db" ]
+        }
     },
     {
         "ids": [ "hostname", "ipv4" ],
@@ -289,8 +293,7 @@
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 32771,
-                "data container namespace": "/var/lib/mysql",
-                "data containers": [ "app_db" ],
+                "data spaces": "/var/lib/mysql",
                 "listen": [
                     {
                         "type": "port",
@@ -303,7 +306,10 @@
                     }
                 ]
             }
-        ]
+        ],
+        "data spaces": {
+            "/var/lib/mysql": [ "app_db" ]
+        }
     },
     {
         "ids": [ "hostname" ],
@@ -386,8 +392,7 @@
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 141,
-                "data container namespace": "/var/lib/mysql",
-                "data containers": [ "app_db" ],
+                "data spaces": "/var/lib/mysql",
                 "listen": [
                     {
                         "type": "port",
@@ -400,7 +405,10 @@
                     }
                 ]
             }
-        ]
+        ],
+        "data spaces": {
+            "/var/lib/mysql": [ "app_db" ]
+        }
     },
     {
         "ids": [ "hostname" ],
@@ -483,8 +491,7 @@
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 141,
-                "data container namespace": "/var/lib/mysql",
-                "data containers": [ "app_db" ],
+                "data spaces": "/var/lib/mysql",
                 "listen": [
                     {
                         "type": "port",
@@ -497,6 +504,9 @@
                     }
                 ]
             }
-        ]
+        ],
+        "data spaces": {
+            "/var/lib/mysql": [ "app_db" ]
+        }
     }
 ]
