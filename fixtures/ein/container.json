@@ -21,7 +21,7 @@
                             "interaction": "rw"
                         }
                     }
-                },
+                }
             },
             "/usr/sbin/httpd": {
                 "id": {
@@ -112,8 +112,8 @@
     {
         "ids": [ "hostname", "ipv4" ],
         "type": "vm",
-        "hostname": "stage01",
-        "ipv4": "10.1.1.3",
+        "hostname": "stage",
+        "ipv4": "10.1.1.5",
         "logic states": {
             "/usr/local/bin/app": {
                 "id": {
@@ -129,7 +129,7 @@
                             "interaction": "rw"
                         }
                     }
-                },
+                }
             },
             "/usr/sbin/httpd": {
                 "id": {
@@ -172,7 +172,7 @@
                 ],
                 "user": "www",
                 "group": "www",
-                "pid": 1234,
+                "pid": 8090,
                 "cwd": "/var/run/app",
                 "listen": [
                     {
@@ -190,7 +190,7 @@
                 ],
                 "user": "mysql",
                 "group": "mysql",
-                "pid": 2345,
+                "pid": 1129,
                 "data id": "var/lib/mysql",
                 "data containers": [ "app_db" ],
                 "listen": [
@@ -205,6 +205,298 @@
                     }
                 ]
             }
-        ],
+        ]
+    },
+    {
+        "ids": [ "hostname", "ipv4" ],
+        "type": "vm",
+        "hostname": "qa",
+        "ipv4": "10.1.1.7",
+        "logic states": {
+            "/usr/local/bin/app": {
+                "id": {
+                    "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a",
+                },
+                "nick": "ourapp",
+                "type": "code",
+                "data states": {
+                    "default db": {
+                        "loc": {
+                            "path": "/var/lib/mysql/mysql.sock",
+                            "schema": "app_db",
+                            "interaction": "rw"
+                        }
+                    }
+                }
+            },
+            "/usr/sbin/httpd": {
+                "id": {
+                    "version": "2.2.6"
+                },
+                "type": "binary",
+                "config": {
+                    "compiled modules": {
+                        "mod_php": {
+                            "loc": {
+                                "path": "/etc/httpd/modules/libphp.so"
+                            }
+                        }
+                    }
+                }
+            },
+            "/etc/httpd/modules/libphp.so": {
+                "type": "library",
+                "php-sapi": "apache",
+                "version": "5.5.13",
+                "config-opts": [ "json", "mysql", "posix" ]
+            },
+            "/usr/libexec/mysqld": {
+                "id": {
+                    "version": "5.5.40"
+                },
+                "nick": "mysql",
+                "type": "binary",
+            }
+        },
+        "processes": [
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/local/bin/app"
+                    },
+                    {
+                        "path": "/usr/sbin/httpd"
+                    }
+                ],
+                "user": "www",
+                "group": "www",
+                "pid": 9213,
+                "cwd": "/var/run/app",
+                "listen": [
+                    {
+                        "type": "port",
+                        "proto": [ "tcp" ],
+                        "number": 80,
+                    }
+                ]
+            },
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/libexec/mysqld"
+                    }
+                ],
+                "user": "mysql",
+                "group": "mysql",
+                "pid": 32771,
+                "data id": "var/lib/mysql",
+                "data containers": [ "app_db" ],
+                "listen": [
+                    {
+                        "type": "port",
+                        "proto": [ "tcp" ],
+                        "number": 3306,
+                    },
+                    {
+                        "type": "unix",
+                        "path": "/var/lib/mysql/mysql.sock"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "ids": [ "hostname" ],
+        "type": "vm",
+        "hostname": "dev01",
+        "logic states": {
+            "/usr/local/bin/app": {
+                "id": {
+                    "commit": "aa41c0391914923302734db6ec61b9e62869aa01",
+                },
+                "nick": "ourapp",
+                "type": "code",
+                "data states": {
+                    "default db": {
+                        "loc": {
+                            "path": "/var/lib/mysql/mysql.sock",
+                            "schema": "app_db",
+                            "interaction": "rw"
+                        }
+                    }
+                }
+            },
+            "/usr/sbin/httpd": {
+                "id": {
+                    "version": "2.2.6"
+                },
+                "type": "binary",
+                "config": {
+                    "compiled modules": {
+                        "mod_php": {
+                            "loc": {
+                                "path": "/etc/httpd/modules/libphp.so"
+                            }
+                        }
+                    }
+                }
+            },
+            "/etc/httpd/modules/libphp.so": {
+                "type": "library",
+                "php-sapi": "apache",
+                "version": "5.5.13",
+                "config-opts": [ "json", "mysql", "posix" ]
+            },
+            "/usr/libexec/mysqld": {
+                "id": {
+                    "version": "5.5.40"
+                },
+                "nick": "mysql",
+                "type": "binary",
+            }
+        },
+        "processes": [
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/local/bin/app"
+                    },
+                    {
+                        "path": "/usr/sbin/httpd"
+                    }
+                ],
+                "user": "www",
+                "group": "www",
+                "pid": 42313,
+                "cwd": "/var/run/app",
+                "listen": [
+                    {
+                        "type": "port",
+                        "proto": [ "tcp" ],
+                        "number": 80,
+                    }
+                ]
+            },
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/libexec/mysqld"
+                    }
+                ],
+                "user": "mysql",
+                "group": "mysql",
+                "pid": 141,
+                "data id": "var/lib/mysql",
+                "data containers": [ "app_db" ],
+                "listen": [
+                    {
+                        "type": "port",
+                        "proto": [ "tcp" ],
+                        "number": 3306,
+                    },
+                    {
+                        "type": "unix",
+                        "path": "/var/lib/mysql/mysql.sock"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "ids": [ "hostname" ],
+        "type": "vm",
+        "hostname": "dev02",
+        "logic states": {
+            "/usr/local/bin/app": {
+                "id": {
+                    "commit": "6c9ae9859187f233eecc2241269056dcb17b68a3",
+                },
+                "nick": "ourapp",
+                "type": "code",
+                "data states": {
+                    "default db": {
+                        "loc": {
+                            "path": "/var/lib/mysql/mysql.sock",
+                            "schema": "app_db",
+                            "interaction": "rw"
+                        }
+                    }
+                }
+            },
+            "/usr/sbin/httpd": {
+                "id": {
+                    "version": "2.2.6"
+                },
+                "type": "binary",
+                "config": {
+                    "compiled modules": {
+                        "mod_php": {
+                            "loc": {
+                                "path": "/etc/httpd/modules/libphp.so"
+                            }
+                        }
+                    }
+                }
+            },
+            "/etc/httpd/modules/libphp.so": {
+                "type": "library",
+                "php-sapi": "apache",
+                "version": "5.5.13",
+                "config-opts": [ "json", "mysql", "posix" ]
+            },
+            "/usr/libexec/mysqld": {
+                "id": {
+                    "version": "5.5.40"
+                },
+                "nick": "mysql",
+                "type": "binary",
+            }
+        },
+        "processes": [
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/local/bin/app"
+                    },
+                    {
+                        "path": "/usr/sbin/httpd"
+                    }
+                ],
+                "user": "www",
+                "group": "www",
+                "pid": 42313,
+                "cwd": "/var/run/app",
+                "listen": [
+                    {
+                        "type": "port",
+                        "proto": [ "tcp" ],
+                        "number": 80,
+                    }
+                ]
+            },
+            {
+                "logic states": [
+                    {
+                        "path": "/usr/libexec/mysqld"
+                    }
+                ],
+                "user": "mysql",
+                "group": "mysql",
+                "pid": 141,
+                "data id": "var/lib/mysql",
+                "data containers": [ "app_db" ],
+                "listen": [
+                    {
+                        "type": "port",
+                        "proto": [ "tcp" ],
+                        "number": 3306,
+                    },
+                    {
+                        "type": "unix",
+                        "path": "/var/lib/mysql/mysql.sock"
+                    }
+                ]
+            }
+        ]
     }
 ]
