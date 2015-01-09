@@ -7,13 +7,14 @@
         "logic states": {
             "/usr/local/bin/app": {
                 "id": {
-                    "commit": "a9a6b91d193cdbe60b316f01df9f6e068b9e82bc",
+                    "commit": "a9a6b91d193cdbe60b316f01df9f6e068b9e82bc"
                 },
                 "nick": "ourapp",
                 "type": "code",
-                "data states": {
+                "datasets": {
                     "default db": {
                         "loc": {
+                            "type": "net",
                             "hostname": "prod-db01",
                             "port": 3306,
                             "proto": "tcp",
@@ -63,7 +64,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 80,
+                        "number": 80
                     }
                 ]
             }
@@ -80,7 +81,7 @@
                     "version": "5.5.37"
                 },
                 "nick": "mysql",
-                "type": "binary",
+                "type": "binary"
             }
         },
         "processes": [
@@ -98,7 +99,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 3306,
+                        "number": 3306
                     },
                     {
                         "type": "unix",
@@ -110,7 +111,7 @@
         "data spaces": {
             "/var/lib/mysql": {
                 "app_db": {
-                    "genesis": "α",
+                    "genesis": "α"
                 }
             }
         }
@@ -123,13 +124,14 @@
         "logic states": {
             "/usr/local/bin/app": {
                 "id": {
-                    "commit": "de10560eec7a1ed519731e4a17311e23599300c5",
+                    "commit": "de10560eec7a1ed519731e4a17311e23599300c5"
                 },
                 "nick": "ourapp",
                 "type": "code",
-                "data states": {
+                "datasets": {
                     "default db": {
                         "loc": {
+                            "type": "unix",
                             "path": "/var/lib/mysql/mysql.sock",
                             "schema": "app_db",
                             "interaction": "rw"
@@ -163,7 +165,7 @@
                     "version": "5.5.40"
                 },
                 "nick": "mysql",
-                "type": "binary",
+                "type": "binary"
             }
         },
         "processes": [
@@ -184,7 +186,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 80,
+                        "number": 80
                     }
                 ]
             },
@@ -202,7 +204,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 3306,
+                        "number": 3306
                     },
                     {
                         "type": "unix",
@@ -232,13 +234,14 @@
         "logic states": {
             "/usr/local/bin/app": {
                 "id": {
-                    "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a",
+                    "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a"
                 },
                 "nick": "ourapp",
                 "type": "code",
-                "data states": {
+                "datasets": {
                     "default db": {
                         "loc": {
+                            "type": "unix",
                             "path": "/var/lib/mysql/mysql.sock",
                             "schema": "app_db",
                             "interaction": "rw"
@@ -272,7 +275,7 @@
                     "version": "5.5.40"
                 },
                 "nick": "mysql",
-                "type": "binary",
+                "type": "binary"
             }
         },
         "processes": [
@@ -293,7 +296,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 80,
+                        "number": 80
                     }
                 ]
             },
@@ -311,7 +314,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 3306,
+                        "number": 3306
                     },
                     {
                         "type": "unix",
@@ -340,13 +343,14 @@
         "logic states": {
             "/usr/local/bin/app": {
                 "id": {
-                    "commit": "aa41c0391914923302734db6ec61b9e62869aa01",
+                    "commit": "aa41c0391914923302734db6ec61b9e62869aa01"
                 },
                 "nick": "ourapp",
                 "type": "code",
-                "data states": {
+                "datasets": {
                     "default db": {
                         "loc": {
+                            "type": "unix",
                             "path": "/var/lib/mysql/mysql.sock",
                             "schema": "app_db",
                             "interaction": "rw"
@@ -380,7 +384,7 @@
                     "version": "5.5.40"
                 },
                 "nick": "mysql",
-                "type": "binary",
+                "type": "binary"
             }
         },
         "processes": [
@@ -401,7 +405,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 80,
+                        "number": 80
                     }
                 ]
             },
@@ -419,7 +423,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 3306,
+                        "number": 3306
                     },
                     {
                         "type": "unix",
@@ -448,13 +452,14 @@
         "logic states": {
             "/usr/local/bin/app": {
                 "id": {
-                    "commit": "6c9ae9859187f233eecc2241269056dcb17b68a3",
+                    "commit": "6c9ae9859187f233eecc2241269056dcb17b68a3"
                 },
                 "nick": "ourapp",
                 "type": "code",
-                "data states": {
+                "datasets": {
                     "default db": {
                         "loc": {
+                            "type": "unix",
                             "path": "/var/lib/mysql/mysql.sock",
                             "schema": "app_db",
                             "interaction": "rw"
@@ -488,7 +493,7 @@
                     "version": "5.5.40"
                 },
                 "nick": "mysql",
-                "type": "binary",
+                "type": "binary"
             }
         },
         "processes": [
@@ -509,7 +514,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 80,
+                        "number": 80
                     }
                 ]
             },
@@ -527,7 +532,7 @@
                     {
                         "type": "port",
                         "proto": [ "tcp" ],
-                        "number": 3306,
+                        "number": 3306
                     },
                     {
                         "type": "unix",
