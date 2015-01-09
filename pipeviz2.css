@@ -16,21 +16,29 @@ body {
     -o-transition: opacity 0.25s ease-in-out;
 }
 
-.offview {
-    opacity: 0;
-}
-
-.node.instance {
+.node.container {
     stroke: #fff;
     stroke-width: 1.5px;
 }
 
-.node.instance circle {
-    fill: #99173C;
+.node.container circle {
+    fill: #ff7f0e;
 }
 
-.node.commit circle {
-    fill: #555152;
+.node.logic circle {
+    fill: #9467bd;
+}
+
+.node.process circle {
+    fill: #2ca02c;
+}
+
+.node.dataspace circle {
+    fill: #c49c94;
+}
+
+.node.dataset circle {
+    fill: #8c564b;
 }
 
 .anchor {
