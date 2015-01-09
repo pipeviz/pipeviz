@@ -1,8 +1,6 @@
 var width = window.innerWidth,
     height = window.innerHeight,
-    color = d3.scale.category20(),
-    allNodes = [],
-    allLinks = [];
+    color = d3.scale.category20();
 
 var svg = d3.select('body').append('svg')
     .attr('width', width)
@@ -12,46 +10,89 @@ var force = d3.layout.force()
     .charge(-3000)
     .size([width, height]);
 
-var containers = {};
+d3.json('/fixtures/ein/container.json', function(err, res) {
+    // Selectors identifying various graph components
+    var sel = {
+        'container': svg.selectAll('.node.container'),
+        'logic': svg.selectAll('.node.logic'),
+        'process': svg.selectAll('.node.process'),
+        'dspace': svg.selectAll('.node.dspace'),
+        'dset': svg.selectAll('.node.dset'),
+        'links': svg.selectAll('.link.commit'),
+        'anchors': svg.selectAll('.node.anchor'),
+        'anchorlinks': svg.selectAll('.link.anchor')
+    },
+    containers = {},
+    allNodes = [],
+    allLinks = [],
+    bindings = {};
 
-// Selectors identifying various graph components
-var sel = {
-    'instances': svg.selectAll('.node.container'),
-    'commits': svg.selectAll('.node.logic-state'),
-    'links': svg.selectAll('.link.commit'),
-    'anchors': svg.selectAll('.node.anchor'),
-    'anchorlinks': svg.selectAll('.link.anchor')
-}
-
-
-d3.json('/fixtures/ein/containers.json', function(err, res) {
     _.each(res, function(cnt) {
         c = new Container(cnt);
         allNodes.push(c);
 
         _.each(c.logicStates(), function(v) {
             allNodes.push(v);
+            allLinks.push({source: c, target: v})
         });
 
         _.each(c.processes(), function(v) {
             allNodes.push(v)
-        })
+            allLinks.push({source: c, target: v})
+        });
 
         _.each(c.dataSpaces(), function(v) {
             allNodes.push(v)
-        })
+            allLinks.push({source: c, target: v})
+        });
 
         _.each(c.dataSets(), function(v) {
             allNodes.push(v)
-        })
+            allLinks.push({source: c, target: v})
+        });
 
         // FIXME assumes hostname is uuid
         containers[cnt.hostname] = c;
     });
 
-    // Drop all nodes into the graph
-    force.nodes(allNodes);
+    // All hierarchical data is processed; second pass for referential.
+    _.forOwn(containers, function(cv, ck) {
+        // find logic refs to data
+        _.each(c.logicStates(), function(l) {
+            if (_.has(l, 'datasets')) {
+                _.forOwn(l.datasets, function(dv, dk) {
+                    var link = _.assign({source: l, name: dk}, dv);
+                    var proc = false;
+                    // check for hostname, else assume path
+                    if (_.has(dv.loc, 'hostname')) {
+                        if (_.has(containers[dv.loc.hostname])) {
+                            proc = containers[dv.loc.hostname].findProcess(dv.loc);
+                        }
+                    } else {
+                        proc = cv.findProcess(dv.loc);
+                    }
 
+                    if (proc) {
+                        link.target = proc;
+                        allLinks.push(link);
+                    }
+                });
+            }
+        });
+    });
+
+    // Populate nodes & links into graph
+    force.nodes(allNodes).links(allLinks);
+    bindings.container = sel.container.data(containers)
+        .enter().append('g')
+        .attr('class', 'node container');
+
+    bindings.container.append("circle")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("r", 35);
+
+    force.start();
 });
 
 function Container(obj) {
@@ -90,6 +131,37 @@ Container.prototype.dataSets = function() {
     }))
 }
 
+Container.prototype.findProcess = function(loc) {
+    var found = false;
+    if (loc.type == "unix") {
+        f = function(proc) {
+            return _.find(proc.listen, function(ingress) {
+                if (ingress.type != 'unix') return false;
+                return loc.path == ingress.path
+            });
+        }
+    } else {
+        f = function(proc) {
+            return _.find(proc.listen, function(ingress) {
+                if (ingress.type != 'net' && ingress.type != 'port') return false;
+                if (loc.port != ingress.number) return false;
+                if (_.isString(ingress.proto)) {
+                    return loc.proto == ingress.proto;
+                } else {
+                    return _.contains(ingress.proto, loc.proto);
+                }
+            });
+        }
+    }
+
+    _.each(this.processes(), function(proc) {
+        f(proc);
+        if (found) return false;
+    });
+
+    return found;
+}
+
 function LogicState(obj) {
     _.assign(this, obj);
 }
@@ -104,15 +176,15 @@ function DataSet(obj, name, space) {
     this._space = space;
 }
 
-Dataset.prototype.vType = function() {
+DataSet.prototype.vType = function() {
     return 'dataset';
 }
 
-Dataset.prototype.space = function() {
+DataSet.prototype.space = function() {
     return this._space;
 }
 
-Dataset.prototype.name = function() {
+DataSet.prototype.name = function() {
     return this._name;
 }
 
