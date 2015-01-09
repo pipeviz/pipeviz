@@ -240,7 +240,10 @@ Process.prototype.vType = function() {
 }
 
 Process.prototype.name = function() {
-    return this.hostname;
+    return _.reduce(this.logicStates(), function(accum, ls) {
+        accum.push(ls.name());
+        return accum;
+    }, []).join('/');
 }
 
 Process.prototype.logicStates = function() {
