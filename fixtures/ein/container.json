@@ -110,7 +110,7 @@
         "data spaces": {
             "/var/lib/mysql": {
                 "app_db": {
-                    "α": true
+                    "genesis": "α",
                 }
             }
         }
@@ -214,7 +214,6 @@
         "data spaces": {
             "/var/lib/mysql": {
                 "app_db": {
-                    "α": false,
                     "genesis": {
                         "hostname": "prod-db01",
                         "data space": "/var/lib/mysql",
@@ -324,7 +323,6 @@
         "data spaces": {
             "/var/lib/mysql": {
                 "app_db": {
-                    "α": false,
                     "genesis": {
                         "hostname": "prod-db01",
                         "data space": "/var/lib/mysql",
@@ -433,7 +431,6 @@
         "data spaces": {
             "/var/lib/mysql": {
                 "app_db": {
-                    "α": false,
                     "genesis": {
                         "hostname": "prod-db01",
                         "data space": "/var/lib/mysql",
@@ -542,7 +539,6 @@
         "data spaces": {
             "/var/lib/mysql": {
                 "app_db": {
-                    "α": false,
                     "genesis": {
                         "hostname": "prod-db01",
                         "data space": "/var/lib/mysql",
