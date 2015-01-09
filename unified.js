@@ -71,7 +71,7 @@ d3.json('/fixtures/ein/container.json', function(err, res) {
                     var proc = false;
                     // check for hostname, else assume path
                     if (_.has(dv.loc, 'hostname')) {
-                        if (_.has(containers[dv.loc.hostname])) {
+                        if (_.has(containers, dv.loc.hostname)) {
                             proc = containers[dv.loc.hostname].findProcess(dv.loc);
                         }
                     } else {
