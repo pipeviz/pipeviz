@@ -48,14 +48,7 @@
         },
         "processes": [
             {
-                "logic states": [
-                    {
-                        "path": "/usr/local/bin/app"
-                    },
-                    {
-                        "path": "/usr/sbin/httpd"
-                    }
-                ],
+                "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
                 "user": "www",
                 "group": "www",
                 "pid": 1234,
@@ -86,11 +79,7 @@
         },
         "processes": [
             {
-                "logic states": [
-                    {
-                        "path": "/usr/libexec/mysqld"
-                    }
-                ],
+                "logic states": [ "/usr/libexec/mysqld" ],
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 2345,
@@ -170,14 +159,7 @@
         },
         "processes": [
             {
-                "logic states": [
-                    {
-                        "path": "/usr/local/bin/app"
-                    },
-                    {
-                        "path": "/usr/sbin/httpd"
-                    }
-                ],
+                "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
                 "user": "www",
                 "group": "www",
                 "pid": 8090,
@@ -191,11 +173,7 @@
                 ]
             },
             {
-                "logic states": [
-                    {
-                        "path": "/usr/libexec/mysqld"
-                    }
-                ],
+                "logic states": [ "/usr/libexec/mysqld" ],
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 1129,
@@ -280,14 +258,7 @@
         },
         "processes": [
             {
-                "logic states": [
-                    {
-                        "path": "/usr/local/bin/app"
-                    },
-                    {
-                        "path": "/usr/sbin/httpd"
-                    }
-                ],
+                "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
                 "user": "www",
                 "group": "www",
                 "pid": 9213,
@@ -301,11 +272,7 @@
                 ]
             },
             {
-                "logic states": [
-                    {
-                        "path": "/usr/libexec/mysqld"
-                    }
-                ],
+                "logic states": [ "/usr/libexec/mysqld" ],
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 32771,
@@ -389,14 +356,7 @@
         },
         "processes": [
             {
-                "logic states": [
-                    {
-                        "path": "/usr/local/bin/app"
-                    },
-                    {
-                        "path": "/usr/sbin/httpd"
-                    }
-                ],
+                "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
                 "user": "www",
                 "group": "www",
                 "pid": 42313,
@@ -410,11 +370,7 @@
                 ]
             },
             {
-                "logic states": [
-                    {
-                        "path": "/usr/libexec/mysqld"
-                    }
-                ],
+                "logic states": [ "/usr/libexec/mysqld" ],
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 141,
@@ -498,14 +454,7 @@
         },
         "processes": [
             {
-                "logic states": [
-                    {
-                        "path": "/usr/local/bin/app"
-                    },
-                    {
-                        "path": "/usr/sbin/httpd"
-                    }
-                ],
+                "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
                 "user": "www",
                 "group": "www",
                 "pid": 42313,
@@ -519,11 +468,7 @@
                 ]
             },
             {
-                "logic states": [
-                    {
-                        "path": "/usr/libexec/mysqld"
-                    }
-                ],
+                "logic states": [ "/usr/libexec/mysqld" ],
                 "user": "mysql",
                 "group": "mysql",
                 "pid": 141,

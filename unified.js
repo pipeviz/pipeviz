@@ -7,7 +7,8 @@ var svg = d3.select('body').append('svg')
     .attr('height', height);
 
 var force = d3.layout.force()
-    .charge(-900)
+    .charge(-3000)
+    .chargeDistance(250)
     .size([width, height]);
 
 d3.json('/fixtures/ein/container.json', function(err, res) {
@@ -57,7 +58,7 @@ d3.json('/fixtures/ein/container.json', function(err, res) {
     // All hierarchical data is processed; second pass for referential.
     _.forOwn(containers, function(cv, ck) {
         // find logic refs to data
-        _.each(c.logicStates(), function(l) {
+        _.each(cv.logicStates(), function(l) {
             if (_.has(l, 'datasets')) {
                 _.forOwn(l.datasets, function(dv, dk) {
                     var link = _.assign({source: l, name: dk}, dv);
@@ -78,6 +79,13 @@ d3.json('/fixtures/ein/container.json', function(err, res) {
                 });
             }
         });
+
+        // next, link processes to logic states
+        _.each(cv.processes(), function(proc) {
+            _.each(proc.logicStates(), function(ls) {
+                allLinks.push({source: proc, target: ls});
+            })
+        })
     });
 
     // Populate nodes & links into graph
@@ -130,12 +138,13 @@ function Container(obj) {
     this.ipv4 = obj.ipv4;
     this.type = obj.type;
 
-    this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, this) }) : {};
-    this._processes = _.has(obj, 'processes') ? _.map(obj['processes'], function(p) { return new Process(p, this) }) : {};
+    var that = this;
+    this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, that) }) : {};
+    this._processes = _.has(obj, 'processes') ? _.map(obj['processes'], function(p) { return new Process(p, that) }) : {};
     this._dataSpaces = _.has(obj, 'data spaces') ? _.mapValues(obj['data spaces'], function(space, id) {
         return new DataSpace(_.mapValues(space, function(dc, set) {
             return new DataSet(dc, set, space);
-        }), id, this);
+        }), id, that);
     }) : {};
 }
 
@@ -172,7 +181,7 @@ Container.prototype.findProcess = function(loc) {
             return _.find(proc.listen, function(ingress) {
                 if (ingress.type != 'unix') return false;
                 return loc.path == ingress.path
-            });
+            }) ? proc : false;
         }
     } else {
         f = function(proc) {
@@ -184,7 +193,7 @@ Container.prototype.findProcess = function(loc) {
                 } else {
                     return _.contains(ingress.proto, loc.proto);
                 }
-            });
+            }) ? proc : false;
         }
     }
 
@@ -217,7 +226,7 @@ LogicState.prototype.name = function() {
 
 function Process(obj, container) {
     _.assign(this, obj);
-    this.container = container;
+    this._container = container;
 }
 
 Process.prototype.vType = function() {
@@ -226,6 +235,10 @@ Process.prototype.vType = function() {
 
 Process.prototype.name = function() {
     return this.hostname;
+}
+
+Process.prototype.logicStates = function() {
+    return _.pick(this._container.logicStates(), this['logic states'])
 }
 
 function DataSpace(sets, name, container) {
