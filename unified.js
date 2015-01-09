@@ -162,11 +162,11 @@ Container.prototype.dataSpaces = function() {
 Container.prototype.dataSets = function() {
     return _.flatten(_.map(this.dataSpaces(), function(space) {
         return _.values(space.dataSets())
-    }))
+    }));
 }
 
 Container.prototype.findProcess = function(loc) {
-    var found = false;
+    var f, found = false;
     if (loc.type == "unix") {
         f = function(proc) {
             return _.find(proc.listen, function(ingress) {
@@ -188,8 +188,8 @@ Container.prototype.findProcess = function(loc) {
         }
     }
 
-    _.each(this.processes(), function(proc) {
-        f(proc);
+    _.each(this.processes(), function(p) {
+        found = f(p);
         if (found) return false;
     });
 
