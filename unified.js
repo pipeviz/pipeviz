@@ -9,6 +9,12 @@ var svg = d3.select('body').append('svg')
 var force = d3.layout.force()
     .charge(-3000)
     .chargeDistance(250)
+    .linkStrength(function(link) {
+        if (link.source instanceof Container) {
+            return 1;
+        }
+        return 0.5;
+    })
     .size([width, height]);
 
 d3.json('/fixtures/ein/container.json', function(err, res) {
