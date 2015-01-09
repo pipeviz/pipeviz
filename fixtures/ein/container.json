@@ -108,7 +108,11 @@
             }
         ],
         "data spaces": {
-            "/var/lib/mysql": [ "app_db" ]
+            "/var/lib/mysql": {
+                "app_db": {
+                    "α": true
+                }
+            }
         }
     },
     {
@@ -208,7 +212,17 @@
             }
         ],
         "data spaces": {
-            "/var/lib/mysql": [ "app_db" ]
+            "/var/lib/mysql": {
+                "app_db": {
+                    "α": false,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "data space": "/var/lib/mysql",
+                        "data set": "app_db",
+                        "at": 1420768880
+                    }
+                }
+            }
         }
     },
     {
@@ -308,7 +322,17 @@
             }
         ],
         "data spaces": {
-            "/var/lib/mysql": [ "app_db" ]
+            "/var/lib/mysql": {
+                "app_db": {
+                    "α": false,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "data space": "/var/lib/mysql",
+                        "data set": "app_db",
+                        "at": 1420768880
+                    }
+                }
+            }
         }
     },
     {
@@ -407,7 +431,17 @@
             }
         ],
         "data spaces": {
-            "/var/lib/mysql": [ "app_db" ]
+            "/var/lib/mysql": {
+                "app_db": {
+                    "α": false,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "data space": "/var/lib/mysql",
+                        "data set": "app_db",
+                        "at": 1420760622
+                    }
+                }
+            }
         }
     },
     {
@@ -506,7 +540,17 @@
             }
         ],
         "data spaces": {
-            "/var/lib/mysql": [ "app_db" ]
+            "/var/lib/mysql": {
+                "app_db": {
+                    "α": false,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "data space": "/var/lib/mysql",
+                        "data set": "app_db",
+                        "at": 1420520672
+                    }
+                }
+            }
         }
     }
 ]
