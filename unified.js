@@ -86,12 +86,40 @@ d3.json('/fixtures/ein/container.json', function(err, res) {
             }
         });
 
-        // next, link processes to logic states
+        // next, link processes to logic states & data spaces
         _.each(cv.processes(), function(proc) {
             _.each(proc.logicStates(), function(ls) {
                 allLinks.push({source: proc, target: ls});
-            })
-        })
+            });
+
+            _.each(proc.dataSpaces(), function(ds) {
+                allLinks.push({source: proc, target: ds});
+            });
+        });
+
+        _.each(cv.dataSpaces(), function(dg) {
+            _.each(dg.dataSets(), function(ds) {
+                // direct tree/parentage info
+                allLinks.push({source: dg, target: ds});
+                // add dataset genesis information
+                if (ds.genesis != "α") {
+                    var link = {source: ds};
+                    var ods = false;
+                    if (_.has(ds.genesis, 'hostname')) {
+                        if (_.has(containers, ds.genesis.hostname)) {
+                            ods = containers[ds.genesis.hostname].findDataSet(ds.genesis);
+                        }
+                    } else {
+                        ods = cv.findDataSet(ds.genesis);
+                    }
+
+                    if (ods) {
+                        link.target = ods;
+                        allLinks.push(link);
+                    }
+                }
+            });
+        });
     });
 
     // Populate nodes & links into graph
@@ -145,13 +173,13 @@ function Container(obj) {
     this.type = obj.type;
 
     var that = this;
-    this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, that) }) : {};
-    this._processes = _.has(obj, 'processes') ? _.map(obj['processes'], function(p) { return new Process(p, that) }) : {};
     this._dataSpaces = _.has(obj, 'data spaces') ? _.mapValues(obj['data spaces'], function(space, id) {
         return new DataSpace(_.mapValues(space, function(dc, set) {
             return new DataSet(dc, set, space);
         }), id, that);
     }) : {};
+    this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, that) }) : {};
+    this._processes = _.has(obj, 'processes') ? _.map(obj['processes'], function(p) { return new Process(p, that) }) : {};
 }
 
 Container.prototype.vType = function() {
@@ -211,6 +239,19 @@ Container.prototype.findProcess = function(loc) {
     return found;
 }
 
+Container.prototype.findDataSet = function(gen) {
+    var found = false;
+
+    if (_.has(this._dataSpaces, gen['data space'])) {
+        var ds = this._dataSpaces[gen['data space']];
+        if (_.has(ds._sets, gen['data set'])) {
+            found = ds._sets[gen['data set']];
+        }
+    }
+
+    return found;
+}
+
 function LogicState(obj, path, container) {
     _.assign(this, obj);
     this._path = path;
@@ -247,7 +288,11 @@ Process.prototype.name = function() {
 }
 
 Process.prototype.logicStates = function() {
-    return _.pick(this._container.logicStates(), this['logic states'])
+    return _.pick(this._container.logicStates(), this['logic states']);
+}
+
+Process.prototype.dataSpaces = function() {
+    return _.pick(this._container.dataSpaces(), this['data spaces']);
 }
 
 function DataSpace(sets, name, container) {
