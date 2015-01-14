@@ -1,5 +1,5 @@
-var d3 = d3 || {};
-var _ = _ || {};
+var d3 = require('./bower_components/d3/d3');
+var _ = require('./bower_components/lodash/dist/lodash');
 
 var width = window.innerWidth,
     height = window.innerHeight,
