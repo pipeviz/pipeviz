@@ -109,8 +109,8 @@ var processJson = function(res) {
 };
 
 var graphRender = function(el, state) {
-    var link = d3.select(el).selectAll('.link'),
-    node = d3.select(el).selectAll('.node');
+    var link = d3.select(el).select('svg').selectAll('.link'),
+    node = d3.select(el).select('svg').selectAll('.node');
 
     link = link.data(state.force.links());
     node = node.data(state.force.nodes());
@@ -170,6 +170,7 @@ var App = React.createClass({
             force: d3.layout.force()
                 .charge(-3000)
                 .chargeDistance(250)
+                .size([this.props.width, this.props.height])
                 .linkStrength(function(link) {
                     if (link.source instanceof Container) {
                         return 1;
@@ -185,10 +186,8 @@ var App = React.createClass({
         };
     },
     render: function() {
-        return React.DOM.svg({
+        return React.DOM.div({
             className: "pipeviz",
-            width: this.props.width,
-            height: this.props.height
         });
     },
     componentDidMount: function() {
@@ -196,6 +195,10 @@ var App = React.createClass({
 
         // TODO this whole retrieval/population pattern will all change
         d3.json('fixtures/ein/container.json', function(err, res) {
+            if (err) {
+                return;
+            }
+
             var d = processJson(res);
             var force = cmp.state.force;
 
@@ -206,9 +209,9 @@ var App = React.createClass({
         });
 
         var el = this.getDOMNode();
-        //d3.select(el).append('svg')
-            //.attr('width', this.props.width)
-            //.attr('height', this.props.height);
+        d3.select(el).append('svg')
+            .attr('width', this.props.width)
+            .attr('height', this.props.height);
 
         graphRender(el, this.state);
     },
