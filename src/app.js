@@ -9,8 +9,6 @@ var Process = require('./Process');
 var DataSpace = require('./DataSpace.js');
 var DataSet = require('./DataSet');
 
-var force = d3.layout.force();
-
 var processJson = function(res) {
     var allLinks = [],
         allNodes = [],
@@ -109,8 +107,8 @@ var processJson = function(res) {
 };
 
 var graphRender = function(el, state) {
-    var link = d3.select(el).select('svg').selectAll('.link'),
-    node = d3.select(el).select('svg').selectAll('.node');
+    var link = d3.select(el).selectAll('.link'),
+    node = d3.select(el).selectAll('.node');
 
     link = link.data(state.force.links());
     node = node.data(state.force.nodes());
@@ -163,8 +161,8 @@ var graphRender = function(el, state) {
     return false;
 };
 
-var App = React.createClass({
-    displayName: "Pipeviz",
+var Viz = React.createClass({
+    displayName: "pipeviz-graph",
     getInitialState: function() {
         return {
             force: d3.layout.force()
@@ -186,8 +184,10 @@ var App = React.createClass({
         };
     },
     render: function() {
-        return React.DOM.div({
+        return React.DOM.svg({
             className: "pipeviz",
+            width: this.props.width,
+            height: this.props.height
         });
     },
     componentDidMount: function() {
@@ -208,12 +208,7 @@ var App = React.createClass({
             cmp.setState({force: force, containers: d.containers});
         });
 
-        var el = this.getDOMNode();
-        d3.select(el).append('svg')
-            .attr('width', this.props.width)
-            .attr('height', this.props.height);
-
-        graphRender(el, this.state);
+        graphRender(this.getDOMNode(), this.state);
     },
     componentDidUpdate: function() {
         return graphRender(this.getDOMNode(), this.state);
@@ -225,4 +220,4 @@ var App = React.createClass({
     //}
 });
 
-React.renderComponent(App(), document.body);
+React.renderComponent(Viz(), document.body);
