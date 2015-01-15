@@ -1,5 +1,10 @@
 var _ = require('../bower_components/lodash/dist/lodash');
 
+var LogicState = require('./LogicState');
+var DataSpace = require('./DataSpace');
+var DataSet = require('./DataSet');
+var Process = require('./Process');
+
 function Container(obj) {
     this.hostname = obj.hostname;
     this.ipv4 = obj.ipv4;

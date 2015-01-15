@@ -108,6 +108,52 @@ var processJson = function(err, res) {
     return {links: allLinks, nodes: allNodes, containers: containers};
 };
 
+var graphRender = function(el, state) {
+    var link = d3.select(el).selectAll('.link'),
+    node = d3.select(el).selectAll('.node');
+
+    link = link.data(state.links);
+    node = node.data(state.nodes);
+
+    link.enter().append('line')
+    .attr('class', 'link');
+
+    var nodeg = node.enter().append('g')
+    .attr('class', function(d) {
+        return 'node ' + d.vType();
+    });
+
+    nodeg.append('circle')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('r', function(d) {
+        if (d instanceof Container) {
+            return 45;
+        }
+        if (d instanceof LogicState) {
+            return 30;
+        }
+        if (d instanceof DataSet) {
+            return 30;
+        }
+        if (d instanceof DataSpace) {
+            return 30;
+        }
+        if (d instanceof Process) {
+            return 37;
+        }
+    });
+
+    nodeg.append('text')
+    .text(function(d) { return d.name(); });
+
+    node.exit().remove();
+    link.exit().remove();
+
+    state.force.start();
+    return false;
+};
+
 var App = React.createClass({ displayName: "Pipeviz",
     getInitialState: function() {
         return {
@@ -132,50 +178,7 @@ var App = React.createClass({ displayName: "Pipeviz",
         };
     },
     render: function() {
-        var state = this.state;
-
-        var link = d3.select(el).selectAll('.link'),
-        node = d3.select(el).selectAll('.node');
-
-        link = link.data(state.links);
-        node = node.data(state.nodes);
-
-        link.enter().append('line')
-        .attr('class', 'link');
-
-        var nodeg = node.enter().append('g')
-        .attr('class', function(d) {
-            return 'node ' + d.vType();
-        });
-
-        nodeg.append('circle')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('r', function(d) {
-            if (d instanceof Container) {
-                return 45;
-            }
-            if (d instanceof LogicState) {
-                return 30;
-            }
-            if (d instanceof DataSet) {
-                return 30;
-            }
-            if (d instanceof DataSpace) {
-                return 30;
-            }
-            if (d instanceof Process) {
-                return 37;
-            }
-        });
-
-        nodeg.append('text')
-        .text(function(d) { return d.name(); });
-
-        node.exit().remove();
-        link.exit().remove();
-
-        state.force.start();
+        return false;
     },
     componentWillMount: function() {
         var cmp = this;
@@ -187,6 +190,17 @@ var App = React.createClass({ displayName: "Pipeviz",
                 cmp.setState(res);
             });
     },
+    componentDidMount: function() {
+        var el = this.getDOMNode();
+        d3.select(el).append('svg')
+            .attr('width', this.props.width)
+            .attr('height', this.props.height);
+
+        graphRender(el, this.state);
+    },
+    componentDidUpdate: function() {
+        return graphRender(this.getDOMNode(), this.state);
+    },
     shouldComponentUpdate: function(nextProps, nextState) {
         // TODO this needs to just be the first check - do another
         // if this is true that sees if our links or nodes have changed
@@ -194,4 +208,4 @@ var App = React.createClass({ displayName: "Pipeviz",
     }
 });
 
-React.render(React.createFactory(App), document.getElementById('pipeviz'));
+React.renderComponent(App(), document.body);

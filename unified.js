@@ -259,7 +259,7 @@ function LogicState(obj, path, container) {
     _.assign(this, obj);
     this._path = path;
     this._container = container;
-};
+}
 
 LogicState.prototype.vType = function() {
     return 'logic';
@@ -277,7 +277,7 @@ LogicState.prototype.name = function() {
 function Process(obj, container) {
     _.assign(this, obj);
     this._container = container;
-};
+}
 
 Process.prototype.vType = function() {
     return 'process';
