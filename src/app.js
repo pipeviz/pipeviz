@@ -11,7 +11,7 @@ var DataSet = require('./DataSet');
 
 var force = d3.layout.force();
 
-var processJson = function(err, res) {
+var processJson = function(res) {
     var allLinks = [],
         allNodes = [],
         containers = {};
@@ -112,49 +112,59 @@ var graphRender = function(el, state) {
     var link = d3.select(el).selectAll('.link'),
     node = d3.select(el).selectAll('.node');
 
-    link = link.data(state.links);
-    node = node.data(state.nodes);
+    link = link.data(state.force.links());
+    node = node.data(state.force.nodes());
 
     link.enter().append('line')
-    .attr('class', 'link');
+        .attr('class', 'link');
 
     var nodeg = node.enter().append('g')
-    .attr('class', function(d) {
-        return 'node ' + d.vType();
-    });
+        .attr('class', function(d) {
+            return 'node ' + d.vType();
+        });
 
     nodeg.append('circle')
-    .attr('x', 0)
-    .attr('y', 0)
-    .attr('r', function(d) {
-        if (d instanceof Container) {
-            return 45;
-        }
-        if (d instanceof LogicState) {
-            return 30;
-        }
-        if (d instanceof DataSet) {
-            return 30;
-        }
-        if (d instanceof DataSpace) {
-            return 30;
-        }
-        if (d instanceof Process) {
-            return 37;
-        }
-    });
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('r', function(d) {
+            if (d instanceof Container) {
+                return 45;
+            }
+            if (d instanceof LogicState) {
+                return 30;
+            }
+            if (d instanceof DataSet) {
+                return 30;
+            }
+            if (d instanceof DataSpace) {
+                return 30;
+            }
+            if (d instanceof Process) {
+                return 37;
+            }
+        });
 
     nodeg.append('text')
-    .text(function(d) { return d.name(); });
+        .text(function(d) { return d.name(); });
 
     node.exit().remove();
     link.exit().remove();
+
+    state.force.on('tick', function() {
+        link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+        node.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; });
+    });
 
     state.force.start();
     return false;
 };
 
-var App = React.createClass({ displayName: "Pipeviz",
+var App = React.createClass({
+    displayName: "Pipeviz",
     getInitialState: function() {
         return {
             force: d3.layout.force()
@@ -165,10 +175,7 @@ var App = React.createClass({ displayName: "Pipeviz",
                         return 1;
                     }
                     return 0.5;
-                }),
-            links: [],
-            nodes: [],
-            containers: {}
+                })
         };
     },
     getDefaultProps: function() {
@@ -178,34 +185,41 @@ var App = React.createClass({ displayName: "Pipeviz",
         };
     },
     render: function() {
-        return false;
-    },
-    componentWillMount: function() {
-        var cmp = this;
-
-        // load up all our data
-        queue()
-            .defer(d3.json, '/fixtures/ein/container.json', processJson)
-            .await(function(err, res) {
-                cmp.setState(res);
-            });
+        return React.DOM.svg({
+            className: "pipeviz",
+            width: this.props.width,
+            height: this.props.height
+        });
     },
     componentDidMount: function() {
+        var cmp = this;
+
+        // TODO this whole retrieval/population pattern will all change
+        d3.json('fixtures/ein/container.json', function(err, res) {
+            var d = processJson(res);
+            var force = cmp.state.force;
+
+            force.nodes(d.nodes);
+            force.links(d.links);
+
+            cmp.setState({force: force, containers: d.containers});
+        });
+
         var el = this.getDOMNode();
-        d3.select(el).append('svg')
-            .attr('width', this.props.width)
-            .attr('height', this.props.height);
+        //d3.select(el).append('svg')
+            //.attr('width', this.props.width)
+            //.attr('height', this.props.height);
 
         graphRender(el, this.state);
     },
     componentDidUpdate: function() {
         return graphRender(this.getDOMNode(), this.state);
-    },
-    shouldComponentUpdate: function(nextProps, nextState) {
-        // TODO this needs to just be the first check - do another
-        // if this is true that sees if our links or nodes have changed
-        return nextState.force.alpha <= 0;
     }
+    //shouldComponentUpdate: function(nextProps, nextState) {
+        //// TODO this needs to just be the first check - do another
+        //// if this is true that sees if our links or nodes have changed
+        //return nextState.force.alpha <= 0;
+    //}
 });
 
 React.renderComponent(App(), document.body);

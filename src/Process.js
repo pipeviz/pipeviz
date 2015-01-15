@@ -1,7 +1,5 @@
 var _ = require('../bower_components/lodash/dist/lodash');
 
-var Container = require('./Container');
-
 function Process(obj, container) {
     _.assign(this, obj);
     this._container = container;

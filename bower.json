@@ -10,5 +10,8 @@
   "private": true,
   "dependencies": {
     "graphlib": "~0.9.1"
+  },
+  "resolutions": {
+    "d3": "~3.5.3"
   }
 }
