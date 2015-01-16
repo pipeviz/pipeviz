@@ -103,11 +103,11 @@ var Viz = React.createClass({
         return graphRender(this.getDOMNode(), this.state, this.props);
     },
     shouldComponentUpdate: function(nextProps, nextState) {
-        // TODO probably a suboptimal way to do this compare...?
-        if (nextProps.nodes !== this.state.force.nodes()) {
+        // FIXME totally cheating for now and just going by length.
+        if (nextProps.nodes.length !== this.state.force.nodes().length) {
             return true;
         }
-        if (nextProps.links !== this.state.force.links()) {
+        if (nextProps.links.length !== this.state.force.links().length) {
             return true;
         }
         return false;
@@ -304,6 +304,8 @@ var App = React.createClass({
         this.setState({target: event});
     },
     render: function() {
+        // FIXME can't afford to search the entire graph on every change, every
+        // time in the long run
         var graphData = this.state.pvd.nodesAndLinks(this.buildNodeFilter(), this.buildLinkFilter());
         return (
             <div id="pipeviz">
