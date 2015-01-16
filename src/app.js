@@ -106,12 +106,11 @@ var processJson = function(res) {
     return {links: allLinks, nodes: allNodes, containers: containers};
 };
 
-var graphRender = function(el, state) {
-    var link = d3.select(el).selectAll('.link'),
-    node = d3.select(el).selectAll('.node');
-
-    link = link.data(state.force.links());
-    node = node.data(state.force.nodes());
+var graphRender = function(el, state, props) {
+    var link = d3.select(el).selectAll('.link')
+            .data(state.force.links()),
+        node = d3.select(el).selectAll('.node')
+            .data(state.force.nodes());
 
     link.enter().append('line')
         .attr('class', 'link');
@@ -140,7 +139,8 @@ var graphRender = function(el, state) {
             if (d instanceof Process) {
                 return 37;
             }
-        });
+        })
+        .on('click', props.target);
 
     nodeg.append('text')
         .text(function(d) { return d.name(); });
@@ -180,14 +180,16 @@ var Viz = React.createClass({
     getDefaultProps: function() {
         return {
             width: window.innerWidth,
-            height: window.innerHeight
+            height: window.innerHeight,
+            nodes: [],
+            links: [],
+            target: function() {}
         };
     },
     render: function() {
         return React.DOM.svg({
             className: "pipeviz",
-            width: this.props.width,
-            height: this.props.height
+            viewBox: "0 0 " + this.props.width + " " + this.props.height
         });
     },
     componentDidMount: function() {
@@ -208,10 +210,10 @@ var Viz = React.createClass({
             cmp.setState({force: force, containers: d.containers});
         });
 
-        graphRender(this.getDOMNode(), this.state);
+        graphRender(this.getDOMNode(), this.state, this.props);
     },
     componentDidUpdate: function() {
-        return graphRender(this.getDOMNode(), this.state);
+        return graphRender(this.getDOMNode(), this.state, this.props);
     }
     //shouldComponentUpdate: function(nextProps, nextState) {
         //// TODO this needs to just be the first check - do another
@@ -220,4 +222,37 @@ var Viz = React.createClass({
     //}
 });
 
-React.renderComponent(Viz(), document.body);
+var InfoBar = React.createClass({
+    displayName: 'pipeviz-info',
+    render: function() {
+        if (typeof this.props.target !== 'object') {
+            return (<div id="infobar"><p>nothing selected</p></div>);
+        }
+
+        return (<div id="inforbar"><p>{this.props.target.toString()}</p></div>);
+    }
+});
+
+var App = React.createClass({
+    displayName: 'pipeviz',
+    getInitialState: function() {
+        return {
+            nodes: [],
+            links: [],
+            target: undefined
+        }
+    },
+    targetNode: function(event) {
+        var i = 'break on me';
+    },
+    render: function() {
+        return (
+            <div id="pipeviz">
+                <Viz width={window.innerWidth} height={window.innerHeight} nodes={this.state.nodes} links={this.state.links} target={this.targetNode}/>
+                <InfoBar width="16.7%" target={this.state.target}/>
+            </div>
+        );
+    }
+});
+
+React.renderComponent(App(), document.body);

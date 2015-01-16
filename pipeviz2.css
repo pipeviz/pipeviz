@@ -1,5 +1,14 @@
 svg {
     background-color: #2E2633;
+    float: left;
+    height: 100vh;
+    width: 83.3%;
+}
+
+div#infobar {
+    width: 16.7%;
+    float: left;
+    padding: 1em;
 }
 
 body {
