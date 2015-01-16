@@ -189,14 +189,36 @@ var InfoBar = React.createClass({
             ];
         } else if (t instanceof Process) {
             title = 'Process';
+            var logics = React.DOM.ul({}, _.map(t.logicStates(), function(v, k) {
+                return React.DOM.li({}, k);
+            }));
+            var listeners = React.DOM.ul({}, _.map(t.listen, function(l) {
+                if (l.type == 'unix') {
+                    return React.DOM.li({}, 'unix socket: ' + l.path);
+                } else {
+                    return React.DOM.li({}, 'port ' + l.number + '; ' + l.proto.toString());
+                }
+            }));
+
             items = [
-                'hey its a proc'
+                ['attached logics:', logics],
+                'user: ' + t.user,
+                'group: ' + t.group,
+                'pid: ' + t.pid,
+                ['listening on', listeners]
             ];
+
+            if (t.hasOwnProperty('data spaces')) {
+                items.push('using data space: ' + t['data spaces']);
+            }
         }
 
         outer.children.push(React.DOM.h3({}, title));
         outer.children.push(React.DOM.ul({
             children: items.map(function(d) {
+                if (d instanceof Array) {
+                    return React.DOM.li({children: [d[0]].concat(d[1])});
+                }
                 return React.DOM.li({}, d);
             })
         }));
@@ -271,7 +293,7 @@ var App = React.createClass({
         }, []);
 
         if (funcs.length > 0) {
-            // if any filter func returns false, we throw it out (OR)
+            // if any filter func returns false, we throw it out (logical OR)
             return function(node) {
                 for (i = 0; i < funcs.length; i++) {
                     if (!funcs[i](node)) {
