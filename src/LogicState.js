@@ -1,10 +1,15 @@
 var _ = require('../bower_components/lodash/dist/lodash');
 
+var _sharedId = require('./_sharedId');
+
 function LogicState(obj, path, container) {
     _.assign(this, obj);
     this._path = path;
     this._container = container;
+    this._nextId();
 }
+
+LogicState.prototype = new _sharedId();
 
 LogicState.prototype.vType = function() {
     return 'logic';

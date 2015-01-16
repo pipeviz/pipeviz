@@ -12,9 +12,9 @@ var Container = require('./Container'),
 
 var graphRender = function(el, state, props) {
     var link = d3.select(el).selectAll('.link')
-            .data(props.links),
+            .data(props.links, function(d) { return d.source.objid() + '-' + d.target.objid(); }),
         node = d3.select(el).selectAll('.node')
-            .data(props.nodes);
+            .data(props.nodes, function(d) { return d.objid(); });
 
     link.enter().append('line')
         .attr('class', 'link');

@@ -1,5 +1,6 @@
 var _ = require('../bower_components/lodash/dist/lodash');
 
+var _sharedId = require('./_sharedId');
 var LogicState = require('./LogicState');
 var DataSpace = require('./DataSpace');
 var DataSet = require('./DataSet');
@@ -11,6 +12,8 @@ function Container(obj) {
     if (obj.ipv4 !== undefined) {
         this.ipv4 = obj.ipv4;
     }
+
+    this._nextId();
 
     var that = this;
     this._dataSpaces = _.has(obj, 'data spaces') ? _.mapValues(obj['data spaces'], function(space, id) {
@@ -24,6 +27,8 @@ function Container(obj) {
     this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, that) }) : {};
     this._processes = _.has(obj, 'processes') ? _.map(obj.processes, function(p) { return new Process(p, that) }) : {};
 }
+
+Container.prototype = new _sharedId();
 
 Container.prototype.vType = function() {
     return 'container';

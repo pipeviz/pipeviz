@@ -1,9 +1,14 @@
 var _ = require('../bower_components/lodash/dist/lodash');
 
+var _sharedId = require('./_sharedId');
+
 function Process(obj, container) {
     _.assign(this, obj);
     this._container = container;
+    this._nextId();
 }
+
+Process.prototype = new _sharedId();
 
 Process.prototype.vType = function() {
     return 'process';
