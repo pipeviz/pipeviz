@@ -284,6 +284,15 @@ var App = React.createClass({
             return false;
         }
     },
+    buildLinkFilter: function() {
+        // TODO atm we have no direct link filtering, this just
+        // filters links that are incident to filtered nodes
+        var nf = this.buildNodeFilter();
+
+        return nf ? function(link) {
+            return nf(link.source) && nf(link.target);
+        } : nf;
+    },
     populatePVDFromJSON: function(pvd, containerData) {
         _.each(containerData, function(container) {
             pvd.attachContainer(new Container(container));
@@ -295,7 +304,7 @@ var App = React.createClass({
         this.setState({target: event});
     },
     render: function() {
-        var graphData = this.state.pvd.nodesAndLinks(this.buildNodeFilter());
+        var graphData = this.state.pvd.nodesAndLinks(this.buildNodeFilter(), this.buildLinkFilter());
         return (
             <div id="pipeviz">
                 <ControlBar filters={this.state.filters} filterChange={this.filterChange}/>
