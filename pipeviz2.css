@@ -12,6 +12,14 @@ div#infobar {
     word-wrap: break-word;
 }
 
+div#controlbar {
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    height: 1.2em;
+    background-color: #5A5A5A;
+    color: #fff;
+}
+
 body {
     /*just be sloppy and sure for now*/
     margin: 0;

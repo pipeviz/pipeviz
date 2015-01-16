@@ -1,7 +1,7 @@
 var d3 = require('../bower_components/d3/d3'),
     queue = require('../bower_components/queue-async/queue'),
     _ = require('../bower_components/lodash/dist/lodash'),
-    React = require('../bower_components/react/react.js');
+    React = require('../bower_components/react/react-with-addons.js');
 
 var Container = require('./Container'),
     LogicState = require('./LogicState'),
@@ -12,9 +12,9 @@ var Container = require('./Container'),
 
 var graphRender = function(el, state, props) {
     var link = d3.select(el).selectAll('.link')
-            .data(state.force.links()),
+            .data(props.links),
         node = d3.select(el).selectAll('.node')
-            .data(state.force.nodes());
+            .data(props.nodes);
 
     link.enter().append('line')
         .attr('class', 'link');
@@ -204,13 +204,85 @@ var InfoBar = React.createClass({
     }
 });
 
+var ControlBar = React.createClass({
+    displayName: 'pipeviz-control',
+    render: function() {
+        var fc = this.props.filterChange;
+        var boxes = this.props.filters.map(function(d) {
+            return (<input type="checkbox" checked={d.selected} onChange={fc.bind(this, d.id)}>{d.id}</input>);
+        });
+
+        return (<div id="controlbar">Filters: {boxes}</div>);
+    },
+});
+
 var App = React.createClass({
     displayName: 'pipeviz',
     getInitialState: function() {
         return {
+            nodes: [],
+            links: [],
             pvd: new PVD(),
-            target: undefined
+            target: undefined,
+            filters: Object.keys(this.filterFuncs).map(function(id) {
+                return {id: id, selected: false};
+            })
         };
+    },
+    filterChange: function(id) {
+        var filters = this.state.filters.map(function(d) {
+            return {
+                id: d.id,
+                selected: (d.id === id ? !d.selected : d.selected)
+            };
+        });
+
+        this.setState({filters: filters});
+    },
+    filterFuncs: {
+        'container': function(node) {
+            return !(node instanceof Container);
+        },
+        'process': function(node) {
+            return !(node instanceof Process);
+        },
+        'logic': function(node) {
+            return !(node instanceof LogicState);
+        },
+        'dataspace': function(node) {
+            return !(node instanceof DataSpace);
+        },
+        'dataset': function(node) {
+            return !(node instanceof DataSet);
+        }
+    },
+    buildNodeFilter: function() {
+        var check = _.filter(this.state.filters, function(d) {
+            return d.selected;
+        }).map(function(d) {
+            return d.id;
+        });
+
+        var funcs = _.reduce(this.filterFuncs, function(accum, f, k) {
+            if (_.contains(check, k)) {
+                accum.push(f);
+            }
+            return accum;
+        }, []);
+
+        if (funcs.length > 0) {
+            // if any filter func returns false, we throw it out (OR)
+            return function(node) {
+                for (i = 0; i < funcs.length; i++) {
+                    if (!funcs[i](node)) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+        } else {
+            return false;
+        }
     },
     populatePVDFromJSON: function(pvd, containerData) {
         _.each(containerData, function(container) {
@@ -223,9 +295,10 @@ var App = React.createClass({
         this.setState({target: event});
     },
     render: function() {
-        var graphData = this.state.pvd.nodesAndLinks();
+        var graphData = this.state.pvd.nodesAndLinks(this.buildNodeFilter());
         return (
             <div id="pipeviz">
+                <ControlBar filters={this.state.filters} filterChange={this.filterChange}/>
                 <Viz width={window.innerWidth * 0.83} height={window.innerHeight} nodes={graphData[0]} links={graphData[1]} target={this.targetNode}/>
                 <InfoBar target={this.state.target}/>
             </div>
