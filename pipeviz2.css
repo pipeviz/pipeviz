@@ -1,0 +1,84 @@
+svg {
+    background-color: #2E2633;
+    float: left;
+    height: 100vh;
+    width: 83.3%;
+}
+
+div#infobar {
+    float: left;
+    padding: 0.5em;
+    width: 15%;
+    word-wrap: break-word;
+}
+
+div#controlbar {
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    height: 1.2em;
+    background-color: #5A5A5A;
+    color: #fff;
+}
+
+body {
+    /*just be sloppy and sure for now*/
+    margin: 0;
+    padding: 0;
+}
+
+.node, .link {
+    opacity: 1;
+    -webkit-transition: opacity 0.25s ease-in-out;
+    -moz-transition: opacity 0.25s ease-in-out;
+    -ms-transition: opacity 0.25s ease-in-out;
+    -o-transition: opacity 0.25s ease-in-out;
+}
+
+.node.container {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+.node.container circle {
+    fill: #ff7f0e;
+}
+
+.node.logic circle {
+    fill: #9467bd;
+}
+
+.node.process circle {
+    fill: #2ca02c;
+}
+
+.node.dataspace circle {
+    fill: #c49c94;
+}
+
+.node.dataset circle {
+    fill: #8c564b;
+}
+
+.anchor {
+    display: none;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: .6;
+    stroke-width: 3px;
+}
+
+text {
+    font: 14px sans-serif;
+    pointer-events: none;
+    text-anchor: middle;
+}
+
+.node text {
+    letter-spacing: 0.1em;
+    alignment-baseline: middle;
+    stroke: #EFFFCD;
+    fill: #EFFFCD;
+}
+

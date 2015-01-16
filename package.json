@@ -1,0 +1,20 @@
+{
+  "name": "d3-test",
+  "version": "0.0.0",
+  "description": "testing out d3",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server -a 0.0.0.0 -p 9132"
+  },
+  "keywords": [
+    "d3",
+    "js",
+    "visualization"
+  ],
+  "author": "Sam Boyer",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^0.6.1"
+  }
+}
