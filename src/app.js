@@ -213,11 +213,90 @@ var Viz = React.createClass({
 var InfoBar = React.createClass({
     displayName: 'pipeviz-info',
     render: function() {
-        if (typeof this.props.target !== 'object') {
-            return (<div id="infobar"><p>nothing selected</p></div>);
+        var t = this.props.target;
+        var outer = {
+            id: "infobar",
+            children: []
+        };
+
+        if (typeof t !== 'object') {
+            outer.children = [React.DOM.p({}, "nothing selected")];
+            // drop out early for the empty case
+            return React.DOM.div(outer);
         }
 
-        return (<div id="infobar"><p>{this.props.target.toString()}</p></div>);
+        var items = [],
+            title;
+        if (t instanceof Container) {
+            title = 'Container';
+            items = [
+                'hostname: ' + t.hostname,
+                'type: ' + t.type,
+                Object.keys(t._logics).length + ' logic state(s)',
+                t._processes.length + ' running process(es)',
+                t.dataSets().length + ' data set(s)'
+            ];
+
+            if (t.hasOwnProperty('ipv4')) {
+                items.push('ipv4: ' + t.ipv4.toString());
+            }
+        } else if (t instanceof LogicState) {
+            title = 'Logic';
+            items = [
+                'path: ' + t._path,
+                'type: ' + t.type,
+            ];
+
+            if (t.hasOwnProperty('nick')) {
+                items.push('nick: ' + t.nick);
+            }
+
+            if (t.hasOwnProperty('id')) {
+                if (t.id.hasOwnProperty('commit')) {
+                    items.push('id by commit: ' + t.id.commit.slice(0, 7));
+                } else {
+                    items.push('id by version: ' + t.id.version);
+                }
+            } else {
+                // FIXME stupid libraries
+                items.push('id by version: ' + t.version);
+            }
+
+            if (t.hasOwnProperty('datasets')) {
+                items.push('connected to ' + Object.keys(t.datasets).length + ' datasets');
+            }
+        } else if (t instanceof DataSet) {
+            title = 'Data set';
+            items = [
+                "set name: " + t.name(),
+                "in space: " + t.space().name()
+            ];
+
+            if (t.genesis === "α") {
+                items.push('has no upstream (α)');
+            } else {
+                items.push('created from ' + t.genesis.hostname + ':' + t.genesis['data space'] + ':' + t.genesis['data set'] + ' at ' + new Date(t.genesis.at * 1000).toLocaleString());
+            }
+        } else if (t instanceof DataSpace) {
+            title = 'Data space';
+            items = [
+                'space identifier: ' + t.name(),
+                'sets contained: ' + Object.keys(t.dataSets()).toString()
+            ];
+        } else if (t instanceof Process) {
+            title = 'Process';
+            items = [
+                'hey its a proc'
+            ];
+        }
+
+        outer.children.push(React.DOM.h3({}, title));
+        outer.children.push(React.DOM.ul({
+            children: items.map(function(d) {
+                return React.DOM.li({}, d);
+            })
+        }));
+        return React.DOM.div(outer);
     }
 });
 
@@ -238,7 +317,7 @@ var App = React.createClass({
         return (
             <div id="pipeviz">
                 <Viz width={window.innerWidth * 0.83} height={window.innerHeight} nodes={this.state.nodes} links={this.state.links} target={this.targetNode}/>
-                <InfoBar width="16.7%" target={this.state.target}/>
+                <InfoBar target={this.state.target}/>
             </div>
         );
     },

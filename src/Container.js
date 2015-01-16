@@ -7,14 +7,19 @@ var Process = require('./Process');
 
 function Container(obj) {
     this.hostname = obj.hostname;
-    this.ipv4 = obj.ipv4;
     this.type = obj.type;
+    if (obj.ipv4 !== undefined) {
+        this.ipv4 = obj.ipv4;
+    }
 
     var that = this;
     this._dataSpaces = _.has(obj, 'data spaces') ? _.mapValues(obj['data spaces'], function(space, id) {
-        return new DataSpace(_.mapValues(space, function(dc, set) {
-            return new DataSet(dc, set, space);
-        }), id, that);
+        var ds = new DataSpace(id, that);
+        ds._sets = _.mapValues(space, function(dc, set) {
+            return new DataSet(dc, set, ds);
+        });
+
+        return ds;
     }) : {};
     this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, that) }) : {};
     this._processes = _.has(obj, 'processes') ? _.map(obj.processes, function(p) { return new Process(p, that) }) : {};
@@ -45,6 +50,14 @@ Container.prototype.dataSets = function() {
         return _.values(space.dataSets());
     }));
 };
+
+Container.prototype.forInfo = function() {
+    return {
+        hostname: this.hostname,
+        ipv4: this.ipv4.toString(),
+        type: this.type,
+    }
+}
 
 Container.prototype.findProcess = function(loc) {
     var f, found = false;
