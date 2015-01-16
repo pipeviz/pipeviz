@@ -192,34 +192,22 @@ var Viz = React.createClass({
             viewBox: "0 0 " + this.props.width + " " + this.props.height
         });
     },
-    componentDidMount: function() {
-        var cmp = this;
-
-        // TODO this whole retrieval/population pattern will all change
-        d3.json('fixtures/ein/container.json', function(err, res) {
-            if (err) {
-                return;
-            }
-
-            var d = processJson(res);
-            var force = cmp.state.force;
-
-            force.nodes(d.nodes);
-            force.links(d.links);
-
-            cmp.setState({force: force, containers: d.containers});
-        });
-
-        graphRender(this.getDOMNode(), this.state, this.props);
-    },
     componentDidUpdate: function() {
+        this.state.force.nodes(this.props.nodes);
+        this.state.force.links(this.props.links);
+
         return graphRender(this.getDOMNode(), this.state, this.props);
+    },
+    shouldComponentUpdate: function(nextProps, nextState) {
+        // TODO probably a suboptimal way to do this compare...?
+        if (nextProps.nodes !== this.state.force.nodes()) {
+            return true;
+        }
+        if (nextProps.links !== this.state.force.links()) {
+            return true;
+        }
+        return false;
     }
-    //shouldComponentUpdate: function(nextProps, nextState) {
-        //// TODO this needs to just be the first check - do another
-        //// if this is true that sees if our links or nodes have changed
-        //return nextState.force.alpha <= 0;
-    //}
 });
 
 var InfoBar = React.createClass({
@@ -229,7 +217,7 @@ var InfoBar = React.createClass({
             return (<div id="infobar"><p>nothing selected</p></div>);
         }
 
-        return (<div id="inforbar"><p>{this.props.target.toString()}</p></div>);
+        return (<div id="infobar"><p>{this.props.target.toString()}</p></div>);
     }
 });
 
@@ -239,19 +227,32 @@ var App = React.createClass({
         return {
             nodes: [],
             links: [],
+            containers: {},
             target: undefined
         }
     },
     targetNode: function(event) {
-        var i = 'break on me';
+        this.setState({target: event});
     },
     render: function() {
         return (
             <div id="pipeviz">
-                <Viz width={window.innerWidth} height={window.innerHeight} nodes={this.state.nodes} links={this.state.links} target={this.targetNode}/>
+                <Viz width={window.innerWidth * 0.83} height={window.innerHeight} nodes={this.state.nodes} links={this.state.links} target={this.targetNode}/>
                 <InfoBar width="16.7%" target={this.state.target}/>
             </div>
         );
+    },
+    componentDidMount: function() {
+        var cmp = this;
+
+        // TODO this whole retrieval/population pattern will all change
+        d3.json('fixtures/ein/container.json', function(err, res) {
+            if (err) {
+                return;
+            }
+
+            cmp.setState(processJson(res));
+        });
     }
 });
 
