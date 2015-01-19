@@ -9,9 +9,13 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "graphlib": "~0.9.1"
+    "graphlib": "~0.9.1",
+    "lodash": "~2.4.1",
+    "d3": "~3.5.3",
+    "react-commonjs": "~0.0.0"
   },
   "resolutions": {
-    "d3": "~3.5.3"
+    "d3": "~3.5.3",
+    "react": "~0.12.2"
   }
 }
