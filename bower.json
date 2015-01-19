@@ -12,7 +12,9 @@
     "graphlib": "~0.9.1",
     "lodash": "~2.4.1",
     "d3": "~3.5.3",
-    "react-commonjs": "~0.0.0"
+    "react-commonjs": "~0.0.0",
+    "queue-async": "~1.0.7",
+    "react": "~0.12.2"
   },
   "resolutions": {
     "d3": "~3.5.3",
