@@ -20,7 +20,10 @@ var graphRender = function(el, state, props) {
     link.enter().append('line')
         .attr('class', function(d) {
             if (d.source instanceof Anchor || d.target instanceof Anchor) {
-                return 'link sort-anchor';
+                return 'link anchor';
+            }
+            if (_.has(d, 'path')) {
+                return 'link link-commit';
             }
             return 'link';
         });
@@ -84,9 +87,18 @@ var Viz = React.createClass({
                 .size([this.props.width, this.props.height])
                 .linkStrength(function(link) {
                     if (link.source instanceof Container) {
+                        return 0.5;
+                    }
+                    if (link.source instanceof Anchor || link.target instanceof Anchor) {
                         return 1;
                     }
-                    return 0.5;
+                    return 0.3;
+                })
+                .linkDistance(function(link) {
+                    if (link.source instanceof Anchor || link.target instanceof Anchor) {
+                        return 1;
+                    }
+                    return 20;
                 })
         };
     },
@@ -379,9 +391,9 @@ var App = React.createClass({
             _.each(c.logicStates(), function(ls, path) {
                 if (ls.id && ls.id.commit && findCommit(cmp.state.commits, ls.id.commit)) {
                     if (!_.has(members, ls.id.commit)) {
-                        members.commit = [];
+                        members[ls.id.commit] = [];
                     }
-                    members.commit.push({commit: ls.id.commit, obj: useContainers ? c : ls});
+                    members[ls.id.commit].push({commit: ls.id.commit, obj: useContainers ? c : ls});
                 }
             });
         });
@@ -404,24 +416,28 @@ var App = React.createClass({
                 // Vertex is black/visited; create link and return. Earlier
                 // code SHOULD guarantee this to be a node-point.
                 _.each(members[v], function(tgt) {
-                    links.push({ source: from.obj, target: tgt, path: path });
+                    _.each(members[from], function(src) {
+                        links.push({ source: src.obj, target: tgt.obj, path: path });
+                    });
                 });
                 path = [];
                 return;
             }
 
-            if (from.commit !== v) {
+            if (from !== v) {
                 if (_.has(members, v)) {
                     // Found node point. Create a link
                     _.each(members[v], function(tgt) {
-                        links.push({ source: from.obj, target: tgt, path: path });
+                        _.each(members[from], function(src) {
+                            links.push({ source: src.obj, target: tgt.obj, path: path });
+                        });
                     });
                     // Our exploration structure inherently guarantees a spanning
                     // tree, so we can safely discard historical path information
                     path = [];
 
                     // Push newly-found node point onto our npath, it's the new head
-                    npath.push(members[v]);
+                    npath.push(v);
                     // Correspondingly, indicate to pop the npath when exiting
                     pop_npath = true;
                 }
@@ -446,19 +462,18 @@ var App = React.createClass({
 
         var stack = _.reduce(g.sources(), function(accum, commit) {
             // as long as we're in here, put the source anchor link in
-            _.each(members[commit], function(obj) {
-                links.push({ source: this.state.anchorL, target: obj });
+            _.each(members[commit], function(member) {
+                links.push({ source: cmp.state.anchorL, target: member.obj });
             });
 
             // FIXME this assumes the sources of the commit graph we have happen to
             // align with commits we have in other logic states
-            accum.concat(members[commit]);
-            return accum;
+            return accum.concat(members[commit]);
         }, []);
 
         _.each(g.sinks(), function(commit) {
-            _.each(members[commit], function(obj) {
-                links.push({ target: obj, source: this.state.anchorL });
+            _.each(members[commit], function(member) {
+                links.push({ source: member.obj, target: cmp.state.anchorR });
             });
         });
 
@@ -481,11 +496,17 @@ var App = React.createClass({
         var graphData = this.state.pvd.nodesAndLinks(nf, this.buildLinkFilter());
 
         if (this.state.commitsort) {
-            graphData[0].concat(this.state.anchors);
+            // FIXME wrong to change this state here like this, just making it work
+            this.state.anchorL.x = 0;
+            this.state.anchorL.y = this.props.vizHeight/2;
+            this.state.anchorR.x = this.props.vizWidth;
+            this.state.anchorR.y = this.props.vizHeight/2;
+
+            graphData[0] = graphData[0].concat([this.state.anchorL, this.state.anchorR]);
             // if the current node filter removes logic states, we know we have
             // to attach to containers
             var targetContainers = (nf && nf(new LogicState()) === false);
-            graphData[1].concat(this.calculateCommitLinks(targetContainers));
+            graphData[1] = graphData[1].concat(this.calculateCommitLinks(targetContainers));
         }
 
         return (

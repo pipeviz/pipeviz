@@ -69,6 +69,11 @@ body {
     stroke-width: 3px;
 }
 
+.link-commit {
+    stroke: #17becf;
+    stroke-width: 5px;
+}
+
 text {
     font: 14px sans-serif;
     pointer-events: none;
