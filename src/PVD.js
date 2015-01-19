@@ -21,6 +21,10 @@ PVD.prototype.byHostname = function(hostname) {
     return false;
 };
 
+PVD.prototype.eachContainer = function(lambda, thisArg) {
+    return _.each(this._containers, lambda, thisArg);
+};
+
 /**
  * Returns a 2-tuple of the nodes and links present in this PVD.
  *

@@ -8,6 +8,7 @@ var Container = require('./Container'),
     Process = require('./Process'),
     DataSpace = require('./DataSpace.js'),
     DataSet = require('./DataSet'),
+    Anchor = require('./Anchor'),
     PVD = require('./PVD');
 
 var graphRender = function(el, state, props) {
@@ -17,7 +18,12 @@ var graphRender = function(el, state, props) {
             .data(props.nodes, function(d) { return d.objid(); });
 
     link.enter().append('line')
-        .attr('class', 'link');
+        .attr('class', function(d) {
+            if (d.source instanceof Anchor || d.target instanceof Anchor) {
+                return 'link sort-anchor';
+            }
+            return 'link';
+        });
 
     var nodeg = node.enter().append('g')
         .attr('class', function(d) {
@@ -42,6 +48,9 @@ var graphRender = function(el, state, props) {
             }
             if (d instanceof Process) {
                 return 37;
+            }
+            if (d instanceof Anchor) {
+                return 0;
             }
         })
         .on('click', props.target);
@@ -234,7 +243,13 @@ var ControlBar = React.createClass({
             return (<input type="checkbox" checked={d.selected} onChange={fc.bind(this, d.id)}>{d.id}</input>);
         });
 
-        return (<div id="controlbar">Filters: {boxes}</div>);
+        return (
+            <div id="controlbar">
+                Filters: {boxes}
+                Sort by: <input type="checkbox" checked={this.props.commitsort}
+                onChange={this.props.csChange}>commits</input>
+            </div>
+        );
     },
 });
 
@@ -242,6 +257,12 @@ var App = React.createClass({
     displayName: 'pipeviz',
     getInitialState: function() {
         return {
+            // FIXME having these in state is a bit fucked up...but consistency
+            // in viz child class' state leaves us no choice for now
+            anchorL: new Anchor(0, this.props.vizHeight/2),
+            anchorR: new Anchor(this.props.vizWidth, this.props.vizHeight/2),
+            commits: [],
+            commitsort: false,
             nodes: [],
             links: [],
             pvd: new PVD(),
@@ -249,6 +270,12 @@ var App = React.createClass({
             filters: Object.keys(this.filterFuncs).map(function(id) {
                 return {id: id, selected: false};
             })
+        };
+    },
+    getDefaultProps: function() {
+        return {
+            vizWidth: window.innerWidth * 0.83,
+            vizHeight: window.innerHeight
         };
     },
     filterChange: function(id) {
@@ -260,6 +287,9 @@ var App = React.createClass({
         });
 
         this.setState({filters: filters});
+    },
+    toggleCommitSort: function() {
+        this.setState({commitsort: !this.state.commitsort});
     },
     filterFuncs: {
         'container': function(node) {
@@ -322,23 +352,161 @@ var App = React.createClass({
 
         return pvd;
     },
+    calculateCommitLinks: function(useContainers) {
+        var g = new graphlib.Graph(),
+            links = []
+            cmp = this;
+
+        this.state.commits.map(function(e) {
+            g.setEdge(e[0], e[1]);
+        });
+
+        var findCommit = function(pairs, commit) {
+            var found = false;
+            _.each(pairs, function(pair) {
+                if (pair[0] === commit || pair[1] === commit) {
+                    found = true;
+                    return false;
+                }
+            });
+
+            return found;
+        }
+
+        var members = {};
+
+        this.state.pvd.eachContainer(function(c, hn) {
+            _.each(c.logicStates(), function(ls, path) {
+                if (ls.id && ls.id.commit && findCommit(cmp.state.commits, ls.id.commit)) {
+                    if (!_.has(members, ls.id.commit)) {
+                        members.commit = [];
+                    }
+                    members.commit.push({commit: ls.id.commit, obj: useContainers ? c : ls});
+                }
+            });
+        });
+
+        // now traverse depth-first to figure out the overlaid edge structure
+        var visited = [], // "black" list - vertices that have been visited
+            path = [], // the current path of interstitial commits
+            npath = [], // the current path, nodes only
+            from, // head of the current exploration path
+            v; // vertex (commit) currently being visited
+
+        var walk = function(v) {
+            // guaranteed acyclic, safe to skip grey/back-edge
+
+            var pop_npath = false;
+            // grab head of node path from stack
+            from = npath[npath.length - 1];
+
+            if (visited.indexOf(v) != -1) {
+                // Vertex is black/visited; create link and return. Earlier
+                // code SHOULD guarantee this to be a node-point.
+                _.each(members[v], function(tgt) {
+                    links.push({ source: from.obj, target: tgt, path: path });
+                });
+                path = [];
+                return;
+            }
+
+            if (from.commit !== v) {
+                if (_.has(members, v)) {
+                    // Found node point. Create a link
+                    _.each(members[v], function(tgt) {
+                        links.push({ source: from.obj, target: tgt, path: path });
+                    });
+                    // Our exploration structure inherently guarantees a spanning
+                    // tree, so we can safely discard historical path information
+                    path = [];
+
+                    // Push newly-found node point onto our npath, it's the new head
+                    npath.push(members[v]);
+                    // Correspondingly, indicate to pop the npath when exiting
+                    pop_npath = true;
+                }
+                else {
+                    // Not a node point and not self - push commit onto path
+                    path.push(v);
+                }
+            }
+
+            // recursive call, the crux of this depth-first traversal
+            g.successors(v).map(function(s) {
+                walk(s);
+            });
+
+            // Mark commit black/visited
+            visited.push(v);
+
+            if (pop_npath) {
+                npath.pop();
+            }
+        };
+
+        var stack = _.reduce(g.sources(), function(accum, commit) {
+            // as long as we're in here, put the source anchor link in
+            _.each(members[commit], function(obj) {
+                links.push({ source: this.state.anchorL, target: obj });
+            });
+
+            // FIXME this assumes the sources of the commit graph we have happen to
+            // align with commits we have in other logic states
+            accum.concat(members[commit]);
+            return accum;
+        }, []);
+
+        _.each(g.sinks(), function(commit) {
+            _.each(members[commit], function(obj) {
+                links.push({ target: obj, source: this.state.anchorL });
+            });
+        });
+
+        // DF walk, working from source commit members
+        while (stack.length !== 0) {
+            v = stack.pop();
+            npath.push(members[v.commit]);
+            walk(v.commit);
+        }
+
+        return links;
+    },
     targetNode: function(event) {
         this.setState({target: event});
     },
     render: function() {
         // FIXME can't afford to search the entire graph on every change, every
         // time in the long run
-        var graphData = this.state.pvd.nodesAndLinks(this.buildNodeFilter(), this.buildLinkFilter());
+        var nf = this.buildNodeFilter();
+        var graphData = this.state.pvd.nodesAndLinks(nf, this.buildLinkFilter());
+
+        if (this.state.commitsort) {
+            graphData[0].concat(this.state.anchors);
+            // if the current node filter removes logic states, we know we have
+            // to attach to containers
+            var targetContainers = (nf && nf(new LogicState()) === false);
+            graphData[1].concat(this.calculateCommitLinks(targetContainers));
+        }
+
         return (
             <div id="pipeviz">
-                <ControlBar filters={this.state.filters} filterChange={this.filterChange}/>
-                <Viz width={window.innerWidth * 0.83} height={window.innerHeight} nodes={graphData[0]} links={graphData[1]} target={this.targetNode}/>
+                <ControlBar filters={this.state.filters} filterChange={this.filterChange} commitsort={this.state.commitsort} csChange={this.toggleCommitSort}/>
+                <Viz width={this.props.vizWidth} height={this.props.vizHeight} nodes={graphData[0]} links={graphData[1]} target={this.targetNode}/>
                 <InfoBar target={this.state.target}/>
             </div>
         );
     },
     componentDidMount: function() {
         var cmp = this;
+
+        // TODO doing two of these like this is icky...but how SHOULD it be done?
+        d3.json('fixtures/state1.json', function(err, res) {
+            if (err) {
+                return;
+            }
+
+            cmp.setState({commits: res.cgraph});
+        });
 
         // TODO this whole retrieval/population pattern will all change
         d3.json('fixtures/ein/container.json', function(err, res) {

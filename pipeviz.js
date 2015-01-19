@@ -59,7 +59,7 @@ d3.json("/fixtures/state2.json", function(err, res) {
     });
 
     // now traverse depth-first to figure out the overlaid edge structure
-    var visited = [], // "black" list - vertices that've been visited
+    var visited = [], // "black" list - vertices that have been visited
         path = [], // the current path of interstitial commits
         npath = [], // the current path, nodes only
         from, // head of the current exploration path
