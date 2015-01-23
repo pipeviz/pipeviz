@@ -87,3 +87,9 @@ text {
     fill: #EFFFCD;
 }
 
+text .commit-subtext {
+    font-size: 85%;
+    stroke: #DDD;
+    fill: #DDD;
+}
+
