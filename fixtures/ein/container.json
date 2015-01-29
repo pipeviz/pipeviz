@@ -8,7 +8,7 @@
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
-                        "commit": "a9a6b91d193cdbe60b316f01df9f6e068b9e82bc"
+                        "commit": "d4c85908b083fceb0d8895c36cb4b450ccb18e3c"
                     },
                     "nick": "ourapp",
                     "lgroup": "prod",
@@ -115,7 +115,7 @@
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
-                        "commit": "de10560eec7a1ed519731e4a17311e23599300c5"
+                        "commit": "16aa32af1768a4850ba7e250bd5b81dcfeca69f1"
                     },
                     "nick": "ourapp",
                     "lgroup": "stage",
@@ -215,7 +215,7 @@
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
-                        "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a"
+                        "commit": "3f7bde72dd71b833378ee839cc6913d44574b793"
                     },
                     "nick": "ourapp",
                     "lgroup": "qa",
@@ -314,7 +314,7 @@
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
-                        "commit": "aa41c0391914923302734db6ec61b9e62869aa01"
+                        "commit": "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
                     },
                     "nick": "ourapp",
                     "lgroup": "sdb-dev",
@@ -413,7 +413,7 @@
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
-                        "commit": "6c9ae9859187f233eecc2241269056dcb17b68a3"
+                        "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a"
                     },
                     "nick": "ourapp",
                     "lgroup": "lz411-dev",
@@ -507,6 +507,14 @@
         }
     ],
     "commits": {
+        "58c5329896cc2a623f1dd881d83969f90637bc9a": {
+            "date" : "Thu Jan 29 10:28:53 2015 -0500",
+            "author" : "Sam Boyer <tech@samboyer.org>",
+            "message" : "Phony commit to simulate fork at tip",
+            "parents" : [
+                "cce276d46b6ba12118d4371c77c2f6d842239fd2"
+            ]
+        },
         "96c4694623cb7ab5a2ff83a5f261fbe74a4877e7" : {
             "date" : "Thu Jan 15 16:28:57 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
@@ -672,9 +680,7 @@
             "date" : "Tue Aug 19 22:32:27 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "message" : "Initial commit",
-            "parents" : [
-                ""
-            ]
+            "parents" : []
         },
         "f534980c7cdfd6da061bef778dbc28f0962488f3" : {
             "date" : "Wed Sep 17 00:50:03 2014 -0400",
