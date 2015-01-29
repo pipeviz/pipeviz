@@ -162,7 +162,9 @@ var Viz = React.createClass({
 var InfoBar = React.createClass({
     displayName: 'pipeviz-info',
     render: function() {
-        var t = this.props.target;
+        var t = this.props.target,
+            cmp = this;
+
         var outer = {
             id: "infobar",
             children: []
@@ -174,96 +176,45 @@ var InfoBar = React.createClass({
             return React.DOM.div(outer);
         }
 
-        var items = [],
-            title;
-        if (t instanceof Container) {
-            title = 'Container';
-            items = [
-                'hostname: ' + t.hostname,
-                'type: ' + t.type,
-                Object.keys(t._logics).length + ' logic state(s)',
-                t._processes.length + ' running process(es)',
-                t.dataSets().length + ' data set(s)'
-            ];
+        var items = [
+            'hostname: ' + t.hostname,
+            'type: ' + t.type,
+            Object.keys(t._logics).length + ' logic state(s)',
+            t._processes.length + ' running process(es)',
+            t.dataSets().length + ' data set(s)'
+        ];
 
-            if (t.hasOwnProperty('ipv4')) {
-                items.push('ipv4: ' + t.ipv4.toString());
-            }
-        } else if (t instanceof LogicState) {
-            title = 'Logic';
-            items = [
-                'path: ' + t._path,
-                'type: ' + t.type,
-            ];
-
-            if (t.hasOwnProperty('nick')) {
-                items.push('nick: ' + t.nick);
-            }
-
-            if (t.hasOwnProperty('id')) {
-                if (t.id.hasOwnProperty('commit')) {
-                    items.push('id by commit: ' + t.id.commit.slice(0, 7));
-                } else {
-                    items.push('id by version: ' + t.id.version);
-                }
-            } else {
-                // FIXME stupid libraries
-                items.push('id by version: ' + t.version);
-            }
-
-            if (t.hasOwnProperty('datasets')) {
-                items.push('connected to ' + Object.keys(t.datasets).length + ' datasets');
-            }
-        } else if (t instanceof DataSet) {
-            title = 'Data set';
-            items = [
-                "set name: " + t.name(),
-                "in space: " + t.space().name()
-            ];
-
-            if (t.genesis === "α") {
-                items.push('has no upstream (α)');
-            } else {
-                items.push('created from ' + t.genesis.hostname + ':' + t.genesis['data space'] + ':' + t.genesis['data set'] + ' at ' + new Date(t.genesis.at * 1000).toLocaleString());
-            }
-        } else if (t instanceof DataSpace) {
-            title = 'Data space';
-            items = [
-                'space identifier: ' + t.name(),
-                'sets contained: ' + Object.keys(t.dataSets()).toString()
-            ];
-        } else if (t instanceof Process) {
-            title = 'Process';
-            var logics = React.DOM.ul({}, _.map(t.logicStates(), function(v, k) {
-                return React.DOM.li({}, k);
-            }));
-            var listeners = React.DOM.ul({}, _.map(t.listen, function(l) {
-                if (l.type == 'unix') {
-                    return React.DOM.li({}, 'unix socket: ' + l.path);
-                } else {
-                    return React.DOM.li({}, 'port ' + l.number + '; ' + l.proto.toString());
-                }
-            }));
-
-            items = [
-                ['attached logics:', logics],
-                'user: ' + t.user,
-                'group: ' + t.group,
-                'pid: ' + t.pid,
-                ['listening on', listeners]
-            ];
-
-            if (t.hasOwnProperty('data spaces')) {
-                items.push('using data space: ' + t['data spaces']);
-            }
+        if (t.hasOwnProperty('ipv4')) {
+            items.push('ipv4: ' + t.ipv4.toString());
         }
 
-        outer.children.push(React.DOM.h3({}, title));
+        outer.children.push(React.DOM.h3({}, 'Container'));
         outer.children.push(React.DOM.ul({
             children: items.map(function(d) {
-                if (d instanceof Array) {
-                    return React.DOM.li({children: [d[0]].concat(d[1])});
-                }
+                return React.DOM.li({}, d);
+            })
+        }));
+
+        outer.children.push(React.DOM.h3({}, 'Active commit'));
+
+        var commit, hash;
+        _.each(t.logicStates(), function(ls) {
+            if (ls.nick === 'ourapp') {
+                commit = cmp.props.commits[ls.id.commit];
+                hash = ls.id.commit;
+                return false;
+            }
+        });
+
+        items = [
+            hash.slice(0, 7),
+            commit.date,
+            commit.author,
+            '"' + commit.message + '"'
+        ];
+
+        outer.children.push(React.DOM.ul({
+            children: items.map(function(d) {
                 return React.DOM.li({}, d);
             })
         }));
@@ -549,7 +500,7 @@ var App = React.createClass({
         return (
             <div id="pipeviz">
                 <Viz width={this.props.vizWidth} height={this.props.vizHeight} nodes={graphData[0]} links={graphData[1]} target={this.targetNode}/>
-                <InfoBar target={this.state.target}/>
+                <InfoBar target={this.state.target} commits={this.state.commits}/>
             </div>
         );
     },

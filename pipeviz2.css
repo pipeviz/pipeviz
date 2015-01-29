@@ -11,6 +11,9 @@ div#infobar {
     width: 15%;
     word-wrap: break-word;
 }
+#infobar ul {
+    padding-left: 20px;
+}
 
 div#controlbar {
     padding-top: 0.2em;
