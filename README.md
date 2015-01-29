@@ -9,3 +9,14 @@ npm install
 bower install
 ln -s bower_components src/bower_components
 ```
+
+command used to generate the formatted git commit logs.
+```
+git log \
+    --pretty=format:'"%H": {"parents":["%P"],"author": "%an <%ae>","date": "%ad","message": "%s"},' \
+    $@ | \
+    perl -pe 'BEGIN{print "{"}; END{print "[]}\n"}' | \
+    perl -pe 's/},\[\]}/}}/'
+```
+
+...almost. note that this is broken because it doesn’t correctly break out the parent commits into separate elements.
