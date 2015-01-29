@@ -405,30 +405,21 @@ var App = React.createClass({
     },
     calculateCommitLinks: function(useContainers) {
         var g = new graphlib.Graph(),
-            links = []
-            cmp = this;
+            links = [],
+            cmp = this,
+            members = {};
 
-        this.state.commits.map(function(e) {
-            g.setEdge(e[0], e[1]);
+        _.each(this.state.commits, function(cdatum, hash) {
+            _.each(cdatum.parents, function(phash) {
+                g.setEdge(hash, phash);
+            });
         });
 
-        var findCommit = function(pairs, commit) {
-            var found = false;
-            _.each(pairs, function(pair) {
-                if (pair[0] === commit || pair[1] === commit) {
-                    found = true;
-                    return false;
-                }
-            });
-
-            return found;
-        }
-
-        var members = {};
-
-        this.state.pvd.eachContainer(function(c, hn) {
-            _.each(c.logicStates(), function(ls, path) {
-                if (ls.id && ls.id.commit && findCommit(cmp.state.commits, ls.id.commit)) {
+        this.state.pvd.eachContainer(function(c) {
+            _.each(c.logicStates(), function(ls) {
+                if (ls.id && ls.id.commit && _.has(cmp.state.commits, ls.id.commit)) {
+                    // FIXME this is the spot where we'd need to deal with multiple
+                    // instances being on the same commit...only kinda doing it now
                     if (!_.has(members, ls.id.commit)) {
                         members[ls.id.commit] = [];
                     }
@@ -451,32 +442,32 @@ var App = React.createClass({
             // grab head of node path from stack
             from = npath[npath.length - 1];
 
-            if (visited.indexOf(v) != -1) {
-                // Vertex is black/visited; create link and return. Earlier
-                // code SHOULD guarantee this to be a node-point.
+            if (visited.indexOf(v) !== -1) {
+                // Vertex is black/visited; create link and return.
                 _.each(members[v], function(tgt) {
-                    _.each(members[from], function(src) {
-                        links.push({ source: src.obj, target: tgt.obj, path: path });
+                    from.map(function(src) {
+                        links.push({ source: src.obj, target: tgt.obj, path: path.slice(0) });
                     });
                 });
                 path = [];
                 return;
             }
 
-            if (from !== v) {
+            if (_.map(from, function(obj) { return obj.commit; }).indexOf(v) === -1) {
                 if (_.has(members, v)) {
                     // Found node point. Create a link
                     _.each(members[v], function(tgt) {
-                        _.each(members[from], function(src) {
-                            links.push({ source: src.obj, target: tgt.obj, path: path });
+                        from.map(function(src) {
+                            links.push({ source: src.obj, target: tgt.obj, path: path.slice(0) });
                         });
                     });
+
                     // Our exploration structure inherently guarantees a spanning
-                    // tree, so we can safely discard historical path information
+                    // tree, so we can safely discard historical path information ERR, NO IT DOESN'T
                     path = [];
 
                     // Push newly-found node point onto our npath, it's the new head
-                    npath.push(v);
+                    npath.push(members[v]);
                     // Correspondingly, indicate to pop the npath when exiting
                     pop_npath = true;
                 }
@@ -491,8 +482,15 @@ var App = React.createClass({
                 walk(s);
             });
 
-            // Mark commit black/visited
-            visited.push(v);
+            // Mark commit black/visited...but only if it's a member-associated
+            // one. This trades CPU for memory, as it triggers a graph
+            // re-traversal interstitial commits until one associated with an
+            // instance is found. The alternative is keeping a map from ALL
+            // interstitial commits to the eventual instance they arrive at...
+            // and that's icky.
+            if (_.has(members, v)) {
+                visited.push(v);
+            }
 
             if (pop_npath) {
                 npath.pop();
@@ -555,22 +553,13 @@ var App = React.createClass({
     componentDidMount: function() {
         var cmp = this;
 
-        // TODO doing two of these like this is icky...but how SHOULD it be done?
-        d3.json('fixtures/state1.json', function(err, res) {
-            if (err) {
-                return;
-            }
-
-            cmp.setState({commits: res.cgraph});
-        });
-
         // TODO this whole retrieval/population pattern will all change
         d3.json('fixtures/ein/container.json', function(err, res) {
             if (err) {
                 return;
             }
 
-            cmp.setState({pvd: cmp.populatePVDFromJSON(cmp.state.pvd, res.containers)});
+            cmp.setState({commits: res.commits, pvd: cmp.populatePVDFromJSON(cmp.state.pvd, res.containers)});
         });
     }
 });
