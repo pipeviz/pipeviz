@@ -26,6 +26,9 @@ var graphRender = function(el, state, props) {
                 return 'link link-commit';
             }
             return 'link';
+        })
+        .style('stroke-width', function(d) {
+            return (d.path && d.path.length > 0) ? 1.5 * Math.sqrt(d.path.length) : 1;
         });
 
     var nodeg = node.enter().append('g')
@@ -103,7 +106,7 @@ var Viz = React.createClass({
     getInitialState: function() {
         return {
             force: d3.layout.force()
-                .charge(-5000)
+                .charge(-4000)
                 .chargeDistance(250)
                 .size([this.props.width, this.props.height])
                 .linkStrength(function(link) {
@@ -117,9 +120,9 @@ var Viz = React.createClass({
                 })
                 .linkDistance(function(link) {
                     if (link.source instanceof Anchor || link.target instanceof Anchor) {
-                        return 1;
+                        return 25;
                     }
-                    return 20;
+                    return 250;
                 })
         };
     },
