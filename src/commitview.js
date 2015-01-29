@@ -570,7 +570,7 @@ var App = React.createClass({
                 return;
             }
 
-            cmp.setState({pvd: cmp.populatePVDFromJSON(cmp.state.pvd, res)});
+            cmp.setState({pvd: cmp.populatePVDFromJSON(cmp.state.pvd, res.containers)});
         });
     }
 });
