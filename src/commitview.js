@@ -554,7 +554,7 @@ var App = React.createClass({
         var cmp = this;
 
         // TODO this whole retrieval/population pattern will all change
-        d3.json('fixtures/ein/container.json', function(err, res) {
+        d3.json('fixtures/ein.json', function(err, res) {
             if (err) {
                 return;
             }
