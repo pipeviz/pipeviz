@@ -26,6 +26,30 @@ PVD.prototype.eachContainer = function(lambda, thisArg) {
 };
 
 /**
+ * Finds all logical groups contained in this PVD.
+ *
+ * Returns a map keyed by group name where the values are an array of all domain
+ * objects that are marked with that logical group.
+ */
+PVD.prototype.findLogicalGroups = function() {
+    var lgroups = {};
+
+    // FIXME just checks logical states. bc we're not a real graphdb (...yet)
+    _.each(this._containers, function(container) {
+        _.each(container.logicStates(), function(ls) {
+            if (_.has(ls, 'lgroup')) {
+                if (!_.has(lgroups, ls.lgroup)) {
+                    lgroups[ls.lgroup] = [];
+                }
+                lgroups[ls.lgroup].push(ls);
+            }
+        });
+    });
+
+    return lgroups;
+};
+
+/**
  * Returns a 2-tuple of the nodes and links present in this PVD.
  *
  * If provided, the nodeFilter and linkFilter functions will be called prior
@@ -37,7 +61,8 @@ PVD.prototype.eachContainer = function(lambda, thisArg) {
  */
 PVD.prototype.nodesAndLinks = function(nodeFilter, linkFilter) {
     // if filter funcs were not provided, just attach one that always passes
-    var nf = (nodeFilter instanceof Function) ? nodeFilter : function() { return true; },
+    var pvd = this,
+        nf = (nodeFilter instanceof Function) ? nodeFilter : function() { return true; },
         lf = (linkFilter instanceof Function) ? linkFilter : function() { return true; },
         nodes = [],
         links = [],
@@ -50,9 +75,7 @@ PVD.prototype.nodesAndLinks = function(nodeFilter, linkFilter) {
             if (lf(link)) {
                 links.push(link);
             }
-        },
-        pvd = this;
-
+        };
 
     // TODO this approach makes links entirely subordinate to nodes...fine for
     // now, maybe not the best in the long run though
