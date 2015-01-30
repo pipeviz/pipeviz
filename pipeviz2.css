@@ -37,12 +37,12 @@ body {
     -o-transition: opacity 0.25s ease-in-out;
 }
 
-.node.container {
+.node.lgroup {
     stroke: #fff;
     stroke-width: 1.5px;
 }
 
-.node.container circle {
+.node.lgroup circle {
     fill: #99173C;
 }
 

@@ -9,6 +9,7 @@ var Container = require('./Container'),
     DataSpace = require('./DataSpace.js'),
     DataSet = require('./DataSet'),
     Anchor = require('./Anchor'),
+    LGroup = require('./LGroup'),
     PVD = require('./PVD');
 
 var graphRender = function(el, state, props) {
@@ -40,7 +41,7 @@ var graphRender = function(el, state, props) {
         .attr('x', 0)
         .attr('y', 0)
         .attr('r', function(d) {
-            if (d instanceof Container) {
+            if (d instanceof LGroup) {
                 return 45;
             }
             if (d instanceof LogicState) {
@@ -71,15 +72,7 @@ var graphRender = function(el, state, props) {
                 return '';
             }
 
-            var output = '';
-            _.each(d.logicStates(), function(ls) {
-                if (ls.nick === 'ourapp') {
-                    output = ls.id.commit.slice(0, 7);
-                    return false;
-                }
-            });
-
-            return output;
+            return d.ref().id.commit.slice(0, 7);
         })
         .attr('dy', "1.4em")
         .attr('x', 0)
@@ -176,38 +169,37 @@ var InfoBar = React.createClass({
             return React.DOM.div(outer);
         }
 
-        var items = [
-            'hostname: ' + t.hostname,
-            'type: ' + t.type,
-            Object.keys(t._logics).length + ' logic state(s)',
-            t._processes.length + ' running process(es)',
-            t.dataSets().length + ' data set(s)'
-        ];
-
-        if (t.hasOwnProperty('ipv4')) {
-            items.push('ipv4: ' + t.ipv4.toString());
+        // find all linked envs for the logic state
+        var linkedContainers = [t.ref()._container]; // parent env
+        // env linked through dataset
+        if (_.has(t.ref(), 'datasets')) {
+            _.forOwn(t.ref().datasets, function(ds) {
+                if (_.has(ds.loc, 'hostname')) {
+                    linkedContainers.push(cmp.props.pvd.byHostname(ds.loc.hostname));
+                }
+            });
         }
 
-        outer.children.push(React.DOM.h3({}, 'Container'));
-        outer.children.push(React.DOM.ul({
-            children: items.map(function(d) {
-                return React.DOM.li({}, d);
-            })
-        }));
+        linkedContainers = _.uniq(linkedContainers);
+
+        // title for containers
+        outer.children.push(React.DOM.h3({}, t.name()));
+        // list of containers
+        outer.children.push(React.DOM.ul({children: [
+            React.DOM.li({children: [
+                'Comprises ' + linkedContainers.length + ' env(s), with hostnames:',
+                React.DOM.ul({}, _.map(linkedContainers, function(d) {
+                    return React.DOM.li({}, d.name());
+                }))
+            ]}),
+            React.DOM.li({}, 'App path: ' + t.ref()._path)
+        ]}));
 
         outer.children.push(React.DOM.h3({}, 'Active commit'));
 
-        var commit, hash;
-        _.each(t.logicStates(), function(ls) {
-            if (ls.nick === 'ourapp') {
-                commit = cmp.props.commits[ls.id.commit];
-                hash = ls.id.commit;
-                return false;
-            }
-        });
-
-        items = [
-            hash.slice(0, 7),
+        var commit = cmp.props.commits[t.ref().id.commit];
+        var items = [
+            'sha1: ' + t.ref().id.commit.slice(0, 7),
             commit.date,
             commit.author,
             '"' + commit.message + '"'
@@ -501,7 +493,7 @@ var App = React.createClass({
         return (
             <div id="pipeviz">
                 <Viz width={this.props.vizWidth} height={this.props.vizHeight} nodes={graphData[0]} links={graphData[1]} target={this.targetNode}/>
-                <InfoBar target={this.state.target} commits={this.state.commits}/>
+                <InfoBar target={this.state.target} commits={this.state.commits} pvd={this.state.pvd}/>
             </div>
         );
     },
