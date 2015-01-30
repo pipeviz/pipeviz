@@ -1,5 +1,7 @@
 var _ = require('../bower_components/lodash/dist/lodash');
 
+var LGroup = require('./LGroup');
+
 // PVD: PipeVizDatastore
 function PVD() {
     this._containers = {};
@@ -28,8 +30,7 @@ PVD.prototype.eachContainer = function(lambda, thisArg) {
 /**
  * Finds all logical groups contained in this PVD.
  *
- * Returns a map keyed by group name where the values are an array of all domain
- * objects that are marked with that logical group.
+ * Returns a map keyed by group name with arrays of LGroup objects as values.
  */
 PVD.prototype.findLogicalGroups = function() {
     var lgroups = {};
@@ -38,10 +39,8 @@ PVD.prototype.findLogicalGroups = function() {
     _.each(this._containers, function(container) {
         _.each(container.logicStates(), function(ls) {
             if (_.has(ls, 'lgroup')) {
-                if (!_.has(lgroups, ls.lgroup)) {
-                    lgroups[ls.lgroup] = [];
-                }
-                lgroups[ls.lgroup].push(ls);
+                // FIXME possible that there could be multiple...and that's a weird case to handle anyway
+                lgroups[ls.lgroup] = new LGroup(ls.lgroup, ls);
             }
         });
     });

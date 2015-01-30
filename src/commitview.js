@@ -357,7 +357,7 @@ var App = React.createClass({
 
         return pvd;
     },
-    calculateCommitLinks: function(useContainers) {
+    calculateCommitLinks: function(lgroups) {
         var g = new graphlib.Graph(),
             links = [],
             cmp = this,
@@ -369,17 +369,16 @@ var App = React.createClass({
             });
         });
 
-        this.state.pvd.eachContainer(function(c) {
-            _.each(c.logicStates(), function(ls) {
-                if (ls.id && ls.id.commit && _.has(cmp.state.commits, ls.id.commit)) {
-                    // FIXME this is the spot where we'd need to deal with multiple
-                    // instances being on the same commit...only kinda doing it now
-                    if (!_.has(members, ls.id.commit)) {
-                        members[ls.id.commit] = [];
-                    }
-                    members[ls.id.commit].push({commit: ls.id.commit, obj: useContainers ? c : ls});
+        _.each(lgroups, function(lgroup) {
+            var ls = lgroup.ref();
+            if (ls.id && ls.id.commit && _.has(cmp.state.commits, ls.id.commit)) {
+                // FIXME this is the spot where we'd need to deal with multiple
+                // instances being on the same commit...only kinda doing it now
+                if (!_.has(members, ls.id.commit)) {
+                    members[ls.id.commit] = [];
                 }
-            });
+                members[ls.id.commit].push({commit: ls.id.commit, obj: lgroup});
+            }
         });
 
         // now traverse depth-first to figure out the overlaid edge structure
@@ -484,7 +483,9 @@ var App = React.createClass({
         // FIXME can't afford to search the entire graph on every change, every
         // time in the long run
         var nf = this.buildNodeFilter();
-        var graphData = this.state.pvd.nodesAndLinks(nf, this.buildLinkFilter());
+        var nodes = this.state.pvd.findLogicalGroups();
+        var graphData = [_.values(nodes), []];
+
 
         if (this.state.commitsort) {
             // FIXME wrong to change this state here like this, just making it work
@@ -494,7 +495,7 @@ var App = React.createClass({
             this.state.anchorR.y = this.props.vizHeight/2;
 
             graphData[0] = graphData[0].concat([this.state.anchorL, this.state.anchorR]);
-            graphData[1] = graphData[1].concat(this.calculateCommitLinks(true));
+            graphData[1] = graphData[1].concat(this.calculateCommitLinks(nodes));
         }
 
         return (
