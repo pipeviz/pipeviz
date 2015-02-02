@@ -79,7 +79,21 @@ var graphRender = function(el, state, props) {
         })
         .attr('dy', "1.4em")
         .attr('x', 0)
-        .attr('class', 'commit-subtext');
+        .attr('class', function(d) {
+            if (d instanceof Anchor) {
+                return;
+            }
+
+            var output = 'commit-subtext',
+                commit = d.ref().id.commit;
+
+            if (_.has(props.commitMeta, commit) &&
+                _.has(props.commitMeta[commit], 'testState')) {
+                output += ' commit-' + props.commitMeta[commit].testState;
+            }
+
+            return output;
+        });
 
     node.exit().remove();
     link.exit().remove();
@@ -200,9 +214,16 @@ var InfoBar = React.createClass({
 
         outer.children.push(React.DOM.h3({}, 'Active commit'));
 
-        var commit = cmp.props.commits[t.ref().id.commit];
+        var commit = this.props.commits[t.ref().id.commit];
+        var sha1line =  'sha1: ' + t.ref().id.commit.slice(0, 7);
+
+        if (_.has(this.props.commitMeta, t.ref().id.commit) &&
+            _.has(this.props.commitMeta[t.ref().id.commit], 'testState')) {
+            sha1line += ' (' + this.props.commitMeta[t.ref().id.commit].testState + ')';
+        }
+
         var items = [
-            'sha1: ' + t.ref().id.commit.slice(0, 7),
+            sha1line,
             commit.date,
             commit.author,
             '"' + commit.message + '"'
@@ -245,6 +266,7 @@ var App = React.createClass({
             anchorR: new Anchor(this.props.vizWidth, this.props.vizHeight/2),
             commits: [],
             commitsort: true,
+            commitMeta: {},
             nodes: [],
             links: [],
             pvd: new PVD(),
@@ -495,8 +517,8 @@ var App = React.createClass({
 
         return (
             <div id="pipeviz">
-                <Viz width={this.props.vizWidth} height={this.props.vizHeight} nodes={graphData[0]} links={graphData[1]} target={this.targetNode}/>
-                <InfoBar target={this.state.target} commits={this.state.commits} pvd={this.state.pvd}/>
+                <Viz width={this.props.vizWidth} height={this.props.vizHeight} nodes={graphData[0]} links={graphData[1]} target={this.targetNode} commitMeta={this.state.commitMeta}/>
+                <InfoBar target={this.state.target} commits={this.state.commits} pvd={this.state.pvd} commitMeta={this.state.commitMeta}/>
             </div>
         );
     },
@@ -509,7 +531,7 @@ var App = React.createClass({
                 return;
             }
 
-            cmp.setState({commits: res.commits, pvd: cmp.populatePVDFromJSON(cmp.state.pvd, res.containers)});
+            cmp.setState({commitMeta: res.commitMeta, commits: res.commits, pvd: cmp.populatePVDFromJSON(cmp.state.pvd, res.containers)});
         });
     }
 });

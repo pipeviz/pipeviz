@@ -47,7 +47,7 @@ image.provider-logo {
 }
 
 .node.lgroup circle {
-    fill: #99173C;
+    fill: #ff7f0e;
 }
 
 .node.logic circle {
@@ -98,5 +98,20 @@ text .commit-subtext {
     font-size: 85%;
     stroke: #DDD;
     fill: #DDD;
+}
+
+text .commit-subtext.commit-passed {
+    stroke: #6cc644;
+    fill: #6cc644;
+}
+
+text .commit-subtext.commit-failed {
+    stroke: #a31f1f;
+    fill: #a31f1f;
+}
+
+text .commit-subtext.commit-pending {
+    stroke: #47bbb3;
+    fill: #47bbb3;
 }
 

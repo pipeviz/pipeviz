@@ -1048,6 +1048,22 @@
                 "1b401a3377785d8533348b01a8cabc936fd39abc"
             ]
         }
+    },
+    "commitMeta": {
+        "d4c85908b083fceb0d8895c36cb4b450ccb18e3c": {
+            "tags": ["init"],
+            "testState": "passed"
+        },
+        "16aa32af1768a4850ba7e250bd5b81dcfeca69f1": {
+            "tags": ["1.0.0"],
+            "testState": "passed"
+        },
+        "3f7bde72dd71b833378ee839cc6913d44574b793": {
+            "testState": "pending"
+        },
+        "f36becb37b195dcc7dbe191a55ac3b5b65e64f19": {
+            "testState": "failed"
+        }
     }
 }
 
