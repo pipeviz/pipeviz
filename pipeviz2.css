@@ -29,6 +29,10 @@ body {
     padding: 0;
 }
 
+image.provider-logo {
+    alignment-baseline: middle;
+}
+
 .node, .link {
     opacity: 1;
     -webkit-transition: opacity 0.25s ease-in-out;

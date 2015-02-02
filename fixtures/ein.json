@@ -5,6 +5,7 @@
             "type": "baremetal",
             "hostname": "prod-web01",
             "ipv4": [ "10.1.1.1", "10.1.1.2" ],
+            "provider": "rackspace",
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
@@ -70,6 +71,7 @@
             "type": "vm",
             "hostname": "prod-db01",
             "ipv4": "10.1.1.3",
+            "provider": "rackspace",
             "logic states": {
                 "/usr/libexec/mysqld": {
                     "id": {
@@ -112,6 +114,7 @@
             "type": "vm",
             "hostname": "stage",
             "ipv4": "10.1.1.5",
+            "provider": "digitalocean",
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
@@ -212,6 +215,7 @@
             "type": "vm",
             "hostname": "qa",
             "ipv4": "10.1.1.7",
+            "provider": "digitalocean",
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
@@ -311,6 +315,7 @@
             "ids": [ "hostname" ],
             "type": "vm",
             "hostname": "dev01",
+            "provider": "vagrant",
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {
@@ -410,6 +415,7 @@
             "ids": [ "hostname" ],
             "type": "vm",
             "hostname": "dev02",
+            "provider": "vagrant",
             "logic states": {
                 "/usr/local/bin/app": {
                     "id": {

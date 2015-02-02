@@ -9,6 +9,7 @@ var Process = require('./Process');
 function Container(obj) {
     this.hostname = obj.hostname;
     this.type = obj.type;
+    this.provider = obj.provider;
     if (obj.ipv4 !== undefined) {
         this.ipv4 = obj.ipv4;
     }

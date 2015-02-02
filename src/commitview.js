@@ -44,23 +44,26 @@ var graphRender = function(el, state, props) {
             if (d instanceof LGroup) {
                 return 45;
             }
-            if (d instanceof LogicState) {
-                return 30;
-            }
-            if (d instanceof DataSet) {
-                return 30;
-            }
-            if (d instanceof DataSpace) {
-                return 30;
-            }
-            if (d instanceof Process) {
-                return 37;
-            }
             if (d instanceof Anchor) {
                 return 0;
             }
         })
         .on('click', props.target);
+
+    nodeg.append('image')
+        .attr('class', 'provider-logo')
+        .attr('height', 22)
+        .attr('width', 22)
+        .attr('y', '-37')
+        .attr('x', '-10')
+        .attr('xlink:href', function(d) {
+            if (d instanceof Anchor) {
+                return;
+            }
+
+            // FIXME hahahahahhahahahahahahhaha hardcoded
+            return 'assets/' + d.ref()._container.provider + '.svg';
+        });
 
     var nodetext = nodeg.append('text');
     nodetext.append('tspan')
