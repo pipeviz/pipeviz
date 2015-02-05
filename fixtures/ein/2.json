@@ -1,0 +1,136 @@
+{
+    "logic-state": [
+        {
+            "type": "code",
+            "id": {
+                "commit": "d4c85908b083fceb0d8895c36cb4b450ccb18e3c"
+            },
+            "nick": "ourapp",
+            "lgroup": "prod",
+            "environment": {
+                "rel": {
+                    "hostname": "prod-web01",
+                    "path": "/var/www/app"
+                }
+            },
+            "dataset": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "rel": {
+                        "type": "net",
+                        "hostname": "prod-db01",
+                        "port": 3306,
+                        "proto": "tcp",
+                        "subset": "app_db"
+                    },
+                    "interaction": "rw"
+                }
+            ]
+        },
+        {
+            "type": "code",
+            "id": {
+                "commit": "16aa32af1768a4850ba7e250bd5b81dcfeca69f1"
+            },
+            "nick": "ourapp",
+            "lgroup": "stage",
+            "environment": {
+                "rel": {
+                    "hostname": "stage",
+                    "path": "/var/www/app"
+                }
+            },
+            "dataset": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "rel": {
+                        "type": "unix",
+                        "path": "/var/lib/mysql/mysql.sock",
+                        "subset": "app_db"
+                    },
+                    "interaction": "rw"
+                }
+            ]
+        },
+        {
+            "type": "code",
+            "id": {
+                "commit": "3f7bde72dd71b833378ee839cc6913d44574b793"
+            },
+            "nick": "ourapp",
+            "lgroup": "qa",
+            "environment": {
+                "rel": {
+                    "hostname": "qa",
+                    "path": "/var/www/app"
+                }
+            },
+            "dataset": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "rel": {
+                        "type": "unix",
+                        "path": "/var/lib/mysql/mysql.sock",
+                        "subset": "app_db"
+                    },
+                    "interaction": "rw"
+                }
+            ]
+        },
+        {
+            "type": "code",
+            "id": {
+                "commit": "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
+            },
+            "nick": "ourapp",
+            "lgroup": "sdb-dev",
+            "environment": {
+                "rel": {
+                    "hostname": "dev01",
+                    "path": "/var/www/app"
+                }
+            },
+            "dataset": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "rel": {
+                        "type": "unix",
+                        "path": "/var/lib/mysql/mysql.sock",
+                        "subset": "app_db"
+                    },
+                    "interaction": "rw"
+                }
+            ]
+        },
+        {
+            "type": "code",
+            "id": {
+                "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a"
+            },
+            "nick": "ourapp",
+            "lgroup": "lz411-dev",
+            "environment": {
+                "rel": {
+                    "hostname": "dev02",
+                    "path": "/var/www/app"
+                }
+            },
+            "dataset": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "rel": {
+                        "type": "unix",
+                        "path": "/var/lib/mysql/mysql.sock",
+                        "subset": "app_db"
+                    },
+                    "interaction": "rw"
+                }
+            ]
+        }
+    ]
+}
