@@ -1,0 +1,14 @@
+{
+    "environments": [
+        {
+            "type": "virtual",
+            "hostname": "dev01",
+            "provider": "vagrant",
+        },
+        {
+            "type": "virtual",
+            "hostname": "dev02",
+            "provider": "vagrant",
+        }
+    ]
+}

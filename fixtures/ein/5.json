@@ -1,0 +1,79 @@
+{
+    "logic-state": [
+        {
+            "type": "binary",
+            "id": {
+                "version": "2.2.4"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "prod-web01",
+                    "path": "/usr/sbin/httpd"
+                }
+            },
+            "library": [
+                "/etc/httpd/modules/libphp.so"
+            ]
+        },
+        {
+            "type": "binary",
+            "id": {
+                "version": "2.2.6"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "stage",
+                    "path": "/usr/sbin/httpd"
+                }
+            },
+            "library": [
+                "/etc/httpd/modules/libphp.so"
+            ]
+        },
+        {
+            "type": "binary",
+            "id": {
+                "version": "2.2.6"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "qa",
+                    "path": "/usr/sbin/httpd"
+                }
+            },
+            "library": [
+                "/etc/httpd/modules/libphp.so"
+            ]
+        },
+        {
+            "type": "binary",
+            "id": {
+                "version": "2.2.6"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "dev01",
+                    "path": "/usr/sbin/httpd"
+                }
+            },
+            "library": [
+                "/etc/httpd/modules/libphp.so"
+            ]
+        },
+        {
+            "type": "binary",
+            "id": {
+                "version": "2.2.6"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "dev02",
+                    "path": "/usr/sbin/httpd"
+                }
+            },
+            "library": [
+                "/etc/httpd/modules/libphp.so"
+            ]
+        }
+    ]
+}
