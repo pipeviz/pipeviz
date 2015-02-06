@@ -9,20 +9,20 @@
         {
             "type": "physical",
             "hostname": "prod-db01",
-            "ipv4": "10.1.1.3",
-            "provider": "rackspace",
+            "ipv4": [ "10.1.1.3" ],
+            "provider": "rackspace"
         },
         {
             "type": "virtual",
             "hostname": "stage",
-            "ipv4": "10.1.1.5",
-            "provider": "digitalocean",
+            "ipv4": [ "10.1.1.5" ],
+            "provider": "digitalocean"
         },
         {
             "type": "virtual",
             "hostname": "qa",
-            "ipv4": "10.1.1.7",
-            "provider": "digitalocean",
+            "ipv4": [ "10.1.1.7" ],
+            "provider": "digitalocean"
         }
     ]
 }
