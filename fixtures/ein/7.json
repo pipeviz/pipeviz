@@ -1,0 +1,64 @@
+{
+    "logic-states": [
+        {
+            "type": "library",
+            "id": {
+                "version": "5.5.13"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "prod-web01",
+                    "path": "/etc/httpd/modules/libphp.so"
+                }
+            }
+        },
+        {
+            "type": "library",
+            "id": {
+                "version": "5.5.13"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "stage",
+                    "path": "/etc/httpd/modules/libphp.so"
+                }
+            }
+        },
+        {
+            "type": "library",
+            "id": {
+                "version": "5.5.13"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "qa",
+                    "path": "/etc/httpd/modules/libphp.so"
+                }
+            }
+        },
+        {
+            "type": "library",
+            "id": {
+                "version": "5.5.13"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "dev01",
+                    "path": "/etc/httpd/modules/libphp.so"
+                }
+            }
+        },
+        {
+            "type": "library",
+            "id": {
+                "version": "5.5.13"
+            },
+            "environment": {
+                "rel": {
+                    "hostname": "dev02",
+                    "path": "/etc/httpd/modules/libphp.so"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,214 @@
+{
+    "processes": [
+        {
+            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "user": "www",
+            "group": "www",
+            "cwd": "/var/run/app",
+            "environment": {
+                "rel": {
+                    "hostname": "prod-web01",
+                    "pid": 6212
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 80
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/libexec/mysqld" ],
+            "user": "mysql",
+            "group": "mysql",
+            "data spaces": "/var/lib/mysql",
+            "environment": {
+                "rel": {
+                    "hostname": "prod-db01",
+                    "pid": 26012
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 3306
+                },
+                {
+                    "type": "unix",
+                    "path": "/var/lib/mysql/mysql.sock"
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "user": "www",
+            "group": "www",
+            "cwd": "/var/run/app",
+            "environment": {
+                "rel": {
+                    "hostname": "stage",
+                    "pid": 34764
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 80
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/libexec/mysqld" ],
+            "user": "mysql",
+            "group": "mysql",
+            "data spaces": "/var/lib/mysql",
+            "environment": {
+                "rel": {
+                    "hostname": "stage",
+                    "pid": 7567
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 3306
+                },
+                {
+                    "type": "unix",
+                    "path": "/var/lib/mysql/mysql.sock"
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "user": "www",
+            "group": "www",
+            "cwd": "/var/run/app",
+            "environment": {
+                "rel": {
+                    "hostname": "qa",
+                    "pid": 38435
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 80
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/libexec/mysqld" ],
+            "user": "mysql",
+            "group": "mysql",
+            "data spaces": "/var/lib/mysql",
+            "environment": {
+                "rel": {
+                    "hostname": "qa",
+                    "pid": 14891
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 3306
+                },
+                {
+                    "type": "unix",
+                    "path": "/var/lib/mysql/mysql.sock"
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "user": "www",
+            "group": "www",
+            "cwd": "/var/run/app",
+            "environment": {
+                "rel": {
+                    "hostname": "dev01",
+                    "pid": 25970
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 80
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/libexec/mysqld" ],
+            "user": "mysql",
+            "group": "mysql",
+            "data spaces": "/var/lib/mysql",
+            "environment": {
+                "rel": {
+                    "hostname": "dev01",
+                    "pid": 30032
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 3306
+                },
+                {
+                    "type": "unix",
+                    "path": "/var/lib/mysql/mysql.sock"
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "user": "www",
+            "group": "www",
+            "cwd": "/var/run/app",
+            "environment": {
+                "rel": {
+                    "hostname": "dev02",
+                    "pid": 20216
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 80
+                }
+            ]
+        },
+        {
+            "logic states": [ "/usr/libexec/mysqld" ],
+            "user": "mysql",
+            "group": "mysql",
+            "data spaces": "/var/lib/mysql",
+            "environment": {
+                "rel": {
+                    "hostname": "dev02",
+                    "pid": 37396
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "number": 3306
+                },
+                {
+                    "type": "unix",
+                    "path": "/var/lib/mysql/mysql.sock"
+                }
+            ]
+        }
+    ]
+}
