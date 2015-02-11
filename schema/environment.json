@@ -12,12 +12,7 @@
             "default": "unix"
         },
         "address": {
-            "type": "array",
-            "anyOf": [
-                { "format": "host-name" },
-                { "format": "ipv4" },
-                { "format": "ipv6" }
-            ]
+            "$ref": "#definitions/address"
         },
         "nickname": {
             "type": "string",
@@ -43,9 +38,31 @@
                 ".*": { "$ref": "#definitions/dataSet" }
             }
         },
-        "additionalProperties": false
+        "additionalProperties": true
     },
     "definitions": {
+        "address": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string",
+                    "format": "host-name"
+                },
+                "ipv4": {
+                    "type": "string",
+                    "format": "ipv4"
+                },
+                "ipv6": {
+                    "type": "string",
+                    "format": "ipv6"
+                }
+            }
+            "anyOf": [
+                { "required": [ "hostname" ] },
+                { "required": [ "ipv4" ] },
+                { "required": [ "ipv6" ] }
+            ]
+        }
         "process": {},
         "logicState": {},
         "dataSet": {}
