@@ -4,10 +4,12 @@
     "type": "object",
     "properties": {
         "type": {
-            "enum": [ "physical", "virtual", "container" ]
+            "enum": [ "physical", "virtual", "container" ],
+            "default": "virtual"
         },
         "os": {
-            "enum": [ "windows", "unix" ]
+            "enum": [ "windows", "unix" ],
+            "default": "unix"
         },
         "address": {
             "type": "array",
@@ -16,6 +18,10 @@
                 { "format": "ipv4" },
                 { "format": "ipv6" }
             ]
+        },
+        "nickname": {
+            "type": "string",
+            "description": "A nickname identifying this environment. Nicknames can be used as referents for defining the hierarchical relationship between an environment and its contents, but not for real network/addressable relationships. Need not correspond to any real state. Nicknames co-exist in a global namespace for all environments known to any pipeviz instance, so pick them wisely."
         },
         "provider": {
             "type": "string"
@@ -36,8 +42,8 @@
             "patternProperties": {
                 ".*": { "$ref": "#definitions/dataSet" }
             }
-        }
-        "additionalProperties": true
+        },
+        "additionalProperties": false
     },
     "definitions": {
         "process": {},
