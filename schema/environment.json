@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "A representation of an environment - physical, virtual, or container.",
+    "type": "object",
+    "properties": {
+        "type": {
+            "enum": [ "physical", "virtual", "container" ]
+        },
+        "os": {
+            "enum": [ "windows", "unix" ]
+        },
+        "address": {
+            "type": "array",
+            "anyOf": [
+                { "format": "host-name" },
+                { "format": "ipv4" },
+                { "format": "ipv6" }
+            ]
+        },
+        "provider": {
+            "type": "string"
+        },
+        "logic-states": {
+            "type": "object",
+            "patternProperties": {
+                "^(/[^/]+)+$": { "$ref": "#definitions/logicState" }
+            }
+        },
+        "processes": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#definitions/process" }
+        },
+        "dataSets": {
+            "type": "object",
+            "patternProperties": {
+                ".*": { "$ref": "#definitions/dataSet" }
+            }
+        }
+        "additionalProperties": true
+    },
+    "definitions": {
+        "process": {},
+        "logicState": {},
+        "dataSet": {}
+    }
+}
