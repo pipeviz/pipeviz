@@ -148,7 +148,7 @@
                     "items": { "$ref": "#/definitions/conn-data" }
                 }
             },
-            "additionProperties": false,
+            "additionalProperties": false,
             "required": [ "path", "id" ]
         },
         "conn-data": {
@@ -211,8 +211,52 @@
         },
         "process": {
             "type": "object",
-            "properties": {},
+            "properties": {
+                "logic-states": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string" }
+                },
+                "user": { "type": "string" },
+                "group": { "type": "string" },
+                "cwd": { "type": "string" },
+                "dataset": { "type": "string" },
+                "pid": { "type": "integer" },
+                "listen": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/addr-listen" }
+                }
+            },
+            "required": [ "logic-states", "pid" ],
             "additionalProperties": false
+        },
+        "addr-listen": {
+            "type": "object",
+            "description": "Describes the listener side of a IPC connection. Currently just ports and sockets, lots of love needed.",
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": { "enum": [ "port" ] },
+                        "port": { "type": "integer" },
+                        "proto": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": { "type": "string" }
+                        }
+                    },
+                    "required": [ "type", "port", "proto" ],
+                    "additionalProperties": false
+                },
+                {
+                    "properties": {
+                        "type": { "enum": [ "unix" ] },
+                        "path": { "type": "string" }
+                    },
+                    "required": [ "type", "path" ],
+                    "additionalProperties": false
+                }
+            ]
         },
         "dataset": {
             "type": "object",

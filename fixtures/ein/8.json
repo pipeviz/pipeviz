@@ -1,40 +1,40 @@
 {
     "processes": [
         {
-            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
+            "pid": 6212,
             "environment": {
                 "rel": {
-                    "hostname": "prod-web01",
-                    "pid": 6212
+                    "hostname": "prod-web01"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 80
+                    "port": 80
                 }
             ]
         },
         {
-            "logic states": [ "/usr/libexec/mysqld" ],
+            "logic-states": [ "/usr/libexec/mysqld" ],
             "user": "mysql",
             "group": "mysql",
-            "data spaces": "/var/lib/mysql",
+            "dataset": "/var/lib/mysql",
+            "pid": 26012,
             "environment": {
                 "rel": {
-                    "hostname": "prod-db01",
-                    "pid": 26012
+                    "hostname": "prod-db01"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 3306
+                    "port": 3306
                 },
                 {
                     "type": "unix",
@@ -43,40 +43,40 @@
             ]
         },
         {
-            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
+            "pid": 34764,
             "environment": {
                 "rel": {
-                    "hostname": "stage",
-                    "pid": 34764
+                    "hostname": "stage"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 80
+                    "port": 80
                 }
             ]
         },
         {
-            "logic states": [ "/usr/libexec/mysqld" ],
+            "logic-states": [ "/usr/libexec/mysqld" ],
             "user": "mysql",
             "group": "mysql",
-            "data spaces": "/var/lib/mysql",
+            "dataset": "/var/lib/mysql",
+            "pid": 7567,
             "environment": {
                 "rel": {
-                    "hostname": "stage",
-                    "pid": 7567
+                    "hostname": "stage"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 3306
+                    "port": 3306
                 },
                 {
                     "type": "unix",
@@ -85,40 +85,40 @@
             ]
         },
         {
-            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
+            "pid": 38435,
             "environment": {
                 "rel": {
-                    "hostname": "qa",
-                    "pid": 38435
+                    "hostname": "qa"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 80
+                    "port": 80
                 }
             ]
         },
         {
-            "logic states": [ "/usr/libexec/mysqld" ],
+            "logic-states": [ "/usr/libexec/mysqld" ],
             "user": "mysql",
             "group": "mysql",
-            "data spaces": "/var/lib/mysql",
+            "dataset": "/var/lib/mysql",
+            "pid": 14891,
             "environment": {
                 "rel": {
-                    "hostname": "qa",
-                    "pid": 14891
+                    "hostname": "qa"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 3306
+                    "port": 3306
                 },
                 {
                     "type": "unix",
@@ -127,40 +127,40 @@
             ]
         },
         {
-            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
+            "pid": 25970,
             "environment": {
                 "rel": {
-                    "hostname": "dev01",
-                    "pid": 25970
+                    "hostname": "dev01"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 80
+                    "port": 80
                 }
             ]
         },
         {
-            "logic states": [ "/usr/libexec/mysqld" ],
+            "logic-states": [ "/usr/libexec/mysqld" ],
             "user": "mysql",
             "group": "mysql",
-            "data spaces": "/var/lib/mysql",
+            "dataset": "/var/lib/mysql",
+            "pid": 30032,
             "environment": {
                 "rel": {
-                    "hostname": "dev01",
-                    "pid": 30032
+                    "hostname": "dev01"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 3306
+                    "port": 3306
                 },
                 {
                     "type": "unix",
@@ -169,40 +169,40 @@
             ]
         },
         {
-            "logic states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
+            "pid": 20216,
             "environment": {
                 "rel": {
-                    "hostname": "dev02",
-                    "pid": 20216
+                    "hostname": "dev02"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 80
+                    "port": 80
                 }
             ]
         },
         {
-            "logic states": [ "/usr/libexec/mysqld" ],
+            "logic-states": [ "/usr/libexec/mysqld" ],
             "user": "mysql",
             "group": "mysql",
-            "data spaces": "/var/lib/mysql",
+            "dataset": "/var/lib/mysql",
+            "pid": 37396,
             "environment": {
                 "rel": {
-                    "hostname": "dev02",
-                    "pid": 37396
+                    "hostname": "dev02"
                 }
             },
             "listen": [
                 {
                     "type": "port",
                     "proto": [ "tcp" ],
-                    "number": 3306
+                    "port": 3306
                 },
                 {
                     "type": "unix",
