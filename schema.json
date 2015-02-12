@@ -18,8 +18,23 @@
             "minItems": 1,
             "items": { "$ref": "#/definitions/dataset" }
         },
-        "additionalProperties": false
+        "processes": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/process" }
+        },
+        "commits": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/commit" }
+        },
+        "commit-meta": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/commit-meta" }
+        }
     },
+    "additionalProperties": false,
     "definitions": {
         "environment": {
             "title": "Environment",
@@ -60,9 +75,9 @@
                     "patternProperties": {
                         ".*": { "$ref": "#/definitions/dataset" }
                     }
-                },
-                "additionalProperties": false
+                }
             },
+            "additionalProperties": false,
             "anyOf": [
                 { "required": [ "nickname" ] },
                 { "required": [ "address" ] }
@@ -194,7 +209,25 @@
                 }
             ]
         },
-        "process": {},
-        "dataset": {}
+        "process": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+        },
+        "dataset": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+        },
+        "commit": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+        },
+        "commit-meta": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+        }
     }
 }
