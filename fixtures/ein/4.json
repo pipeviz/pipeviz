@@ -3,14 +3,14 @@
         {
             "type": "virtual",
             "address": {
-                "host-name": "dev01"
+                "hostname": "dev01"
             },
             "provider": "vagrant"
         },
         {
             "type": "virtual",
             "address": {
-                "host-name": "dev02"
+                "hostname": "dev02"
             },
             "provider": "vagrant"
         }

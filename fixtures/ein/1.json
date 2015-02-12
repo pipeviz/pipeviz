@@ -4,7 +4,7 @@
             "type": "physical",
             "os": "unix",
             "address": {
-                "host-name": "prod-web01",
+                "hostname": "prod-web01",
                 "ipv4": "10.1.1.1"
             },
             "provider": "rackspace"
@@ -13,7 +13,7 @@
             "type": "physical",
             "os": "unix",
             "address": {
-                "host-name": "prod-db01",
+                "hostname": "prod-db01",
                 "ipv4": "10.1.1.3"
             },
             "provider": "rackspace"
@@ -21,7 +21,7 @@
         {
             "type": "virtual",
             "address": {
-                "host-name": "stage",
+                "hostname": "stage",
                 "ipv4": "10.1.1.5"
             },
             "provider": "digitalocean"
@@ -29,7 +29,7 @@
         {
             "type": "virtual",
             "address": {
-                "host-name": "qa",
+                "hostname": "qa",
                 "ipv4": "10.1.1.7"
             },
             "provider": "digitalocean"

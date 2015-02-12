@@ -6,17 +6,17 @@
         "environments": {
             "type": "array",
             "minItems": 1,
-            "items": { "$ref": "#definitions/environment" }
+            "items": { "$ref": "#/definitions/environment" }
         },
         "logic-states": {
             "type": "array",
             "minItems": 1,
-            "items": { "$ref": "#definitions/logicState" }
+            "items": { "$ref": "#/definitions/logicState" }
         },
         "datasets": {
             "type": "array",
             "minItems": 1,
-            "items": { "$ref": "#definitions/dataset" }
+            "items": { "$ref": "#/definitions/dataset" }
         }
     },
     "definitions": {
@@ -34,7 +34,7 @@
                     "default": "unix"
                 },
                 "address": {
-                    "$ref": "#definitions/address"
+                    "$ref": "#/definitions/address"
                 },
                 "nickname": {
                     "type": "string",
@@ -46,18 +46,18 @@
                 "logic-states": {
                     "type": "object",
                     "patternProperties": {
-                        "^(/[^/]+)+$": { "$ref": "#definitions/logicState" }
+                        "^(/[^/]+)+$": { "$ref": "#/definitions/logicState" }
                     }
                 },
                 "processes": {
                     "type": "array",
                     "minItems": 1,
-                    "items": { "$ref": "#definitions/process" }
+                    "items": { "$ref": "#/definitions/process" }
                 },
                 "datasets": {
                     "type": "object",
                     "patternProperties": {
-                        ".*": { "$ref": "#definitions/dataset" }
+                        ".*": { "$ref": "#/definitions/dataset" }
                     }
                 },
                 "additionalProperties": true
