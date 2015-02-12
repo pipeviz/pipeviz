@@ -1,6 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "Complete schema for pipeviz messages.",
+    "type": "object",
     "properties": {
         "environments": {
             "type": "array",
@@ -60,8 +61,8 @@
                     }
                 },
                 "additionalProperties": true
-            },
-        }
+            }
+        },
         "address": {
             "type": "object",
             "properties": {
@@ -77,13 +78,13 @@
                     "type": "string",
                     "format": "ipv6"
                 }
-            }
+            },
             "anyOf": [
                 { "required": [ "hostname" ] },
                 { "required": [ "ipv4" ] },
                 { "required": [ "ipv6" ] }
             ]
-        }
+        },
         "process": {},
         "logicState": {},
         "dataset": {}

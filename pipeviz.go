@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/sdboyer/pipeviz/persist"
 	"github.com/zenazn/goji/graceful"
@@ -48,12 +49,12 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		// FIXME send back an error
 	}
 
+	id := persist.Append(b)
+
 	// super-sloppy write back to client, but does the trick
 	// TODO not writing the id back at all might make things simpler
 	w.WriteHeader(202) // use 202 because it's a little more correct
-	w.Write(id)
-
-	id := persist.Append(b)
+	w.Write([]byte(strconv.FormatUint(id, 10)))
 
 	// FIXME passing directly from here means it's possible for messages to arrive
 	// at the interpretation layer in a different order than they went into the log

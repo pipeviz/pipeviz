@@ -11,7 +11,7 @@
             "subsets": [
                 {
                     "app_db": {
-                        "genesis": "α"
+                        "genesis": "α",
                         "create-time": 1410328380
                     }
                 }
