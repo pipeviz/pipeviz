@@ -5,10 +5,10 @@
             "id": {
                 "version": "5.5.13"
             },
+            "path": "/etc/httpd/modules/libphp.so",
             "environment": {
                 "rel": {
-                    "hostname": "prod-web01",
-                    "path": "/etc/httpd/modules/libphp.so"
+                    "hostname": "prod-web01"
                 }
             }
         },
@@ -17,10 +17,10 @@
             "id": {
                 "version": "5.5.13"
             },
+            "path": "/etc/httpd/modules/libphp.so",
             "environment": {
                 "rel": {
-                    "hostname": "stage",
-                    "path": "/etc/httpd/modules/libphp.so"
+                    "hostname": "stage"
                 }
             }
         },
@@ -29,10 +29,10 @@
             "id": {
                 "version": "5.5.13"
             },
+            "path": "/etc/httpd/modules/libphp.so",
             "environment": {
                 "rel": {
-                    "hostname": "qa",
-                    "path": "/etc/httpd/modules/libphp.so"
+                    "hostname": "qa"
                 }
             }
         },
@@ -41,10 +41,10 @@
             "id": {
                 "version": "5.5.13"
             },
+            "path": "/etc/httpd/modules/libphp.so",
             "environment": {
                 "rel": {
-                    "hostname": "dev01",
-                    "path": "/etc/httpd/modules/libphp.so"
+                    "hostname": "dev01"
                 }
             }
         },
@@ -53,10 +53,10 @@
             "id": {
                 "version": "5.5.13"
             },
+            "path": "/etc/httpd/modules/libphp.so",
             "environment": {
                 "rel": {
-                    "hostname": "dev02",
-                    "path": "/etc/httpd/modules/libphp.so"
+                    "hostname": "dev02"
                 }
             }
         }

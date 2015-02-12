@@ -5,10 +5,10 @@
             "id": {
                 "version": "2.2.4"
             },
+            "path": "/usr/sbin/httpd",
             "environment": {
                 "rel": {
-                    "hostname": "prod-web01",
-                    "path": "/usr/sbin/httpd"
+                    "hostname": "prod-web01"
                 }
             },
             "library": [
@@ -20,10 +20,10 @@
             "id": {
                 "version": "2.2.6"
             },
+            "path": "/usr/sbin/httpd",
             "environment": {
                 "rel": {
-                    "hostname": "stage",
-                    "path": "/usr/sbin/httpd"
+                    "hostname": "stage"
                 }
             },
             "library": [
@@ -35,10 +35,10 @@
             "id": {
                 "version": "2.2.6"
             },
+            "path": "/usr/sbin/httpd",
             "environment": {
                 "rel": {
-                    "hostname": "qa",
-                    "path": "/usr/sbin/httpd"
+                    "hostname": "qa"
                 }
             },
             "library": [
@@ -50,10 +50,10 @@
             "id": {
                 "version": "2.2.6"
             },
+            "path": "/usr/sbin/httpd",
             "environment": {
                 "rel": {
-                    "hostname": "dev01",
-                    "path": "/usr/sbin/httpd"
+                    "hostname": "dev01"
                 }
             },
             "library": [
@@ -65,10 +65,10 @@
             "id": {
                 "version": "2.2.6"
             },
+            "path": "/usr/sbin/httpd",
             "environment": {
                 "rel": {
-                    "hostname": "dev02",
-                    "path": "/usr/sbin/httpd"
+                    "hostname": "dev02"
                 }
             },
             "library": [

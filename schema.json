@@ -11,13 +11,14 @@
         "logic-states": {
             "type": "array",
             "minItems": 1,
-            "items": { "$ref": "#/definitions/logicState" }
+            "items": { "$ref": "#/definitions/logic-state" }
         },
         "datasets": {
             "type": "array",
             "minItems": 1,
             "items": { "$ref": "#/definitions/dataset" }
-        }
+        },
+        "additionalProperties": false
     },
     "definitions": {
         "environment": {
@@ -46,7 +47,7 @@
                 "logic-states": {
                     "type": "object",
                     "patternProperties": {
-                        "^(/[^/]+)+$": { "$ref": "#/definitions/logicState" }
+                        "^(/[^/]+)+$": { "$ref": "#/definitions/logic-state" }
                     }
                 },
                 "processes": {
@@ -60,8 +61,12 @@
                         ".*": { "$ref": "#/definitions/dataset" }
                     }
                 },
-                "additionalProperties": true
-            }
+                "additionalProperties": false
+            },
+            "anyOf": [
+                { "required": [ "nickname" ] },
+                { "required": [ "address" ] }
+            ]
         },
         "address": {
             "type": "object",
@@ -83,10 +88,99 @@
                 { "required": [ "hostname" ] },
                 { "required": [ "ipv4" ] },
                 { "required": [ "ipv6" ] }
-            ]
+            ],
+            "additionalProperties": false
+        },
+        "logic-state": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "enum": [ "binary", "code", "library" ]
+                },
+                "path": { "type": "string" },
+                "nick": { "type": "string" },
+                "lgroup": { "type": "string" },
+                "id": {
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "repository": { "type": "string" },
+                                "commit": { "type" : "string" }
+                            },
+                            "required": [ "repository", "commit" ]
+                        },
+                        {
+                            "properties": {
+                                "version": { "type": "string" }
+                            },
+                            "required": [ "version" ]
+                        },
+                        {
+                            "properties": {
+                                "semver": { "type": "string" }
+                            },
+                            "required": [ "semver" ]
+                        }
+                    ]
+                },
+                "datasets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/conn-data" }
+                }
+            },
+            "additionProperties": false,
+            "required": [ "path", "id" ]
+        },
+        "conn-data": {
+            "type": "object",
+            "oneOf": [
+                {
+                    "properties": {
+                        "name": { "type": "string" },
+                        "type": { "enum": [ "mediated" ] },
+                        "subset": { "type": "string" },
+                        "interaction": {
+                            "enum": [ "rw", "ro" ]
+                        },
+                        "rel": { "$ref": "#/definitions/connection" }
+                    },
+                    "required": [ "interaction", "type", "rel" ]
+                },
+                {
+                    "properties": {
+                        "name": { "type": "string" },
+                        "type": { "enum": [ "file" ] },
+                        "subset": { "type": "string" },
+                        "interaction": {
+                            "enum": [ "rw", "ro" ]
+                        },
+                        "path": { "type": "string" }
+                    },
+                    "required": [ "interaction", "type", "path" ]
+                }
+            ],
+            "additionalProperties": false
+        },
+        "connection": {
+            "type": "object",
+            "description": "anu kind of inter-process communication path. this needs a ton of work.",
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": { "enum": [ "net" ] },
+                        "hostname": {
+                            "type": "string",
+                            "format": "host-name"
+                        },
+                        "port": { "type": "integer" }
+                    }
+                }
+            ],
+            "additionalProperties": false
         },
         "process": {},
-        "logicState": {},
         "dataset": {}
     }
 }
