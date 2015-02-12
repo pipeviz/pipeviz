@@ -14,7 +14,7 @@
                     "hostname": "prod-web01"
                 }
             },
-            "dataset": [
+            "datasets": [
                 {
                     "name": "default db",
                     "type": "mediated",
@@ -22,10 +22,10 @@
                         "type": "net",
                         "hostname": "prod-db01",
                         "port": 3306,
-                        "proto": "tcp",
-                        "subset": "app_db"
+                        "proto": "tcp"
                     },
-                    "interaction": "rw"
+                    "interaction": "rw",
+                    "subset": "app_db"
                 }
             ]
         },
@@ -43,16 +43,16 @@
                     "hostname": "stage"
                 }
             },
-            "dataset": [
+            "datasets": [
                 {
                     "name": "default db",
                     "type": "mediated",
                     "rel": {
                         "type": "unix",
-                        "path": "/var/lib/mysql/mysql.sock",
-                        "subset": "app_db"
+                        "path": "/var/lib/mysql/mysql.sock"
                     },
-                    "interaction": "rw"
+                    "interaction": "rw",
+                    "subset": "app_db"
                 }
             ]
         },
@@ -70,16 +70,16 @@
                     "hostname": "qa"
                 }
             },
-            "dataset": [
+            "datasets": [
                 {
                     "name": "default db",
                     "type": "mediated",
                     "rel": {
                         "type": "unix",
-                        "path": "/var/lib/mysql/mysql.sock",
-                        "subset": "app_db"
+                        "path": "/var/lib/mysql/mysql.sock"
                     },
-                    "interaction": "rw"
+                    "interaction": "rw",
+                    "subset": "app_db"
                 }
             ]
         },
@@ -97,16 +97,16 @@
                     "hostname": "dev01"
                 }
             },
-            "dataset": [
+            "datasets": [
                 {
                     "name": "default db",
                     "type": "mediated",
                     "rel": {
                         "type": "unix",
-                        "path": "/var/lib/mysql/mysql.sock",
-                        "subset": "app_db"
+                        "path": "/var/lib/mysql/mysql.sock"
                     },
-                    "interaction": "rw"
+                    "interaction": "rw",
+                    "subset": "app_db"
                 }
             ]
         },
@@ -124,16 +124,16 @@
                     "hostname": "dev02"
                 }
             },
-            "dataset": [
+            "datasets": [
                 {
                     "name": "default db",
                     "type": "mediated",
                     "rel": {
                         "type": "unix",
-                        "path": "/var/lib/mysql/mysql.sock",
-                        "subset": "app_db"
+                        "path": "/var/lib/mysql/mysql.sock"
                     },
-                    "interaction": "rw"
+                    "interaction": "rw",
+                    "subset": "app_db"
                 }
             ]
         }

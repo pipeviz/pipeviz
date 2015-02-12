@@ -108,19 +108,22 @@
                                 "repository": { "type": "string" },
                                 "commit": { "type" : "string" }
                             },
-                            "required": [ "repository", "commit" ]
+                            "required": [ "repository", "commit" ],
+                            "additionProperties": false
                         },
                         {
                             "properties": {
                                 "version": { "type": "string" }
                             },
-                            "required": [ "version" ]
+                            "required": [ "version" ],
+                            "additionProperties": false
                         },
                         {
                             "properties": {
                                 "semver": { "type": "string" }
                             },
-                            "required": [ "semver" ]
+                            "required": [ "semver" ],
+                            "additionProperties": false
                         }
                     ]
                 },
@@ -146,7 +149,8 @@
                         },
                         "rel": { "$ref": "#/definitions/connection" }
                     },
-                    "required": [ "interaction", "type", "rel" ]
+                    "required": [ "interaction", "type", "rel" ],
+                    "additionalProperties": false
                 },
                 {
                     "properties": {
@@ -158,14 +162,14 @@
                         },
                         "path": { "type": "string" }
                     },
-                    "required": [ "interaction", "type", "path" ]
+                    "required": [ "interaction", "type", "path" ],
+                    "additionalProperties": false
                 }
-            ],
-            "additionalProperties": false
+            ]
         },
         "connection": {
             "type": "object",
-            "description": "anu kind of inter-process communication path. this needs a ton of work.",
+            "description": "Any kind of inter-process communication path. this needs a ton of work.",
             "oneOf": [
                 {
                     "properties": {
@@ -174,11 +178,21 @@
                             "type": "string",
                             "format": "host-name"
                         },
-                        "port": { "type": "integer" }
-                    }
+                        "port": { "type": "integer" },
+                        "proto": { "type": "string" }
+                    },
+                    "required": [ "type", "hostname", "port", "proto" ],
+                    "additionalProperties": false
+                },
+                {
+                    "properties": {
+                        "type": { "enum": [ "unix" ] },
+                        "path": { "type": "string" }
+                    },
+                    "required": [ "type", "path" ],
+                    "additionalProperties": false
                 }
-            ],
-            "additionalProperties": false
+            ]
         },
         "process": {},
         "dataset": {}
