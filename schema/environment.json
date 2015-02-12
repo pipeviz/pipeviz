@@ -1,46 +1,67 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "description": "A representation of an environment - physical, virtual, or container.",
-    "type": "object",
+    "description": "Complete schema for pipeviz messages.",
     "properties": {
-        "type": {
-            "enum": [ "physical", "virtual", "container" ],
-            "default": "virtual"
-        },
-        "os": {
-            "enum": [ "windows", "unix" ],
-            "default": "unix"
-        },
-        "address": {
-            "$ref": "#definitions/address"
-        },
-        "nickname": {
-            "type": "string",
-            "description": "A nickname identifying this environment. Nicknames can be used as referents for defining the hierarchical relationship between an environment and its contents, but not for real network/addressable relationships. Need not correspond to any real state. Nicknames co-exist in a global namespace for all environments known to any pipeviz instance, so pick them wisely."
-        },
-        "provider": {
-            "type": "string"
-        },
-        "logic-states": {
-            "type": "object",
-            "patternProperties": {
-                "^(/[^/]+)+$": { "$ref": "#definitions/logicState" }
-            }
-        },
-        "processes": {
+        "environments": {
             "type": "array",
             "minItems": 1,
-            "items": { "$ref": "#definitions/process" }
+            "items": { "$ref": "#definitions/environment" }
         },
-        "dataSets": {
-            "type": "object",
-            "patternProperties": {
-                ".*": { "$ref": "#definitions/dataSet" }
-            }
+        "logic-states": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#definitions/logicState" }
         },
-        "additionalProperties": true
+        "datasets": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#definitions/dataset" }
+        }
     },
     "definitions": {
+        "environment": {
+            "title": "Environment",
+            "description": "A representation of an environment - physical, virtual, or container.",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "enum": [ "physical", "virtual", "container" ],
+                    "default": "virtual"
+                },
+                "os": {
+                    "enum": [ "windows", "unix" ],
+                    "default": "unix"
+                },
+                "address": {
+                    "$ref": "#definitions/address"
+                },
+                "nickname": {
+                    "type": "string",
+                    "description": "A nickname identifying this environment. Nicknames can be used as referents for defining the hierarchical relationship between an environment and its contents, but not for real network/addressable relationships. Need not correspond to any real state. Nicknames co-exist in a global namespace for all environments known to any pipeviz instance, so pick them wisely."
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "logic-states": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^(/[^/]+)+$": { "$ref": "#definitions/logicState" }
+                    }
+                },
+                "processes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#definitions/process" }
+                },
+                "datasets": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".*": { "$ref": "#definitions/dataset" }
+                    }
+                },
+                "additionalProperties": true
+            },
+        }
         "address": {
             "type": "object",
             "properties": {
@@ -65,6 +86,6 @@
         }
         "process": {},
         "logicState": {},
-        "dataSet": {}
+        "dataset": {}
     }
 }
