@@ -322,12 +322,41 @@
         },
         "commit": {
             "type": "object",
-            "properties": {},
+            "description": "Describes a source control commit object. For now, just git. Probably for always, only SCMs that have atomic commits/a DAG.",
+            "properties": {
+                "sha1": { "type": "string" },
+                "date": { "type": "string" },
+                "author": { "type": "string" },
+                "subject": { "type": "string" },
+                "parents": {
+                    "type": "array",
+                    "minItems": 0,
+                    "items": { "type": "string" }
+                }
+            },
+            "required": [ "sha1", "date", "author", "subject", "parents" ],
             "additionalProperties": false
         },
         "commit-meta": {
             "type": "object",
-            "properties": {},
+            "description": "Describes metadata about a commit - branches or tags associated with it, testing states, etc.",
+            "properties": {
+                "sha1": { "type": "string" },
+                "testState": {
+                    "enum": [ "passed", "pending", "failed" ]
+                },
+                "tags": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string" }
+                },
+                "branches": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string" }
+                }
+            },
+            "required": [ "sha1" ],
             "additionalProperties": false
         }
     }
