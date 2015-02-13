@@ -1,7 +1,7 @@
 {
     "datasets": [
         {
-            "id": "/var/lib/mysql",
+            "name": "/var/lib/mysql",
             "environment": {
                 "rel": {
                     "hostname": "prod-db01",
@@ -10,10 +10,8 @@
             },
             "subsets": [
                 {
-                    "app_db": {
-                        "genesis": "α",
-                        "create-time": 1410328380
-                    }
+                    "name": "app_db",
+                    "genesis": "α"
                 }
             ]
         },
@@ -27,15 +25,12 @@
             },
             "subsets": [
                 {
-                    "app_db": {
-                        "genesis": {
-                            "rel": {
-                                "hostname": "prod-db01",
-                                "dataset": [ "/var/lib/mysql", "app_db" ],
-                                "snap-time": 1420768880
-                            },
-                            "create-time": 1420768880
-                        }
+                    "name": "app_db",
+                    "create-time": 1420768880,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "dataset": [ "/var/lib/mysql", "app_db" ],
+                        "snap-time": 1420768880
                     }
                 }
             ]
@@ -50,15 +45,12 @@
             },
             "subsets": [
                 {
-                    "app_db": {
-                        "genesis": {
-                            "rel": {
-                                "hostname": "prod-db01",
-                                "dataset": [ "/var/lib/mysql", "app_db" ],
-                                "snap-time": 1420760622
-                            },
-                            "create-time": 1420760622
-                        }
+                    "name": "app_db",
+                    "create-time": 1420760622,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "dataset": [ "/var/lib/mysql", "app_db" ],
+                        "snap-time": 1420760622
                     }
                 }
             ]
@@ -73,15 +65,12 @@
             },
             "subsets": [
                 {
-                    "app_db": {
-                        "genesis": {
-                            "rel": {
-                                "hostname": "prod-db01",
-                                "dataset": [ "/var/lib/mysql", "app_db" ],
-                                "snap-time": 1420760622
-                            },
-                            "create-time": 1420760622
-                        }
+                    "name": "app_db",
+                    "create-time": 1420760622,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "dataset": [ "/var/lib/mysql", "app_db" ],
+                        "snap-time": 1420760622
                     }
                 }
             ]
@@ -96,15 +85,12 @@
             },
             "subsets": [
                 {
-                    "app_db": {
-                        "genesis": {
-                            "rel": {
-                                "hostname": "prod-db01",
-                                "dataset": [ "/var/lib/mysql", "app_db" ],
-                                "snap-time": 1420760622
-                            },
-                            "create-time": 1420760622
-                        }
+                    "name": "app_db",
+                    "create-time": 1420760622,
+                    "genesis": {
+                        "hostname": "prod-db01",
+                        "dataset": [ "/var/lib/mysql", "app_db" ],
+                        "snap-time": 1420760622
                     }
                 }
             ]

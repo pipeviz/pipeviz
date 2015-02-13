@@ -260,8 +260,51 @@
         },
         "dataset": {
             "type": "object",
-            "properties": {},
-            "additionalProperties": false
+            "description": "A dataset. Think of the term really, really broadly. variant 1 is a self-sourced dataset; variant 2 is a functioning dataset; variant 3 is a dataset container",
+            "oneOf": [
+                {
+                    "properties": {
+                        "name": { "type": "string" },
+                        "genesis": { "enum": "α" }
+                    },
+                    "required": [ "name", "genesis" ],
+                    "additionalProperties": false
+                },
+                {
+                    "properties": {
+                        "name": { "type": "string" },
+                        "create-time": { "format": "date-time" },
+                        "genesis": {
+                            "type": "object",
+                            "properties": {
+                                "address": { "$ref": "#/definitions/address" },
+                                "dataset": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": { "type": "string" }
+                                },
+                                "snap-time": { "format": "date-time" }
+                            },
+                            "required": [ "address", "dataset", "snap-time" ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [ "name", "create-time", "genesis" ],
+                    "additionalProperties": false
+                },
+                {
+                    "properties": {
+                        "name": { "type": "string" },
+                        "subsets": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": { "$ref": "#/definitions/dataset" }
+                        }
+                    },
+                    "required": [ "name" ],
+                    "additionalProperties": false
+                }
+            ]
         },
         "commit": {
             "type": "object",
