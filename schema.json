@@ -265,7 +265,8 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
-                        "genesis": { "enum": "α" }
+                        "create-time": { "format": "date-time" },
+                        "genesis": { "enum": [ "α" ] }
                     },
                     "required": [ "name", "genesis" ],
                     "additionalProperties": false
@@ -289,7 +290,7 @@
                             "additionalProperties": false
                         }
                     },
-                    "required": [ "name", "create-time", "genesis" ],
+                    "required": [ "name", "genesis" ],
                     "additionalProperties": false
                 },
                 {
