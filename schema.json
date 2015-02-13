@@ -60,10 +60,9 @@
                     "type": "string"
                 },
                 "logic-states": {
-                    "type": "object",
-                    "patternProperties": {
-                        "^(/[^/]+)+$": { "$ref": "#/definitions/logic-state" }
-                    }
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/logic-state" }
                 },
                 "processes": {
                     "type": "array",
@@ -71,10 +70,9 @@
                     "items": { "$ref": "#/definitions/process" }
                 },
                 "datasets": {
-                    "type": "object",
-                    "patternProperties": {
-                        ".*": { "$ref": "#/definitions/dataset" }
-                    }
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/dataset" }
                 }
             },
             "additionalProperties": false,
