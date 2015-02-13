@@ -1,10 +1,11 @@
 package main_test
 
 import (
-	gjs "github.com/xeipuuv/gojsonschema"
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	gjs "github.com/xeipuuv/gojsonschema"
 )
 
 // Reads all message fixtures from fixtures/ein and validates them
@@ -50,5 +51,4 @@ func TestMessageValidity(t *testing.T) {
 			}
 		}
 	}
-
 }
