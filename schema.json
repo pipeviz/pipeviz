@@ -123,6 +123,7 @@
                 "path": { "type": "string" },
                 "nick": { "type": "string" },
                 "lgroup": { "type": "string" },
+                "environment": { "$ref": "#/definitions/env-link" },
                 "id": {
                     "type": "object",
                     "oneOf": [
@@ -226,6 +227,7 @@
                     "items": { "type": "string" }
                 },
                 "user": { "type": "string" },
+                "environment": { "$ref": "#/definitions/env-link" },
                 "group": { "type": "string" },
                 "cwd": { "type": "string" },
                 "dataset": { "type": "string" },

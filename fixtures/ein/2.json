@@ -10,7 +10,7 @@
             "lgroup": "prod",
             "path": "/var/www/app",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "prod-web01"
                 }
             },
@@ -39,7 +39,7 @@
             "lgroup": "stage",
             "path": "/var/www/app",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "stage"
                 }
             },
@@ -66,7 +66,7 @@
             "lgroup": "qa",
             "path": "/var/www/app",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "qa"
                 }
             },
@@ -93,7 +93,7 @@
             "lgroup": "sdb-dev",
             "path": "/var/www/app",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev01"
                 }
             },
@@ -120,7 +120,7 @@
             "lgroup": "lz411-dev",
             "path": "/var/www/app",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev02"
                 }
             },

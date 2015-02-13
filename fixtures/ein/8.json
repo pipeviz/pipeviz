@@ -7,7 +7,7 @@
             "cwd": "/var/run/app",
             "pid": 6212,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "prod-web01"
                 }
             },
@@ -26,7 +26,7 @@
             "dataset": "/var/lib/mysql",
             "pid": 26012,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "prod-db01"
                 }
             },
@@ -49,7 +49,7 @@
             "cwd": "/var/run/app",
             "pid": 34764,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "stage"
                 }
             },
@@ -68,7 +68,7 @@
             "dataset": "/var/lib/mysql",
             "pid": 7567,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "stage"
                 }
             },
@@ -91,7 +91,7 @@
             "cwd": "/var/run/app",
             "pid": 38435,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "qa"
                 }
             },
@@ -110,7 +110,7 @@
             "dataset": "/var/lib/mysql",
             "pid": 14891,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "qa"
                 }
             },
@@ -133,7 +133,7 @@
             "cwd": "/var/run/app",
             "pid": 25970,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev01"
                 }
             },
@@ -152,7 +152,7 @@
             "dataset": "/var/lib/mysql",
             "pid": 30032,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev01"
                 }
             },
@@ -175,7 +175,7 @@
             "cwd": "/var/run/app",
             "pid": 20216,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev02"
                 }
             },
@@ -194,7 +194,7 @@
             "dataset": "/var/lib/mysql",
             "pid": 37396,
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev02"
                 }
             },

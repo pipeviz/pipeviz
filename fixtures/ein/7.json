@@ -7,7 +7,7 @@
             },
             "path": "/etc/httpd/modules/libphp.so",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "prod-web01"
                 }
             }
@@ -19,7 +19,7 @@
             },
             "path": "/etc/httpd/modules/libphp.so",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "stage"
                 }
             }
@@ -31,7 +31,7 @@
             },
             "path": "/etc/httpd/modules/libphp.so",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "qa"
                 }
             }
@@ -43,7 +43,7 @@
             },
             "path": "/etc/httpd/modules/libphp.so",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev01"
                 }
             }
@@ -55,7 +55,7 @@
             },
             "path": "/etc/httpd/modules/libphp.so",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev02"
                 }
             }

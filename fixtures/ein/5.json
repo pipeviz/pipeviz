@@ -7,7 +7,7 @@
             },
             "path": "/usr/sbin/httpd",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "prod-web01"
                 }
             },
@@ -22,7 +22,7 @@
             },
             "path": "/usr/sbin/httpd",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "stage"
                 }
             },
@@ -37,7 +37,7 @@
             },
             "path": "/usr/sbin/httpd",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "qa"
                 }
             },
@@ -52,7 +52,7 @@
             },
             "path": "/usr/sbin/httpd",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev01"
                 }
             },
@@ -67,7 +67,7 @@
             },
             "path": "/usr/sbin/httpd",
             "environment": {
-                "rel": {
+                "address": {
                     "hostname": "dev02"
                 }
             },
