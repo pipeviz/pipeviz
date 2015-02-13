@@ -106,6 +106,14 @@
             ],
             "additionalProperties": false
         },
+        "env-link": {
+            "type": "object",
+            "description": "Describes a link back from a thing to the environment that contains it. 'Contains' in as physical a sense as possible. This approach needs a lot of thought.",
+            "properties": {
+                "address": { "$ref": "#/definitions/address" }
+            },
+            "required": [ "address" ]
+        },
         "logic-state": {
             "type": "object",
             "properties": {
@@ -265,6 +273,7 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
+                        "environment": { "$ref": "#/definitions/env-link" },
                         "create-time": { "format": "date-time" },
                         "genesis": { "enum": [ "α" ] }
                     },
@@ -274,6 +283,7 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
+                        "environment": { "$ref": "#/definitions/env-link" },
                         "create-time": { "format": "date-time" },
                         "genesis": {
                             "type": "object",
@@ -296,6 +306,7 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
+                        "environment": { "$ref": "#/definitions/env-link" },
                         "subsets": {
                             "type": "array",
                             "minItems": 1,

@@ -3,10 +3,10 @@
         {
             "name": "/var/lib/mysql",
             "environment": {
-                "rel": {
-                    "hostname": "prod-db01",
-                    "path": "/var/lib/mysql"
-                }
+                "address": {
+                    "hostname": "prod-db01"
+                },
+                "path": "/var/lib/mysql"
             },
             "subsets": [
                 {
@@ -16,81 +16,89 @@
             ]
         },
         {
-            "id": "/var/lib/mysql",
+            "name": "/var/lib/mysql",
             "environment": {
-                "rel": {
-                    "hostname": "stage",
-                    "path": "/var/lib/mysql"
-                }
+                "address": {
+                    "hostname": "stage"
+                },
+                "path": "/var/lib/mysql"
             },
             "subsets": [
                 {
                     "name": "app_db",
-                    "create-time": 1420768880,
+                    "create-time": "2015-01-09T02:01:20.000Z",
                     "genesis": {
-                        "hostname": "prod-db01",
+                        "address": {
+                            "hostname": "prod-db01"
+                        },
                         "dataset": [ "/var/lib/mysql", "app_db" ],
-                        "snap-time": 1420768880
+                        "snap-time": "2015-01-09T02:01:20.000Z"
                     }
                 }
             ]
         },
         {
-            "id": "/var/lib/mysql",
+            "name": "/var/lib/mysql",
             "environment": {
-                "rel": {
-                    "hostname": "qa",
-                    "path": "/var/lib/mysql"
-                }
+                "address": {
+                    "hostname": "qa"
+                },
+                "path": "/var/lib/mysql"
             },
             "subsets": [
                 {
                     "name": "app_db",
-                    "create-time": 1420760622,
+                    "create-time": "2015-01-08T23:43:42.000Z",
                     "genesis": {
-                        "hostname": "prod-db01",
+                        "address": {
+                            "hostname": "prod-db01"
+                        },
                         "dataset": [ "/var/lib/mysql", "app_db" ],
-                        "snap-time": 1420760622
+                        "snap-time": "2015-01-08T23:43:42.000Z"
                     }
                 }
             ]
         },
         {
-            "id": "/var/lib/mysql",
+            "name": "/var/lib/mysql",
             "environment": {
-                "rel": {
-                    "hostname": "dev01",
-                    "path": "/var/lib/mysql"
-                }
+                "address": {
+                    "hostname": "dev01"
+                },
+                "path": "/var/lib/mysql"
             },
             "subsets": [
                 {
                     "name": "app_db",
-                    "create-time": 1420760622,
+                    "create-time": "2015-01-08T23:43:42.000Z",
                     "genesis": {
-                        "hostname": "prod-db01",
+                        "address": {
+                            "hostname": "prod-db01"
+                        },
                         "dataset": [ "/var/lib/mysql", "app_db" ],
-                        "snap-time": 1420760622
+                        "snap-time": "2015-01-08T23:43:42.000Z"
                     }
                 }
             ]
         },
         {
-            "id": "/var/lib/mysql",
+            "name": "/var/lib/mysql",
             "environment": {
-                "rel": {
-                    "hostname": "dev02",
-                    "path": "/var/lib/mysql"
-                }
+                "address": {
+                    "hostname": "dev02"
+                },
+                "path": "/var/lib/mysql"
             },
             "subsets": [
                 {
                     "name": "app_db",
-                    "create-time": 1420760622,
+                    "create-time": "2015-01-08T23:43:42.000Z",
                     "genesis": {
-                        "hostname": "prod-db01",
+                        "address": {
+                            "hostname": "prod-db01"
+                        },
                         "dataset": [ "/var/lib/mysql", "app_db" ],
-                        "snap-time": 1420760622
+                        "snap-time": "2015-01-08T23:43:42.000Z"
                     }
                 }
             ]
