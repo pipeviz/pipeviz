@@ -124,6 +124,11 @@
                 "nick": { "type": "string" },
                 "lgroup": { "type": "string" },
                 "environment": { "$ref": "#/definitions/env-link" },
+                "libraries": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string" }
+                },
                 "id": {
                     "type": "object",
                     "oneOf": [

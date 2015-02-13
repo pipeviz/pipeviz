@@ -11,7 +11,7 @@
                     "hostname": "prod-web01"
                 }
             },
-            "library": [
+            "libraries": [
                 "/etc/httpd/modules/libphp.so"
             ]
         },
@@ -26,7 +26,7 @@
                     "hostname": "stage"
                 }
             },
-            "library": [
+            "libraries": [
                 "/etc/httpd/modules/libphp.so"
             ]
         },
@@ -41,7 +41,7 @@
                     "hostname": "qa"
                 }
             },
-            "library": [
+            "libraries": [
                 "/etc/httpd/modules/libphp.so"
             ]
         },
@@ -56,7 +56,7 @@
                     "hostname": "dev01"
                 }
             },
-            "library": [
+            "libraries": [
                 "/etc/httpd/modules/libphp.so"
             ]
         },
@@ -71,7 +71,7 @@
                     "hostname": "dev02"
                 }
             },
-            "library": [
+            "libraries": [
                 "/etc/httpd/modules/libphp.so"
             ]
         }
