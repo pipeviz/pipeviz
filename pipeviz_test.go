@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+// Reads all message fixtures from fixtures/ein and validates them
+// against the master message schema (schema.json).
 func TestMessageValidity(t *testing.T) {
 	src, err := ioutil.ReadFile("./schema.json")
 	if err != nil {
