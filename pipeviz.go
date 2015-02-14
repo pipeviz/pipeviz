@@ -69,7 +69,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if result.Valid() {
-		id := persist.Append(b)
+		id := persist.Append(b, r.RemoteAddr)
 
 		// super-sloppy write back to client, but does the trick
 		// TODO not writing the id back at all might make things simpler
