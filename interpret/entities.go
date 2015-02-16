@@ -23,15 +23,52 @@ func (m Message) UnmarshalJSON(data []byte) error {
 	}{}
 
 	json.Unmarshal(data, tm)
+	// first, dump all top-level objects into the node list. ugh type system that we can't append
+	for _, e := range tm.env {
+		m.Nodes = append(m.Nodes, e)
+	}
+	for _, e := range tm.ls {
+		m.Nodes = append(m.Nodes, e)
+	}
+	for _, e := range tm.ds {
+		m.Nodes = append(m.Nodes, e)
+	}
+	for _, e := range tm.p {
+		m.Nodes = append(m.Nodes, e)
+	}
+	for _, e := range tm.c {
+		m.Nodes = append(m.Nodes, e)
+	}
+	for _, e := range tm.cm {
+		m.Nodes = append(m.Nodes, e)
+	}
+
+	// now do nested from env
+	// FIXME all needs refactoring, but the important guarantee is order of interpretation, including nested
+	// structures. this approach allows earlier nested structures to overwrite later top-level structures.
+	for _, e := range tm.env {
+		for _, ne := range e.LogicStates {
+			m.Nodes = append(m.Nodes, ne)
+		}
+		for _, ne := range e.Processes {
+			m.Nodes = append(m.Nodes, ne)
+		}
+		for _, ne := range e.Datasets {
+			m.Nodes = append(m.Nodes, ne)
+		}
+	}
 
 	return nil
 }
 
 type Environment struct {
-	Address  Address `json:"address"`
-	Os       string  `json:"os"`
-	Provider string  `json:"provider"`
-	Type     string  `json:"type"`
+	Address     Address      `json:"address"`
+	Os          string       `json:"os"`
+	Provider    string       `json:"provider"`
+	Type        string       `json:"type"`
+	LogicStates []LogicState `json:logic-states`
+	Datasets    []Dataset    `json:"datasets"`
+	Processes   []Process    `json:"processes"`
 }
 
 type EnvLink struct {
