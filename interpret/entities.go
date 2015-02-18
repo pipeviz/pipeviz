@@ -2,6 +2,7 @@ package interpret
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type Message struct {
@@ -12,41 +13,45 @@ type Message struct {
 type Node interface{} // TODO for now
 type Edge interface{} // TODO for now
 
-func (m Message) UnmarshalJSON(data []byte) error {
+func (m *Message) UnmarshalJSON(data []byte) error {
 	tm := struct {
-		env []Environment `json:"environments"`
-		ls  []LogicState  `json:"logic-states"`
-		ds  []Dataset     `json:"datasets"`
-		p   []Process     `json:"processes"`
-		c   []Commit      `json:"commits"`
-		cm  []CommitMeta  `json:"commit-meta"`
+		Env []Environment `json:"environments"`
+		Ls  []LogicState  `json:"logic-states"`
+		Ds  []Dataset     `json:"datasets"`
+		P   []Process     `json:"processes"`
+		C   []Commit      `json:"commits"`
+		Cm  []CommitMeta  `json:"commit-meta"`
 	}{}
 
-	json.Unmarshal(data, tm)
+	err := json.Unmarshal(data, &tm)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	// first, dump all top-level objects into the node list. ugh type system that we can't append
-	for _, e := range tm.env {
+	for _, e := range tm.Env {
 		m.Nodes = append(m.Nodes, e)
 	}
-	for _, e := range tm.ls {
+	for _, e := range tm.Ls {
 		m.Nodes = append(m.Nodes, e)
 	}
-	for _, e := range tm.ds {
+	for _, e := range tm.Ds {
 		m.Nodes = append(m.Nodes, e)
 	}
-	for _, e := range tm.p {
+	for _, e := range tm.P {
 		m.Nodes = append(m.Nodes, e)
 	}
-	for _, e := range tm.c {
+	for _, e := range tm.C {
 		m.Nodes = append(m.Nodes, e)
 	}
-	for _, e := range tm.cm {
+	for _, e := range tm.Cm {
 		m.Nodes = append(m.Nodes, e)
 	}
 
 	// now do nested from env
 	// FIXME all needs refactoring, but the important guarantee is order of interpretation, including nested
 	// structures. this approach allows earlier nested structures to overwrite later top-level structures.
-	for _, e := range tm.env {
+	for _, e := range tm.Env {
 		for _, ne := range e.LogicStates {
 			m.Nodes = append(m.Nodes, ne)
 		}
@@ -66,7 +71,7 @@ type Environment struct {
 	Os          string       `json:"os"`
 	Provider    string       `json:"provider"`
 	Type        string       `json:"type"`
-	LogicStates []LogicState `json:logic-states`
+	LogicStates []LogicState `json:"logic-states"`
 	Datasets    []Dataset    `json:"datasets"`
 	Processes   []Process    `json:"processes"`
 }
@@ -83,8 +88,21 @@ type Address struct {
 }
 
 type LogicState struct {
-	Datasets    []Dataset `json:"datasets"`
-	Environment EnvLink   `json:"environment"`
+	Datasets []struct {
+		Name        string `json:"name"`
+		Type        string `json:"type"`
+		Subset      string `json:"subset"`
+		Interaction string `json:"interaction"`
+		Path        string `json:"path"`
+		Rel         struct {
+			Hostname string `json:"hostname"`
+			Port     int    `json:"port"`
+			Proto    string `json:"proto"`
+			Type     string `json:"type"`
+			Path     string `json:"path"`
+		} `json:"rel"`
+	} `json:"datasets"`
+	Environment EnvLink `json:"environment"`
 	ID          struct {
 		Commit     string `json:"commit"`
 		Repository string `json:"repository"`
@@ -98,17 +116,17 @@ type LogicState struct {
 }
 
 type CommitMeta struct {
-	Sha1      string   `json:"sha1"`
+	Sha1      []byte   `json:"sha1"`
 	Tags      []string `json:"tags"`
 	TestState string   `json:"testState"`
 }
 
 type Commit struct {
-	Author  string     `json:"author"`
-	Date    string     `json:"date"`
-	Parents [][40]byte `json:"parents"`
-	Sha1    [40]byte   `json:"sha1"`
-	Subject string     `json:"subject"`
+	Author  string   `json:"author"`
+	Date    string   `json:"date"`
+	Parents [][]byte `json:"parents"`
+	Sha1    []byte   `json:"sha1"`
+	Subject string   `json:"subject"`
 }
 
 type Dataset struct {
@@ -122,7 +140,6 @@ type Dataset struct {
 			Dataset  []string `json:"dataset"`
 			SnapTime string   `json:"snap-time"`
 		} `json:"genesis"`
-		GenesisSelf string `json:"genesis"`
 	} `json:"subsets"`
 }
 
@@ -135,7 +152,7 @@ type Process struct {
 		Port  int      `json:"port"`
 		Proto []string `json:"proto"`
 		Type  string   `json:"type"`
-		Path  string   `json:"type"`
+		Path  string   `json:"path"`
 	} `json:"listen"`
 	LogicStates []string `json:"logic-states"`
 	User        string   `json:"user"`
