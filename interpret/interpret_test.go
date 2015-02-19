@@ -14,7 +14,7 @@ func TestUnmarshal(t *testing.T) {
 		Nodes: make([]interpret.Node, 0),
 	}
 
-	f, err := ioutil.ReadFile("../fixtures/ein/6.json")
+	f, err := ioutil.ReadFile("../fixtures/ein/2.json")
 	if err != nil {
 		t.Error("fnf")
 	}

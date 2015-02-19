@@ -3,11 +3,21 @@ package interpret
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/sdboyer/gogl"
+	"github.com/sdboyer/gogl/graph/al"
 )
+
+type MessageGraph interface {
+	gogl.DataDigraph
+	gogl.VertexSetMutator
+	gogl.DataArcSetMutator
+}
 
 type Message struct {
 	Nodes []Node
 	Edges []Edge
+	Graph MessageGraph
 }
 
 type Node interface{} // TODO for now
@@ -28,38 +38,72 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		fmt.Println(err)
 	}
 
-	// first, dump all top-level objects into the node list. ugh type system that we can't append
+	if m.Graph == nil {
+		m.Graph = gogl.Spec().Mutable().Directed().DataEdges().Create(al.G).(MessageGraph)
+	}
+
+	// first, dump all top-level objects into the graph.
 	for _, e := range tm.Env {
-		m.Nodes = append(m.Nodes, e)
+		envlink := EnvLink{Address: Address{}}
+
+		if e.Nickname != "" {
+			envlink.Nick = e.Nickname
+		} else if e.Address.Hostname != "" {
+			envlink.Address.Hostname = e.Address.Hostname
+		} else if e.Address.Ipv4 != "" {
+			envlink.Address.Ipv4 = e.Address.Ipv4
+		} else if e.Address.Ipv6 != "" {
+			envlink.Address.Ipv6 = e.Address.Ipv6
+		}
+
+		// manage the little environment hierarchy
+		for _, ls := range e.LogicStates {
+			ls.Environment = envlink
+			tm.Ls = append(tm.Ls, ls)
+		}
+		for _, p := range e.Processes {
+			p.Environment = envlink
+			tm.P = append(tm.P, p)
+		}
+		for _, ds := range e.Datasets {
+			ds.Environment = envlink
+			tm.Ds = append(tm.Ds, ds)
+		}
+
+		m.Graph.EnsureVertex(e)
 	}
 	for _, e := range tm.Ls {
-		m.Nodes = append(m.Nodes, e)
+		// TODO deduping/overwriting on ID needs to be done here
+		m.Graph.EnsureVertex(e)
 	}
 	for _, e := range tm.Ds {
-		m.Nodes = append(m.Nodes, e)
+		// TODO deduping/overwriting on ID needs to be done here
+		m.Graph.EnsureVertex(e)
 	}
 	for _, e := range tm.P {
-		m.Nodes = append(m.Nodes, e)
+		// TODO deduping/overwriting on ID needs to be done here
+		m.Graph.EnsureVertex(e)
 	}
 	for _, e := range tm.C {
-		m.Nodes = append(m.Nodes, e)
+		m.Graph.EnsureVertex(e)
 	}
 	for _, e := range tm.Cm {
-		m.Nodes = append(m.Nodes, e)
+		m.Graph.EnsureVertex(e)
 	}
 
 	// now do nested from env
 	// FIXME all needs refactoring, but the important guarantee is order of interpretation, including nested
 	// structures. this approach allows earlier nested structures to overwrite later top-level structures.
 	for _, e := range tm.Env {
+		// TODO deduping/overwriting on ID needs to be done here
 		for _, ne := range e.LogicStates {
-			m.Nodes = append(m.Nodes, ne)
+			m.Graph.EnsureVertex(ne)
 		}
 		for _, ne := range e.Processes {
-			m.Nodes = append(m.Nodes, ne)
+			m.Graph.EnsureVertex(ne)
 		}
 		for _, ne := range e.Datasets {
-			m.Nodes = append(m.Nodes, ne)
+			m.Graph.EnsureVertex(ne)
 		}
 	}
 
@@ -71,6 +115,7 @@ type Environment struct {
 	Os          string       `json:"os"`
 	Provider    string       `json:"provider"`
 	Type        string       `json:"type"`
+	Nickname    string       `json:"nickname"`
 	LogicStates []LogicState `json:"logic-states"`
 	Datasets    []Dataset    `json:"datasets"`
 	Processes   []Process    `json:"processes"`
