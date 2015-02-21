@@ -2,6 +2,7 @@ package interpret
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/sdboyer/gogl"
@@ -46,6 +47,7 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	for _, e := range tm.Env {
 		envlink := EnvLink{Address: Address{}}
 
+		// Create an envlink for any nested items, preferring nick, then hostname, ipv4, ipv6.
 		if e.Nickname != "" {
 			envlink.Nick = e.Nickname
 		} else if e.Address.Hostname != "" {
@@ -91,20 +93,39 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		m.Graph.EnsureVertex(e)
 	}
 
-	// now do nested from env
-	// FIXME all needs refactoring, but the important guarantee is order of interpretation, including nested
-	// structures. this approach allows earlier nested structures to overwrite later top-level structures.
-	for _, e := range tm.Env {
-		// TODO deduping/overwriting on ID needs to be done here
-		for _, ne := range e.LogicStates {
-			m.Graph.EnsureVertex(ne)
+	findEnv := func(el EnvLink) (Environment, error) {
+		if el.Nick != "" {
+			for _, e := range tm.Env {
+				if e.Nickname == el.Nick {
+					return e, nil
+				}
+			}
+		} else if el.Address.Hostname != "" {
+			for _, e := range tm.Env {
+				if e.Address.Hostname == el.Address.Hostname {
+					return e, nil
+				}
+			}
+		} else if el.Address.Ipv4 != "" {
+			for _, e := range tm.Env {
+				if e.Address.Ipv4 == el.Address.Ipv4 {
+					return e, nil
+				}
+			}
+		} else if el.Address.Ipv6 != "" {
+			for _, e := range tm.Env {
+				if e.Address.Ipv6 == el.Address.Ipv6 {
+					return e, nil
+				}
+			}
 		}
-		for _, ne := range e.Processes {
-			m.Graph.EnsureVertex(ne)
-		}
-		for _, ne := range e.Datasets {
-			m.Graph.EnsureVertex(ne)
-		}
+
+		return Environment{}, errors.New("Env not found")
+	}
+
+	// All vertices are populated now. Try to link things up.
+	for _, e := range tm.Ls {
+		env, err := findEnv(e.Environment)
 	}
 
 	return nil
