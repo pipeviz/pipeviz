@@ -2,7 +2,6 @@ package interpret
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/sdboyer/gogl"
@@ -93,42 +92,59 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		m.Graph.EnsureVertex(e)
 	}
 
-	findEnv := func(el EnvLink) (Environment, error) {
-		if el.Nick != "" {
-			for _, e := range tm.Env {
-				if e.Nickname == el.Nick {
-					return e, nil
-				}
-			}
-		} else if el.Address.Hostname != "" {
-			for _, e := range tm.Env {
-				if e.Address.Hostname == el.Address.Hostname {
-					return e, nil
-				}
-			}
-		} else if el.Address.Ipv4 != "" {
-			for _, e := range tm.Env {
-				if e.Address.Ipv4 == el.Address.Ipv4 {
-					return e, nil
-				}
-			}
-		} else if el.Address.Ipv6 != "" {
-			for _, e := range tm.Env {
-				if e.Address.Ipv6 == el.Address.Ipv6 {
-					return e, nil
+	// All vertices are populated now. Try to link things up.
+	for _, e := range tm.Ls {
+		env, found := findEnv(tm.Env, e.Environment)
+		if found != false {
+			// No env found, assign false
+			m.Graph.AddArcs(gogl.NewDataArc(e, false, e.Environment))
+		} else {
+			m.Graph.AddArcs(gogl.NewDataArc(e, env, e.Environment))
+		}
+
+		for _, ds := range e.Datasets {
+			if ds.Rel.Type == "unix" {
+				// implicit link within env; can only work if we found an env
+				if found != false {
+					m.Graph.AddArcs(gogl.NewDataArc(e, false, ds))
+				} else {
+
 				}
 			}
 		}
-
-		return Environment{}, errors.New("Env not found")
-	}
-
-	// All vertices are populated now. Try to link things up.
-	for _, e := range tm.Ls {
-		env, err := findEnv(e.Environment)
 	}
 
 	return nil
+}
+
+func findEnv(envs []Environment, el EnvLink) (Environment, bool) {
+	if el.Nick != "" {
+		for _, e := range envs {
+			if e.Nickname == el.Nick {
+				return e, true
+			}
+		}
+	} else if el.Address.Hostname != "" {
+		for _, e := range envs {
+			if e.Address.Hostname == el.Address.Hostname {
+				return e, true
+			}
+		}
+	} else if el.Address.Ipv4 != "" {
+		for _, e := range envs {
+			if e.Address.Ipv4 == el.Address.Ipv4 {
+				return e, true
+			}
+		}
+	} else if el.Address.Ipv6 != "" {
+		for _, e := range envs {
+			if e.Address.Ipv6 == el.Address.Ipv6 {
+				return e, true
+			}
+		}
+	}
+
+	return Environment{}, false
 }
 
 type Environment struct {
