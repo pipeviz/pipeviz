@@ -23,21 +23,8 @@ type Address struct {
 }
 
 type LogicState struct {
-	Datasets []struct {
-		Name        string `json:"name"`
-		Type        string `json:"type"`
-		Subset      string `json:"subset"`
-		Interaction string `json:"interaction"`
-		Path        string `json:"path"`
-		Rel         struct {
-			Hostname string `json:"hostname"`
-			Port     int    `json:"port"`
-			Proto    string `json:"proto"`
-			Type     string `json:"type"`
-			Path     string `json:"path"`
-		} `json:"rel"`
-	} `json:"datasets"`
-	Environment EnvLink `json:"environment"`
+	Datasets    []DataLink `json:"datasets"`
+	Environment EnvLink    `json:"environment"`
 	ID          struct {
 		Commit     string `json:"commit"`
 		Repository string `json:"repository"`
@@ -48,6 +35,21 @@ type LogicState struct {
 	Nick   string `json:"nick"`
 	Path   string `json:"path"`
 	Type   string `json:"type"`
+}
+
+type DataLink struct {
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Subset      string `json:"subset"`
+	Interaction string `json:"interaction"`
+	Path        string `json:"path"`
+	Rel         struct {
+		Hostname string `json:"hostname"`
+		Port     int    `json:"port"`
+		Proto    string `json:"proto"`
+		Type     string `json:"type"`
+		Path     string `json:"path"`
+	} `json:"rel"`
 }
 
 type CommitMeta struct {
