@@ -174,9 +174,22 @@
                         "interaction": {
                             "enum": [ "rw", "ro" ]
                         },
-                        "rel": { "$ref": "#/definitions/connection" }
+                        "connNet": { "$ref": "#/definitions/conn-net" }
                     },
-                    "required": [ "interaction", "type", "rel" ],
+                    "required": [ "interaction", "type", "connNet" ],
+                    "additionalProperties": false
+                },
+                {
+                    "properties": {
+                        "name": { "type": "string" },
+                        "type": { "enum": [ "mediated" ] },
+                        "subset": { "type": "string" },
+                        "interaction": {
+                            "enum": [ "rw", "ro" ]
+                        },
+                        "connUnix": { "$ref": "#/definitions/conn-unix" }
+                    },
+                    "required": [ "interaction", "type", "connUnix" ],
                     "additionalProperties": false
                 },
                 {
@@ -194,13 +207,12 @@
                 }
             ]
         },
-        "connection": {
+        "conn-net": {
             "type": "object",
-            "description": "Any kind of inter-process communication path. this needs a ton of work.",
+            "description": "Descriptor of an outgoing network connection; a target/address",
             "oneOf": [
                 {
                     "properties": {
-                        "type": { "enum": [ "net" ] },
                         "hostname": {
                             "type": "string",
                             "format": "host-name"
@@ -208,18 +220,41 @@
                         "port": { "type": "integer" },
                         "proto": { "type": "string" }
                     },
-                    "required": [ "type", "hostname", "port", "proto" ],
+                    "required": [ "hostname", "port", "proto" ],
                     "additionalProperties": false
                 },
                 {
                     "properties": {
-                        "type": { "enum": [ "unix" ] },
-                        "path": { "type": "string" }
+                        "ipv4": {
+                            "type": "string",
+                            "format": "ipv4"
+                        },
+                        "port": { "type": "integer" },
+                        "proto": { "type": "string" }
                     },
-                    "required": [ "type", "path" ],
+                    "required": [ "ipv4", "port", "proto" ],
+                    "additionalProperties": false
+                },
+                {
+                    "properties": {
+                        "ipv6": {
+                            "type": "string",
+                            "format": "ipv6"
+                        },
+                        "port": { "type": "integer" },
+                        "proto": { "type": "string" }
+                    },
+                    "required": [ "ipv6", "port", "proto" ],
                     "additionalProperties": false
                 }
             ]
+        },
+        "conn-unix": {
+            "type": "object",
+            "description": "Descriptor of an outgoing local unix connection; a target/path",
+            "properties": {
+                "path": { "type": "string" }
+            }
         },
         "process": {
             "type": "object",
@@ -246,7 +281,7 @@
         },
         "addr-listen": {
             "type": "object",
-            "description": "Describes the listener side of a IPC connection. Currently just ports and sockets, lots of love needed.",
+            "description": "Describes the listener side of an inter-process connection. Currently just ports and sockets, lots of love needed.",
             "oneOf": [
                 {
                     "properties": {

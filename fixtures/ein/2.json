@@ -18,8 +18,7 @@
                 {
                     "name": "default db",
                     "type": "mediated",
-                    "rel": {
-                        "type": "net",
+                    "connNet": {
                         "hostname": "prod-db01",
                         "port": 3306,
                         "proto": "tcp"
@@ -47,8 +46,7 @@
                 {
                     "name": "default db",
                     "type": "mediated",
-                    "rel": {
-                        "type": "unix",
+                    "connUnix": {
                         "path": "/var/lib/mysql/mysql.sock"
                     },
                     "interaction": "rw",
@@ -74,8 +72,7 @@
                 {
                     "name": "default db",
                     "type": "mediated",
-                    "rel": {
-                        "type": "unix",
+                    "connUnix": {
                         "path": "/var/lib/mysql/mysql.sock"
                     },
                     "interaction": "rw",
@@ -101,8 +98,7 @@
                 {
                     "name": "default db",
                     "type": "mediated",
-                    "rel": {
-                        "type": "unix",
+                    "connUnix": {
                         "path": "/var/lib/mysql/mysql.sock"
                     },
                     "interaction": "rw",
@@ -128,8 +124,7 @@
                 {
                     "name": "default db",
                     "type": "mediated",
-                    "rel": {
-                        "type": "unix",
+                    "connUnix": {
                         "path": "/var/lib/mysql/mysql.sock"
                     },
                     "interaction": "rw",

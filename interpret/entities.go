@@ -38,18 +38,24 @@ type LogicState struct {
 }
 
 type DataLink struct {
-	Name        string `json:"name"`
-	Type        string `json:"type"`
-	Subset      string `json:"subset"`
-	Interaction string `json:"interaction"`
-	Path        string `json:"path"`
-	Rel         struct {
-		Hostname string `json:"hostname"`
-		Port     int    `json:"port"`
-		Proto    string `json:"proto"`
-		Type     string `json:"type"`
-		Path     string `json:"path"`
-	} `json:"rel"`
+	Name        string   `json:"name"`
+	Type        string   `json:"type"`
+	Subset      string   `json:"subset"`
+	Interaction string   `json:"interaction"`
+	ConnUnix    ConnUnix `json:"connUnix"`
+	ConnNet     ConnNet  `json:"connNet"`
+}
+
+type ConnNet struct {
+	Hostname string `json:"hostname"`
+	Ipv4     string `json:"ipv4"`
+	Ipv6     string `json:"ipv6"`
+	Port     int    `json:"port"`
+	Proto    string `json:"proto"`
+}
+
+type ConnUnix struct {
+	Path string `json:"path"`
 }
 
 type CommitMeta struct {

@@ -73,6 +73,7 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 
 		m.Graph.EnsureVertex(e)
 	}
+
 	for _, e := range tm.Ls {
 		// TODO deduping/overwriting on ID needs to be done here
 		m.Graph.EnsureVertex(e)
@@ -103,7 +104,8 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		}
 
 		for _, ds := range e.Datasets {
-			if ds.Rel.Type == "unix" {
+			// TODO comparison against empty struct literal...works?
+			if ds.ConnUnix != (ConnUnix{}) {
 				// implicit link within env; can only work if we found an env
 				if found != false {
 					m.Graph.AddArcs(gogl.NewDataArc(e, false, ds))
