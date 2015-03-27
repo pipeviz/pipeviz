@@ -1,5 +1,9 @@
 package interpret
 
+import (
+	"bytes"
+)
+
 // Identifiers represent the logic for identifying specific types of objects
 // that may be contained within the graph, and finding matches between these
 // types of objects
@@ -75,4 +79,50 @@ func (i IdentifierLogicState) Matches(a interface{}, b interface{}) bool {
 	// Path matches; env has to match, too.
 	// TODO matching like this assumes that envlinks are always directly resolved, with no bounding context
 	return matchEnvLink(l.Environment, r.Environment)
+}
+
+type IdentifierDataset struct{}
+
+func (i IdentifierDataset) CanIdentify(data interface{}) bool {
+	_, ok := data.(Dataset)
+	return ok
+}
+
+func (i IdentifierDataset) Matches(a interface{}, b interface{}) bool {
+	l, ok := a.(Dataset)
+	if !ok {
+		return false
+	}
+	r, ok := b.(Dataset)
+	if !ok {
+		return false
+	}
+
+	if l.Name != r.Name {
+		return false
+	}
+
+	// Name matches; env has to match, too.
+	// TODO matching like this assumes that envlinks are always directly resolved, with no bounding context
+	return matchEnvLink(l.Environment, r.Environment)
+}
+
+type IdentifierCommit struct{}
+
+func (i IdentifierCommit) CanIdentify(data interface{}) bool {
+	_, ok := data.(Commit)
+	return ok
+}
+
+func (i IdentifierCommit) Matches(a interface{}, b interface{}) bool {
+	l, ok := a.(Commit)
+	if !ok {
+		return false
+	}
+	r, ok := b.(Commit)
+	if !ok {
+		return false
+	}
+
+	return bytes.Equal(l.Sha1, r.Sha1)
 }
