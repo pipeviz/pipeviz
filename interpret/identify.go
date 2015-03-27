@@ -26,16 +26,47 @@ func (i IdentifierEnvironment) Matches(a interface{}, b interface{}) bool {
 		return false
 	}
 
-	// Current logic: match if *any* non-empty of hostname, ipv4, or ipv6 match
-	if l.Address.Hostname == r.Address.Hostname && r.Address.Hostname != "" {
+	return matchAddress(l.Address, r.Address)
+}
+
+// Helper func to match addresses
+func matchAddress(a Address, b Address) bool {
+	// For now, match if *any* non-empty of hostname, ipv4, or ipv6 match
+	// TODO this needs moar thinksies
+	if a.Hostname == b.Hostname && b.Hostname != "" {
 		return true
 	}
-	if l.Address.Ipv4 == r.Address.Ipv4 && r.Address.Ipv4 != "" {
+	if a.Ipv4 == b.Ipv4 && b.Ipv4 != "" {
 		return true
 	}
-	if l.Address.Ipv6 == r.Address.Ipv6 && r.Address.Ipv6 != "" {
+	if a.Ipv6 == b.Ipv6 && b.Ipv6 != "" {
 		return true
 	}
 
 	return false
+}
+
+type IdentifierLogicState struct{}
+
+func (i IdentifierLogicState) CanIdentify(data interface{}) bool {
+	_, ok := data.(LogicState)
+	return ok
+}
+
+func (i IdentifierLogicState) Matches(a interface{}, b interface{}) bool {
+	l, ok := a.(LogicState)
+	if !ok {
+		return false
+	}
+	r, ok := b.(LogicState)
+	if !ok {
+		return false
+	}
+
+	if l.Path != r.Path {
+		return false
+	}
+
+	// Path matches; env has to match, too.
+	return matchAddress(l.Environment.Address, r.Environment.Address) || l.Environment.Nick == r.Environment.Nick
 }
