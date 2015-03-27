@@ -126,3 +126,24 @@ func (i IdentifierCommit) Matches(a interface{}, b interface{}) bool {
 
 	return bytes.Equal(l.Sha1, r.Sha1)
 }
+
+type IdentifierProcess struct{}
+
+func (i IdentifierProcess) CanIdentify(data interface{}) bool {
+	_, ok := data.(Process)
+	return ok
+}
+
+func (i IdentifierProcess) Matches(a interface{}, b interface{}) bool {
+	l, ok := a.(Process)
+	if !ok {
+		return false
+	}
+	r, ok := b.(Process)
+	if !ok {
+		return false
+	}
+
+	// TODO numeric id within the 2^16 ring buffer that is pids is a horrible way to do this
+	return r.Pid == l.Pid && matchEnvLink(l.Environment, r.Environment)
+}
