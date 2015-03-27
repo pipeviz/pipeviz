@@ -46,6 +46,11 @@ func matchAddress(a Address, b Address) bool {
 	return false
 }
 
+// Helper func to match env links
+func matchEnvLink(a EnvLink, b EnvLink) bool {
+	return matchAddress(a.Address, b.Address) || a.Nick == b.Nick
+}
+
 type IdentifierLogicState struct{}
 
 func (i IdentifierLogicState) CanIdentify(data interface{}) bool {
@@ -68,5 +73,6 @@ func (i IdentifierLogicState) Matches(a interface{}, b interface{}) bool {
 	}
 
 	// Path matches; env has to match, too.
-	return matchAddress(l.Environment.Address, r.Environment.Address) || l.Environment.Nick == r.Environment.Nick
+	// TODO matching like this assumes that envlinks are always directly resolved, with no bounding context
+	return matchEnvLink(l.Environment, r.Environment)
 }
