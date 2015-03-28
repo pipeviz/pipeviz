@@ -4,6 +4,18 @@ import (
 	"bytes"
 )
 
+var Identifiers []Identifier
+
+func init() {
+	Identifiers = []Identifier{
+		IdentifierEnvironment{},
+		IdentifierLogicState{},
+		IdentifierDataset{},
+		IdentifierProcess{},
+		IdentifierCommit{},
+	}
+}
+
 // Identifiers represent the logic for identifying specific types of objects
 // that may be contained within the graph, and finding matches between these
 // types of objects
