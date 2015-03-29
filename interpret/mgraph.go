@@ -8,7 +8,6 @@ type EdgeList map[int]interface{}
 
 type VertexContainer struct {
 	Vertex gogl.Vertex
-	Id     int
 	Edges  EdgeList
 }
 
@@ -16,7 +15,7 @@ type VertexContainer struct {
 // because our design guarantees no parallel writes on the graph. parallel
 // reads will be dealt with later as part of making the graph persistent
 type mGraph struct {
-	list       []VertexContainer
+	list       map[int]VertexContainer
 	size       int
 	vtxCounter int
 }
@@ -27,16 +26,14 @@ type mGraph struct {
 //
 // If no vertex is associated with the given id, returns nil, false.
 func (g *mGraph) GetVertex(id int) (vertex gogl.Vertex, exists bool) {
-	return nil, false
-}
+	var vc VertexContainer
+	vc, exists = g.list[id]
 
-// Returns the vertex id associated with the given vertex, if one can be found.
-//
-// If the vertex does not exist in the graph, returns 0, false.
-// This operation relies on equality comparisons; it is not a fuzzy/string id matcher.
-// For that, see... TODO something else that needs to be done
-func (g *mGraph) GetVertexId(vertex gogl.Vertex) (id int, exists bool) {
-	return 0, false
+	if exists {
+		return vc.Vertex, true
+	}
+
+	return nil, exists
 }
 
 // Traverses the graph's vertices in random order, passing each vertex to the
@@ -51,6 +48,7 @@ func (g *mGraph) Vertices(f gogl.VertexStep) {
 
 // Indicates whether or not the given vertex is present in the graph.
 func (g *mGraph) HasVertex(vertex gogl.Vertex) (exists bool) {
+	_, exists = g.Find(vertex)
 	return
 }
 
@@ -60,9 +58,9 @@ func (g *mGraph) Find(vertex gogl.Vertex) (int, bool) {
 	// FIXME so very hilariously O(n)
 
 	var chk Identifier
-	for _, id := range Identifiers {
-		if id.CanIdentify(vertex) {
-			chk = id
+	for _, idf := range Identifiers {
+		if idf.CanIdentify(vertex) {
+			chk = idf
 		}
 	}
 
@@ -72,9 +70,9 @@ func (g *mGraph) Find(vertex gogl.Vertex) (int, bool) {
 		return 0, false
 	}
 
-	for _, vc := range g.list {
+	for id, vc := range g.list {
 		if chk.Matches(vc.Vertex, vertex) {
-			return vc.Id, true
+			return id, true
 		}
 	}
 
@@ -101,7 +99,7 @@ func (g *mGraph) EnsureVertex(vertices ...gogl.Vertex) {
 	for _, vertex := range vertices {
 		if !g.HasVertex(vertex) {
 			g.vtxCounter++
-			g.list = append(g.list, VertexContainer{Vertex: vertex, Id: g.vtxCounter, Edges: make(EdgeList)})
+			g.list[g.vtxCounter] = VertexContainer{Vertex: vertex, Edges: make(EdgeList)}
 		}
 	}
 
