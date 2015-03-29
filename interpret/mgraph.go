@@ -58,11 +58,23 @@ func (g *mGraph) HasVertex(vertex gogl.Vertex) (exists bool) {
 // returns the vertex id and true; otherwise returns 0 and false.
 func (g *mGraph) Find(vertex gogl.Vertex) (int, bool) {
 	// FIXME so very hilariously O(n)
+
+	var chk Identifier
+	for _, id := range Identifiers {
+		if id.CanIdentify(vertex) {
+			chk = id
+		}
+	}
+
+	// we hit this case iff there's an object type our identifiers can't work
+	// with. which should, eventually, be structurally impossible by this point
+	if chk == nil {
+		return 0, false
+	}
+
 	for _, vc := range g.list {
-		for _, id := range Identifiers {
-			if id.Matches(vc.Vertex, vertex) {
-				return vc.Id, true
-			}
+		if chk.Matches(vc.Vertex, vertex) {
+			return vc.Id, true
 		}
 	}
 
