@@ -5,19 +5,12 @@ import (
 	"fmt"
 
 	"github.com/sdboyer/gogl"
-	"github.com/sdboyer/gogl/graph/al"
 )
-
-type MessageGraph interface {
-	gogl.DataDigraph
-	gogl.VertexSetMutator
-	gogl.DataArcSetMutator
-}
 
 type Message struct {
 	Nodes []Node
 	Edges []Edge
-	Graph MessageGraph
+	Graph mGraph
 }
 
 type Node interface{} // TODO for now
@@ -39,7 +32,7 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	}
 
 	if m.Graph == nil {
-		m.Graph = gogl.Spec().Mutable().Directed().DataEdges().Create(al.G).(MessageGraph)
+		m.Graph = mGraph{make(map[int]VertexContainer), 0, 0}
 	}
 
 	// first, dump all top-level objects into the graph.
@@ -98,9 +91,9 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		env, found := findEnv(tm.Env, e.Environment)
 		if found != false {
 			// No env found, assign false
-			m.Graph.AddArcs(gogl.NewDataArc(e, false, e.Environment))
+			m.Graph.AddArcs(StandardEdge{e, false, "contained in", e.Environment})
 		} else {
-			m.Graph.AddArcs(gogl.NewDataArc(e, env, e.Environment))
+			m.Graph.AddArcs(StandardEdge{e, env, "contained in", e.Environment})
 		}
 
 		for _, ds := range e.Datasets {

@@ -142,7 +142,7 @@ func (g *mGraph) RemoveVertex(vertices ...gogl.Vertex) {
 }
 
 // Adds a new arc to the graph.
-func (g *mGraph) AddArcs(arcs ...gogl.DataArc) {
+func (g *mGraph) AddArcs(arcs ...MessageArc) {
 	for _, arc := range arcs {
 		u, v := arc.Both()
 		g.ensureVertex(u, v)
