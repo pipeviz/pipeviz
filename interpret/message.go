@@ -8,35 +8,24 @@ import (
 )
 
 type Message struct {
-	Nodes []Node
-	Edges []Edge
-	Graph mGraph
+	Env []Environment `json:"environments"`
+	Ls  []LogicState  `json:"logic-states"`
+	Ds  []Dataset     `json:"datasets"`
+	P   []Process     `json:"processes"`
+	C   []Commit      `json:"commits"`
+	Cm  []CommitMeta  `json:"commit-meta"`
 }
 
-type Node interface{} // TODO for now
-type Edge interface{} // TODO for now
-
 func (m *Message) UnmarshalJSON(data []byte) error {
-	tm := struct {
-		Env []Environment `json:"environments"`
-		Ls  []LogicState  `json:"logic-states"`
-		Ds  []Dataset     `json:"datasets"`
-		P   []Process     `json:"processes"`
-		C   []Commit      `json:"commits"`
-		Cm  []CommitMeta  `json:"commit-meta"`
-	}{}
-
-	err := json.Unmarshal(data, &tm)
+	err := json.Unmarshal(data, &m)
 	if err != nil {
+		// FIXME logging
 		fmt.Println(err)
 	}
 
-	if m.Graph == nil {
-		m.Graph = mGraph{make(map[int]VertexContainer), 0, 0}
-	}
-
+	// TODO separate all of this into pluggable/generated structures
 	// first, dump all top-level objects into the graph.
-	for _, e := range tm.Env {
+	for _, e := range m.Env {
 		envlink := EnvLink{Address: Address{}}
 
 		// Create an envlink for any nested items, preferring nick, then hostname, ipv4, ipv6.
@@ -53,42 +42,21 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		// manage the little environment hierarchy
 		for _, ls := range e.LogicStates {
 			ls.Environment = envlink
-			tm.Ls = append(tm.Ls, ls)
+			m.Ls = append(m.Ls, ls)
 		}
 		for _, p := range e.Processes {
 			p.Environment = envlink
-			tm.P = append(tm.P, p)
+			m.P = append(m.P, p)
 		}
 		for _, ds := range e.Datasets {
 			ds.Environment = envlink
-			tm.Ds = append(tm.Ds, ds)
+			m.Ds = append(m.Ds, ds)
 		}
-
-		m.Graph.EnsureVertex(e)
-	}
-
-	for _, e := range tm.Ls {
-		// TODO deduping/overwriting on ID needs to be done here
-		m.Graph.EnsureVertex(e)
-	}
-	for _, e := range tm.Ds {
-		// TODO deduping/overwriting on ID needs to be done here
-		m.Graph.EnsureVertex(e)
-	}
-	for _, e := range tm.P {
-		// TODO deduping/overwriting on ID needs to be done here
-		m.Graph.EnsureVertex(e)
-	}
-	for _, e := range tm.C {
-		m.Graph.EnsureVertex(e)
-	}
-	for _, e := range tm.Cm {
-		m.Graph.EnsureVertex(e)
 	}
 
 	// All vertices are populated now. Try to link things up.
-	for _, e := range tm.Ls {
-		env, found := findEnv(tm.Env, e.Environment)
+	for _, e := range m.Ls {
+		env, found := findEnv(m.Env, e.Environment)
 		if found != false {
 			// No env found, assign false
 			m.Graph.AddArcs(StandardEdge{e, false, "contained in", e.Environment})
@@ -110,6 +78,27 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
+}
+
+func (m *Message) Each(f func(vertex interface{})) {
+	for _, e := range m.Env {
+		f(e)
+	}
+	for _, e := range m.Ls {
+		f(e)
+	}
+	for _, e := range m.Ds {
+		f(e)
+	}
+	for _, e := range m.P {
+		f(e)
+	}
+	for _, e := range m.C {
+		f(e)
+	}
+	for _, e := range m.Cm {
+		f(e)
+	}
 }
 
 func findEnv(envs []Environment, el EnvLink) (Environment, bool) {
