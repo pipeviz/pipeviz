@@ -52,33 +52,6 @@ func (g *mGraph) HasVertex(vertex gogl.Vertex) (exists bool) {
 	return
 }
 
-// Searches for an instance of the vertex within the graph. If found,
-// returns the vertex id and true; otherwise returns 0 and false.
-func (g *mGraph) Find(vertex gogl.Vertex) (int, bool) {
-	// FIXME so very hilariously O(n)
-
-	var chk Identifier
-	for _, idf := range Identifiers {
-		if idf.CanIdentify(vertex) {
-			chk = idf
-		}
-	}
-
-	// we hit this case iff there's an object type our identifiers can't work
-	// with. which should, eventually, be structurally impossible by this point
-	if chk == nil {
-		return 0, false
-	}
-
-	for id, vc := range g.list {
-		if chk.Matches(vc.Vertex, vertex) {
-			return id, true
-		}
-	}
-
-	return 0, false
-}
-
 // Returns the order (number of vertices) in the graph.
 func (g *mGraph) Order() int {
 	return len(g.list)

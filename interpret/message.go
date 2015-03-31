@@ -3,8 +3,6 @@ package interpret
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/sdboyer/gogl"
 )
 
 type Message struct {
@@ -55,27 +53,27 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	}
 
 	// All vertices are populated now. Try to link things up.
-	for _, e := range m.Ls {
-		env, found := findEnv(m.Env, e.Environment)
-		if found != false {
-			// No env found, assign false
-			m.Graph.AddArcs(StandardEdge{e, false, "contained in", e.Environment})
-		} else {
-			m.Graph.AddArcs(StandardEdge{e, env, "contained in", e.Environment})
-		}
+	//for _, e := range m.Ls {
+	//env, found := findEnv(m.Env, e.Environment)
+	//if found != false {
+	//// No env found, assign false
+	//m.Graph.AddArcs(StandardEdge{e, false, "contained in", e.Environment})
+	//} else {
+	//m.Graph.AddArcs(StandardEdge{e, env, "contained in", e.Environment})
+	//}
 
-		for _, ds := range e.Datasets {
-			// TODO comparison against empty struct literal...works?
-			if ds.ConnUnix != (ConnUnix{}) {
-				// implicit link within env; can only work if we found an env
-				if found != false {
-					m.Graph.AddArcs(gogl.NewDataArc(e, false, ds))
-				} else {
+	//for _, ds := range e.Datasets {
+	//// TODO comparison against empty struct literal...works?
+	//if ds.ConnUnix != (ConnUnix{}) {
+	//// implicit link within env; can only work if we found an env
+	//if found != false {
+	//m.Graph.AddArcs(gogl.NewDataArc(e, false, ds))
+	//} else {
 
-				}
-			}
-		}
-	}
+	//}
+	//}
+	//}
+	//}
 
 	return nil
 }

@@ -1,4 +1,4 @@
-package interpret
+package represent
 
 import (
 	"github.com/sdboyer/gogl"
