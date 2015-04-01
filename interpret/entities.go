@@ -87,16 +87,18 @@ type Dataset struct {
 }
 
 type Process struct {
-	Pid         int     `json:"pid"`
-	Cwd         string  `json:"cwd"`
-	Environment EnvLink `json:"environment"`
-	Group       string  `json:"group"`
-	Listen      []struct {
-		Port  int      `json:"port"`
-		Proto []string `json:"proto"`
-		Type  string   `json:"type"`
-		Path  string   `json:"path"`
-	} `json:"listen"`
-	LogicStates []string `json:"logic-states"`
-	User        string   `json:"user"`
+	Pid         int          `json:"pid"`
+	Cwd         string       `json:"cwd"`
+	Environment EnvLink      `json:"environment"`
+	Group       string       `json:"group"`
+	Listen      []ListenAddr `json:"listen"`
+	LogicStates []string     `json:"logic-states"`
+	User        string       `json:"user"`
+}
+
+type ListenAddr struct {
+	Port  int      `json:"port"`
+	Proto []string `json:"proto"`
+	Type  string   `json:"type"`
+	Path  string   `json:"path"`
 }
