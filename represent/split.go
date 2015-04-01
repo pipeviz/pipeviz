@@ -6,13 +6,19 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
-type EdgeSpec struct{}
+// TODO for now, no structure to this. change to queryish form later
+type EdgeSpec interface{}
+type EdgeSpecs []EdgeSpec
+
+type SpecCommit struct {
+	Sha1 []byte
+}
 
 // TODO unused until plugging/codegen
-type Splitter func(data interface{}, id int) (Vertex, EdgeSpec, error)
+type Splitter func(data interface{}, id int) (Vertex, EdgeSpecs, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id int) (Vertex, EdgeSpec, error) {
+func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
 	switch v := d.(type) {
 	case interpret.Environment:
 		return splitEnvironment(v, id)
@@ -20,10 +26,10 @@ func Split(d interface{}, id int) (Vertex, EdgeSpec, error) {
 		return splitLogicState(v, id)
 	}
 
-	return Vertex{nil}, EdgeSpec{}, errors.New("No handler for object type")
+	return Vertex{nil}, nil, errors.New("No handler for object type")
 }
 
-func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpec, error) {
+func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error) {
 	// seven distinct props
 	v := Vertex{props: make([]Property, 0)}
 	if d.Os != "" {
@@ -49,11 +55,12 @@ func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpec, error)
 	}
 
 	// By spec, Environments have no outbound edges
-	return v, EdgeSpec{}, nil
+	return v, nil, nil
 }
 
-func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpec, error) {
+func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) {
 	v := Vertex{props: make([]Property, 0)}
+	edges := make([]EdgeSpec, 0)
 
 	// TODO do IDs need different handling?
 	v.props = append(v.props, Property{id, "path", d.Path})
@@ -70,7 +77,7 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpec, error) {
 
 	// TODO should do anything with mutually exclusive properties here?
 	if d.ID.Commit != "" {
-		v.props = append(v.props, Property{id, "commit", d.ID.Commit})
+		edges = append(edges, SpecCommit{[]byte(d.ID.Commit)})
 	}
 	if d.ID.Repository != "" {
 		v.props = append(v.props, Property{id, "repository", d.ID.Repository})
@@ -82,5 +89,5 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpec, error) {
 		v.props = append(v.props, Property{id, "semver", d.ID.Semver})
 	}
 
-	return v, EdgeSpec{}, nil
+	return v, edges, nil
 }
