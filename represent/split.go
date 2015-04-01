@@ -14,6 +14,10 @@ type SpecCommit struct {
 	Sha1 []byte
 }
 
+type SpecLocalLogic struct {
+	Path string
+}
+
 // TODO unused until plugging/codegen
 type Splitter func(data interface{}, id int) (Vertex, EdgeSpecs, error)
 
@@ -60,7 +64,7 @@ func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error
 
 func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) {
 	v := Vertex{props: make([]Property, 0)}
-	edges := make([]EdgeSpec, 0)
+	var edges EdgeSpecs
 
 	// TODO do IDs need different handling?
 	v.props = append(v.props, Property{id, "path", d.Path})
@@ -79,6 +83,7 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 	if d.ID.Commit != "" {
 		edges = append(edges, SpecCommit{[]byte(d.ID.Commit)})
 	}
+	// FIXME this shouldn't be here, it's a property of the commit
 	if d.ID.Repository != "" {
 		v.props = append(v.props, Property{id, "repository", d.ID.Repository})
 	}
@@ -89,5 +94,52 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 		v.props = append(v.props, Property{id, "semver", d.ID.Semver})
 	}
 
+	for _, dl := range d.Datasets {
+		edges = append(edges, dl)
+	}
+
+	edges = append(edges, d.Environment)
+
 	return v, edges, nil
 }
+func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
+	v := Vertex{props: make([]Property, 0)}
+	var edges EdgeSpecs
+
+	v.props = append(v.props, Property{id, "pid", d.Pid})
+	if d.Cwd != "" {
+		v.props = append(v.props, Property{id, "Cwd", d.Cwd})
+	}
+	if d.Group != "" {
+		v.props = append(v.props, Property{id, "Group", d.Group})
+	}
+	if d.User != "" {
+		v.props = append(v.props, Property{id, "User", d.User})
+	}
+
+	for _, ls := range d.LogicStates {
+		edges = append(edges, SpecLocalLogic{ls})
+	}
+
+	for _, listen := range d.Listen {
+		edges = append(edges, listen)
+	}
+
+	edges = append(edges, d.Environment)
+
+	return v, edges, nil
+}
+
+// TODO can't do this till refactor interpret.Dataset to transform into something sane
+//func splitDataset(d interpret.Dataset, id int) (Vertex, EdgeSpecs, error) {
+//v := Vertex{props: make([]Property, 0)}
+//var edges EdgeSpecs
+
+//// Props first
+//if d.Name != "" {
+//v.props = append(v.props, Property{id, "Name", d.Name})
+//}
+//if d.Name != "" {
+//v.props = append(v.props, Property{id, "Name", d.Name})
+//}
+//}
