@@ -6,6 +6,7 @@ import (
 )
 
 type Message struct {
+	Id  int
 	Env []Environment `json:"environments"`
 	Ls  []LogicState  `json:"logic-states"`
 	Ds  []Dataset     `json:"datasets"`

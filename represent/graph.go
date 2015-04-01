@@ -22,7 +22,16 @@ type Property struct {
 type Delta struct{}
 
 // the method to merge a message into the graph
-func (g *CoreGraph) Merge(interpret.Message) Delta {
+func (g *CoreGraph) Merge(msg interpret.Message) Delta {
+
+	msg.Each(func(d interface{}) {
+		vertex, edges, err := Split(d, msg.Id)
+		vid := g.Find(vertex)
+
+		if vid != 0 {
+
+		}
+	})
 
 	return Delta{}
 }
@@ -31,28 +40,28 @@ func (g *CoreGraph) Merge(interpret.Message) Delta {
 //func (g CoreGraph) Cons(interpret.Message) CoreGraph, Delta, error {}
 
 // Searches for an instance of the vertex within the graph. If found,
-// returns the vertex id and true; otherwise returns 0 and false.
-//func (g *CoreGraph) Find(vertex gogl.Vertex) (int, bool) {
-//// FIXME so very hilariously O(n)
+// returns the vertex id, otherwise returns 0.
+func (g *CoreGraph) Find(vertex Vertex) int {
+	// FIXME so very hilariously O(n)
 
-//var chk Identifier
-//for _, idf := range Identifiers {
-//if idf.CanIdentify(vertex) {
-//chk = idf
-//}
-//}
+	var chk interpret.Identifier
+	for _, idf := range interpret.Identifiers {
+		if idf.CanIdentify(vertex) {
+			chk = idf
+		}
+	}
 
-//// we hit this case iff there's an object type our identifiers can't work
-//// with. which should, eventually, be structurally impossible by this point
-//if chk == nil {
-//return 0, false
-//}
+	// we hit this case iff there's an object type our identifiers can't work
+	// with. which should, eventually, be structurally impossible by this point
+	if chk == nil {
+		return 0
+	}
 
-//for id, vc := range g.list {
-//if chk.Matches(vc.Vertex, vertex) {
-//return id, true
-//}
-//}
+	for id, v := range g.vlist {
+		if chk.Matches(v, vertex) {
+			return id
+		}
+	}
 
-//return 0, false
-//}
+	return 0
+}

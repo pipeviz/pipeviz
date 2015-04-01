@@ -70,6 +70,7 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 	v.props = append(v.props, Property{id, "path", d.Path})
 
 	if d.Lgroup != "" {
+		// TODO should be an edge, a simple semantic one
 		v.props = append(v.props, Property{id, "lgroup", d.Lgroup})
 	}
 	if d.Nick != "" {
