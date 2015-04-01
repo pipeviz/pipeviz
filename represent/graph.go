@@ -15,7 +15,7 @@ type Vertex struct {
 type Property struct {
 	MsgSrc int
 	Key    string
-	Value  string
+	Value  interface{}
 }
 
 // some kind of structure representing the delta introduced by a message
@@ -24,6 +24,7 @@ type Delta struct{}
 // the method to merge a message into the graph
 func (g *CoreGraph) Merge(interpret.Message) Delta {
 
+	return Delta{}
 }
 
 // the func we eventually aim to fulfill, replacing Merge for integrating messages
