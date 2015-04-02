@@ -5,8 +5,8 @@ import (
 )
 
 type StandardEdge struct {
-	Source interface{}
-	Target interface{}
+	Source int
+	Target int
 	Label  string
 	Data   interface{}
 }
