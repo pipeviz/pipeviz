@@ -36,11 +36,8 @@ func (ess edgeSpecSet) EdgeCount() (i int) {
 	return
 }
 
-// some kind of structure representing the delta introduced by a message
-type Delta struct{}
-
 // the method to merge a message into the graph
-func (g *CoreGraph) Merge(msg interpret.Message) Delta {
+func (g *CoreGraph) Merge(msg interpret.Message) {
 	var ess edgeSpecSet
 
 	// Process incoming elements from the message
@@ -78,8 +75,6 @@ func (g *CoreGraph) Merge(msg interpret.Message) Delta {
 			}
 		}
 	}
-
-	return Delta{}
 }
 
 // Ensures the vertex is present. Merges according to type-specific logic if
