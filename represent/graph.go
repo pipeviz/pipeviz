@@ -143,7 +143,7 @@ func (g *CoreGraph) Find(vtx Vertex) int {
 	}
 
 	for id, v := range g.list {
-		if chk.Matches(v, vtx) {
+		if chk.Matches(v.v, vtx) {
 			return id
 		}
 	}
