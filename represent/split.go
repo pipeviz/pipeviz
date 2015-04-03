@@ -28,6 +28,9 @@ func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
 		return splitEnvironment(v, id)
 	case interpret.LogicState:
 		return splitLogicState(v, id)
+	case interpret.Process:
+		return splitProcess(v, id)
+		// TODO missing dataset, commit, and commitmeta
 	}
 
 	return Vertex{nil}, nil, errors.New("No handler for object type")
