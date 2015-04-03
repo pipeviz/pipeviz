@@ -22,8 +22,8 @@ func init() {
 // that may be contained within the graph, and finding matches between these
 // types of objects
 type Identifier interface {
-	CanIdentify(data interface{}) bool
-	Matches(a interface{}, b interface{}) bool
+	CanIdentify(data Vertex) bool
+	Matches(a Vertex, b Vertex) bool
 }
 
 // Performs simple equality comparison on the provided key between two persistent maps.
@@ -45,12 +45,12 @@ func mapValEq(key string, l, r ps.Map) bool {
 // Identifier for Environments
 type IdentifierEnvironment struct{}
 
-func (i IdentifierEnvironment) CanIdentify(data interface{}) bool {
+func (i IdentifierEnvironment) CanIdentify(data Vertex) bool {
 	_, ok := data.(environmentVertex)
 	return ok
 }
 
-func (i IdentifierEnvironment) Matches(a interface{}, b interface{}) bool {
+func (i IdentifierEnvironment) Matches(a Vertex, b Vertex) bool {
 	l, ok := a.(environmentVertex)
 	if !ok {
 		return false
@@ -87,12 +87,12 @@ func matchEnvLink(a, b ps.Map) bool {
 
 type IdentifierLogicState struct{}
 
-func (i IdentifierLogicState) CanIdentify(data interface{}) bool {
+func (i IdentifierLogicState) CanIdentify(data Vertex) bool {
 	_, ok := data.(logicStateVertex)
 	return ok
 }
 
-func (i IdentifierLogicState) Matches(a interface{}, b interface{}) bool {
+func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
 	l, ok := a.(logicStateVertex)
 	if !ok {
 		return false
@@ -113,12 +113,12 @@ func (i IdentifierLogicState) Matches(a interface{}, b interface{}) bool {
 
 type IdentifierDataset struct{}
 
-func (i IdentifierDataset) CanIdentify(data interface{}) bool {
+func (i IdentifierDataset) CanIdentify(data Vertex) bool {
 	_, ok := data.(datasetVertex)
 	return ok
 }
 
-func (i IdentifierDataset) Matches(a interface{}, b interface{}) bool {
+func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
 	l, ok := a.(datasetVertex)
 	if !ok {
 		return false
@@ -139,12 +139,12 @@ func (i IdentifierDataset) Matches(a interface{}, b interface{}) bool {
 
 type IdentifierCommit struct{}
 
-func (i IdentifierCommit) CanIdentify(data interface{}) bool {
+func (i IdentifierCommit) CanIdentify(data Vertex) bool {
 	_, ok := data.(commitVertex)
 	return ok
 }
 
-func (i IdentifierCommit) Matches(a interface{}, b interface{}) bool {
+func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
 	l, ok := a.(commitVertex)
 	if !ok {
 		return false
@@ -161,12 +161,12 @@ func (i IdentifierCommit) Matches(a interface{}, b interface{}) bool {
 
 type IdentifierProcess struct{}
 
-func (i IdentifierProcess) CanIdentify(data interface{}) bool {
+func (i IdentifierProcess) CanIdentify(data Vertex) bool {
 	_, ok := data.(processVertex)
 	return ok
 }
 
-func (i IdentifierProcess) Matches(a interface{}, b interface{}) bool {
+func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 	l, ok := a.(processVertex)
 	if !ok {
 		return false
