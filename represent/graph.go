@@ -18,7 +18,7 @@ type VtxI interface {
 	// Returns a string representing the object type. Used for namespacing keys, etc.
 	// While this is (currently) implemented as a method, its result must be invariant.
 	// TODO use string-const generator, other tricks to enforce invariance, compact space use
-	OType() string
+	Typ() string
 	// Returns a persistent map with the vertex's properties.
 	// TODO generate more type-restricted versions of the map?
 	Props() ps.Map
@@ -67,9 +67,9 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 	msg.Each(func(d interface{}) {
 		// Split each input element into vertex and edge specs
 		// TODO errs
-		vertex, edges, _ := Split(d, msg.Id)
+		vtx, edges, _ := Split(d, msg.Id)
 		// Ensure the vertex is present
-		vid := g.ensureVertex(vertex)
+		vid := g.ensureVertex(vtx)
 
 		// Collect edge specs for later processing
 		ess = append(ess, rootedEdgeSpecTuple{
@@ -104,15 +104,15 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *CoreGraph) ensureVertex(vertex Vertex) (vid int) {
-	vid = g.Find(vertex)
+func (g *CoreGraph) ensureVertex(vtx Vertex) (vid int) {
+	vid = g.Find(vtx)
 
 	if vid != 0 {
 		vt := g.list[vid]
-		g.list[vid] = vtTuple{e: vt.e, v: vt.v.Merge(vertex)}
+		g.list[vid] = vtTuple{e: vt.e, v: vt.v.Merge(vtx)}
 	} else {
 		g.vserial++
-		g.list[g.vserial] = vtTuple{v: vertex}
+		g.list[g.vserial] = vtTuple{v: vtx}
 		vid = g.vserial
 	}
 
@@ -131,12 +131,12 @@ func (g *CoreGraph) ensureEdge(e StandardEdge) {
 // returns the vertex id, otherwise returns 0.
 //
 // TODO this is really a querying method. needs to be replaced by that whole subsystem
-func (g *CoreGraph) Find(vertex Vertex) int {
+func (g *CoreGraph) Find(vtx Vertex) int {
 	// FIXME so very hilariously O(n)
 
 	var chk interpret.Identifier
 	for _, idf := range interpret.Identifiers {
-		if idf.CanIdentify(vertex) {
+		if idf.CanIdentify(vtx) {
 			chk = idf
 		}
 	}
@@ -148,7 +148,7 @@ func (g *CoreGraph) Find(vertex Vertex) int {
 	}
 
 	for id, v := range g.list {
-		if chk.Matches(v, vertex) {
+		if chk.Matches(v, vtx) {
 			return id
 		}
 	}
