@@ -1,11 +1,27 @@
 package represent
 
-import "github.com/sdboyer/pipeviz/interpret"
+import (
+	"github.com/mndrix/ps"
+	"github.com/sdboyer/pipeviz/interpret"
+)
 
 // the main graph construct
 type CoreGraph struct {
 	list    map[int]vtTuple
 	vserial int
+}
+
+type VtxI interface {
+	// Merges another vertex into this vertex. Error is indicated if the
+	// dynamic types do not match.
+	Merge(VtxI) (VtxI, error)
+	// Returns a string representing the object type. Used for namespacing keys, etc.
+	// While this is (currently) implemented as a method, its result must be invariant.
+	// TODO use string-const generator, other tricks to enforce invariance, compact space use
+	OType() string
+	// Returns a persistent map with the vertex's properties.
+	// TODO generate more type-restricted versions of the map?
+	Props() ps.Map
 }
 
 type Vertex struct {
