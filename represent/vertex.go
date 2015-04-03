@@ -41,7 +41,7 @@ func (vtx environmentVertex) Typ() string {
 	return "environment"
 }
 
-func (vtx environmentVertex) Merge(ivtx VtxI) (VtxI, error) {
+func (vtx environmentVertex) Merge(ivtx Vertex) (Vertex, error) {
 	if _, ok := ivtx.(environmentVertex); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -63,7 +63,7 @@ func (vtx logicStateVertex) Typ() string {
 	return "logicState"
 }
 
-func (vtx logicStateVertex) Merge(ivtx VtxI) (VtxI, error) {
+func (vtx logicStateVertex) Merge(ivtx Vertex) (Vertex, error) {
 	if _, ok := ivtx.(logicStateVertex); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -85,7 +85,7 @@ func (vtx processVertex) Typ() string {
 	return "process"
 }
 
-func (vtx processVertex) Merge(ivtx VtxI) (VtxI, error) {
+func (vtx processVertex) Merge(ivtx Vertex) (Vertex, error) {
 	if _, ok := ivtx.(processVertex); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -107,7 +107,7 @@ func (vtx datasetVertex) Typ() string {
 	return "dataset"
 }
 
-func (vtx datasetVertex) Merge(ivtx VtxI) (VtxI, error) {
+func (vtx datasetVertex) Merge(ivtx Vertex) (Vertex, error) {
 	if _, ok := ivtx.(datasetVertex); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -129,7 +129,7 @@ func (vtx commitVertex) Typ() string {
 	return "commit"
 }
 
-func (vtx commitVertex) Merge(ivtx VtxI) (VtxI, error) {
+func (vtx commitVertex) Merge(ivtx Vertex) (Vertex, error) {
 	if _, ok := ivtx.(commitVertex); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -151,7 +151,7 @@ func (vtx commitMetaVertex) Typ() string {
 	return "commitMeta"
 }
 
-func (vtx commitMetaVertex) Merge(ivtx VtxI) (VtxI, error) {
+func (vtx commitMetaVertex) Merge(ivtx Vertex) (Vertex, error) {
 	if _, ok := ivtx.(commitMetaVertex); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)

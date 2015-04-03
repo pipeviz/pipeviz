@@ -11,10 +11,10 @@ type CoreGraph struct {
 	vserial int
 }
 
-type VtxI interface {
+type Vertex interface {
 	// Merges another vertex into this vertex. Error is indicated if the
 	// dynamic types do not match.
-	Merge(VtxI) (VtxI, error)
+	Merge(Vertex) (Vertex, error)
 	// Returns a string representing the object type. Used for namespacing keys, etc.
 	// While this is (currently) implemented as a method, its result must be invariant.
 	// TODO use string-const generator, other tricks to enforce invariance, compact space use
@@ -24,17 +24,9 @@ type VtxI interface {
 	Props() ps.Map
 }
 
-type Vertex struct {
-	props []Property
-}
-
 type vtTuple struct {
 	v Vertex
 	e []StandardEdge
-}
-
-func (v Vertex) Merge(iv Vertex) Vertex {
-	return iv
 }
 
 type Property struct {
@@ -110,7 +102,9 @@ func (g *CoreGraph) ensureVertex(vtx Vertex) (vid int) {
 
 	if vid != 0 {
 		vt := g.list[vid]
-		g.list[vid] = vtTuple{e: vt.e, v: vt.v.Merge(vtx)}
+		// TODO err
+		nu, _ := vt.v.Merge(vtx)
+		g.list[vid] = vtTuple{e: vt.e, v: nu}
 	} else {
 		g.vserial++
 		g.list[g.vserial] = vtTuple{v: vtx}
@@ -166,5 +160,5 @@ func (g *CoreGraph) Vertices(f func(Vertex, int) bool) {
 }
 
 func (g *CoreGraph) Get(id int) (Vertex, error) {
-	return Vertex{}, nil
+	return nil, nil
 }

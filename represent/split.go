@@ -20,10 +20,10 @@ type SpecLocalLogic struct {
 }
 
 // TODO unused until plugging/codegen
-type Splitter func(data interface{}, id int) (VtxI, EdgeSpecs, error)
+type Splitter func(data interface{}, id int) (Vertex, EdgeSpecs, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id int) (VtxI, EdgeSpecs, error) {
+func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
 	switch v := d.(type) {
 	case interpret.Environment:
 		return splitEnvironment(v, id)
@@ -37,7 +37,7 @@ func Split(d interface{}, id int) (VtxI, EdgeSpecs, error) {
 	return nil, nil, errors.New("No handler for object type")
 }
 
-func splitEnvironment(d interpret.Environment, id int) (VtxI, EdgeSpecs, error) {
+func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error) {
 	// seven distinct props
 	v := environmentVertex{props: ps.NewMap()}
 	if d.Os != "" {
@@ -66,7 +66,7 @@ func splitEnvironment(d interpret.Environment, id int) (VtxI, EdgeSpecs, error) 
 	return v, nil, nil
 }
 
-func splitLogicState(d interpret.LogicState, id int) (VtxI, EdgeSpecs, error) {
+func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) {
 	v := logicStateVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
@@ -107,7 +107,7 @@ func splitLogicState(d interpret.LogicState, id int) (VtxI, EdgeSpecs, error) {
 
 	return v, edges, nil
 }
-func splitProcess(d interpret.Process, id int) (VtxI, EdgeSpecs, error) {
+func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
 	v := processVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
