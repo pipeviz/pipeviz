@@ -135,8 +135,8 @@ func (g *CoreGraph) ensureEdge(e StandardEdge) {
 func (g *CoreGraph) Find(vtx Vertex) int {
 	// FIXME so very hilariously O(n)
 
-	var chk interpret.Identifier
-	for _, idf := range interpret.Identifiers {
+	var chk Identifier
+	for _, idf := range Identifiers {
 		if idf.CanIdentify(vtx) {
 			chk = idf
 		}
