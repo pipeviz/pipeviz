@@ -45,6 +45,8 @@ func (ess edgeSpecSet) EdgeCount() (i int) {
 func (g *CoreGraph) Merge(msg interpret.Message) {
 	var ess edgeSpecSet
 
+	// TODO see if some lookup + locality of reference perf benefit can be gained keeping all vertices loaded up locally
+
 	// Process incoming elements from the message
 	msg.Each(func(d interface{}) {
 		// Split each input element into vertex and edge specs
@@ -136,6 +138,14 @@ func (g *CoreGraph) Find(vertex Vertex) int {
 	}
 
 	return 0
+}
+
+func (g *CoreGraph) Vertices(f func(Vertex, int) bool) {
+	for id, vt := range g.list {
+		if f(vt.v, id) {
+			return
+		}
+	}
 }
 
 func (g *CoreGraph) Get(id int) (Vertex, error) {
