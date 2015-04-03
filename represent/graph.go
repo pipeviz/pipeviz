@@ -92,6 +92,7 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 			for k, spec := range tuple.es {
 				edge, success := Resolve(g, spec)
 				if success {
+					edge.Source = tuple.vid
 					g.ensureEdge(edge)
 					tuple.es = append(tuple.es[:k], tuple.es[k+1:]...)
 				}

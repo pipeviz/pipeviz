@@ -3,6 +3,7 @@ package represent
 import (
 	"errors"
 
+	"github.com/mndrix/ps"
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
@@ -19,10 +20,10 @@ type SpecLocalLogic struct {
 }
 
 // TODO unused until plugging/codegen
-type Splitter func(data interface{}, id int) (Vertex, EdgeSpecs, error)
+type Splitter func(data interface{}, id int) (VtxI, EdgeSpecs, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
+func Split(d interface{}, id int) (VtxI, EdgeSpecs, error) {
 	switch v := d.(type) {
 	case interpret.Environment:
 		return splitEnvironment(v, id)
@@ -33,54 +34,54 @@ func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
 		// TODO missing dataset, commit, and commitmeta
 	}
 
-	return Vertex{nil}, nil, errors.New("No handler for object type")
+	return nil, nil, errors.New("No handler for object type")
 }
 
-func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error) {
+func splitEnvironment(d interpret.Environment, id int) (VtxI, EdgeSpecs, error) {
 	// seven distinct props
-	v := Vertex{props: make([]Property, 0)}
+	v := environmentVertex{props: ps.NewMap()}
 	if d.Os != "" {
-		v.props = append(v.props, Property{id, "os", d.Os})
+		v.props = v.props.Set("os", Property{MsgSrc: id, Value: d.Os})
 	}
 	if d.Provider != "" {
-		v.props = append(v.props, Property{id, "provider", d.Provider})
+		v.props = v.props.Set("provider", Property{MsgSrc: id, Value: d.Provider})
 	}
 	if d.Type != "" {
-		v.props = append(v.props, Property{id, "type", d.Type})
+		v.props = v.props.Set("type", Property{MsgSrc: id, Value: d.Type})
 	}
 	if d.Nickname != "" {
-		v.props = append(v.props, Property{id, "nickname", d.Nickname})
+		v.props = v.props.Set("nickname", Property{MsgSrc: id, Value: d.Nickname})
 	}
 	if d.Address.Hostname != "" {
-		v.props = append(v.props, Property{id, "hostname", d.Address.Hostname})
+		v.props = v.props.Set("hostname", Property{MsgSrc: id, Value: d.Address.Hostname})
 	}
 	if d.Address.Ipv4 != "" {
-		v.props = append(v.props, Property{id, "ipv4", d.Address.Ipv4})
+		v.props = v.props.Set("ipv4", Property{MsgSrc: id, Value: d.Address.Ipv4})
 	}
 	if d.Address.Ipv6 != "" {
-		v.props = append(v.props, Property{id, "ipv6", d.Address.Ipv6})
+		v.props = v.props.Set("ipv6", Property{MsgSrc: id, Value: d.Address.Ipv6})
 	}
 
 	// By spec, Environments have no outbound edges
 	return v, nil, nil
 }
 
-func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) {
-	v := Vertex{props: make([]Property, 0)}
+func splitLogicState(d interpret.LogicState, id int) (VtxI, EdgeSpecs, error) {
+	v := logicStateVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
 	// TODO do IDs need different handling?
-	v.props = append(v.props, Property{id, "path", d.Path})
+	v.props = v.props.Set("path", Property{MsgSrc: id, Value: d.Path})
 
 	if d.Lgroup != "" {
 		// TODO should be an edge, a simple semantic one
-		v.props = append(v.props, Property{id, "lgroup", d.Lgroup})
+		v.props = v.props.Set("lgroup", Property{MsgSrc: id, Value: d.Lgroup})
 	}
 	if d.Nick != "" {
-		v.props = append(v.props, Property{id, "nick", d.Nick})
+		v.props = v.props.Set("nick", Property{MsgSrc: id, Value: d.Nick})
 	}
 	if d.Type != "" {
-		v.props = append(v.props, Property{id, "type", d.Type})
+		v.props = v.props.Set("type", Property{MsgSrc: id, Value: d.Type})
 	}
 
 	// TODO should do anything with mutually exclusive properties here?
@@ -89,13 +90,13 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 	}
 	// FIXME this shouldn't be here, it's a property of the commit
 	if d.ID.Repository != "" {
-		v.props = append(v.props, Property{id, "repository", d.ID.Repository})
+		v.props = v.props.Set("repository", Property{MsgSrc: id, Value: d.ID.Repository})
 	}
 	if d.ID.Version != "" {
-		v.props = append(v.props, Property{id, "version", d.ID.Version})
+		v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.ID.Version})
 	}
 	if d.ID.Semver != "" {
-		v.props = append(v.props, Property{id, "semver", d.ID.Semver})
+		v.props = v.props.Set("semver", Property{MsgSrc: id, Value: d.ID.Semver})
 	}
 
 	for _, dl := range d.Datasets {
@@ -106,19 +107,19 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 
 	return v, edges, nil
 }
-func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
-	v := Vertex{props: make([]Property, 0)}
+func splitProcess(d interpret.Process, id int) (VtxI, EdgeSpecs, error) {
+	v := processVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
-	v.props = append(v.props, Property{id, "pid", d.Pid})
+	v.props = v.props.Set("pid", Property{MsgSrc: id, Value: d.Pid})
 	if d.Cwd != "" {
-		v.props = append(v.props, Property{id, "Cwd", d.Cwd})
+		v.props = v.props.Set("Cwd", Property{MsgSrc: id, Value: d.Cwd})
 	}
 	if d.Group != "" {
-		v.props = append(v.props, Property{id, "Group", d.Group})
+		v.props = v.props.Set("Group", Property{MsgSrc: id, Value: d.Group})
 	}
 	if d.User != "" {
-		v.props = append(v.props, Property{id, "User", d.User})
+		v.props = v.props.Set("User", Property{MsgSrc: id, Value: d.User})
 	}
 
 	for _, ls := range d.LogicStates {
@@ -135,15 +136,15 @@ func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
 }
 
 // TODO can't do this till refactor interpret.Dataset to transform into something sane
-//func splitDataset(d interpret.Dataset, id int) (Vertex, EdgeSpecs, error) {
-//v := Vertex{props: make([]Property, 0)}
+//func splitDataset(d interpret.Dataset, id int) (VtxI, EdgeSpecs, error) {
+//v := datasetVertex{props: ps.NewMap()}
 //var edges EdgeSpecs
 
 //// Props first
 //if d.Name != "" {
-//v.props = append(v.props, Property{id, "Name", d.Name})
+//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
 //}
 //if d.Name != "" {
-//v.props = append(v.props, Property{id, "Name", d.Name})
+//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
 //}
 //}
