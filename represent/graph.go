@@ -4,12 +4,17 @@ import "github.com/sdboyer/pipeviz/interpret"
 
 // the main graph construct
 type CoreGraph struct {
-	vlist   map[int]Vertex
+	list    map[int]vtTuple
 	vserial int
 }
 
 type Vertex struct {
 	props []Property
+}
+
+type vtTuple struct {
+	v Vertex
+	e []StandardEdge
 }
 
 func (v Vertex) Merge(iv Vertex) Vertex {
@@ -85,11 +90,11 @@ func (g *CoreGraph) ensureVertex(vertex Vertex) (vid int) {
 	vid = g.Find(vertex)
 
 	if vid != 0 {
-		v2, _ := g.Get(vid)
-		g.vlist[vid] = v2.Merge(vertex)
+		vt := g.list[vid]
+		g.list[vid] = vtTuple{e: vt.e, v: vt.v.Merge(vertex)}
 	} else {
 		g.vserial++
-		g.vlist[g.vserial] = vertex
+		g.list[g.vserial] = vtTuple{v: vertex}
 		vid = g.vserial
 	}
 
@@ -124,7 +129,7 @@ func (g *CoreGraph) Find(vertex Vertex) int {
 		return 0
 	}
 
-	for id, v := range g.vlist {
+	for id, v := range g.list {
 		if chk.Matches(v, vertex) {
 			return id
 		}
