@@ -1,13 +1,19 @@
 package represent
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
+
 	"github.com/mndrix/ps"
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
 // the main graph construct
 type CoreGraph struct {
-	list    map[int]vtTuple
+	list map[int]vtTuple
+	// TODO experiment with replacing with a hash array-mapped trie
+	vtuples ps.Map
 	vserial int
 }
 
@@ -25,8 +31,9 @@ type Vertex interface {
 }
 
 type vtTuple struct {
-	v Vertex
-	e []StandardEdge
+	id int
+	v  Vertex
+	e  []StandardEdge
 }
 
 type Property struct {
@@ -101,14 +108,18 @@ func (g *CoreGraph) ensureVertex(vtx Vertex) (vid int) {
 	vid = g.Find(vtx)
 
 	if vid != 0 {
-		vt := g.list[vid]
+		ivt, _ := g.vtuples.Lookup(strconv.Itoa(vid))
+		vt := ivt.(vtTuple)
+
 		// TODO err
 		nu, _ := vt.v.Merge(vtx)
-		g.list[vid] = vtTuple{e: vt.e, v: nu}
+		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), vtTuple{id: vid, e: vt.e, v: nu})
+		//g.list[vid] = vtTuple{id: vid, e: vt.e, v: nu}
 	} else {
 		g.vserial++
-		g.list[g.vserial] = vtTuple{v: vtx}
 		vid = g.vserial
+		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), vtTuple{id: vid, v: vtx})
+		//g.list[g.vserial] = vtTuple{v: vtx}
 	}
 
 	return vid
