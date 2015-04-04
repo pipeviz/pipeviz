@@ -1,14 +1,16 @@
 package represent
 
 import (
+	"github.com/mndrix/ps"
 	"github.com/sdboyer/gogl"
 )
 
 type StandardEdge struct {
+	id     int
 	Source int
 	Target int
-	Label  string
-	Data   interface{}
+	Spec   ps.Map
+	Props  ps.Map
 }
 
 type MessageArc interface {

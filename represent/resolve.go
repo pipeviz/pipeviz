@@ -2,6 +2,13 @@ package represent
 
 import "github.com/sdboyer/pipeviz/interpret"
 
+// Attempts to resolve an EdgeSpec into a real edge. This process has two steps:
+//
+// 1. Finding the target node.
+// 2. Seeing if this edge already exists between source and target.
+//
+// It is the responsibility of the edge spec's type handler to determine what "if an edge
+// already exists" means, as well as whether to overwrite/merge or duplicate the edge in such a case.
 func Resolve(g *CoreGraph, d EdgeSpec) (StandardEdge, bool) {
 	switch es := d.(type) {
 	case interpret.EnvLink:
