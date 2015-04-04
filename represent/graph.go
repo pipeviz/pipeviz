@@ -42,12 +42,12 @@ type Property struct {
 	Value  interface{}
 }
 
-type rootedEdgeSpecTuple struct {
-	vid int
-	es  EdgeSpecs
+type veProcessingInfo struct {
+	vt vtTuple
+	es EdgeSpecs
 }
 
-type edgeSpecSet []rootedEdgeSpecTuple
+type edgeSpecSet []veProcessingInfo
 
 func (ess edgeSpecSet) EdgeCount() (i int) {
 	for _, tuple := range ess {
@@ -68,12 +68,12 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 		// TODO errs
 		vtx, edges, _ := Split(d, msg.Id)
 		// Ensure the vertex is present
-		vid := g.ensureVertex(vtx)
+		tuple := g.ensureVertex(vtx)
 
 		// Collect edge specs for later processing
-		ess = append(ess, rootedEdgeSpecTuple{
-			vid: vid,
-			es:  edges,
+		ess = append(ess, veProcessingInfo{
+			vt: tuple,
+			es: edges,
 		})
 	})
 
@@ -87,13 +87,22 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 	var ec, lec int
 	for ec = ess.EdgeCount(); ec != lec; ec = ess.EdgeCount() {
 		lec = ec
-		for _, tuple := range ess {
-			for k, spec := range tuple.es {
+		for _, info := range ess {
+			for k, spec := range info.es {
 				edge, success := Resolve(g, spec)
 				if success {
-					edge.Source = tuple.vid
-					g.ensureEdge(edge)
-					tuple.es = append(tuple.es[:k], tuple.es[k+1:]...)
+					edge.Source = info.vt.id
+					if edge.id == 0 {
+						// new edge, allocate a new id for it
+						g.vserial++
+						edge.id = g.vserial
+					}
+
+					// TODO setting multiple times is silly and wasteful
+					tvt, _ := g.Get(edge.Target)
+					g.vtuples = g.vtuples.Set(strconv.Itoa(info.vt.id), info.vt)
+
+					info.es = append(info.es[:k], info.es[k+1:]...)
 				}
 			}
 		}
@@ -104,8 +113,8 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *CoreGraph) ensureVertex(vtx Vertex) (vid int) {
-	vid = g.Find(vtx)
+func (g *CoreGraph) ensureVertex(vtx Vertex) (final vtTuple) {
+	vid := g.Find(vtx)
 
 	if vid != 0 {
 		ivt, _ := g.vtuples.Lookup(strconv.Itoa(vid))
@@ -113,21 +122,18 @@ func (g *CoreGraph) ensureVertex(vtx Vertex) (vid int) {
 
 		// TODO err
 		nu, _ := vt.v.Merge(vtx)
-		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), vtTuple{id: vid, e: vt.e, v: nu})
+		final = vtTuple{id: vid, e: vt.e, v: nu}
+		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
 		//g.list[vid] = vtTuple{id: vid, e: vt.e, v: nu}
 	} else {
 		g.vserial++
 		vid = g.vserial
-		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), vtTuple{id: vid, v: vtx})
+		final = vtTuple{id: vid, v: vtx}
+		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
 		//g.list[g.vserial] = vtTuple{v: vtx}
 	}
 
-	return vid
-}
-
-// TODO add edge to the structure. blah blah handwave blah blah
-func (g *CoreGraph) ensureEdge(e StandardEdge) {
-
+	return
 }
 
 // the func we eventually aim to fulfill, replacing Merge for integrating messages
