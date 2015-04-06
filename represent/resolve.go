@@ -1,6 +1,9 @@
 package represent
 
-import "github.com/sdboyer/pipeviz/interpret"
+import (
+	"github.com/mndrix/ps"
+	"github.com/sdboyer/pipeviz/interpret"
+)
 
 // Attempts to resolve an EdgeSpec into a real edge. This process has two steps:
 //
@@ -12,7 +15,7 @@ import "github.com/sdboyer/pipeviz/interpret"
 func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool) {
 	switch es := d.(type) {
 	case interpret.EnvLink:
-		return resolveEnvLink(g, src, es)
+		return resolveEnvLink(g, mid, src, es)
 	case interpret.DataLink:
 		return resolveDataLink(g, src, es)
 	case SpecCommit:
@@ -24,10 +27,63 @@ func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool
 	return StandardEdge{}, false
 }
 
-func resolveEnvLink(g *CoreGraph, src vtTuple, e interpret.EnvLink) (StandardEdge, bool) {
+func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Spec:   ps.NewMap(),
+		Props:  ps.NewMap(),
+	}
+
+	// Whether we find a match or not, have to record the EnvLink
+	if es.Address.Hostname != "" {
+		e.Spec = e.Spec.Set("hostname", Property{MsgSrc: mid, Value: es.Address.Hostname})
+	}
+	if es.Address.Ipv4 != "" {
+		e.Spec = e.Spec.Set("ipv4", Property{MsgSrc: mid, Value: es.Address.Ipv4})
+	}
+	if es.Address.Ipv6 != "" {
+		e.Spec = e.Spec.Set("ipv6", Property{MsgSrc: mid, Value: es.Address.Ipv6})
+	}
+	if es.Nick != "" {
+		e.Spec = e.Spec.Set("nick", Property{MsgSrc: mid, Value: es.Nick})
+	}
+
 	g.Vertices(func(vtx Vertex, id int) bool {
-		// TODO add something to vertex properties to make it easier to check prop membership
+		if v, ok := vtx.(environmentVertex); !ok {
+			return false
+		}
+
+		// TODO for now we're just gonna return out the first matching edge
+		props := vtx.Props()
+
+		var val interface{}
+		var exists bool
+
+		if val, exists := props.Lookup("hostname"); exists && val == es.Address.Hostname {
+			success = true
+			e.Target = id
+			return true
+		}
+		if val, exists := props.Lookup("ipv4"); exists && val == es.Address.Ipv4 {
+			success = true
+			e.Target = id
+			return true
+		}
+		if val, exists := props.Lookup("ipv6"); exists && val == es.Address.Ipv6 {
+			success = true
+			e.Target = id
+			return true
+		}
+		if val, exists := props.Lookup("nick"); exists && val == es.Nick {
+			success = true
+			e.Target = id
+			return true
+		}
+
+		return false
 	})
+
+	return e, success
 }
 
 func resolveDataLink(g *CoreGraph, src vtTuple, e interpret.DataLink) (StandardEdge, bool) {
