@@ -89,7 +89,7 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 		lec = ec
 		for _, info := range ess {
 			for k, spec := range info.es {
-				edge, success := Resolve(g, spec)
+				edge, success := Resolve(g, info.vt, spec)
 				if success {
 					edge.Source = info.vt.id
 					if edge.id == 0 {
