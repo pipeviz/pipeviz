@@ -48,7 +48,7 @@ type veProcessingInfo struct {
 	es EdgeSpecs
 }
 
-type edgeSpecSet []veProcessingInfo
+type edgeSpecSet []*veProcessingInfo
 
 func (ess edgeSpecSet) EdgeCount() (i int) {
 	for _, tuple := range ess {
@@ -72,7 +72,7 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 		tuple := g.ensureVertex(vtx)
 
 		// Collect edge specs for later processing
-		ess = append(ess, veProcessingInfo{
+		ess = append(ess, &veProcessingInfo{
 			vt: tuple,
 			es: edges,
 		})
@@ -99,9 +99,14 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 						edge.id = g.vserial
 					}
 
-					// TODO setting multiple times is silly and wasteful
-					tvt, _ := g.Get(edge.Target)
+					// FIXME make sure assignment makes it back into ess slice
+					info.vt.oe = info.vt.oe.Set(strconv.Itoa(edge.id), edge)
 					g.vtuples = g.vtuples.Set(strconv.Itoa(info.vt.id), info.vt)
+
+					// TODO setting multiple times is silly and wasteful
+					any, _ := g.vtuples.Lookup(strconv.Itoa(edge.Target))
+					tvt := any.(vtTuple)
+					tvt.ie = tvt.ie.Set(strconv.Itoa(edge.id), edge)
 
 					info.es = append(info.es[:k], info.es[k+1:]...)
 				}
