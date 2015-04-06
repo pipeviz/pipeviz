@@ -9,7 +9,7 @@ import "github.com/sdboyer/pipeviz/interpret"
 //
 // It is the responsibility of the edge spec's type handler to determine what "if an edge
 // already exists" means, as well as whether to overwrite/merge or duplicate the edge in such a case.
-func Resolve(g *CoreGraph, src vtTuple, d EdgeSpec) (StandardEdge, bool) {
+func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool) {
 	switch es := d.(type) {
 	case interpret.EnvLink:
 		return resolveEnvLink(g, src, es)
