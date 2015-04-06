@@ -33,7 +33,8 @@ type Vertex interface {
 type vtTuple struct {
 	id int
 	v  Vertex
-	e  []StandardEdge
+	ie ps.Map
+	oe ps.Map
 }
 
 type Property struct {
@@ -107,6 +108,8 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 			}
 		}
 	}
+
+	// TODO attempt to de-orphan items here?
 }
 
 // Ensures the vertex is present. Merges according to type-specific logic if
@@ -122,13 +125,13 @@ func (g *CoreGraph) ensureVertex(vtx Vertex) (final vtTuple) {
 
 		// TODO err
 		nu, _ := vt.v.Merge(vtx)
-		final = vtTuple{id: vid, e: vt.e, v: nu}
+		final = vtTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
 		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
 		//g.list[vid] = vtTuple{id: vid, e: vt.e, v: nu}
 	} else {
 		g.vserial++
 		vid = g.vserial
-		final = vtTuple{id: vid, v: vtx}
+		final = vtTuple{id: vid, v: vtx, ie: ps.NewMap(), oe: ps.NewMap()}
 		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
 		//g.list[g.vserial] = vtTuple{v: vtx}
 	}
