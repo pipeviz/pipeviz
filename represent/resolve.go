@@ -112,6 +112,10 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 
 	// DataLinks have a 'name' field that is expected to be unique for the source, if present
 	if es.Name != "" {
+		// TODO 'name' is a traditional unique key; a change in it inherently denotes a new edge. how to handle this?
+		// FIXME this approach just always updates the mid, which is weird?
+		e.Spec = e.Spec.Set("name", Property{MsgSrc: mid, Value: es.Name})
+
 		src.oe.ForEach(func(_ string, val ps.Any) {
 			edge := val.(StandardEdge)
 			if name, exists := edge.Props.Lookup("name"); exists && edge.Label == "datalink" && name == es.Name {
@@ -122,9 +126,6 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		})
 	}
 
-	// TODO 'name' is a traditional unique key; a change in it inherently denotes a new edge. how to handle this?
-	// FIXME this approach just always updates the mid, which is weird?
-	e.Spec = e.Spec.Set("name", Property{MsgSrc: mid, Value: es.Name})
 	if es.Type != "" {
 		e.Spec = e.Spec.Set("type", Property{MsgSrc: mid, Value: es.Type})
 	}
