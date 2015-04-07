@@ -32,9 +32,20 @@ func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e
 		Source: src.id,
 		Spec:   ps.NewMap(),
 		Props:  ps.NewMap(),
+		Label:  "envlink",
 	}
 
-	// Whether we find a match or not, have to record the EnvLink
+	// First, check if this vertex already *has* an outbound envlink; semantics dictate there can be only one.
+	src.oe.ForEach(func(_ string, val ps.Any) {
+		edge := val.(StandardEdge)
+		if edge.Label == "envlink" {
+			success = true
+			// FIXME need a way to cut out early
+			e = edge
+		}
+	})
+
+	// Whether we find a match or not, have to merge in the EnvLink
 	if es.Address.Hostname != "" {
 		e.Spec = e.Spec.Set("hostname", Property{MsgSrc: mid, Value: es.Address.Hostname})
 	}
@@ -46,6 +57,11 @@ func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e
 	}
 	if es.Nick != "" {
 		e.Spec = e.Spec.Set("nick", Property{MsgSrc: mid, Value: es.Nick})
+	}
+
+	// If we already found the matching edge, bail out now
+	if success {
+		return e, true
 	}
 
 	g.Vertices(func(vtx Vertex, id int) bool {
