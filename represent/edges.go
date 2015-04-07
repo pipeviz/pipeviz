@@ -9,8 +9,10 @@ type StandardEdge struct {
 	id     int
 	Source int
 	Target int
-	Spec   ps.Map
-	Props  ps.Map
+	// TODO do these *actually* need to be persistent structures?
+	Spec  ps.Map
+	Props ps.Map
+	Label string
 }
 
 type MessageArc interface {
