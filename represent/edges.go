@@ -10,7 +10,6 @@ type StandardEdge struct {
 	Source int
 	Target int
 	// TODO do these *actually* need to be persistent structures?
-	Spec  ps.Map
 	Props ps.Map
 	Label string
 }
