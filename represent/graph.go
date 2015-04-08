@@ -184,15 +184,16 @@ func (g *CoreGraph) Vertices(f func(Vertex, int) bool) {
 	}
 }
 
-func (g *CoreGraph) Get(id int) (Vertex, error) {
+// Gets the vtTuple for a given vertex id.
+func (g *CoreGraph) Get(id int) (vtTuple, error) {
 	if id > g.vserial {
-		return nil, errors.New(fmt.Sprintf("Graph has only ", g.vserial, "elements, no vertex yet exists with id", id))
+		return vtTuple{}, errors.New(fmt.Sprintf("Graph has only ", g.vserial, "elements, no vertex yet exists with id", id))
 	}
 
 	vtx, exists := g.vtuples.Lookup(strconv.Itoa(id))
 	if exists {
-		return vtx.(vtTuple).v, nil
+		return vtx.(vtTuple), nil
 	} else {
-		return nil, errors.New(fmt.Sprintf("No vertex exists with id", id, "at the present revision of the graph"))
+		return vtTuple{}, errors.New(fmt.Sprintf("No vertex exists with id", id, "at the present revision of the graph"))
 	}
 }
