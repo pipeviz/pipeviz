@@ -1,9 +1,6 @@
 package represent
 
-import (
-	"github.com/mndrix/ps"
-	"github.com/sdboyer/gogl"
-)
+import "github.com/mndrix/ps"
 
 type StandardEdge struct {
 	id     int
@@ -22,10 +19,4 @@ type edgePartial struct {
 	Id   int    // edge id
 	Ovid int    // the "other" vertex id. from this scope, unknown if head or tail
 	Typ  uint32 // edge type
-}
-
-type MessageArc interface {
-	gogl.Arc
-	Data() interface{}
-	Label() string
 }
