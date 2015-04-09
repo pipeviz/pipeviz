@@ -17,6 +17,24 @@ type CoreGraph struct {
 	vserial int
 }
 
+type (
+	// A value indicating a vertex's type. For now, done as a string.
+	VType string
+	// A value indicating an edge's type. For now, done as a string.
+	EType string
+)
+
+const (
+	VTypeNone VType = ""
+	ETypeNone EType = ""
+)
+
+// Used in queries to specify property k/v pairs.
+type PropQ struct {
+	K string
+	V interface{}
+}
+
 type Vertex interface {
 	// Merges another vertex into this vertex. Error is indicated if the
 	// dynamic types do not match.
@@ -195,4 +213,38 @@ func (g *CoreGraph) Get(id int) (Vertex, error) {
 	} else {
 		return nil, errors.New(fmt.Sprintf("No vertex exists with id", id, "at the present revision of the graph"))
 	}
+}
+
+// Inspects the indicated vertex's set of out-edges, returning a slice of
+// those that match on type and properties. ETypeNone and nil can be passed
+// for the last two parameters respectively, in which case the filters will
+// be bypassed.
+func (g *CoreGraph) OutWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
+	vt, err := g.Get(egoId)
+	if err != nil {
+		// vertex doesn't exist
+		return
+	}
+
+	var fef func(k string, v ps.Any)
+	// TODO specialize the func for zero-cases
+	fef = func(k string, v ps.Any) {
+		edge := v.(StandardEdge)
+		if etype != ETypeNone && etype != edge.EType {
+			// etype doesn't match
+			return
+		}
+
+		for _, p := range props {
+			prop, exists := edge.Props.Lookup(p.K)
+			if !exists || prop != p.V {
+				return
+			}
+		}
+
+		es = append(es, edge)
+	}
+
+	vt.oe.ForEach(fef)
+	return
 }

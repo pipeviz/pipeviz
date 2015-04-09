@@ -9,6 +9,7 @@ type StandardEdge struct {
 	id     int
 	Source int
 	Target int
+	EType  EType
 	Spec   ps.Map
 	Props  ps.Map
 }
