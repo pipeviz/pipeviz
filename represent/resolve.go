@@ -165,7 +165,28 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	// if net, must scan. if local, a bit easier.
 
 	if isLocal {
+		envid, exists := findEnv(g, src)
+		if !exists {
+			// this is would be a pretty weird case
+			return e, false
+		}
 
+		envvt, _ := g.Get(envid)
+		envvt.ie.ForEach(func(_ string, val ps.Any) {
+			e2 := val.(StandardEdge)
+			if e2.Label == "envlink" {
+				// FIXME really, really not lovely to have to scan through all these like this
+				vt, err := g.Get(e2.Target)
+				if err != nil {
+					// err means not found; skip
+					return
+				}
+
+				if vt.v.Typ() == "process" {
+					// TODO ugh this is where we need multi-vertex returns from splitters
+				}
+			}
+		})
 	} else {
 		g.Vertices(func(vtx Vertex, id int) bool {
 			return false
@@ -175,10 +196,28 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	return e, false
 }
 
-func resolveSpecCommit(g *CoreGraph, src vtTuple, e SpecCommit) (StandardEdge, bool) {
-	g.Vertices(func(vtx Vertex, id int) bool {})
+//func resolveSpecCommit(g *CoreGraph, src vtTuple, e SpecCommit) (StandardEdge, bool) {
+//g.Vertices(func(vtx Vertex, id int) bool {})
+//}
+
+//func resolveSpecLocalLogic(g *CoreGraph, src vtTuple, e SpecLocalLogic) (StandardEdge, bool) {
+//g.Vertices(func(vtx Vertex, id int) bool {})
+//}
+
+// Searches the given vertex's out-edges to find its environment's vertex id.
+func findEnv(g *CoreGraph, vt vtTuple) (id int, success bool) {
+	vt.oe.ForEach(func(_ string, val ps.Any) {
+		edge := val.(StandardEdge)
+		if edge.Label == "envlink" {
+			success = true
+			// FIXME need a way to cut out early
+			id = edge.Target
+		}
+	})
+
+	return
 }
 
-func resolveSpecLocalLogic(g *CoreGraph, src vtTuple, e SpecLocalLogic) (StandardEdge, bool) {
-	g.Vertices(func(vtx Vertex, id int) bool {})
-}
+//func findByListener(g *CoreGraph, vt vtTuple) (vtTuple, bool) {
+
+//}
