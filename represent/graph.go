@@ -67,15 +67,22 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 	msg.Each(func(d interface{}) {
 		// Split each input element into vertex and edge specs
 		// TODO errs
-		vtx, edges, _ := Split(d, msg.Id)
-		// Ensure the vertex is present
-		tuple := g.ensureVertex(vtx)
+		sds, _ := Split(d, msg.Id)
+		// Ensure vertices are present
+
+		var tuples []vtTuple
+		for _, sd := range sds {
+			// TODO this can't work now, dammit, need edge context. UGH
+			tuples = append(tuples, g.ensureVertex(sd.Vertex))
+		}
 
 		// Collect edge specs for later processing
-		ess = append(ess, &veProcessingInfo{
-			vt: tuple,
-			es: edges,
-		})
+		for k, tuple := range tuples {
+			ess = append(ess, &veProcessingInfo{
+				vt: tuple,
+				es: sds[k].EdgeSpecs,
+			})
+		}
 	})
 
 	// All vertices processed. now, process edges in passes, ensuring that each

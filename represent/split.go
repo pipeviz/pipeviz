@@ -7,6 +7,11 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
+type SplitData struct {
+	Vertex
+	EdgeSpecs
+}
+
 // TODO for now, no structure to this. change to queryish form later
 type EdgeSpec interface{}
 type EdgeSpecs []EdgeSpec
@@ -19,11 +24,15 @@ type SpecLocalLogic struct {
 	Path string
 }
 
+type SpecProc struct {
+	Pid int
+}
+
 // TODO unused until plugging/codegen
-type Splitter func(data interface{}, id int) (Vertex, EdgeSpecs, error)
+type Splitter func(data interface{}, id int) ([]SplitData, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
+func Split(d interface{}, id int) ([]SplitData, error) {
 	switch v := d.(type) {
 	case interpret.Environment:
 		return splitEnvironment(v, id)
@@ -34,10 +43,10 @@ func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
 		// TODO missing dataset, commit, and commitmeta
 	}
 
-	return nil, nil, errors.New("No handler for object type")
+	return nil, errors.New("No handler for object type")
 }
 
-func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error) {
+func splitEnvironment(d interpret.Environment, id int) ([]SplitData, error) {
 	// seven distinct props
 	v := environmentVertex{props: ps.NewMap()}
 	if d.Os != "" {
@@ -63,10 +72,10 @@ func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error
 	}
 
 	// By spec, Environments have no outbound edges
-	return v, nil, nil
+	return []SplitData{{Vertex: v}}, nil
 }
 
-func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) {
+func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 	v := logicStateVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
@@ -105,9 +114,12 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 
 	edges = append(edges, d.Environment)
 
-	return v, edges, nil
+	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
-func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
+
+func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
+	sd := make([]SplitData, 0)
+
 	v := processVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
@@ -127,12 +139,23 @@ func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
 	}
 
 	for _, listen := range d.Listen {
+		v2 := commVertex{props: ps.NewMap()}
+
+		if listen.Type == "unix" {
+			v2.props = v2.props.Set("path", listen.Path)
+		} else {
+			v2.props = v2.props.Set("port", listen.Port)
+			// FIXME protos are a slice, wtf do we do about this
+			v2.props = v2.props.Set("proto", listen.Proto)
+		}
+		v2.props = v2.props.Set("type", listen.Type)
+		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment, SpecProc{d.Pid}}})
+
 		edges = append(edges, listen)
 	}
 
 	edges = append(edges, d.Environment)
-
-	return v, edges, nil
+	return append([]SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
 }
 
 // TODO can't do this till refactor interpret.Dataset to transform into something sane

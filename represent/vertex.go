@@ -95,6 +95,28 @@ func (vtx processVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
+type commVertex struct {
+	props ps.Map
+}
+
+func (vtx commVertex) Props() ps.Map {
+	return vtx.props
+}
+
+func (vtx commVertex) Typ() string {
+	return "comm"
+}
+
+func (vtx commVertex) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(commVertex); !ok {
+		// NOTE remember, formatting with types means reflection
+		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
+	}
+
+	vtx.props = GenericMerge(vtx.props, ivtx.Props())
+	return vtx, nil
+}
+
 type datasetVertex struct {
 	props ps.Map
 }
