@@ -24,6 +24,16 @@ type (
 	EType string
 )
 
+type EdgeFilter struct {
+	EType
+	Props []PropQ
+}
+
+type VertexFilter struct {
+	VType
+	Props []PropQ
+}
+
 const (
 	VTypeNone VType = ""
 	ETypeNone EType = ""
@@ -258,6 +268,88 @@ func (g *CoreGraph) arcWith(egoId int, etype EType, props []PropQ, in bool) (es 
 		vt.ie.ForEach(fef)
 	} else {
 		vt.oe.ForEach(fef)
+	}
+
+	return
+}
+
+// Return a slice of vtTuples that are successors of the given vid, constraining the list
+// to those that are connected by edges that pass the EdgeFilter, and the successor
+// vertices pass the VertexFilter.
+func (g *CoreGraph) SuccessorsWith(egoId int, ef EdgeFilter, vf VertexFilter) (vts []vtTuple) {
+	return g.adjacentWith(egoId, ef, vf, false)
+}
+
+// Return a slice of vtTuples that are predecessors of the given vid, constraining the list
+// to those that are connected by edges that pass the EdgeFilter, and the predecessor
+// vertices pass the VertexFilter.
+func (g *CoreGraph) PredecessorsWith(egoId int, ef EdgeFilter, vf VertexFilter) (vts []vtTuple) {
+	return g.adjacentWith(egoId, ef, vf, true)
+}
+
+func (g *CoreGraph) adjacentWith(egoId int, ef EdgeFilter, vf VertexFilter, in bool) (vts []vtTuple) {
+	vt, err := g.Get(egoId)
+	if err != nil {
+		// vertex doesn't exist
+		return
+	}
+
+	// Allow some quick parallelism by continuing to search edges while loading vertices
+	// TODO performance test this to see if it's at all worth it
+	vidchan := make(chan int, 10)
+
+	var feef func(k string, v ps.Any)
+	// TODO specialize the func for zero-cases
+	feef = func(k string, v ps.Any) {
+		edge := v.(StandardEdge)
+		if ef.EType != ETypeNone && ef.EType != edge.EType {
+			// etype doesn't match
+			return
+		}
+
+		for _, p := range ef.Props {
+			prop, exists := edge.Props.Lookup(p.K)
+			if !exists || prop != p.V {
+				return
+			}
+		}
+
+		if in {
+			vidchan <- edge.Source
+		} else {
+			vidchan <- edge.Target
+		}
+	}
+
+	go func() {
+		if in {
+			vt.ie.ForEach(feef)
+		} else {
+			vt.oe.ForEach(feef)
+		}
+		close(vidchan)
+	}()
+
+	for vid := range vidchan {
+		adjvt, err := g.Get(vid)
+		if err != nil {
+			// TODO panic, really?
+			panic("got nonexistent vid - should be impossible")
+		}
+
+		// FIXME can't rely on Typ() method here, need to store it
+		if vf.VType != VTypeNone && vf.VType != adjvt.v.Typ() {
+			continue
+		}
+
+		for _, p := range vf.Props {
+			prop, exists := adjvt.v.Props().Lookup(p.K)
+			if !exists || prop != p.V {
+				continue
+			}
+		}
+
+		vts = append(vts, adjvt)
 	}
 
 	return
