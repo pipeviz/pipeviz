@@ -103,7 +103,7 @@ func (vtx commVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx commVertex) Typ() string {
+func (vtx commVertex) Typ() VType {
 	return "comm"
 }
 
