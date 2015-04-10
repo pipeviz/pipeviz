@@ -6,6 +6,7 @@ type StandardEdge struct {
 	id     int
 	Source int
 	Target int
+	EType  EType
 	// TODO do these *actually* need to be persistent structures?
 	Props ps.Map
 	Label string

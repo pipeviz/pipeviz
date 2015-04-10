@@ -17,6 +17,24 @@ type CoreGraph struct {
 	vserial int
 }
 
+type (
+	// A value indicating a vertex's type. For now, done as a string.
+	VType string
+	// A value indicating an edge's type. For now, done as a string.
+	EType string
+)
+
+const (
+	VTypeNone VType = ""
+	ETypeNone EType = ""
+)
+
+// Used in queries to specify property k/v pairs.
+type PropQ struct {
+	K string
+	V interface{}
+}
+
 type Vertex interface {
 	// Merges another vertex into this vertex. Error is indicated if the
 	// dynamic types do not match.
@@ -24,7 +42,7 @@ type Vertex interface {
 	// Returns a string representing the object type. Used for namespacing keys, etc.
 	// While this is (currently) implemented as a method, its result must be invariant.
 	// TODO use string-const generator, other tricks to enforce invariance, compact space use
-	Typ() string
+	Typ() VType
 	// Returns a persistent map with the vertex's properties.
 	// TODO generate more type-restricted versions of the map?
 	Props() ps.Map
@@ -151,9 +169,6 @@ func (g *CoreGraph) ensureVertex(vtx Vertex) (final vtTuple) {
 	return
 }
 
-// the func we eventually aim to fulfill, replacing Merge for integrating messages
-//func (g CoreGraph) Cons(interpret.Message) CoreGraph, Delta, error {}
-
 // Searches for an instance of the vertex within the graph. If found,
 // returns the vertex id, otherwise returns 0.
 //
@@ -183,14 +198,6 @@ func (g *CoreGraph) Find(vtx Vertex) int {
 	return 0
 }
 
-func (g *CoreGraph) Vertices(f func(Vertex, int) bool) {
-	for id, vt := range g.list {
-		if f(vt.v, id) {
-			return
-		}
-	}
-}
-
 // Gets the vtTuple for a given vertex id.
 func (g *CoreGraph) Get(id int) (vtTuple, error) {
 	if id > g.vserial {
@@ -203,4 +210,81 @@ func (g *CoreGraph) Get(id int) (vtTuple, error) {
 	} else {
 		return vtTuple{}, errors.New(fmt.Sprintf("No vertex exists with id", id, "at the present revision of the graph"))
 	}
+}
+
+// Inspects the indicated vertex's set of out-edges, returning a slice of
+// those that match on type and properties. ETypeNone and nil can be passed
+// for the last two parameters respectively, in which case the filters will
+// be bypassed.
+func (g *CoreGraph) OutWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
+	return g.arcWith(egoId, etype, props, false)
+}
+
+// Inspects the indicated vertex's set of in-edges, returning a slice of
+// those that match on type and properties. ETypeNone and nil can be passed
+// for the last two parameters respectively, in which case the filters will
+// be bypassed.
+func (g *CoreGraph) InWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
+	return g.arcWith(egoId, etype, props, true)
+}
+
+func (g *CoreGraph) arcWith(egoId int, etype EType, props []PropQ, in bool) (es []StandardEdge) {
+	vt, err := g.Get(egoId)
+	if err != nil {
+		// vertex doesn't exist
+		return
+	}
+
+	var fef func(k string, v ps.Any)
+	// TODO specialize the func for zero-cases
+	fef = func(k string, v ps.Any) {
+		edge := v.(StandardEdge)
+		if etype != ETypeNone && etype != edge.EType {
+			// etype doesn't match
+			return
+		}
+
+		for _, p := range props {
+			prop, exists := edge.Props.Lookup(p.K)
+			if !exists || prop != p.V {
+				return
+			}
+		}
+
+		es = append(es, edge)
+	}
+
+	if in {
+		vt.ie.ForEach(fef)
+	} else {
+		vt.oe.ForEach(fef)
+	}
+
+	return
+}
+
+// Returns a slice of vertices matching the filter conditions.
+//
+// The first parameter, VType, filters on vertex type; passing VTypeNone
+// will bypass the filter.
+//
+// The second parameter allows filtering on a k/v property pair.
+func (g *CoreGraph) VerticesWith(vtype VType, props []PropQ) (vs []vtTuple) {
+	g.vtuples.ForEach(func(_ string, val ps.Any) {
+		vt := val.(vtTuple)
+		if vt.v.Typ() != vtype {
+			return
+		}
+
+		for _, p := range props {
+			prop, exists := vt.v.Props().Lookup(p.K)
+			if !exists || prop != p.V {
+				return
+			}
+		}
+
+		vs = append(vs, vt)
+	})
+
+	return vs
 }
