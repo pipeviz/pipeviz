@@ -162,38 +162,82 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		return e, true
 	}
 
-	// if net, must scan. if local, a bit easier.
+	var sock vtTuple
+	var rv []vtTuple // just for reuse
+	// If net, must scan; if local, a bit easier.
+	if !isLocal {
+		// First, find the environment vertex
+		rv = g.VerticesWith("environment", nil)
+		var envid int
+		for _, vt := range rv {
+			// TODO this'll be cross-package eventually - reorg needed
+			if matchAddress(e.Props, vt.v.Props()) {
+				envid = vt.id
+				break
+			}
+		}
 
-	if isLocal {
+		// No matching env found, bail out
+		if envid == 0 {
+			return e, false
+		}
+
+		// Now, walk the environment's edges to find the vertex representing the port
+		ef := EdgeFilter{EType: "envlink"}
+		vf := VertexFilter{VType: "comm", Props: []PropQ{
+			{"port", es.ConnNet.Port},
+			{"proto", es.ConnNet.Proto},
+		}}
+		rv = g.PredecessorsWith(envid, ef, vf)
+
+		if len(rv) != 1 {
+			return e, false
+		}
+		sock := rv[0]
+	} else {
 		envid, exists := findEnv(g, src)
 		if !exists {
 			// this is would be a pretty weird case
 			return e, false
 		}
 
-		envvt, _ := g.Get(envid)
-		envvt.ie.ForEach(func(_ string, val ps.Any) {
-			e2 := val.(StandardEdge)
-			if e2.Label == "envlink" {
-				// FIXME really, really not lovely to have to scan through all these like this
-				vt, err := g.Get(e2.Target)
-				if err != nil {
-					// err means not found; skip
-					return
-				}
-
-				if vt.v.Typ() == "process" {
-					// TODO ugh this is where we need multi-vertex returns from splitters
-				}
-			}
-		})
-	} else {
-		g.Vertices(func(vtx Vertex, id int) bool {
-			return false
-		})
+		// Walk the graph to find the vertex representing the unix socket
+		ef := EdgeFilter{EType: "envlink"}
+		vf := VertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
+		rv = g.PredecessorsWith(envid, ef, vf)
+		if len(rv) != 1 {
+			return e, false
+		}
+		sock := rv[0]
 	}
 
-	return e, false
+	// With sock in hand, now find its proc
+	rv = g.SuccessorsWith(sock.id, EdgeFilter{"", nil}, VertexFilter{"process", nil})
+	if len(rv) != 1 {
+		// TODO could/will we ever allow >1?
+		return e, false
+	}
+
+	rv = g.SuccessorsWith(rv[0].id, EdgeFilter{"", nil}, VertexFilter{"dataset", nil})
+	if len(rv) != 1 {
+		return e, false
+	}
+	dataset := rv[0]
+
+	// if the spec indicates a subset, find it
+	if es.Subset != "" {
+		rv = g.SuccessorsWith(rv[0].id, EdgeFilter{"", nil}, VertexFilter{"dataset", []PropQ{{"name", es.Subset}}})
+		if len(rv) != 1 {
+			return e, false
+		}
+		dataset = rv[0]
+	}
+
+	// FIXME only recording the final target id is totally broken; see https://github.com/sdboyer/pipeviz/issues/37
+
+	// Aaaand we found our target.
+	e.Target = dataset.id
+	return e, true
 }
 
 //func resolveSpecCommit(g *CoreGraph, src vtTuple, e SpecCommit) (StandardEdge, bool) {
