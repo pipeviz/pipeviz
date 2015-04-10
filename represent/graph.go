@@ -221,6 +221,18 @@ func (g *CoreGraph) Get(id int) (vtTuple, error) {
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
 func (g *CoreGraph) OutWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
+	return g.arcWith(egoId, etype, props, false)
+}
+
+// Inspects the indicated vertex's set of in-edges, returning a slice of
+// those that match on type and properties. ETypeNone and nil can be passed
+// for the last two parameters respectively, in which case the filters will
+// be bypassed.
+func (g *CoreGraph) InWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
+	return g.arcWith(egoId, etype, props, true)
+}
+
+func (g *CoreGraph) arcWith(egoId int, etype EType, props []PropQ, in bool) (es []StandardEdge) {
 	vt, err := g.Get(egoId)
 	if err != nil {
 		// vertex doesn't exist
@@ -246,6 +258,11 @@ func (g *CoreGraph) OutWith(egoId int, etype EType, props []PropQ) (es []Standar
 		es = append(es, edge)
 	}
 
-	vt.oe.ForEach(fef)
+	if in {
+		vt.ie.ForEach(fef)
+	} else {
+		vt.oe.ForEach(fef)
+	}
+
 	return
 }
