@@ -162,9 +162,6 @@ func (g *CoreGraph) ensureVertex(vtx Vertex) (final vtTuple) {
 	return
 }
 
-// the func we eventually aim to fulfill, replacing Merge for integrating messages
-//func (g CoreGraph) Cons(interpret.Message) CoreGraph, Delta, error {}
-
 // Searches for an instance of the vertex within the graph. If found,
 // returns the vertex id, otherwise returns 0.
 //
@@ -192,14 +189,6 @@ func (g *CoreGraph) Find(vtx Vertex) int {
 	}
 
 	return 0
-}
-
-func (g *CoreGraph) Vertices(f func(Vertex, int) bool) {
-	for id, vt := range g.list {
-		if f(vt.v, id) {
-			return
-		}
-	}
 }
 
 // Gets the vtTuple for a given vertex id.
@@ -267,6 +256,12 @@ func (g *CoreGraph) arcWith(egoId int, etype EType, props []PropQ, in bool) (es 
 	return
 }
 
+// Returns a slice of vertices matching the filter conditions.
+//
+// The first parameter, VType, filters on vertex type; passing VTypeNone
+// will bypass the filter.
+//
+// The second parameter allows filtering on a k/v property pair.
 func (g *CoreGraph) VerticesWith(vtype VType, props []PropQ) (vs []vtTuple) {
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
 		vt := val.(vtTuple)

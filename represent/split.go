@@ -107,6 +107,7 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 
 	return v, edges, nil
 }
+
 func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
 	v := processVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
