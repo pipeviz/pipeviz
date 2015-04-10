@@ -42,7 +42,7 @@ type Vertex interface {
 	// Returns a string representing the object type. Used for namespacing keys, etc.
 	// While this is (currently) implemented as a method, its result must be invariant.
 	// TODO use string-const generator, other tricks to enforce invariance, compact space use
-	Typ() string
+	Typ() VType
 	// Returns a persistent map with the vertex's properties.
 	// TODO generate more type-restricted versions of the map?
 	Props() ps.Map
@@ -265,4 +265,24 @@ func (g *CoreGraph) arcWith(egoId int, etype EType, props []PropQ, in bool) (es 
 	}
 
 	return
+}
+
+func (g *CoreGraph) VerticesWith(vtype VType, props []PropQ) (vs []vtTuple) {
+	g.vtuples.ForEach(func(_ string, val ps.Any) {
+		vt := val.(vtTuple)
+		if vt.v.Typ() != vtype {
+			return
+		}
+
+		for _, p := range props {
+			prop, exists := vt.v.Props().Lookup(p.K)
+			if !exists || prop != p.V {
+				return
+			}
+		}
+
+		vs = append(vs, vt)
+	})
+
+	return vs
 }

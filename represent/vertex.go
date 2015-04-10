@@ -37,7 +37,7 @@ func (vtx environmentVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx environmentVertex) Typ() string {
+func (vtx environmentVertex) Typ() VType {
 	return "environment"
 }
 
@@ -59,7 +59,7 @@ func (vtx logicStateVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx logicStateVertex) Typ() string {
+func (vtx logicStateVertex) Typ() VType {
 	return "logicState"
 }
 
@@ -81,7 +81,7 @@ func (vtx processVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx processVertex) Typ() string {
+func (vtx processVertex) Typ() VType {
 	return "process"
 }
 
@@ -103,7 +103,7 @@ func (vtx datasetVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx datasetVertex) Typ() string {
+func (vtx datasetVertex) Typ() VType {
 	return "dataset"
 }
 
@@ -125,7 +125,7 @@ func (vtx commitVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx commitVertex) Typ() string {
+func (vtx commitVertex) Typ() VType {
 	return "commit"
 }
 
@@ -147,7 +147,7 @@ func (vtx commitMetaVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx commitMetaVertex) Typ() string {
+func (vtx commitMetaVertex) Typ() VType {
 	return "commitMeta"
 }
 
