@@ -163,12 +163,12 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		}
 
 		// Now, walk the environment's edges to find the vertex representing the port
-		ef := EdgeFilter{EType: "envlink"}
-		vf := VertexFilter{VType: "comm", Props: []PropQ{
-			{"port", es.ConnNet.Port},
-			{"proto", es.ConnNet.Proto},
-		}}
-		rv = g.PredecessorsWith(envid, BothFilter{vf, ef})
+		//ef := edgeFilter{EType: "envlink"}
+		//vf := vertexFilter{VType: "comm", Props: []PropQ{
+		//{"port", es.ConnNet.Port},
+		//{"proto", es.ConnNet.Proto},
+		//}}
+		rv = g.PredecessorsWith(envid, qbv("comm", "port", es.ConnNet.Port, "proto", es.ConnNet.Proto).and(qbe("envlink")))
 
 		if len(rv) != 1 {
 			return e, false
@@ -182,9 +182,9 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		}
 
 		// Walk the graph to find the vertex representing the unix socket
-		ef := EdgeFilter{EType: "envlink"}
-		vf := VertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
-		rv = g.PredecessorsWith(envid, BothFilter{vf, ef})
+		//ef := edgeFilter{EType: "envlink"}
+		//vf := vertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
+		rv = g.PredecessorsWith(envid, qbv("comm", "path", es.ConnUnix).and(qbe("envlink")))
 		if len(rv) != 1 {
 			return e, false
 		}
@@ -192,13 +192,13 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	}
 
 	// With sock in hand, now find its proc
-	rv = g.SuccessorsWith(sock.id, qbv("process").bf())
+	rv = g.SuccessorsWith(sock.id, qbv("process"))
 	if len(rv) != 1 {
 		// TODO could/will we ever allow >1?
 		return e, false
 	}
 
-	rv = g.SuccessorsWith(rv[0].id, qbv("dataset").bf())
+	rv = g.SuccessorsWith(rv[0].id, qbv("dataset"))
 	if len(rv) != 1 {
 		return e, false
 	}
@@ -206,7 +206,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 
 	// if the spec indicates a subset, find it
 	if es.Subset != "" {
-		rv = g.SuccessorsWith(rv[0].id, qbv("dataset", "name", es.Subset).bf())
+		rv = g.SuccessorsWith(rv[0].id, qbv("dataset", "name", es.Subset))
 		if len(rv) != 1 {
 			return e, false
 		}

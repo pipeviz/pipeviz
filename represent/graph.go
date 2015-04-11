@@ -24,19 +24,34 @@ type (
 	EType string
 )
 
-type EdgeFilter struct {
-	EType
-	Props []PropQ
+type EFilter interface {
+	EType() EType
+	EProps() []PropQ
 }
 
-type VertexFilter struct {
-	VType
-	Props []PropQ
+type VFilter interface {
+	VType() VType
+	VProps() []PropQ
 }
 
-type BothFilter struct {
-	VertexFilter
-	EdgeFilter
+type VEFilter interface {
+	EFilter
+	VFilter
+}
+
+type edgeFilter struct {
+	etype EType
+	props []PropQ
+}
+
+type vertexFilter struct {
+	vtype VType
+	props []PropQ
+}
+
+type bothFilter struct {
+	VFilter
+	EFilter
 }
 
 const (
@@ -231,7 +246,7 @@ func (g *CoreGraph) Get(id int) (vtTuple, error) {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *CoreGraph) OutWith(egoId int, ef EdgeFilter) (es []StandardEdge) {
+func (g *CoreGraph) OutWith(egoId int, ef EFilter) (es []StandardEdge) {
 	return g.arcWith(egoId, ef, false)
 }
 
@@ -239,12 +254,12 @@ func (g *CoreGraph) OutWith(egoId int, ef EdgeFilter) (es []StandardEdge) {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *CoreGraph) InWith(egoId int, ef EdgeFilter) (es []StandardEdge) {
+func (g *CoreGraph) InWith(egoId int, ef EFilter) (es []StandardEdge) {
 	return g.arcWith(egoId, ef, true)
 }
 
-func (g *CoreGraph) arcWith(egoId int, ef EdgeFilter, in bool) (es []StandardEdge) {
-	etype, props := ef.EType, ef.Props
+func (g *CoreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) {
+	etype, props := ef.EType(), ef.EProps()
 	vt, err := g.Get(egoId)
 	if err != nil {
 		// vertex doesn't exist
@@ -282,19 +297,20 @@ func (g *CoreGraph) arcWith(egoId int, ef EdgeFilter, in bool) (es []StandardEdg
 // Return a slice of vtTuples that are successors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the successor
 // vertices pass the VertexFilter.
-func (g *CoreGraph) SuccessorsWith(egoId int, bf BothFilter) (vts []vtTuple) {
-	return g.adjacentWith(egoId, bf, false)
+func (g *CoreGraph) SuccessorsWith(egoId int, vef VEFilter) (vts []vtTuple) {
+	return g.adjacentWith(egoId, vef, false)
 }
 
 // Return a slice of vtTuples that are predecessors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the predecessor
 // vertices pass the VertexFilter.
-func (g *CoreGraph) PredecessorsWith(egoId int, bf BothFilter) (vts []vtTuple) {
-	return g.adjacentWith(egoId, bf, true)
+func (g *CoreGraph) PredecessorsWith(egoId int, vef VEFilter) (vts []vtTuple) {
+	return g.adjacentWith(egoId, vef, true)
 }
 
-func (g *CoreGraph) adjacentWith(egoId int, bf BothFilter, in bool) (vts []vtTuple) {
-	ef, vf := bf.EdgeFilter, bf.VertexFilter
+func (g *CoreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTuple) {
+	etype, eprops := vef.EType(), vef.EProps()
+	vtype, vprops := vef.VType(), vef.VProps()
 	vt, err := g.Get(egoId)
 	if err != nil {
 		// vertex doesn't exist
@@ -309,12 +325,12 @@ func (g *CoreGraph) adjacentWith(egoId int, bf BothFilter, in bool) (vts []vtTup
 	// TODO specialize the func for zero-cases
 	feef = func(k string, v ps.Any) {
 		edge := v.(StandardEdge)
-		if ef.EType != ETypeNone && ef.EType != edge.EType {
+		if etype != ETypeNone && etype != edge.EType {
 			// etype doesn't match
 			return
 		}
 
-		for _, p := range ef.Props {
+		for _, p := range eprops {
 			prop, exists := edge.Props.Lookup(p.K)
 			if !exists || prop != p.V {
 				return
@@ -345,11 +361,11 @@ func (g *CoreGraph) adjacentWith(egoId int, bf BothFilter, in bool) (vts []vtTup
 		}
 
 		// FIXME can't rely on Typ() method here, need to store it
-		if vf.VType != VTypeNone && vf.VType != adjvt.v.Typ() {
+		if vtype != VTypeNone && vtype != adjvt.v.Typ() {
 			continue
 		}
 
-		for _, p := range vf.Props {
+		for _, p := range vprops {
 			prop, exists := adjvt.v.Props().Lookup(p.K)
 			if !exists || prop != p.V {
 				continue
@@ -368,8 +384,8 @@ func (g *CoreGraph) adjacentWith(egoId int, bf BothFilter, in bool) (vts []vtTup
 // will bypass the filter.
 //
 // The second parameter allows filtering on a k/v property pair.
-func (g *CoreGraph) VerticesWith(vf VertexFilter) (vs []vtTuple) {
-	vtype, props := vf.VType, vf.Props
+func (g *CoreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
+	vtype, props := vf.VType(), vf.VProps()
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
 		vt := val.(vtTuple)
 		if vt.v.Typ() != vtype {
@@ -390,30 +406,62 @@ func (g *CoreGraph) VerticesWith(vf VertexFilter) (vs []vtTuple) {
 }
 
 // all temporary functions to just make query building a little easier for now
-func (vf VertexFilter) bf() BothFilter {
-	return BothFilter{vf, EdgeFilter{}}
+func (vf vertexFilter) VType() VType {
+	return vf.vtype
 }
 
-func (ef EdgeFilter) bf() BothFilter {
-	return BothFilter{VertexFilter{}, ef}
+func (vf vertexFilter) VProps() []PropQ {
+	return vf.props
+}
+
+func (vf vertexFilter) EType() EType {
+	return ETypeNone
+}
+
+func (vf vertexFilter) EProps() []PropQ {
+	return nil
+}
+
+func (vf vertexFilter) and(ef EFilter) VEFilter {
+	return bothFilter{vf, ef}
+}
+
+func (ef edgeFilter) VType() VType {
+	return VTypeNone
+}
+
+func (ef edgeFilter) VProps() []PropQ {
+	return nil
+}
+
+func (ef edgeFilter) EType() EType {
+	return ef.etype
+}
+
+func (ef edgeFilter) EProps() []PropQ {
+	return ef.props
+}
+
+func (ef edgeFilter) and(vf VFilter) VEFilter {
+	return bothFilter{vf, ef}
 }
 
 // first string is vtype, then pairs after that are props
-func qbv(v ...interface{}) VertexFilter {
+func qbv(v ...interface{}) vertexFilter {
 	switch len(v) {
 	case 0:
-		return VertexFilter{}
+		return vertexFilter{VTypeNone, nil}
 	case 1, 2:
-		return VertexFilter{v[0].(VType), nil}
+		return vertexFilter{v[0].(VType), nil}
 	default:
-		vf := VertexFilter{v[0].(VType), nil}
+		vf := vertexFilter{v[0].(VType), nil}
 		v = v[1:]
 
 		var k string
 		var v2 interface{}
 		for len(v) > 1 {
 			k, v2, v = v[0].(string), v[1], v[2:]
-			vf.Props = append(vf.Props, PropQ{k, v2})
+			vf.props = append(vf.props, PropQ{k, v2})
 		}
 
 		return vf
@@ -421,23 +469,23 @@ func qbv(v ...interface{}) VertexFilter {
 }
 
 // first string is etype, then pairs after that are props
-func qbe(v ...interface{}) EdgeFilter {
+func qbe(v ...interface{}) edgeFilter {
 	switch len(v) {
 	case 0:
-		return EdgeFilter{}
+		return edgeFilter{ETypeNone, nil}
 	case 1, 2:
-		return EdgeFilter{v[0].(EType), nil}
+		return edgeFilter{v[0].(EType), nil}
 	default:
-		vf := EdgeFilter{v[0].(EType), nil}
+		ef := edgeFilter{v[0].(EType), nil}
 		v = v[1:]
 
 		var k string
 		var v2 interface{}
 		for len(v) > 1 {
 			k, v2, v = v[0].(string), v[1], v[2:]
-			vf.Props = append(vf.Props, PropQ{k, v2})
+			ef.props = append(ef.props, PropQ{k, v2})
 		}
 
-		return vf
+		return ef
 	}
 }
