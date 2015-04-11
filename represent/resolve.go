@@ -28,21 +28,7 @@ func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool
 }
 
 func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e StandardEdge, success bool) {
-	e = StandardEdge{
-		Source: src.id,
-		Props:  ps.NewMap(),
-		EType:  "envlink",
-	}
-
-	// First, check if this vertex already *has* an outbound envlink; semantics dictate there can be only one.
-	src.oe.ForEach(func(_ string, val ps.Any) {
-		edge := val.(StandardEdge)
-		if edge.EType == "envlink" {
-			success = true
-			// FIXME need a way to cut out early
-			e = edge
-		}
-	})
+	_, e, success = findEnv(g, src)
 
 	// Whether we find a match or not, have to merge in the EnvLink
 	if es.Address.Hostname != "" {
@@ -60,25 +46,20 @@ func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e
 
 	// If we already found the matching edge, bail out now
 	if success {
-		return e, true
+		return
 	}
 
 	rv := g.VerticesWith(qbv("environment"))
-	var envid int
 	for _, vt := range rv {
 		// TODO this'll be cross-package eventually - reorg needed
 		if matchEnvLink(e.Props, vt.v.Props()) {
-			envid = vt.id
+			success = true
+			e.Target = vt.id
 			break
 		}
 	}
 
-	// No matching env found, bail out
-	if envid == 0 {
-		return e, false
-	}
-
-	return e, success
+	return
 }
 
 func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) (e StandardEdge, success bool) {
@@ -94,14 +75,11 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		// FIXME this approach just always updates the mid, which is weird?
 		e.Props = e.Props.Set("name", Property{MsgSrc: mid, Value: es.Name})
 
-		src.oe.ForEach(func(_ string, val ps.Any) {
-			edge := val.(StandardEdge)
-			if name, exists := edge.Props.Lookup("name"); exists && edge.EType == "datalink" && name == es.Name {
-				// FIXME need a way to cut out early
-				success = true
-				e = edge
-			}
-		})
+		re := g.OutWith(src.id, qbe("datalink", "name", es.Name))
+		if len(re) == 1 {
+			success = true
+			e = re[0]
+		}
 	}
 
 	if es.Type != "" {
@@ -139,7 +117,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	}
 
 	if success {
-		return e, true
+		return
 	}
 
 	var sock vtTuple
@@ -150,7 +128,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		rv = g.VerticesWith(qbv("environment"))
 		var envid int
 		for _, vt := range rv {
-			// TODO this'll be cross-package eventually - reorg needed
+			// TODO matchAddress() func will need to be reorged to cross-package eventually - export!
 			if matchAddress(e.Props, vt.v.Props()) {
 				envid = vt.id
 				break
@@ -159,7 +137,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 
 		// No matching env found, bail out
 		if envid == 0 {
-			return e, false
+			return
 		}
 
 		// Now, walk the environment's edges to find the vertex representing the port
@@ -171,14 +149,15 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		rv = g.PredecessorsWith(envid, qbv("comm", "port", es.ConnNet.Port, "proto", es.ConnNet.Proto).and(qbe("envlink")))
 
 		if len(rv) != 1 {
-			return e, false
+			return
 		}
 		sock = rv[0]
 	} else {
-		envid, exists := findEnv(g, src)
+		envid, _, exists := findEnv(g, src)
+
 		if !exists {
 			// this is would be a pretty weird case
-			return e, false
+			return
 		}
 
 		// Walk the graph to find the vertex representing the unix socket
@@ -186,7 +165,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		//vf := vertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
 		rv = g.PredecessorsWith(envid, qbv("comm", "path", es.ConnUnix).and(qbe("envlink")))
 		if len(rv) != 1 {
-			return e, false
+			return
 		}
 		sock = rv[0]
 	}
@@ -195,12 +174,12 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	rv = g.SuccessorsWith(sock.id, qbv("process"))
 	if len(rv) != 1 {
 		// TODO could/will we ever allow >1?
-		return e, false
+		return
 	}
 
 	rv = g.SuccessorsWith(rv[0].id, qbv("dataset"))
 	if len(rv) != 1 {
-		return e, false
+		return
 	}
 	dataset := rv[0]
 
@@ -208,7 +187,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	if es.Subset != "" {
 		rv = g.SuccessorsWith(rv[0].id, qbv("dataset", "name", es.Subset))
 		if len(rv) != 1 {
-			return e, false
+			return
 		}
 		dataset = rv[0]
 	}
@@ -216,8 +195,9 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	// FIXME only recording the final target id is totally broken; see https://github.com/sdboyer/pipeviz/issues/37
 
 	// Aaaand we found our target.
+	success = true
 	e.Target = dataset.id
-	return e, true
+	return
 }
 
 func resolveSpecCommit(g *CoreGraph, mid int, src vtTuple, es SpecCommit) (e StandardEdge, success bool) {
@@ -243,15 +223,19 @@ func resolveSpecCommit(g *CoreGraph, mid int, src vtTuple, es SpecCommit) (e Sta
 //}
 
 // Searches the given vertex's out-edges to find its environment's vertex id.
-func findEnv(g *CoreGraph, vt vtTuple) (id int, success bool) {
-	vt.oe.ForEach(func(_ string, val ps.Any) {
-		edge := val.(StandardEdge)
-		if edge.EType == "envlink" {
-			success = true
-			// FIXME need a way to cut out early
-			id = edge.Target
-		}
-	})
+//
+// Also conveniently initializes a StandardEdge to the standard zero-state for an envlink.
+func findEnv(g *CoreGraph, vt vtTuple) (vid int, edge StandardEdge, success bool) {
+	edge = StandardEdge{
+		Source: vt.id,
+		Props:  ps.NewMap(),
+		EType:  "envlink",
+	}
+
+	re := g.OutWith(vt.id, qbe("envlink"))
+	if len(re) == 1 {
+		vid, edge, success = re[0].Target, re[0], true
+	}
 
 	return
 }
