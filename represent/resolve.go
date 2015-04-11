@@ -20,8 +20,8 @@ func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool
 		return resolveDataLink(g, mid, src, es)
 	case SpecCommit:
 		return resolveSpecCommit(g, mid, src, es)
-		//case SpecLocalLogic:
-		//return resolveSpecLocalLogic(g, src, es)
+	case SpecLocalLogic:
+		return resolveSpecLocalLogic(g, mid, src, es)
 	}
 
 	return StandardEdge{}, false
@@ -204,10 +204,10 @@ func resolveSpecCommit(g *CoreGraph, mid int, src vtTuple, es SpecCommit) (e Sta
 	e = StandardEdge{
 		Source: src.id,
 		Props:  ps.NewMap(),
-		EType:  "logic-version",
+		EType:  "version",
 	}
 
-	re := g.OutWith(src.id, qbe("logic-version", "sha1", es.Sha1))
+	re := g.OutWith(src.id, qbe("version", "sha1", es.Sha1))
 	// TODO could there ever be >1?
 	if len(re) == 1 {
 		success = true
@@ -218,9 +218,32 @@ func resolveSpecCommit(g *CoreGraph, mid int, src vtTuple, es SpecCommit) (e Sta
 	return
 }
 
-//func resolveSpecLocalLogic(g *CoreGraph, src vtTuple, e SpecLocalLogic) (StandardEdge, bool) {
-//g.Vertices(func(vtx Vertex, id int) bool {})
-//}
+func resolveSpecLocalLogic(g *CoreGraph, mid int, src vtTuple, es SpecLocalLogic) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "logic-link",
+	}
+
+	// search for existing link
+	re := g.OutWith(src.id, qbe("logic-link", "path", es.Path))
+	if len(re) == 1 {
+		// TODO don't set the path prop again, it's the unique id...meh, same question here w/uniqueness as above
+		success = true
+		e = re[0]
+		return
+	}
+
+	// no existing link found, search for proc directly
+	envid, _, _ := findEnv(g, src)
+	rv := g.PredecessorsWith(envid, qbv("logicState", "path", es.Path))
+	if len(rv) == 1 {
+		success = true
+		e.Target = rv[0].id
+	}
+
+	return
+}
 
 // Searches the given vertex's out-edges to find its environment's vertex id.
 //
