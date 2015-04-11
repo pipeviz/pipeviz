@@ -226,19 +226,20 @@ func (g *CoreGraph) Get(id int) (vtTuple, error) {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *CoreGraph) OutWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
-	return g.arcWith(egoId, etype, props, false)
+func (g *CoreGraph) OutWith(egoId int, ef EdgeFilter) (es []StandardEdge) {
+	return g.arcWith(egoId, ef, false)
 }
 
 // Inspects the indicated vertex's set of in-edges, returning a slice of
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *CoreGraph) InWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
-	return g.arcWith(egoId, etype, props, true)
+func (g *CoreGraph) InWith(egoId int, ef EdgeFilter) (es []StandardEdge) {
+	return g.arcWith(egoId, ef, true)
 }
 
-func (g *CoreGraph) arcWith(egoId int, etype EType, props []PropQ, in bool) (es []StandardEdge) {
+func (g *CoreGraph) arcWith(egoId int, ef EdgeFilter, in bool) (es []StandardEdge) {
+	etype, props := ef.EType, ef.Props
 	vt, err := g.Get(egoId)
 	if err != nil {
 		// vertex doesn't exist
@@ -361,7 +362,8 @@ func (g *CoreGraph) adjacentWith(egoId int, ef EdgeFilter, vf VertexFilter, in b
 // will bypass the filter.
 //
 // The second parameter allows filtering on a k/v property pair.
-func (g *CoreGraph) VerticesWith(vtype VType, props []PropQ) (vs []vtTuple) {
+func (g *CoreGraph) VerticesWith(vf VertexFilter) (vs []vtTuple) {
+	vtype, props := vf.VType, vf.Props
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
 		vt := val.(vtTuple)
 		if vt.v.Typ() != vtype {
