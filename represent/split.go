@@ -40,7 +40,11 @@ func Split(d interface{}, id int) ([]SplitData, error) {
 		return splitLogicState(v, id)
 	case interpret.Process:
 		return splitProcess(v, id)
-		// TODO missing dataset, commit, and commitmeta
+	case interpret.Commit:
+		return splitCommit(v, id)
+	case interpret.CommitMeta:
+		return splitCommitMeta(v, id)
+		// TODO missing dataset
 	}
 
 	return nil, errors.New("No handler for object type")
@@ -142,11 +146,11 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 		v2 := commVertex{props: ps.NewMap()}
 
 		if listen.Type == "unix" {
-			v2.props = v2.props.Set("path", listen.Path)
+			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
 		} else {
-			v2.props = v2.props.Set("port", listen.Port)
+			v2.props = v2.props.Set("port", Property{MsgSrc: id, Value: listen.Port})
 			// FIXME protos are a slice, wtf do we do about this
-			v2.props = v2.props.Set("proto", listen.Proto)
+			v2.props = v2.props.Set("proto", Property{MsgSrc: id, Value: listen.Proto})
 		}
 		v2.props = v2.props.Set("type", listen.Type)
 		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment, SpecProc{d.Pid}}})
@@ -156,6 +160,46 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 
 	edges = append(edges, d.Environment)
 	return append([]SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
+}
+
+func splitCommit(d interpret.Commit, id int) ([]SplitData, error) {
+	v := commitVertex{props: ps.NewMap()}
+
+	v.props = v.props.Set("sha1", Property{MsgSrc: id, Value: d.Sha1})
+	if d.Author != "" {
+		v.props = v.props.Set("author", Property{MsgSrc: id, Value: d.Author})
+	}
+	if d.Date != "" {
+		v.props = v.props.Set("date", Property{MsgSrc: id, Value: d.Date})
+	}
+	if d.Subject != "" {
+		v.props = v.props.Set("subject", Property{MsgSrc: id, Value: d.Subject})
+	}
+
+	var edges EdgeSpecs
+	for _, parent := range d.Parents {
+		edges = append(edges, SpecCommit{parent})
+	}
+
+	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
+}
+
+func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
+	sd := make([]SplitData, 0)
+
+	for _, tag := range d.Tags {
+		v := vcsLabelVertex{ps.NewMap()}
+		v.props = v.props.Set("name", tag)
+		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+	}
+
+	if d.TestState != "" {
+		v := testResultVertex{ps.NewMap()}
+		v.props = v.props.Set("result", d.TestState)
+		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+	}
+
+	return sd, nil
 }
 
 // TODO can't do this till refactor interpret.Dataset to transform into something sane

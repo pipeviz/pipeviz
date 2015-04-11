@@ -166,20 +166,42 @@ func (vtx commitVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type commitMetaVertex struct {
+type vcsLabelVertex struct {
 	props ps.Map
 }
 
-func (vtx commitMetaVertex) Props() ps.Map {
+func (vtx vcsLabelVertex) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx commitMetaVertex) Typ() VType {
-	return "commitMeta"
+func (vtx vcsLabelVertex) Typ() VType {
+	return "vcs-label"
 }
 
-func (vtx commitMetaVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(commitMetaVertex); !ok {
+func (vtx vcsLabelVertex) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vcsLabelVertex); !ok {
+		// NOTE remember, formatting with types means reflection
+		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
+	}
+
+	vtx.props = GenericMerge(vtx.props, ivtx.Props())
+	return vtx, nil
+}
+
+type testResultVertex struct {
+	props ps.Map
+}
+
+func (vtx testResultVertex) Props() ps.Map {
+	return vtx.props
+}
+
+func (vtx testResultVertex) Typ() VType {
+	return "test-result"
+}
+
+func (vtx testResultVertex) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(testResultVertex); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
