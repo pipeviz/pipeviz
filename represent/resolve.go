@@ -63,7 +63,7 @@ func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e
 		return e, true
 	}
 
-	rv := g.VerticesWith("environment", nil)
+	rv := g.VerticesWith(qbv("environment"))
 	var envid int
 	for _, vt := range rv {
 		// TODO this'll be cross-package eventually - reorg needed
@@ -147,7 +147,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	// If net, must scan; if local, a bit easier.
 	if !isLocal {
 		// First, find the environment vertex
-		rv = g.VerticesWith("environment", nil)
+		rv = g.VerticesWith(qbv("environment"))
 		var envid int
 		for _, vt := range rv {
 			// TODO this'll be cross-package eventually - reorg needed
@@ -168,7 +168,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 			{"port", es.ConnNet.Port},
 			{"proto", es.ConnNet.Proto},
 		}}
-		rv = g.PredecessorsWith(envid, ef, vf)
+		rv = g.PredecessorsWith(envid, BothFilter{vf, ef})
 
 		if len(rv) != 1 {
 			return e, false
@@ -184,7 +184,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		// Walk the graph to find the vertex representing the unix socket
 		ef := EdgeFilter{EType: "envlink"}
 		vf := VertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
-		rv = g.PredecessorsWith(envid, ef, vf)
+		rv = g.PredecessorsWith(envid, BothFilter{vf, ef})
 		if len(rv) != 1 {
 			return e, false
 		}
@@ -192,13 +192,13 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	}
 
 	// With sock in hand, now find its proc
-	rv = g.SuccessorsWith(sock.id, EdgeFilter{"", nil}, VertexFilter{"process", nil})
+	rv = g.SuccessorsWith(sock.id, qbv("process").bf())
 	if len(rv) != 1 {
 		// TODO could/will we ever allow >1?
 		return e, false
 	}
 
-	rv = g.SuccessorsWith(rv[0].id, EdgeFilter{"", nil}, VertexFilter{"dataset", nil})
+	rv = g.SuccessorsWith(rv[0].id, qbv("dataset").bf())
 	if len(rv) != 1 {
 		return e, false
 	}
@@ -206,7 +206,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 
 	// if the spec indicates a subset, find it
 	if es.Subset != "" {
-		rv = g.SuccessorsWith(rv[0].id, EdgeFilter{"", nil}, VertexFilter{"dataset", []PropQ{{"name", es.Subset}}})
+		rv = g.SuccessorsWith(rv[0].id, qbv("dataset", "name", es.Subset).bf())
 		if len(rv) != 1 {
 			return e, false
 		}

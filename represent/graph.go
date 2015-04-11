@@ -34,6 +34,11 @@ type VertexFilter struct {
 	Props []PropQ
 }
 
+type BothFilter struct {
+	VertexFilter
+	EdgeFilter
+}
+
 const (
 	VTypeNone VType = ""
 	ETypeNone EType = ""
@@ -277,18 +282,19 @@ func (g *CoreGraph) arcWith(egoId int, ef EdgeFilter, in bool) (es []StandardEdg
 // Return a slice of vtTuples that are successors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the successor
 // vertices pass the VertexFilter.
-func (g *CoreGraph) SuccessorsWith(egoId int, ef EdgeFilter, vf VertexFilter) (vts []vtTuple) {
-	return g.adjacentWith(egoId, ef, vf, false)
+func (g *CoreGraph) SuccessorsWith(egoId int, bf BothFilter) (vts []vtTuple) {
+	return g.adjacentWith(egoId, bf, false)
 }
 
 // Return a slice of vtTuples that are predecessors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the predecessor
 // vertices pass the VertexFilter.
-func (g *CoreGraph) PredecessorsWith(egoId int, ef EdgeFilter, vf VertexFilter) (vts []vtTuple) {
-	return g.adjacentWith(egoId, ef, vf, true)
+func (g *CoreGraph) PredecessorsWith(egoId int, bf BothFilter) (vts []vtTuple) {
+	return g.adjacentWith(egoId, bf, true)
 }
 
-func (g *CoreGraph) adjacentWith(egoId int, ef EdgeFilter, vf VertexFilter, in bool) (vts []vtTuple) {
+func (g *CoreGraph) adjacentWith(egoId int, bf BothFilter, in bool) (vts []vtTuple) {
+	ef, vf := bf.EdgeFilter, bf.VertexFilter
 	vt, err := g.Get(egoId)
 	if err != nil {
 		// vertex doesn't exist
@@ -381,4 +387,57 @@ func (g *CoreGraph) VerticesWith(vf VertexFilter) (vs []vtTuple) {
 	})
 
 	return vs
+}
+
+// all temporary functions to just make query building a little easier for now
+func (vf VertexFilter) bf() BothFilter {
+	return BothFilter{vf, EdgeFilter{}}
+}
+
+func (ef EdgeFilter) bf() BothFilter {
+	return BothFilter{VertexFilter{}, ef}
+}
+
+// first string is vtype, then pairs after that are props
+func qbv(v ...interface{}) VertexFilter {
+	switch len(v) {
+	case 0:
+		return VertexFilter{}
+	case 1, 2:
+		return VertexFilter{v[0].(VType), nil}
+	default:
+		vf := VertexFilter{v[0].(VType), nil}
+		v = v[1:]
+
+		var k string
+		var v2 interface{}
+		for len(v) > 1 {
+			k, v2, v = v[0].(string), v[1], v[2:]
+			vf.Props = append(vf.Props, PropQ{k, v2})
+		}
+
+		return vf
+	}
+}
+
+// first string is etype, then pairs after that are props
+func qbe(v ...interface{}) EdgeFilter {
+	switch len(v) {
+	case 0:
+		return EdgeFilter{}
+	case 1, 2:
+		return EdgeFilter{v[0].(EType), nil}
+	default:
+		vf := EdgeFilter{v[0].(EType), nil}
+		v = v[1:]
+
+		var k string
+		var v2 interface{}
+		for len(v) > 1 {
+			k, v2, v = v[0].(string), v[1], v[2:]
+			vf.Props = append(vf.Props, PropQ{k, v2})
+		}
+
+		return vf
+	}
 }
