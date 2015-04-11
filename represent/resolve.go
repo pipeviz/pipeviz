@@ -18,10 +18,10 @@ func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool
 		return resolveEnvLink(g, mid, src, es)
 	case interpret.DataLink:
 		return resolveDataLink(g, mid, src, es)
-	case SpecCommit:
-		return resolveSpecCommit(g, src, es)
-	case SpecLocalLogic:
-		return resolveSpecLocalLogic(g, src, es)
+		//case SpecCommit:
+		//return resolveSpecCommit(g, src, es)
+		//case SpecLocalLogic:
+		//return resolveSpecLocalLogic(g, src, es)
 	}
 
 	return StandardEdge{}, false
@@ -63,40 +63,20 @@ func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e
 		return e, true
 	}
 
-	g.Vertices(func(vtx Vertex, id int) bool {
-		if v, ok := vtx.(environmentVertex); !ok {
-			return false
+	rv := g.VerticesWith("environment", nil)
+	var envid int
+	for _, vt := range rv {
+		// TODO this'll be cross-package eventually - reorg needed
+		if matchEnvLink(e.Props, vt.v.Props()) {
+			envid = vt.id
+			break
 		}
+	}
 
-		// TODO for now we're just gonna return out the first matching edge
-		props := vtx.Props()
-
-		var val interface{}
-		var exists bool
-
-		if val, exists := props.Lookup("hostname"); exists && val == es.Address.Hostname {
-			success = true
-			e.Target = id
-			return true
-		}
-		if val, exists := props.Lookup("ipv4"); exists && val == es.Address.Ipv4 {
-			success = true
-			e.Target = id
-			return true
-		}
-		if val, exists := props.Lookup("ipv6"); exists && val == es.Address.Ipv6 {
-			success = true
-			e.Target = id
-			return true
-		}
-		if val, exists := props.Lookup("nick"); exists && val == es.Nick {
-			success = true
-			e.Target = id
-			return true
-		}
-
-		return false
-	})
+	// No matching env found, bail out
+	if envid == 0 {
+		return e, false
+	}
 
 	return e, success
 }
@@ -193,7 +173,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		if len(rv) != 1 {
 			return e, false
 		}
-		sock := rv[0]
+		sock = rv[0]
 	} else {
 		envid, exists := findEnv(g, src)
 		if !exists {
@@ -208,7 +188,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 		if len(rv) != 1 {
 			return e, false
 		}
-		sock := rv[0]
+		sock = rv[0]
 	}
 
 	// With sock in hand, now find its proc
@@ -261,7 +241,3 @@ func findEnv(g *CoreGraph, vt vtTuple) (id int, success bool) {
 
 	return
 }
-
-//func findByListener(g *CoreGraph, vt vtTuple) (vtTuple, bool) {
-
-//}
