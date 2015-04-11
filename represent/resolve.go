@@ -236,7 +236,7 @@ func resolveSpecLocalLogic(g *CoreGraph, mid int, src vtTuple, es SpecLocalLogic
 
 	// no existing link found, search for proc directly
 	envid, _, _ := findEnv(g, src)
-	rv := g.PredecessorsWith(envid, qbv("logicState", "path", es.Path))
+	rv := g.PredecessorsWith(envid, qbv("logic-state", "path", es.Path))
 	if len(rv) == 1 {
 		success = true
 		e.Target = rv[0].id

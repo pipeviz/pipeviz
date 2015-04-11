@@ -65,7 +65,7 @@ func (vtx logicStateVertex) Props() ps.Map {
 }
 
 func (vtx logicStateVertex) Typ() VType {
-	return "logicState"
+	return "logic-state"
 }
 
 func (vtx logicStateVertex) Merge(ivtx Vertex) (Vertex, error) {
