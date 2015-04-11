@@ -9,7 +9,6 @@ type StandardEdge struct {
 	EType  EType
 	// TODO do these *actually* need to be persistent structures?
 	Props ps.Map
-	Label string
 }
 
 // Edge partials contain the shorthand structural information common to all edges,

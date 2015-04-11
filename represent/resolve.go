@@ -31,13 +31,13 @@ func resolveEnvLink(g *CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e
 	e = StandardEdge{
 		Source: src.id,
 		Props:  ps.NewMap(),
-		Label:  "envlink",
+		EType:  "envlink",
 	}
 
 	// First, check if this vertex already *has* an outbound envlink; semantics dictate there can be only one.
 	src.oe.ForEach(func(_ string, val ps.Any) {
 		edge := val.(StandardEdge)
-		if edge.Label == "envlink" {
+		if edge.EType == "envlink" {
 			success = true
 			// FIXME need a way to cut out early
 			e = edge
@@ -85,7 +85,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	e = StandardEdge{
 		Source: src.id,
 		Props:  ps.NewMap(),
-		Label:  "datalink",
+		EType:  "datalink",
 	}
 
 	// DataLinks have a 'name' field that is expected to be unique for the source, if present
@@ -96,7 +96,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 
 		src.oe.ForEach(func(_ string, val ps.Any) {
 			edge := val.(StandardEdge)
-			if name, exists := edge.Props.Lookup("name"); exists && edge.Label == "datalink" && name == es.Name {
+			if name, exists := edge.Props.Lookup("name"); exists && edge.EType == "datalink" && name == es.Name {
 				// FIXME need a way to cut out early
 				success = true
 				e = edge
@@ -232,7 +232,7 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 func findEnv(g *CoreGraph, vt vtTuple) (id int, success bool) {
 	vt.oe.ForEach(func(_ string, val ps.Any) {
 		edge := val.(StandardEdge)
-		if edge.Label == "envlink" {
+		if edge.EType == "envlink" {
 			success = true
 			// FIXME need a way to cut out early
 			id = edge.Target
