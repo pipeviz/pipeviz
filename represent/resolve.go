@@ -18,8 +18,8 @@ func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool
 		return resolveEnvLink(g, mid, src, es)
 	case interpret.DataLink:
 		return resolveDataLink(g, mid, src, es)
-		//case SpecCommit:
-		//return resolveSpecCommit(g, src, es)
+	case SpecCommit:
+		return resolveSpecCommit(g, mid, src, es)
 		//case SpecLocalLogic:
 		//return resolveSpecLocalLogic(g, src, es)
 	}
@@ -220,9 +220,23 @@ func resolveDataLink(g *CoreGraph, mid int, src vtTuple, es interpret.DataLink) 
 	return e, true
 }
 
-//func resolveSpecCommit(g *CoreGraph, src vtTuple, e SpecCommit) (StandardEdge, bool) {
-//g.Vertices(func(vtx Vertex, id int) bool {})
-//}
+func resolveSpecCommit(g *CoreGraph, mid int, src vtTuple, es SpecCommit) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "logic-version",
+	}
+
+	re := g.OutWith(src.id, qbe("logic-version", "sha1", es.Sha1))
+	// TODO could there ever be >1?
+	if len(re) == 1 {
+		success = true
+		e.Target = re[0].Target
+		e.id = re[0].id
+	}
+
+	return
+}
 
 //func resolveSpecLocalLogic(g *CoreGraph, src vtTuple, e SpecLocalLogic) (StandardEdge, bool) {
 //g.Vertices(func(vtx Vertex, id int) bool {})
