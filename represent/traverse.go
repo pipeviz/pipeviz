@@ -1,6 +1,10 @@
 package represent
 
-import "github.com/mndrix/ps"
+import (
+	"bytes"
+
+	"github.com/mndrix/ps"
+)
 
 type EFilter interface {
 	EType() EType
@@ -152,8 +156,20 @@ func (g *CoreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) 
 
 		for _, p := range props {
 			prop, exists := edge.Props.Lookup(p.K)
-			if !exists || prop != p.V {
+			if !exists {
 				return
+			}
+
+			switch tv := prop.(type) {
+			default:
+				if prop != p.V {
+					return
+				}
+			case []byte:
+				cmptv, ok := p.V.([]byte)
+				if !ok || !bytes.Equal(tv, cmptv) {
+					return
+				}
 			}
 		}
 
@@ -207,8 +223,20 @@ func (g *CoreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTupl
 
 		for _, p := range eprops {
 			prop, exists := edge.Props.Lookup(p.K)
-			if !exists || prop != p.V {
+			if !exists {
 				return
+			}
+
+			switch tv := prop.(type) {
+			default:
+				if prop != p.V {
+					return
+				}
+			case []byte:
+				cmptv, ok := p.V.([]byte)
+				if !ok || !bytes.Equal(tv, cmptv) {
+					return
+				}
 			}
 		}
 
@@ -242,8 +270,20 @@ func (g *CoreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTupl
 
 		for _, p := range vprops {
 			prop, exists := adjvt.v.Props().Lookup(p.K)
-			if !exists || prop != p.V {
-				continue
+			if !exists {
+				return
+			}
+
+			switch tv := prop.(type) {
+			default:
+				if prop != p.V {
+					return
+				}
+			case []byte:
+				cmptv, ok := p.V.([]byte)
+				if !ok || !bytes.Equal(tv, cmptv) {
+					return
+				}
 			}
 		}
 
@@ -269,8 +309,20 @@ func (g *CoreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
 
 		for _, p := range props {
 			prop, exists := vt.v.Props().Lookup(p.K)
-			if !exists || prop != p.V {
+			if !exists {
 				return
+			}
+
+			switch tv := prop.(type) {
+			default:
+				if prop != p.V {
+					return
+				}
+			case []byte:
+				cmptv, ok := p.V.([]byte)
+				if !ok || !bytes.Equal(tv, cmptv) {
+					return
+				}
 			}
 		}
 

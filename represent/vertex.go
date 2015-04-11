@@ -21,7 +21,12 @@ func GenericMerge(old, nu ps.Map) ps.Map {
 			if val != "" {
 				old = old.Set(key, prop)
 			}
+		case []byte:
+			if len(val) != 0 {
+				old = old.Set(key, prop)
+			}
 		}
+
 	})
 
 	return old

@@ -39,7 +39,13 @@ func mapValEq(key string, l, r ps.Map) bool {
 		return false
 	}
 
-	return lv == rv
+	switch tlv := lv.(type) {
+	default:
+		return rv == lv
+	case []byte:
+		trv, ok := rv.([]byte)
+		return ok && bytes.Equal(tlv, trv)
+	}
 }
 
 // Identifier for Environments
