@@ -57,7 +57,6 @@ type vtTuple struct {
 
 type Property struct {
 	MsgSrc int
-	Key    string
 	Value  interface{}
 }
 
