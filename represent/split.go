@@ -8,8 +8,8 @@ import (
 )
 
 type SplitData struct {
-	Vertex
-	EdgeSpecs
+	Vertex    Vertex
+	EdgeSpecs EdgeSpecs
 }
 
 // TODO for now, no structure to this. change to queryish form later
