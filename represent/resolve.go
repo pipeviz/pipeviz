@@ -22,6 +22,8 @@ func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool
 		return resolveSpecCommit(g, mid, src, es)
 	case SpecLocalLogic:
 		return resolveSpecLocalLogic(g, mid, src, es)
+	case interpret.DataAlpha:
+		return resolveDataAlpha(g, mid, src, es)
 	}
 
 	return StandardEdge{}, false
@@ -240,6 +242,24 @@ func resolveSpecLocalLogic(g *CoreGraph, mid int, src vtTuple, es SpecLocalLogic
 	if len(rv) == 1 {
 		success = true
 		e.Target = rv[0].id
+	}
+
+	return
+}
+
+func resolveDataAlpha(g *CoreGraph, mid int, src vtTuple, es interpret.DataAlpha) (e StandardEdge, success bool) {
+	// TODO this makes a loop...are we cool with that?
+	success = true // impossible to fail here
+	e = StandardEdge{
+		Source: src.id,
+		Target: src.id,
+		Props:  ps.NewMap(),
+		EType:  "data-provenance",
+	}
+
+	re := g.OutWith(src.id, qbe("data-provenance"))
+	if len(re) == 1 {
+		e = re[0]
 	}
 
 	return
