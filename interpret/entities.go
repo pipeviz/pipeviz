@@ -75,6 +75,7 @@ type Commit struct {
 // FIXME this metaset/set design is not recursive, but it will need to be
 type DataMetaSet struct {
 	Environment EnvLink   `json:"environment"`
+	Path        string    `json:"path"`
 	Name        string    `json:"name"`
 	Subsets     []Dataset `json:"subsets"`
 }
