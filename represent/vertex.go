@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mndrix/ps"
+	"github.com/sdboyer/pipeviz/interpret"
 )
 
 func GenericMerge(old, nu ps.Map) ps.Map {
@@ -30,6 +31,48 @@ func GenericMerge(old, nu ps.Map) ps.Map {
 	})
 
 	return old
+}
+
+func assignEnvLink(mid int, e interpret.EnvLink, m ps.Map, excl bool) ps.Map {
+	m = assignAddress(mid, e.Address, m, excl)
+	if e.Nick != "" {
+		if excl {
+			m = m.Delete("hostname")
+			m = m.Delete("ipv4")
+			m = m.Delete("ipv6")
+		}
+		m = m.Set("nick", Property{MsgSrc: mid, Value: e.Nick})
+	} else if excl {
+		m = m.Delete("nick")
+	}
+
+	return m
+}
+
+func assignAddress(mid int, a interpret.Address, m ps.Map, excl bool) ps.Map {
+	if a.Hostname != "" {
+		if excl {
+			m = m.Delete("ipv4")
+			m = m.Delete("ipv6")
+		}
+		m = m.Set("hostname", Property{MsgSrc: mid, Value: a.Hostname})
+	}
+	if a.Ipv4 != "" {
+		if excl {
+			m = m.Delete("hostname")
+			m = m.Delete("ipv6")
+		}
+		m = m.Set("ipv4", Property{MsgSrc: mid, Value: a.Ipv4})
+	}
+	if a.Ipv6 != "" {
+		if excl {
+			m = m.Delete("hostname")
+			m = m.Delete("ipv4")
+		}
+		m = m.Set("ipv6", Property{MsgSrc: mid, Value: a.Ipv6})
+	}
+
+	return m
 }
 
 // All of the vertex types behave identically for now, but this will change as things mature
