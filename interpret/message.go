@@ -2,6 +2,7 @@ package interpret
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -90,6 +91,36 @@ func (m *Message) Each(f func(vertex interface{})) {
 	for _, e := range m.m.Cm {
 		f(e)
 	}
+}
+
+// Unmarshalers for variant subtypes
+
+// Unmarshaling a Dataset involves resolving whether it has α genesis (string), or
+// a provenancial one (struct). So we have to decode directly, here.
+func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
+	type αDataset struct {
+		Name       string    `json:"name"`
+		CreateTime string    `json:"create-time"`
+		Genesis    DataAlpha `json:"genesis"`
+	}
+	type provDataset struct {
+		Name       string         `json:"name"`
+		CreateTime string         `json:"create-time"`
+		Genesis    DataProvenance `json:"genesis"`
+	}
+
+	a, b := αDataset{}, provDataset{}
+	// use α first, as that can match the case where it's not specified (though schema
+	// currently does not allow that)
+	if err = json.Unmarshal(data, &a); err == nil {
+		ds.Name, ds.CreateTime, ds.Genesis = a.Name, a.CreateTime, a.Genesis
+	} else if err = json.Unmarshal(data, &b); err == nil {
+		ds.Name, ds.CreateTime, ds.Genesis = b.Name, b.CreateTime, b.Genesis
+	} else {
+		err = errors.New("JSON genesis did not match either alpha or provenancial forms.")
+	}
+
+	return err
 }
 
 func findEnv(envs []Environment, el EnvLink) (Environment, bool) {
