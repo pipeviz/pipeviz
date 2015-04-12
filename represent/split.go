@@ -189,13 +189,13 @@ func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
 
 	for _, tag := range d.Tags {
 		v := vcsLabelVertex{ps.NewMap()}
-		v.props = v.props.Set("name", tag)
+		v.props = v.props.Set("name", Property{MsgSrc: id, Value: tag})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	if d.TestState != "" {
 		v := testResultVertex{ps.NewMap()}
-		v.props = v.props.Set("result", d.TestState)
+		v.props = v.props.Set("result", Property{MsgSrc: id, Value: d.TestState})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
