@@ -7,26 +7,69 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
-// Performs simple equality comparison on the provided key between two persistent maps.
+// Performs simple equality comparison on the provided keys between two persistent maps.
 // CRUCIAL NOTE - returns false if either OR both keys do not exist.
-func mapValEq(key string, l, r ps.Map) bool {
-	lv, exists := l.Lookup(key)
-	if !exists {
-		return false
+func mapValEq(l, r ps.Map, keys ...string) bool {
+	for _, key := range keys {
+		lv, exists := l.Lookup(key)
+		if !exists {
+			return false
+		}
+
+		rv, exists := r.Lookup(key)
+		if !exists {
+			return false
+		}
+
+		switch tlv := lv.(type) {
+		default:
+			if rv != lv {
+				return false
+			}
+		case []byte:
+			trv, ok := rv.([]byte)
+			if ok && bytes.Equal(tlv, trv) { // for readability, instead of ! || !
+				continue
+			}
+			return false
+		}
 	}
 
-	rv, exists := r.Lookup(key)
-	if !exists {
-		return false
+	return true
+}
+
+// Performs equality comparison on the provided keys between two persistent maps.
+// Returns true IFF all values are equal. Unlike mapValEq, both keys not existing
+// *is* considered equality.
+func mapValEqAnd(l, r ps.Map, keys ...string) bool {
+	for _, key := range keys {
+		lv, lexists := l.Lookup(key)
+		rv, rexists := r.Lookup(key)
+
+		// bail out if one exists and the other doesn't
+		if lexists != rexists {
+			return false
+		}
+		// if neither exist, skip
+		if !lexists {
+			continue
+		}
+
+		switch tlv := lv.(type) {
+		default:
+			if rv != lv {
+				return false
+			}
+		case []byte:
+			trv, ok := rv.([]byte)
+			if ok && bytes.Equal(tlv, trv) { // for readability, instead of ! || !
+				continue
+			}
+			return false
+		}
 	}
 
-	switch tlv := lv.(type) {
-	default:
-		return rv == lv
-	case []byte:
-		trv, ok := rv.([]byte)
-		return ok && bytes.Equal(tlv, trv)
-	}
+	return true
 }
 
 func envLinkEqProps(e interpret.EnvLink, m ps.Map) bool {

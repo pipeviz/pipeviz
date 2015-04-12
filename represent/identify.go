@@ -51,13 +51,13 @@ func (i IdentifierEnvironment) Matches(a Vertex, b Vertex) bool {
 func matchAddress(a, b ps.Map) bool {
 	// For now, match if *any* non-empty of hostname, ipv4, or ipv6 match
 	// TODO this needs moar thinksies
-	if mapValEq("hostname", a, b) {
+	if mapValEq(a, b, "hostname") {
 		return true
 	}
-	if mapValEq("ipv4", a, b) {
+	if mapValEq(a, b, "ipv4") {
 		return true
 	}
-	if mapValEq("ipv6", a, b) {
+	if mapValEq(a, b, "ipv6") {
 		return true
 	}
 
@@ -66,7 +66,7 @@ func matchAddress(a, b ps.Map) bool {
 
 // Helper func to match env links
 func matchEnvLink(a, b ps.Map) bool {
-	return mapValEq("nick", a, b) || matchAddress(a, b)
+	return mapValEq(a, b, "nick") || matchAddress(a, b)
 }
 
 type IdentifierLogicState struct{}
@@ -86,7 +86,7 @@ func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	if !mapValEq("path", l.Props(), r.Props()) {
+	if !mapValEq(l.Props(), r.Props(), "path") {
 		return false
 	}
 
@@ -112,7 +112,7 @@ func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	if !mapValEq("name", l.Props(), r.Props()) {
+	if !mapValEq(l.Props(), r.Props(), "name") {
 		return false
 	}
 
@@ -161,5 +161,5 @@ func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 	}
 
 	// TODO numeric id within the 2^16 ring buffer that is pids is a horrible way to do this
-	return mapValEq("pid", l.Props(), r.Props()) && matchEnvLink(l.Props(), r.Props())
+	return mapValEq(l.Props(), r.Props(), "pid") && matchEnvLink(l.Props(), r.Props())
 }
