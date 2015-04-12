@@ -22,6 +22,8 @@ func Resolve(g *CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool
 		return resolveSpecCommit(g, mid, src, es)
 	case SpecLocalLogic:
 		return resolveSpecLocalLogic(g, mid, src, es)
+	case interpret.DataProvenance:
+		return resolveDataProvenance(g, mid, src, es)
 	case interpret.DataAlpha:
 		return resolveDataAlpha(g, mid, src, es)
 	}
@@ -244,6 +246,48 @@ func resolveSpecLocalLogic(g *CoreGraph, mid int, src vtTuple, es SpecLocalLogic
 		e.Target = rv[0].id
 	}
 
+	return
+}
+
+func resolveDataProvenance(g *CoreGraph, mid int, src vtTuple, es interpret.DataProvenance) (e StandardEdge, success bool) {
+	// FIXME this presents another weird case where "success" is not binary. We *could*
+	// find an already-existing data-provenance edge, but then have some net-addr params
+	// change which cause it to fail to resolve to an environment. If we call that successful,
+	// then it won't try to resolve again later...though, hm, just call it unsuccessful and
+	// then try again one more time. Maybe it is fine. THINK IT THROUGH.
+
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "data-provenance",
+	}
+	e.Props = assignAddress(mid, es.Address, e.Props, false)
+
+	re := g.OutWith(src.id, qbe("data-provenance"))
+	if len(re) == 1 {
+		// TODO wasteful, blargh
+		reresolve := mapValEqAnd(e.Props, re[0].Props, "hostname", "ipv4", "ipv6")
+
+		e = re[0]
+		if es.SnapTime != "" {
+			e.Props = e.Props.Set("snap-time", Property{MsgSrc: mid, Value: es.SnapTime})
+		}
+
+		if reresolve {
+			e.Props = assignAddress(mid, es.Address, e.Props, true)
+		} else {
+			return e, true
+		}
+	}
+
+	envid, found := g.findEnvironment(e.Props)
+	if !found {
+		// TODO returning this already-modified edge necessitates that the core system
+		// disregard 'failed' edges. which should be fine, that should be a guarantee
+		return e, false
+	}
+
+	e.Target, success = g.findDataset(envid, es.Dataset)
 	return
 }
 

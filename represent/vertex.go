@@ -35,15 +35,9 @@ func GenericMerge(old, nu ps.Map) ps.Map {
 
 func assignEnvLink(mid int, e interpret.EnvLink, m ps.Map, excl bool) ps.Map {
 	m = assignAddress(mid, e.Address, m, excl)
+	// nick is logically separate from network identity, so excl has no effect
 	if e.Nick != "" {
-		if excl {
-			m = m.Delete("hostname")
-			m = m.Delete("ipv4")
-			m = m.Delete("ipv6")
-		}
 		m = m.Set("nick", Property{MsgSrc: mid, Value: e.Nick})
-	} else if excl {
-		m = m.Delete("nick")
 	}
 
 	return m
@@ -262,7 +256,7 @@ func (vtx parentDatasetVertex) Props() ps.Map {
 }
 
 func (vtx parentDatasetVertex) Typ() VType {
-	return "test-result"
+	return "parent-dataset"
 }
 
 func (vtx parentDatasetVertex) Merge(ivtx Vertex) (Vertex, error) {

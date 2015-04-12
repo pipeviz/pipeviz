@@ -331,3 +331,33 @@ func (g *CoreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
 
 	return vs
 }
+
+func (g *CoreGraph) findEnvironment(props ps.Map) (envid int, success bool) {
+	rv := g.VerticesWith(qbv("environment"))
+	for _, vt := range rv {
+		if matchEnvLink(props, vt.v.Props()) {
+			return vt.id, true
+		}
+	}
+
+	return
+}
+
+func (g *CoreGraph) findDataset(envid int, name []string) (id int, success bool) {
+	// first time through use the parent type
+	vtype := "parent-dataset"
+
+	for len(name) > 0 {
+		n, name := name[0], name[1:]
+		rv := g.PredecessorsWith(envid, qbv(vtype, "name", n))
+		vtype = "dataset"
+
+		if len(rv) != 1 {
+			return 0, false
+		}
+
+		id = rv[0].id
+	}
+
+	return id, true
+}
