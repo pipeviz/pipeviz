@@ -209,3 +209,25 @@ func (vtx testResultVertex) Merge(ivtx Vertex) (Vertex, error) {
 	vtx.props = GenericMerge(vtx.props, ivtx.Props())
 	return vtx, nil
 }
+
+type parentDatasetVertex struct {
+	props ps.Map
+}
+
+func (vtx parentDatasetVertex) Props() ps.Map {
+	return vtx.props
+}
+
+func (vtx parentDatasetVertex) Typ() VType {
+	return "test-result"
+}
+
+func (vtx parentDatasetVertex) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(parentDatasetVertex); !ok {
+		// NOTE remember, formatting with types means reflection
+		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
+	}
+
+	vtx.props = GenericMerge(vtx.props, ivtx.Props())
+	return vtx, nil
+}

@@ -28,6 +28,10 @@ type SpecProc struct {
 	Pid int
 }
 
+type SpecLocalDataset struct {
+	NamePath []string // path through the series of names that arrives at the final dataset
+}
+
 // TODO unused until plugging/codegen
 type Splitter func(data interface{}, id int) ([]SplitData, error)
 
@@ -44,7 +48,10 @@ func Split(d interface{}, id int) ([]SplitData, error) {
 		return splitCommit(v, id)
 	case interpret.CommitMeta:
 		return splitCommitMeta(v, id)
-		// TODO missing dataset
+	case interpret.ParentDataset:
+		return splitParentDataset(v, id)
+	case interpret.Dataset:
+		return splitDataset(v, id)
 	}
 
 	return nil, errors.New("No handler for object type")
@@ -202,16 +209,35 @@ func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
 	return sd, nil
 }
 
-// TODO can't do this till refactor interpret.Dataset to transform into something sane
-//func splitDataset(d interpret.Dataset, id int) (VtxI, EdgeSpecs, error) {
-//v := datasetVertex{props: ps.NewMap()}
-//var edges EdgeSpecs
+func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) {
+	v := parentDatasetVertex{props: ps.NewMap()}
+	var edges EdgeSpecs
 
-//// Props first
-//if d.Name != "" {
-//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
-//}
-//if d.Name != "" {
-//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
-//}
-//}
+	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
+	if d.Path != "" {
+		v.props = v.props.Set("path", Property{MsgSrc: id, Value: d.Path})
+	}
+
+	edges = append(edges, d.Environment)
+
+	for _, sds := range d.Subsets {
+		edges = append(edges, SpecLocalDataset{[]string{d.Name, sds.Name}})
+	}
+
+	return []SplitData{{v, edges}}, nil
+}
+
+func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
+	//v := datasetVertex{props: ps.NewMap()}
+	//var edges EdgeSpecs
+
+	//// Props first
+	//if d.Name != "" {
+	//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
+	//}
+	//if d.Name != "" {
+	//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
+	//}
+
+	return nil, nil
+}
