@@ -26,28 +26,6 @@ type Identifier interface {
 	Matches(a Vertex, b Vertex) bool
 }
 
-// Performs simple equality comparison on the provided key between two persistent maps.
-// CRUCIAL NOTE - returns false if either OR both keys do not exist.
-func mapValEq(key string, l, r ps.Map) bool {
-	lv, exists := l.Lookup(key)
-	if !exists {
-		return false
-	}
-
-	rv, exists := r.Lookup(key)
-	if !exists {
-		return false
-	}
-
-	switch tlv := lv.(type) {
-	default:
-		return rv == lv
-	case []byte:
-		trv, ok := rv.([]byte)
-		return ok && bytes.Equal(tlv, trv)
-	}
-}
-
 // Identifier for Environments
 type IdentifierEnvironment struct{}
 
