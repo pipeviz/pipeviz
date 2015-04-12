@@ -5,9 +5,9 @@
             "environment": {
                 "address": {
                     "hostname": "prod-db01"
-                },
-                "path": "/var/lib/mysql"
+                }
             },
+            "path": "/var/lib/mysql",
             "subsets": [
                 {
                     "name": "app_db",
@@ -20,9 +20,9 @@
             "environment": {
                 "address": {
                     "hostname": "stage"
-                },
-                "path": "/var/lib/mysql"
+                }
             },
+            "path": "/var/lib/mysql",
             "subsets": [
                 {
                     "name": "app_db",
@@ -42,9 +42,9 @@
             "environment": {
                 "address": {
                     "hostname": "qa"
-                },
-                "path": "/var/lib/mysql"
+                }
             },
+            "path": "/var/lib/mysql",
             "subsets": [
                 {
                     "name": "app_db",
@@ -64,9 +64,9 @@
             "environment": {
                 "address": {
                     "hostname": "dev01"
-                },
-                "path": "/var/lib/mysql"
+                }
             },
+            "path": "/var/lib/mysql",
             "subsets": [
                 {
                     "name": "app_db",
@@ -86,9 +86,9 @@
             "environment": {
                 "address": {
                     "hostname": "dev02"
-                },
-                "path": "/var/lib/mysql"
+                }
             },
+            "path": "/var/lib/mysql",
             "subsets": [
                 {
                     "name": "app_db",

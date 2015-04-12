@@ -1,14 +1,14 @@
 package interpret
 
 type Environment struct {
-	Address     Address      `json:"address"`
-	Os          string       `json:"os"`
-	Provider    string       `json:"provider"`
-	Type        string       `json:"type"`
-	Nickname    string       `json:"nickname"`
-	LogicStates []LogicState `json:"logic-states"`
-	Datasets    []Dataset    `json:"datasets"`
-	Processes   []Process    `json:"processes"`
+	Address     Address       `json:"address"`
+	Os          string        `json:"os"`
+	Provider    string        `json:"provider"`
+	Type        string        `json:"type"`
+	Nickname    string        `json:"nickname"`
+	LogicStates []LogicState  `json:"logic-states"`
+	Datasets    []DataMetaSet `json:"datasets"`
+	Processes   []Process     `json:"processes"`
 }
 
 type EnvLink struct {
@@ -72,19 +72,38 @@ type Commit struct {
 	Subject string   `json:"subject"`
 }
 
-type Dataset struct {
-	Environment EnvLink `json:"environment"`
-	Name        string  `json:"name"`
-	Subsets     []struct {
-		Name       string `json:"name"`
-		CreateTime string `json:"create-time"`
-		Genesis    struct {
-			Address  Address  `json:"address"`
-			Dataset  []string `json:"dataset"`
-			SnapTime string   `json:"snap-time"`
-		} `json:"genesis"`
-	} `json:"subsets"`
+// FIXME this metaset/set design is not recursive, but it will need to be
+type DataMetaSet struct {
+	Environment EnvLink   `json:"environment"`
+	Path        string    `json:"path"`
+	Name        string    `json:"name"`
+	Subsets     []Dataset `json:"subsets"`
 }
+
+type Dataset struct {
+	Name       string      `json:"name"`
+	Parent     string      `json:"parent"` // TODO yechhhh...how do we qualify the hierarchy?
+	CreateTime string      `json:"create-time"`
+	Genesis    DataGenesis `json:"genesis"`
+}
+
+type DataGenesis interface {
+	//json.Unmarshaler
+	_dg() // dummy method, avoid propagating the interface
+}
+
+// TODO this form implies a snap that only existed while 'in flight' - that is, no
+// dump artfiact that exists on disk anywhere. Need to incorporate that case, though.
+type DataProvenance struct {
+	Address  Address  `json:"address"`
+	Dataset  []string `json:"dataset"`
+	SnapTime string   `json:"snap-time"`
+}
+
+type DataAlpha string
+
+func (d DataAlpha) _dg()      {}
+func (d DataProvenance) _dg() {}
 
 type Process struct {
 	Pid         int          `json:"pid"`
