@@ -52,7 +52,7 @@
                 "address": {
                     "$ref": "#/definitions/address"
                 },
-                "nickname": {
+                "nick": {
                     "type": "string",
                     "description": "A nickname identifying this environment. Nicknames can be used as referents for defining the hierarchical relationship between an environment and its contents, but not for real network/addressable relationships. Need not correspond to any real state. Nicknames co-exist in a global namespace for all environments known to any pipeviz instance, so pick them wisely."
                 },
@@ -77,7 +77,7 @@
             },
             "additionalProperties": false,
             "anyOf": [
-                { "required": [ "nickname" ] },
+                { "required": [ "nick" ] },
                 { "required": [ "address" ] }
             ]
         },

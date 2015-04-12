@@ -69,8 +69,8 @@ func splitEnvironment(d interpret.Environment, id int) ([]SplitData, error) {
 	if d.Type != "" {
 		v.props = v.props.Set("type", Property{MsgSrc: id, Value: d.Type})
 	}
-	if d.Nickname != "" {
-		v.props = v.props.Set("nickname", Property{MsgSrc: id, Value: d.Nickname})
+	if d.Nick != "" {
+		v.props = v.props.Set("nick", Property{MsgSrc: id, Value: d.Nick})
 	}
 	if d.Address.Hostname != "" {
 		v.props = v.props.Set("hostname", Property{MsgSrc: id, Value: d.Address.Hostname})

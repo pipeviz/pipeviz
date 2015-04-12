@@ -5,7 +5,7 @@ type Environment struct {
 	Os          string          `json:"os"`
 	Provider    string          `json:"provider"`
 	Type        string          `json:"type"`
-	Nickname    string          `json:"nickname"`
+	Nick        string          `json:"nick"`
 	LogicStates []LogicState    `json:"logic-states"`
 	Datasets    []ParentDataset `json:"datasets"`
 	Processes   []Process       `json:"processes"`
