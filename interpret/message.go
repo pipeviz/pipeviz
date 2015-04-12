@@ -2,21 +2,28 @@ package interpret
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
 type Message struct {
-	Id  int
+	Id int
+	m  *message
+}
+
+type message struct {
 	Env []Environment `json:"environments"`
 	Ls  []LogicState  `json:"logic-states"`
-	Ds  []Dataset     `json:"datasets"`
-	P   []Process     `json:"processes"`
-	C   []Commit      `json:"commits"`
-	Cm  []CommitMeta  `json:"commit-meta"`
+	Dms []DataMetaSet `json:"datasets"`
+	Ds  []Dataset
+	P   []Process    `json:"processes"`
+	C   []Commit     `json:"commits"`
+	Cm  []CommitMeta `json:"commit-meta"`
 }
 
 func (m *Message) UnmarshalJSON(data []byte) error {
-	err := json.Unmarshal(data, &m)
+	m.m = new(message)
+	err := json.Unmarshal(data, m.m)
 	if err != nil {
 		// FIXME logging
 		fmt.Println(err)
@@ -24,7 +31,7 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 
 	// TODO separate all of this into pluggable/generated structures
 	// first, dump all top-level objects into the graph.
-	for _, e := range m.Env {
+	for _, e := range m.m.Env {
 		envlink := EnvLink{Address: Address{}}
 
 		// Create an envlink for any nested items, preferring nick, then hostname, ipv4, ipv6.
@@ -41,63 +48,79 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		// manage the little environment hierarchy
 		for _, ls := range e.LogicStates {
 			ls.Environment = envlink
-			m.Ls = append(m.Ls, ls)
+			m.m.Ls = append(m.m.Ls, ls)
 		}
 		for _, p := range e.Processes {
 			p.Environment = envlink
-			m.P = append(m.P, p)
+			m.m.P = append(m.m.P, p)
 		}
-		for _, ds := range e.Datasets {
-			ds.Environment = envlink
-			m.Ds = append(m.Ds, ds)
+		for _, dms := range e.Datasets {
+			dms.Environment = envlink
+			m.m.Dms = append(m.m.Dms, dms)
+
+			for _, ds := range dms.Subsets {
+				// FIXME this doesn't really work as a good linkage
+				ds.Parent = dms.Name
+				m.m.Ds = append(m.m.Ds, ds)
+			}
 		}
 	}
-
-	// All vertices are populated now. Try to link things up.
-	//for _, e := range m.Ls {
-	//env, found := findEnv(m.Env, e.Environment)
-	//if found != false {
-	//// No env found, assign false
-	//m.Graph.AddArcs(StandardEdge{e, false, "contained in", e.Environment})
-	//} else {
-	//m.Graph.AddArcs(StandardEdge{e, env, "contained in", e.Environment})
-	//}
-
-	//for _, ds := range e.Datasets {
-	//// TODO comparison against empty struct literal...works?
-	//if ds.ConnUnix != (ConnUnix{}) {
-	//// implicit link within env; can only work if we found an env
-	//if found != false {
-	//m.Graph.AddArcs(gogl.NewDataArc(e, false, ds))
-	//} else {
-
-	//}
-	//}
-	//}
-	//}
 
 	return nil
 }
 
 func (m *Message) Each(f func(vertex interface{})) {
-	for _, e := range m.Env {
+	for _, e := range m.m.Env {
 		f(e)
 	}
-	for _, e := range m.Ls {
+	for _, e := range m.m.Ls {
 		f(e)
 	}
-	for _, e := range m.Ds {
+	for _, e := range m.m.Dms {
 		f(e)
 	}
-	for _, e := range m.P {
+	for _, e := range m.m.Ds {
 		f(e)
 	}
-	for _, e := range m.C {
+	for _, e := range m.m.P {
 		f(e)
 	}
-	for _, e := range m.Cm {
+	for _, e := range m.m.C {
 		f(e)
 	}
+	for _, e := range m.m.Cm {
+		f(e)
+	}
+}
+
+// Unmarshalers for variant subtypes
+
+// Unmarshaling a Dataset involves resolving whether it has α genesis (string), or
+// a provenancial one (struct). So we have to decode directly, here.
+func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
+	type αDataset struct {
+		Name       string    `json:"name"`
+		CreateTime string    `json:"create-time"`
+		Genesis    DataAlpha `json:"genesis"`
+	}
+	type provDataset struct {
+		Name       string         `json:"name"`
+		CreateTime string         `json:"create-time"`
+		Genesis    DataProvenance `json:"genesis"`
+	}
+
+	a, b := αDataset{}, provDataset{}
+	// use α first, as that can match the case where it's not specified (though schema
+	// currently does not allow that)
+	if err = json.Unmarshal(data, &a); err == nil {
+		ds.Name, ds.CreateTime, ds.Genesis = a.Name, a.CreateTime, a.Genesis
+	} else if err = json.Unmarshal(data, &b); err == nil {
+		ds.Name, ds.CreateTime, ds.Genesis = b.Name, b.CreateTime, b.Genesis
+	} else {
+		err = errors.New("JSON genesis did not match either alpha or provenancial forms.")
+	}
+
+	return err
 }
 
 func findEnv(envs []Environment, el EnvLink) (Environment, bool) {
