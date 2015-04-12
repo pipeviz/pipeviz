@@ -85,15 +85,22 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 	msg.Each(func(d interface{}) {
 		// Split each input element into vertex and edge specs
 		// TODO errs
-		vtx, edges, _ := Split(d, msg.Id)
-		// Ensure the vertex is present
-		tuple := g.ensureVertex(vtx)
+		sds, _ := Split(d, msg.Id)
+		// Ensure vertices are present
+
+		var tuples []vtTuple
+		for _, sd := range sds {
+			// TODO this can't work now, dammit, need edge context. UGH
+			tuples = append(tuples, g.ensureVertex(sd.Vertex))
+		}
 
 		// Collect edge specs for later processing
-		ess = append(ess, &veProcessingInfo{
-			vt: tuple,
-			es: edges,
-		})
+		for k, tuple := range tuples {
+			ess = append(ess, &veProcessingInfo{
+				vt: tuple,
+				es: sds[k].EdgeSpecs,
+			})
+		}
 	})
 
 	// All vertices processed. now, process edges in passes, ensuring that each
@@ -108,7 +115,7 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 		lec = ec
 		for _, info := range ess {
 			for k, spec := range info.es {
-				edge, success := Resolve(g, info.vt, spec)
+				edge, success := Resolve(g, msg.Id, info.vt, spec)
 				if success {
 					edge.Source = info.vt.id
 					if edge.id == 0 {
@@ -203,81 +210,4 @@ func (g *CoreGraph) Get(id int) (vtTuple, error) {
 	} else {
 		return vtTuple{}, errors.New(fmt.Sprintf("No vertex exists with id", id, "at the present revision of the graph"))
 	}
-}
-
-// Inspects the indicated vertex's set of out-edges, returning a slice of
-// those that match on type and properties. ETypeNone and nil can be passed
-// for the last two parameters respectively, in which case the filters will
-// be bypassed.
-func (g *CoreGraph) OutWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
-	return g.arcWith(egoId, etype, props, false)
-}
-
-// Inspects the indicated vertex's set of in-edges, returning a slice of
-// those that match on type and properties. ETypeNone and nil can be passed
-// for the last two parameters respectively, in which case the filters will
-// be bypassed.
-func (g *CoreGraph) InWith(egoId int, etype EType, props []PropQ) (es []StandardEdge) {
-	return g.arcWith(egoId, etype, props, true)
-}
-
-func (g *CoreGraph) arcWith(egoId int, etype EType, props []PropQ, in bool) (es []StandardEdge) {
-	vt, err := g.Get(egoId)
-	if err != nil {
-		// vertex doesn't exist
-		return
-	}
-
-	var fef func(k string, v ps.Any)
-	// TODO specialize the func for zero-cases
-	fef = func(k string, v ps.Any) {
-		edge := v.(StandardEdge)
-		if etype != ETypeNone && etype != edge.EType {
-			// etype doesn't match
-			return
-		}
-
-		for _, p := range props {
-			prop, exists := edge.Props.Lookup(p.K)
-			if !exists || prop != p.V {
-				return
-			}
-		}
-
-		es = append(es, edge)
-	}
-
-	if in {
-		vt.ie.ForEach(fef)
-	} else {
-		vt.oe.ForEach(fef)
-	}
-
-	return
-}
-
-// Returns a slice of vertices matching the filter conditions.
-//
-// The first parameter, VType, filters on vertex type; passing VTypeNone
-// will bypass the filter.
-//
-// The second parameter allows filtering on a k/v property pair.
-func (g *CoreGraph) VerticesWith(vtype VType, props []PropQ) (vs []vtTuple) {
-	g.vtuples.ForEach(func(_ string, val ps.Any) {
-		vt := val.(vtTuple)
-		if vt.v.Typ() != vtype {
-			return
-		}
-
-		for _, p := range props {
-			prop, exists := vt.v.Props().Lookup(p.K)
-			if !exists || prop != p.V {
-				return
-			}
-		}
-
-		vs = append(vs, vt)
-	})
-
-	return vs
 }

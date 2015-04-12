@@ -7,6 +7,11 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
+type SplitData struct {
+	Vertex
+	EdgeSpecs
+}
+
 // TODO for now, no structure to this. change to queryish form later
 type EdgeSpec interface{}
 type EdgeSpecs []EdgeSpec
@@ -19,11 +24,19 @@ type SpecLocalLogic struct {
 	Path string
 }
 
+type SpecProc struct {
+	Pid int
+}
+
+type SpecLocalDataset struct {
+	NamePath []string // path through the series of names that arrives at the final dataset
+}
+
 // TODO unused until plugging/codegen
-type Splitter func(data interface{}, id int) (Vertex, EdgeSpecs, error)
+type Splitter func(data interface{}, id int) ([]SplitData, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
+func Split(d interface{}, id int) ([]SplitData, error) {
 	switch v := d.(type) {
 	case interpret.Environment:
 		return splitEnvironment(v, id)
@@ -31,13 +44,20 @@ func Split(d interface{}, id int) (Vertex, EdgeSpecs, error) {
 		return splitLogicState(v, id)
 	case interpret.Process:
 		return splitProcess(v, id)
-		// TODO missing dataset, commit, and commitmeta
+	case interpret.Commit:
+		return splitCommit(v, id)
+	case interpret.CommitMeta:
+		return splitCommitMeta(v, id)
+	case interpret.ParentDataset:
+		return splitParentDataset(v, id)
+	case interpret.Dataset:
+		return splitDataset(v, id)
 	}
 
-	return nil, nil, errors.New("No handler for object type")
+	return nil, errors.New("No handler for object type")
 }
 
-func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error) {
+func splitEnvironment(d interpret.Environment, id int) ([]SplitData, error) {
 	// seven distinct props
 	v := environmentVertex{props: ps.NewMap()}
 	if d.Os != "" {
@@ -63,10 +83,10 @@ func splitEnvironment(d interpret.Environment, id int) (Vertex, EdgeSpecs, error
 	}
 
 	// By spec, Environments have no outbound edges
-	return v, nil, nil
+	return []SplitData{{Vertex: v}}, nil
 }
 
-func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) {
+func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 	v := logicStateVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
@@ -105,10 +125,12 @@ func splitLogicState(d interpret.LogicState, id int) (Vertex, EdgeSpecs, error) 
 
 	edges = append(edges, d.Environment)
 
-	return v, edges, nil
+	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
-func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
+func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
+	sd := make([]SplitData, 0)
+
 	v := processVertex{props: ps.NewMap()}
 	var edges EdgeSpecs
 
@@ -128,24 +150,97 @@ func splitProcess(d interpret.Process, id int) (Vertex, EdgeSpecs, error) {
 	}
 
 	for _, listen := range d.Listen {
+		v2 := commVertex{props: ps.NewMap()}
+
+		if listen.Type == "unix" {
+			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
+		} else {
+			v2.props = v2.props.Set("port", Property{MsgSrc: id, Value: listen.Port})
+			// FIXME protos are a slice, wtf do we do about this
+			v2.props = v2.props.Set("proto", Property{MsgSrc: id, Value: listen.Proto})
+		}
+		v2.props = v2.props.Set("type", listen.Type)
+		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment, SpecProc{d.Pid}}})
+
 		edges = append(edges, listen)
 	}
 
 	edges = append(edges, d.Environment)
-
-	return v, edges, nil
+	return append([]SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
 }
 
-// TODO can't do this till refactor interpret.Dataset to transform into something sane
-//func splitDataset(d interpret.Dataset, id int) (VtxI, EdgeSpecs, error) {
-//v := datasetVertex{props: ps.NewMap()}
-//var edges EdgeSpecs
+func splitCommit(d interpret.Commit, id int) ([]SplitData, error) {
+	v := commitVertex{props: ps.NewMap()}
 
-//// Props first
-//if d.Name != "" {
-//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
-//}
-//if d.Name != "" {
-//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
-//}
-//}
+	v.props = v.props.Set("sha1", Property{MsgSrc: id, Value: d.Sha1})
+	if d.Author != "" {
+		v.props = v.props.Set("author", Property{MsgSrc: id, Value: d.Author})
+	}
+	if d.Date != "" {
+		v.props = v.props.Set("date", Property{MsgSrc: id, Value: d.Date})
+	}
+	if d.Subject != "" {
+		v.props = v.props.Set("subject", Property{MsgSrc: id, Value: d.Subject})
+	}
+
+	var edges EdgeSpecs
+	for _, parent := range d.Parents {
+		edges = append(edges, SpecCommit{parent})
+	}
+
+	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
+}
+
+func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
+	sd := make([]SplitData, 0)
+
+	for _, tag := range d.Tags {
+		v := vcsLabelVertex{ps.NewMap()}
+		v.props = v.props.Set("name", Property{MsgSrc: id, Value: tag})
+		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+	}
+
+	if d.TestState != "" {
+		v := testResultVertex{ps.NewMap()}
+		v.props = v.props.Set("result", Property{MsgSrc: id, Value: d.TestState})
+		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+	}
+
+	return sd, nil
+}
+
+func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) {
+	v := parentDatasetVertex{props: ps.NewMap()}
+	var edges EdgeSpecs
+
+	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
+	if d.Path != "" {
+		v.props = v.props.Set("path", Property{MsgSrc: id, Value: d.Path})
+	}
+
+	edges = append(edges, d.Environment)
+
+	for _, sds := range d.Subsets {
+		edges = append(edges, SpecLocalDataset{[]string{d.Name, sds.Name}})
+	}
+
+	return []SplitData{{v, edges}}, nil
+}
+
+func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
+	v := datasetVertex{props: ps.NewMap()}
+	var edges EdgeSpecs
+
+	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
+
+	// TODO convert input from string to int and force timestamps. javascript apparently likes
+	// ISO 8601, but go doesn't? so, timestamps.
+	if d.CreateTime != "" {
+		v.props = v.props.Set("create-time", Property{MsgSrc: id, Value: d.CreateTime})
+	}
+
+	edges = append(edges, SpecLocalDataset{[]string{d.Parent}})
+	edges = append(edges, d.Genesis)
+
+	return []SplitData{{v, edges}}, nil
+}

@@ -12,9 +12,9 @@ type Message struct {
 }
 
 type message struct {
-	Env []Environment `json:"environments"`
-	Ls  []LogicState  `json:"logic-states"`
-	Dms []DataMetaSet `json:"datasets"`
+	Env []Environment   `json:"environments"`
+	Ls  []LogicState    `json:"logic-states"`
+	Pds []ParentDataset `json:"datasets"`
 	Ds  []Dataset
 	P   []Process    `json:"processes"`
 	C   []Commit     `json:"commits"`
@@ -54,15 +54,15 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 			p.Environment = envlink
 			m.m.P = append(m.m.P, p)
 		}
-		for _, dms := range e.Datasets {
-			dms.Environment = envlink
-			m.m.Dms = append(m.m.Dms, dms)
-
-			for _, ds := range dms.Subsets {
+		for _, pds := range e.Datasets {
+			for _, ds := range pds.Subsets {
 				// FIXME this doesn't really work as a good linkage
-				ds.Parent = dms.Name
+				ds.Parent = pds.Name
 				m.m.Ds = append(m.m.Ds, ds)
 			}
+
+			pds.Environment = envlink
+			m.m.Pds = append(m.m.Pds, pds)
 		}
 	}
 
@@ -76,7 +76,7 @@ func (m *Message) Each(f func(vertex interface{})) {
 	for _, e := range m.m.Ls {
 		f(e)
 	}
-	for _, e := range m.m.Dms {
+	for _, e := range m.m.Pds {
 		f(e)
 	}
 	for _, e := range m.m.Ds {

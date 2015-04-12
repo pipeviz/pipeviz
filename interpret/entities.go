@@ -1,14 +1,14 @@
 package interpret
 
 type Environment struct {
-	Address     Address       `json:"address"`
-	Os          string        `json:"os"`
-	Provider    string        `json:"provider"`
-	Type        string        `json:"type"`
-	Nickname    string        `json:"nickname"`
-	LogicStates []LogicState  `json:"logic-states"`
-	Datasets    []DataMetaSet `json:"datasets"`
-	Processes   []Process     `json:"processes"`
+	Address     Address         `json:"address"`
+	Os          string          `json:"os"`
+	Provider    string          `json:"provider"`
+	Type        string          `json:"type"`
+	Nickname    string          `json:"nickname"`
+	LogicStates []LogicState    `json:"logic-states"`
+	Datasets    []ParentDataset `json:"datasets"`
+	Processes   []Process       `json:"processes"`
 }
 
 type EnvLink struct {
@@ -73,7 +73,7 @@ type Commit struct {
 }
 
 // FIXME this metaset/set design is not recursive, but it will need to be
-type DataMetaSet struct {
+type ParentDataset struct {
 	Environment EnvLink   `json:"environment"`
 	Path        string    `json:"path"`
 	Name        string    `json:"name"`
@@ -82,13 +82,12 @@ type DataMetaSet struct {
 
 type Dataset struct {
 	Name       string      `json:"name"`
-	Parent     string      `json:"parent"` // TODO yechhhh...how do we qualify the hierarchy?
+	Parent     string      // TODO yechhhh...how do we qualify the hierarchy?
 	CreateTime string      `json:"create-time"`
 	Genesis    DataGenesis `json:"genesis"`
 }
 
 type DataGenesis interface {
-	//json.Unmarshaler
 	_dg() // dummy method, avoid propagating the interface
 }
 
