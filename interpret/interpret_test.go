@@ -5,20 +5,16 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/kr/pretty"
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
 func TestUnmarshal(t *testing.T) {
-	m := &interpret.Message{
-		Nodes: make([]interpret.Node, 0),
-	}
+	m := interpret.Message{}
 
-	f, err := ioutil.ReadFile("../fixtures/ein/2.json")
+	f, err := ioutil.ReadFile("../fixtures/ein/6.json")
 	if err != nil {
 		t.Error("fnf")
 	}
 
-	json.Unmarshal(f, m)
-	pretty.Print(m)
+	err = json.Unmarshal(f, &m)
 }
