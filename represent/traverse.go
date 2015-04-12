@@ -347,8 +347,9 @@ func (g *CoreGraph) findDataset(envid int, name []string) (id int, success bool)
 	// first time through use the parent type
 	vtype := "parent-dataset"
 
+	var n string
 	for len(name) > 0 {
-		n, name := name[0], name[1:]
+		n, name = name[0], name[1:]
 		rv := g.PredecessorsWith(envid, qbv(vtype, "name", n))
 		vtype = "dataset"
 
