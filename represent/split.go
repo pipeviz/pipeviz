@@ -228,16 +228,19 @@ func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) 
 }
 
 func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
-	//v := datasetVertex{props: ps.NewMap()}
-	//var edges EdgeSpecs
+	v := datasetVertex{props: ps.NewMap()}
+	var edges EdgeSpecs
 
-	//// Props first
-	//if d.Name != "" {
-	//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
-	//}
-	//if d.Name != "" {
-	//v.props = v.props.Set("Name", Property{MsgSrc: id, Value: d.Name})
-	//}
+	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
 
-	return nil, nil
+	// TODO convert input from string to int and force timestamps. javascript apparently likes
+	// ISO 8601, but go doesn't? so, timestamps.
+	if d.CreateTime != "" {
+		v.props = v.props.Set("create-time", Property{MsgSrc: id, Value: d.CreateTime})
+	}
+
+	edges = append(edges, SpecLocalDataset{[]string{d.Parent}})
+	edges = append(edges, d.Genesis)
+
+	return []SplitData{{v, edges}}, nil
 }

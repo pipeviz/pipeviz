@@ -82,13 +82,12 @@ type ParentDataset struct {
 
 type Dataset struct {
 	Name       string      `json:"name"`
-	Parent     string      `json:"parent"` // TODO yechhhh...how do we qualify the hierarchy?
+	Parent     string      // TODO yechhhh...how do we qualify the hierarchy?
 	CreateTime string      `json:"create-time"`
 	Genesis    DataGenesis `json:"genesis"`
 }
 
 type DataGenesis interface {
-	//json.Unmarshaler
 	_dg() // dummy method, avoid propagating the interface
 }
 
