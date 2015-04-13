@@ -200,9 +200,9 @@
                         "interaction": {
                             "enum": [ "rw", "ro" ]
                         },
-                        "path": { "type": "string" }
+                        "connUnix": { "$ref": "#/definitions/conn-unix" }
                     },
-                    "required": [ "interaction", "type", "path" ],
+                    "required": [ "interaction", "type", "connUnix" ],
                     "additionalProperties": false
                 }
             ]
