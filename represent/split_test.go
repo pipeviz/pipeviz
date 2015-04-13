@@ -269,6 +269,7 @@ func compareSplitData(expect, actual []SplitData, t *testing.T) {
 		t.Errorf("SplitData slices are different lengths; guaranteed not equal. Expected len %v, actual %v", len(expect), len(actual))
 	}
 
+	// Can't expect the order to be the same, so have to search the actuals for a match
 	for k, esd := range expect {
 		asd := actual[k]
 		et := reflect.TypeOf(esd.Vertex)
@@ -278,25 +279,39 @@ func compareSplitData(expect, actual []SplitData, t *testing.T) {
 			t.Errorf("Vertex type mismatch at SplitData index %v: expected %T, actual %T", k, esd.Vertex, asd.Vertex)
 		}
 
-		mapEq(esd.Vertex.Props(), asd.Vertex.Props(), t)
+		mapEq(esd.Vertex.Props(), asd.Vertex.Props(), t, true)
 	}
 }
 
-func mapEq(expect, actual ps.Map, t *testing.T) {
+func mapEq(expect, actual ps.Map, t *testing.T, emitErr bool) (match bool) {
+	match = true
 	if expect.Size() != actual.Size() {
-		t.Errorf("Prop maps are different sizes; guaranteed not equal. Expected size %v, actual %v", expect.Size(), actual.Size())
+		match = false
+		if emitErr {
+			t.Errorf("Prop maps are different sizes; guaranteed not equal. Expected size %v, actual %v", expect.Size(), actual.Size())
+		}
 	}
 
 	expect.ForEach(func(k string, val ps.Any) {
 		aval, exists := actual.Lookup(k)
 		if !exists {
-			t.Errorf("Missing expected key '%v', expected value %v", k, val)
+			match = false
+			if emitErr {
+				t.Errorf("Missing expected key '%v', expected value %v", k, val)
+			}
 			return
 		}
 
-		assert.Equal(t, val, aval, "Values for key '%v' are not equal: expected %v, actual %v", k, val, aval)
+		if emitErr {
+			match = assert.Equal(t, val, aval, "Values for key '%v' are not equal: expected %v, actual %v", k, val, aval)
+		} else {
+			// keep it from erroring
+			match = assert.Equal(new(testing.T), val, aval, "Values for key '%v' are not equal: expected %v, actual %v", k, val, aval)
+		}
 	})
 	// TODO if keys are missing/nonequal length, walk the actual map to find out what's not there and dump it?
+
+	return
 }
 
 // ******** Actual tests
