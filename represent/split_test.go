@@ -15,6 +15,9 @@ const (
 	D_ipv4     string = "33.31.155.2"
 	D_ipv6     string = "2001:4860:0:2001::68"
 	D_nick     string = "bar-nick"
+	D_commit   string = "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
+	D_version  string = "2.2"
+	D_semver   string = "0.12.9"
 )
 
 // Default values for use in environments; these complement the constants
@@ -24,6 +27,19 @@ var D_env interpret.Environment = interpret.Environment{
 	Provider: "vagrant",
 	Type:     "physical",
 	Nick:     D_nick,
+}
+
+// Default values for logic states; as defined, will induce no edges.
+var D_ls interpret.LogicState = interpret.LogicState{
+	ID: struct {
+		Commit  string `json:"commit"`
+		Version string `json:"version"`
+		Semver  string `json:"semver"`
+	}{Version: D_version},
+	Lgroup: "bigparty",
+	Nick:   D_nick,
+	Path:   "/usr/local/src/imaginationland",
+	Type:   "code",
 }
 
 // A matrix of standard interpret.Address values, including all permutations of field presence
@@ -42,17 +58,10 @@ var M_envlink []interpret.EnvLink = []interpret.EnvLink{
 	{Address: M_addr[0]},
 	{Address: M_addr[1]},
 	{Address: M_addr[2]},
-	{Address: M_addr[3]},
-	{Address: M_addr[4]},
-	{Address: M_addr[5]},
-	{Address: M_addr[6]},
 	{Address: M_addr[0], Nick: D_nick},
 	{Address: M_addr[1], Nick: D_nick},
 	{Address: M_addr[2], Nick: D_nick},
-	{Address: M_addr[3], Nick: D_nick},
-	{Address: M_addr[4], Nick: D_nick},
-	{Address: M_addr[5], Nick: D_nick},
-	{Address: M_addr[6], Nick: D_nick},
+	{Address: interpret.Address{}, Nick: D_nick},
 }
 
 type FixtureEnvironmentSplit struct {
@@ -78,10 +87,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 	},
 	{
 		Summary: "Minimal environment with hostname and nick",
-		Input: interpret.Environment{
-			Address: M_addr[0],
-			Nick:    D_nick,
-		},
+		Input:   interpret.Environment{Address: M_addr[0], Nick: D_nick},
 		Output: []SplitData{
 			{
 				Vertex: environmentVertex{
@@ -93,10 +99,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 	},
 	{
 		Summary: "Minimal environment with hostname, ipv4, ipv6, and nick",
-		Input: interpret.Environment{
-			Address: M_addr[6],
-			Nick:    D_nick,
-		},
+		Input:   interpret.Environment{Address: M_addr[6], Nick: D_nick},
 		Output: []SplitData{
 			{
 				Vertex: environmentVertex{
