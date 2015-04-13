@@ -2,6 +2,7 @@
     "commits": [
         {
             "sha1": "58c5329896cc2a623f1dd881d83969f90637bc9a",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 29 10:28:53 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Phony commit to simulate fork at tip",
@@ -11,6 +12,7 @@
         },
         {
             "sha1": "96c4694623cb7ab5a2ff83a5f261fbe74a4877e7",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 15 16:28:57 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Get rid of svg el dance in Viz",
@@ -20,6 +22,7 @@
         },
         {
             "sha1": "e26e7ec4823e4c0dfd145c1032b150e41a947ea6",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 15:00:08 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Make JSON correct",
@@ -29,6 +32,7 @@
         },
         {
             "sha1": "1076009c0200542e7a3f86a79bdc1c5db1c44824",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Sep 17 01:31:33 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add code-change.json with experimental payload",
@@ -38,6 +42,7 @@
         },
         {
             "sha1": "83800507cf26320a19f05de808ffd8056cdea91e",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 17:23:35 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Fix Container.findProcess()",
@@ -47,6 +52,7 @@
         },
         {
             "sha1": "1cfcb902abbc715be9b4fee1da1f92fdd0efa4a7",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 04:47:50 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Remove some old cruft",
@@ -56,6 +62,7 @@
         },
         {
             "sha1": "85238efb54b4fd6a3907e5105a5dad32b7bb7ec5",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 15 12:13:49 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "React approach almost working, just need to fix offset",
@@ -65,6 +72,7 @@
         },
         {
             "sha1": "8210883dc420a0ef4ac8754a88b7e7e1a2bdfafd",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 04:10:17 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add basic filtering mechanism.",
@@ -74,6 +82,7 @@
         },
         {
             "sha1": "f36becb37b195dcc7dbe191a55ac3b5b65e64f19",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 29 10:05:25 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add new, more detailed commit data to fixture",
@@ -83,6 +92,7 @@
         },
         {
             "sha1": "158071c4acfa91ee5f0797760daa24f09c3965dc",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Jan 19 12:57:20 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add missing react & queue-async to bower.json",
@@ -92,6 +102,7 @@
         },
         {
             "sha1": "874e493410ea0c9471534b37719c66442fcd599e",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 15:05:32 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Incremental, reorganize, fixup, progress, blah",
@@ -101,6 +112,7 @@
         },
         {
             "sha1": "504e77a434c673417bc70c3a7d3b57cad0f2bd75",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 18:02:57 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Put names on processes",
@@ -110,6 +122,7 @@
         },
         {
             "sha1": "dfac77628b9be996cfa6c33fb204a669efaa4f4e",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 04:32:52 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add a stupid little shared id system",
@@ -119,6 +132,7 @@
         },
         {
             "sha1": "2711c5061241a4feb42abf060470647e00aee1d1",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Sun Jan 18 23:06:07 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add outer logic for toposort by commit",
@@ -128,6 +142,7 @@
         },
         {
             "sha1": "bd268d26a62088552732a6d563962dbbc73edb86",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 04:48:50 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Merge branch 'proto'",
@@ -138,6 +153,7 @@
         },
         {
             "sha1": "3ac263fd54f48c1fe02adbc142f0bf4b449e3421",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Jan 6 18:48:58 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Use mysql socket for stage01 app",
@@ -147,6 +163,7 @@
         },
         {
             "sha1": "082deeb4dd95d4c39d63a9fa09afe75eb8286b98",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 17:56:30 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Mess with link strength a bit",
@@ -156,6 +173,7 @@
         },
         {
             "sha1": "97df43900d0db9d1d38c85b1d17d7e73e7a12632",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 04:44:43 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Reuse the node filter for link filter, HUZZAH",
@@ -165,6 +183,7 @@
         },
         {
             "sha1": "8ca8a871f6243a5256a96994a842c9685ecc865d",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Oct 22 17:07:02 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "silly little reset for my local",
@@ -174,6 +193,7 @@
         },
         {
             "sha1": "9253f48a904ffa493aaed135a7ebf2ac5b2fe92f",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Jan 6 14:20:41 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "missing comma",
@@ -183,6 +203,7 @@
         },
         {
             "sha1": "5d63fa5fe5f4699138fcd00dd3d613a6a10a2420",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 23 12:37:07 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add a pure commit 'view'",
@@ -192,6 +213,7 @@
         },
         {
             "sha1": "d4c85908b083fceb0d8895c36cb4b450ccb18e3c",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Aug 19 22:32:27 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Initial commit",
@@ -199,6 +221,7 @@
         },
         {
             "sha1": "f534980c7cdfd6da061bef778dbc28f0962488f3",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Sep 17 00:50:03 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Buncha stupid things to start with",
@@ -208,6 +231,7 @@
         },
         {
             "sha1": "cc896a82f0aa0d0e018f9da23ccaca672bf9e406",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Jan 6 07:32:35 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Incremental commit of container.json",
@@ -217,6 +241,7 @@
         },
         {
             "sha1": "887b16ced6e538e1e0b0aaa8b7533d36a56db134",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 17:54:15 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add proc->logic links",
@@ -226,6 +251,7 @@
         },
         {
             "sha1": "530fb5f29ecfc58e94894e045cfaf5f7ee5fe169",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Jan 14 22:28:13 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Initial commit of React-based approach",
@@ -235,6 +261,7 @@
         },
         {
             "sha1": "9cad2d5e0bed169fc3a071bcb644b2d1aca0dbcb",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Oct 7 22:46:40 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Change hash on instance subject",
@@ -244,6 +271,7 @@
         },
         {
             "sha1": "67ebe466a30e3aa4bdef03e70c3c864e7b01d412",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 15 13:14:32 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Lol set the layout size, idiot",
@@ -253,6 +281,7 @@
         },
         {
             "sha1": "b566993a00c166a3e0b2a65658fb52bf41ac21da",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Jan 19 00:17:51 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add README with super-prelim setup instructions",
@@ -262,6 +291,7 @@
         },
         {
             "sha1": "3a0598c2a6ef410f7b6f39dd466d608076e2e2ec",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Jan 6 18:33:50 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "finish up db01 and stage01",
@@ -271,6 +301,7 @@
         },
         {
             "sha1": "bbc35a6f9efc0ec598109c783a3ad01a8d646c7e",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Oct 21 15:23:45 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add second state fixture; touchups for that",
@@ -280,6 +311,7 @@
         },
         {
             "sha1": "22e3eb081f35973e68ef3756f64a488026a0b0e0",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 8 00:17:04 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Cleanup and add all containers",
@@ -289,6 +321,7 @@
         },
         {
             "sha1": "cf2c61eae37ffbb4abceb268445185fae9bc13b8",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Oct 7 07:58:03 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add experimental instance.json",
@@ -298,6 +331,7 @@
         },
         {
             "sha1": "23db8ba7fee81ace9ba4ff8a21849b5559550ae0",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Jan 6 14:01:31 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Start adding mysqld",
@@ -307,6 +341,7 @@
         },
         {
             "sha1": "3d14fbb476b0169c604d6ef0055065c4103361d0",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 15 22:55:52 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "First pass at populating the info table",
@@ -316,6 +351,7 @@
         },
         {
             "sha1": "7aa24b91c5514492f2e67a58764814db247d59c4",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Oct 21 21:22:07 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "more cleanups and better separation",
@@ -325,6 +361,7 @@
         },
         {
             "sha1": "491034fc11aa3c3c4cb1ca6a4dbbf92aa3208cb1",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Dec 22 20:27:26 2014 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Mucking around with secondary transition. not good stuff.",
@@ -334,6 +371,7 @@
         },
         {
             "sha1": "06748871fec3cba4dcd0e3302242fd49ed137554",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 17:00:12 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Another incremental checkin, getting close",
@@ -343,6 +381,7 @@
         },
         {
             "sha1": "1854930bef6511f688afd99c1018dcb99ae966b0",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 12:37:46 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Incremental commit of unified approach",
@@ -352,6 +391,7 @@
         },
         {
             "sha1": "ebabbe014c17992f0441b013651f058d89a52db6",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 15 20:32:05 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Get info table populating correctly",
@@ -361,6 +401,7 @@
         },
         {
             "sha1": "b099e1e71f0fd70b4a477cfe9a3ad1780c0b7793",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Jan 14 15:43:16 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "More silly syntastic happy-making",
@@ -370,6 +411,7 @@
         },
         {
             "sha1": "3f129d9d9da92c049391a23cb90821a76c27d52d",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Oct 20 20:05:09 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Use anchor class to hide elements",
@@ -379,6 +421,7 @@
         },
         {
             "sha1": "95850cc2cd10c746cabcaeb97dc66cd17968f80d",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 9 18:05:42 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Fix has check in dataset linker",
@@ -388,6 +431,7 @@
         },
         {
             "sha1": "bb8973c5cb2559c7e50730cefe0d81395e2cc8f8",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 8 11:23:17 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Move to 'data spaces' representation concept",
@@ -397,6 +441,7 @@
         },
         {
             "sha1": "c5c402de2ffc42be26091b231417077046ecb411",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Oct 22 17:07:21 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "add swell on mouseover to nodes",
@@ -406,6 +451,7 @@
         },
         {
             "sha1": "1b401a3377785d8533348b01a8cabc936fd39abc",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Oct 17 18:47:24 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Throw in mock/proto node files",
@@ -415,6 +461,7 @@
         },
         {
             "sha1": "cce276d46b6ba12118d4371c77c2f6d842239fd2",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 29 09:57:55 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Put data under 'containers' key in fixture",
@@ -424,6 +471,7 @@
         },
         {
             "sha1": "e8596d1073b51f7ed42b01c8c7aeef51e03e05c5",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Oct 22 16:45:18 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Tweak friction and charge distance a bit.",
@@ -433,6 +481,7 @@
         },
         {
             "sha1": "8bd6f2519e3c437d3228c14be7bdcf2dc799c171",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 15 19:34:02 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Basic nested components working",
@@ -442,6 +491,7 @@
         },
         {
             "sha1": "6aa4a3ef1597e5864fd60193f6bc92068c2856c9",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 11:59:29 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Fill in info table for processes",
@@ -451,6 +501,7 @@
         },
         {
             "sha1": "48a65b5d0d5e838065d92cc90077e4de64f1d11c",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 8 22:04:50 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Flesh out - α and genesis!",
@@ -460,6 +511,7 @@
         },
         {
             "sha1": "99aa80fac7b208c1ca371644281b66e0ab79521f",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Oct 20 11:13:04 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Tad more cleanup",
@@ -469,6 +521,7 @@
         },
         {
             "sha1": "d71a5ebc53ecd7beac4025c7f7c797b0c958152e",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Jan 14 14:48:33 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Tweaks to make syntastic happy",
@@ -478,6 +531,7 @@
         },
         {
             "sha1": "c03ecb9a34155452cb5ae0ac897f2746ae6bc942",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Oct 21 14:55:33 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Giant refactor to work from injected JSON data.",
@@ -487,6 +541,7 @@
         },
         {
             "sha1": "1b3339611de68e56d9fb00f08f47de0deb1ab683",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Wed Jan 14 23:54:38 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "First refactor pass, still not working",
@@ -496,6 +551,7 @@
         },
         {
             "sha1": "c5bd38eb24eb0dfd4ab23957dbedcab73becc4c7",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Tue Oct 21 14:56:12 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add bower.json for graphlib",
@@ -505,6 +561,7 @@
         },
         {
             "sha1": "4b27183601586ab3389a30420ecc5a1c50ce8c0f",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Oct 20 22:28:50 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Sweet, got it working all split up.",
@@ -514,6 +571,7 @@
         },
         {
             "sha1": "c22608f157682add4284ccbb957996bc044191e6",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Oct 17 19:09:50 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Clean up js file, removing commented bits.",
@@ -523,6 +581,7 @@
         },
         {
             "sha1": "205490d7a6d06fd1109846c2a1bbb5c122086519",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Sun Jan 18 23:52:10 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Actually make the commit sort work",
@@ -532,6 +591,7 @@
         },
         {
             "sha1": "23f21002148796052bcedf5429b0b1b0aad7fc32",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Thu Jan 8 10:33:03 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Change 'data id' to 'data container namespace' for now",
@@ -541,6 +601,7 @@
         },
         {
             "sha1": "87dd42d85d5b59480554832841eff49ab50412fc",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 01:28:36 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Introduce PVD (PipeVizDatastore) - main graph entry",
@@ -550,6 +611,7 @@
         },
         {
             "sha1": "a3054a17b2a7d574ddddb7b23be781617ef045ab",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Jan 12 14:55:06 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add all remaining links.",
@@ -559,6 +621,7 @@
         },
         {
             "sha1": "099a989163b9cfb210e7e8965c5c934a1ae21658",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Jan 19 00:16:00 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add relevant packages to bower.json",
@@ -568,6 +631,7 @@
         },
         {
             "sha1": "16aa32af1768a4850ba7e250bd5b81dcfeca69f1",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Oct 20 19:30:57 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Split nodes into separate data lists",
@@ -577,6 +641,7 @@
         },
         {
             "sha1": "96bbdaa577c5423bbf4862f7b2fc63b0b47df2c3",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Mon Jan 19 00:15:15 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add anchor file (forgot it before)",
@@ -586,6 +651,7 @@
         },
         {
             "sha1": "3f7bde72dd71b833378ee839cc6913d44574b793",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Jan 16 08:25:33 2015 -0500",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Use length-based shouldComponentUpdate trick for viz",
@@ -595,6 +661,7 @@
         },
         {
             "sha1": "599fd0bbf826bcfd82a1f5e3918af394a925340d",
+            "repository": "https://github.com/sdboyer/pipeviz",
             "date" : "Fri Oct 17 19:08:05 2014 -0400",
             "author" : "Sam Boyer <tech@samboyer.org>",
             "subject" : "Add d3 locally for offline dev",

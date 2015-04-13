@@ -3,7 +3,6 @@
         {
             "type": "code",
             "id": {
-                "repository": "github.com/sdboyer/pipeviz",
                 "commit": "d4c85908b083fceb0d8895c36cb4b450ccb18e3c"
             },
             "nick": "ourapp",
@@ -31,7 +30,6 @@
         {
             "type": "code",
             "id": {
-                "repository": "github.com/sdboyer/pipeviz",
                 "commit": "16aa32af1768a4850ba7e250bd5b81dcfeca69f1"
             },
             "nick": "ourapp",
@@ -57,7 +55,6 @@
         {
             "type": "code",
             "id": {
-                "repository": "github.com/sdboyer/pipeviz",
                 "commit": "3f7bde72dd71b833378ee839cc6913d44574b793"
             },
             "nick": "ourapp",
@@ -83,7 +80,6 @@
         {
             "type": "code",
             "id": {
-                "repository": "github.com/sdboyer/pipeviz",
                 "commit": "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
             },
             "nick": "ourapp",
@@ -109,7 +105,6 @@
         {
             "type": "code",
             "id": {
-                "repository": "github.com/sdboyer/pipeviz",
                 "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a"
             },
             "nick": "ourapp",

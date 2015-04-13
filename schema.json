@@ -133,25 +133,24 @@
                     "oneOf": [
                         {
                             "properties": {
-                                "repository": { "type": "string" },
                                 "commit": { "type" : "string" }
                             },
-                            "required": [ "repository", "commit" ],
-                            "additionProperties": false
+                            "required": [ "commit" ],
+                            "additionalProperties": false
                         },
                         {
                             "properties": {
                                 "version": { "type": "string" }
                             },
                             "required": [ "version" ],
-                            "additionProperties": false
+                            "additionalProperties": false
                         },
                         {
                             "properties": {
                                 "semver": { "type": "string" }
                             },
                             "required": [ "semver" ],
-                            "additionProperties": false
+                            "additionalProperties": false
                         }
                     ]
                 },
@@ -161,8 +160,8 @@
                     "items": { "$ref": "#/definitions/conn-data" }
                 }
             },
-            "additionalProperties": false,
-            "required": [ "path", "id" ]
+            "required": [ "path", "id" ],
+            "additionalProperties": false
         },
         "conn-data": {
             "type": "object",
@@ -365,6 +364,7 @@
             "description": "Describes a source control commit object. For now, just git. Probably for always, only SCMs that have atomic commits/a DAG.",
             "properties": {
                 "sha1": { "type": "string" },
+                "repository": { "type": "string" },
                 "date": { "type": "string" },
                 "author": { "type": "string" },
                 "subject": { "type": "string" },
@@ -374,7 +374,7 @@
                     "items": { "type": "string" }
                 }
             },
-            "required": [ "sha1", "date", "author", "subject", "parents" ],
+            "required": [ "sha1", "date", "author", "subject", "parents", "repository" ],
             "additionalProperties": false
         },
         "commit-meta": {
