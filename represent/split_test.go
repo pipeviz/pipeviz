@@ -169,58 +169,57 @@ func init() {
 
 	F_LogicState = []FixtureLogicStateSplit{
 		{
-			Summary: "Commit id and path. No props, datasets, or envlink.",
-			Input:   interpret.LogicState{ID: lsIds[0], Path: D_ls.Path},
+			Summary: "Commit id, path, envlink. No props or datasets.",
+			Input:   interpret.LogicState{ID: lsIds[0], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}),
 					},
-					EdgeSpecs: EdgeSpecs{
-						SpecCommit{[]byte(D_commit)},
-					},
+					EdgeSpecs: EdgeSpecs{SpecCommit{[]byte(D_commit)}, M_envlink[1]},
 				},
 			},
 		},
 		{
-			Summary: "Version and path. No props, datasets, or envlink.",
-			Input:   interpret.LogicState{ID: lsIds[1], Path: D_ls.Path},
+			Summary: "Version, path, envlink. No props, datasets.",
+			Input:   interpret.LogicState{ID: lsIds[1], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"version", D_version}),
 					},
-					EdgeSpecs: nil,
+					EdgeSpecs: EdgeSpecs{M_envlink[1]},
 				},
 			},
 		},
 		{
-			Summary: "Semver and path. No props, datasets, or envlink.",
-			Input:   interpret.LogicState{ID: lsIds[2], Path: D_ls.Path},
+			Summary: "Semver, path, and envlink. No props or datasets.",
+			Input:   interpret.LogicState{ID: lsIds[2], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
-					EdgeSpecs: nil,
+					EdgeSpecs: EdgeSpecs{M_envlink[1]},
 				},
 			},
 		},
 		{
-			Summary: "Commit id, path, and all non-edge inducing props.",
+			Summary: "Commit id, path, envlink, and all non-edge inducing props.",
 			Input: interpret.LogicState{
-				ID:     lsIds[0],
-				Lgroup: D_ls.Lgroup,
-				Nick:   D_nick,
-				Path:   D_ls.Path,
-				Type:   D_ls.Type,
+				ID:          lsIds[0],
+				Lgroup:      D_ls.Lgroup,
+				Nick:        D_nick,
+				Path:        D_ls.Path,
+				Type:        D_ls.Type,
+				Environment: M_envlink[1],
 			},
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
-					EdgeSpecs: EdgeSpecs{SpecCommit{[]byte(D_commit)}},
+					EdgeSpecs: EdgeSpecs{SpecCommit{[]byte(D_commit)}, M_envlink[1]},
 				},
 			},
 		},
@@ -265,6 +264,7 @@ func init() {
 // ******** Utility funcs
 
 func compareSplitData(expect, actual []SplitData, t *testing.T) {
+	//fmt.Printf("%T %#v\n%T %#v\n\n", expect, expect, actual, actual)
 	if len(expect) != len(actual) {
 		t.Errorf("SplitData slices are different lengths; guaranteed not equal. Expected len %v, actual %v", len(expect), len(actual))
 	}
@@ -346,6 +346,8 @@ func TestSplitLogicState(t *testing.T) {
 			t.Error(err)
 		}
 
+		//fmt.Println(fixture.Summary)
+		//fmt.Printf("%T %v\n%T %v\n\n", expect, actual, expect, actual)
 		compareSplitData(fixture.Output, sd, t)
 	}
 }
