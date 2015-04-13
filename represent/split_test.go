@@ -269,7 +269,7 @@ func compareSplitData(expect, actual []SplitData, t *testing.T) {
 		t.Errorf("SplitData slices are different lengths; guaranteed not equal. Expected len %v, actual %v", len(expect), len(actual))
 	}
 
-	// Can't expect the order to be the same, so have to search the actuals for a match
+	// TODO Can't expect the EdgeSpecs order to be the same; should search for a match
 	for k, esd := range expect {
 		asd := actual[k]
 		et := reflect.TypeOf(esd.Vertex)
@@ -279,7 +279,13 @@ func compareSplitData(expect, actual []SplitData, t *testing.T) {
 			t.Errorf("Vertex type mismatch at SplitData index %v: expected %T, actual %T", k, esd.Vertex, asd.Vertex)
 		}
 
-		mapEq(esd.Vertex.Props(), asd.Vertex.Props(), t, true)
+		if !mapEq(esd.Vertex.Props(), asd.Vertex.Props(), t, false) {
+			continue
+		}
+		if !assert.Equal(t, esd.EdgeSpecs, asd.EdgeSpecs, "EdgeSpecs are not equal") {
+			//t.Errorf("Vertices not equal type mismatch at SplitData index %v: expected %T, actual %T", k, esd.Vertex, asd.Vertex)
+			continue
+		}
 	}
 }
 
