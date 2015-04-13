@@ -109,9 +109,6 @@ func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 		edges = append(edges, SpecCommit{[]byte(d.ID.Commit)})
 	}
 	// FIXME this shouldn't be here, it's a property of the commit
-	if d.ID.Repository != "" {
-		v.props = v.props.Set("repository", Property{MsgSrc: id, Value: d.ID.Repository})
-	}
 	if d.ID.Version != "" {
 		v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.ID.Version})
 	}
@@ -173,15 +170,10 @@ func splitCommit(d interpret.Commit, id int) ([]SplitData, error) {
 	v := commitVertex{props: ps.NewMap()}
 
 	v.props = v.props.Set("sha1", Property{MsgSrc: id, Value: d.Sha1})
-	if d.Author != "" {
-		v.props = v.props.Set("author", Property{MsgSrc: id, Value: d.Author})
-	}
-	if d.Date != "" {
-		v.props = v.props.Set("date", Property{MsgSrc: id, Value: d.Date})
-	}
-	if d.Subject != "" {
-		v.props = v.props.Set("subject", Property{MsgSrc: id, Value: d.Subject})
-	}
+	v.props = v.props.Set("author", Property{MsgSrc: id, Value: d.Author})
+	v.props = v.props.Set("date", Property{MsgSrc: id, Value: d.Date})
+	v.props = v.props.Set("subject", Property{MsgSrc: id, Value: d.Subject})
+	v.props = v.props.Set("repository", Property{MsgSrc: id, Value: d.Repository})
 
 	var edges EdgeSpecs
 	for _, parent := range d.Parents {
