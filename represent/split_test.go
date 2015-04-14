@@ -21,6 +21,8 @@ const (
 	D_msgid    int    = 1
 )
 
+var D_commithash []byte
+
 // Default values for use in environments; these complement the constants
 var D_env interpret.Environment = interpret.Environment{
 	Address:  M_addr[0],
@@ -140,7 +142,17 @@ type FixtureProcessSplit struct {
 
 var F_Process []FixtureProcessSplit
 
+type FixtureCommitSplit struct {
+	Summary string
+	Input   interpret.Commit
+	Output  []SplitData
+}
+
+var F_Commit []FixtureCommitSplit
+
 func init() {
+	D_commithash = []byte("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
+
 	lsIds := []struct {
 		Commit  string `json:"commit"`
 		Version string `json:"version"`
@@ -384,6 +396,69 @@ func init() {
 		},
 	}
 
+	F_Commit = []FixtureCommitSplit{
+		{
+			Summary: "A single-parent git commit",
+			Input: interpret.Commit{
+				Author:     "Sam Boyer <tech@samboyer.org>",
+				Date:       "Fri Jan 9 15:00:08 2015 -0500",
+				Repository: "https://github.com/sdboyer/pipeviz",
+				Subject:    "Make JSON correct",
+				Sha1:       D_commithash,
+				Parents:    [][]byte{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0")},
+			},
+			Output: []SplitData{
+				{
+					Vertex: commitVertex{
+						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						SpecCommit{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0")},
+					},
+				},
+			},
+		},
+		{
+			Summary: "A zero-parent git commit",
+			Input: interpret.Commit{
+				Author:     "Sam Boyer <tech@samboyer.org>",
+				Date:       "Fri Jan 9 15:00:08 2015 -0500",
+				Repository: "https://github.com/sdboyer/pipeviz",
+				Subject:    "Make JSON correct",
+				Sha1:       D_commithash,
+			},
+			Output: []SplitData{
+				{
+					Vertex: commitVertex{
+						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					},
+					EdgeSpecs: nil,
+				},
+			},
+		},
+		{
+			Summary: "A two-parent git commit",
+			Input: interpret.Commit{
+				Author:     "Sam Boyer <tech@samboyer.org>",
+				Date:       "Fri Jan 9 15:00:08 2015 -0500",
+				Repository: "https://github.com/sdboyer/pipeviz",
+				Subject:    "Make JSON correct",
+				Sha1:       D_commithash,
+				Parents:    [][]byte{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0"), []byte("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
+			},
+			Output: []SplitData{
+				{
+					Vertex: commitVertex{
+						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						SpecCommit{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0")},
+						SpecCommit{[]byte("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
+					},
+				},
+			},
+		},
+	}
 }
 
 // ******** Utility funcs
@@ -473,9 +548,24 @@ func TestSplitLogicState(t *testing.T) {
 		compareSplitData(fixture.Output, sd, t)
 	}
 }
+
 func TestSplitProcess(t *testing.T) {
 	for _, fixture := range F_Process {
 		t.Log("Split test on process fixture:", fixture.Summary)
+
+		// by convention we're always using msgid 1 in fixtures
+		sd, err := Split(fixture.Input, D_msgid)
+		if err != nil {
+			t.Error(err)
+		}
+
+		compareSplitData(fixture.Output, sd, t)
+	}
+}
+
+func TestSplitCommit(t *testing.T) {
+	for _, fixture := range F_Commit {
+		t.Log("Split test on commit fixture:", fixture.Summary)
 
 		// by convention we're always using msgid 1 in fixtures
 		sd, err := Split(fixture.Input, D_msgid)
