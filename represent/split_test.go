@@ -186,6 +186,14 @@ type FixtureDatasetSplit struct {
 
 var F_Dataset []FixtureDatasetSplit
 
+type FixtureParentDatasetSplit struct {
+	Summary string
+	Input   interpret.ParentDataset
+	Output  []SplitData
+}
+
+var F_ParentDataset []FixtureParentDatasetSplit
+
 func init() {
 	D_commithash = []byte("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
 
@@ -607,6 +615,88 @@ func init() {
 			},
 		},
 	}
+
+	F_ParentDataset = []FixtureParentDatasetSplit{
+		{
+			Summary: "Parent with no subsets",
+			Input: interpret.ParentDataset{
+				Environment: M_envlink[0],
+				Path:        "/var/lib/froofroodata",
+				Name:        "froofroo",
+			},
+			Output: []SplitData{
+				{
+					Vertex: parentDatasetVertex{
+						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+					},
+				},
+			},
+		},
+		{
+			Summary: "Parent with one subset",
+			Input: interpret.ParentDataset{
+				Environment: M_envlink[0],
+				Path:        "/var/lib/froofroodata",
+				Name:        "froofroo",
+				Subsets: []interpret.Dataset{
+					{
+						Name:       "childset1",
+						CreateTime: D_datetime,
+						Parent:     "parentdata",
+						Genesis:    interpret.DataAlpha("α"),
+					},
+				},
+			},
+			Output: []SplitData{
+				{
+					Vertex: parentDatasetVertex{
+						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecLocalDataset{[]string{"froofroo", "childset1"}},
+					},
+				},
+			},
+		},
+		{
+			Summary: "Parent with two subsets",
+			Input: interpret.ParentDataset{
+				Environment: M_envlink[0],
+				Path:        "/var/lib/froofroodata",
+				Name:        "froofroo",
+				Subsets: []interpret.Dataset{
+					{
+						Name:       "childset1",
+						CreateTime: D_datetime,
+						Parent:     "parentdata",
+						Genesis:    interpret.DataAlpha("α"),
+					},
+					{
+						Name:       "childset2",
+						CreateTime: D_datetime,
+						Parent:     "parentdata",
+						Genesis:    interpret.DataAlpha("α"),
+					},
+				},
+			},
+			Output: []SplitData{
+				{
+					Vertex: parentDatasetVertex{
+						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecLocalDataset{[]string{"froofroo", "childset1"}},
+						SpecLocalDataset{[]string{"froofroo", "childset2"}},
+					},
+				},
+			},
+		},
+	}
 }
 
 // ******** Utility funcs
@@ -742,6 +832,20 @@ func TestSplitCommitMeta(t *testing.T) {
 func TestSplitDataset(t *testing.T) {
 	for _, fixture := range F_Dataset {
 		t.Log("Split test on dataset fixture:", fixture.Summary)
+
+		// by convention we're always using msgid 1 in fixtures
+		sd, err := Split(fixture.Input, D_msgid)
+		if err != nil {
+			t.Error(err)
+		}
+
+		compareSplitData(fixture.Output, sd, t)
+	}
+}
+
+func TestSplitParentDataset(t *testing.T) {
+	for _, fixture := range F_ParentDataset {
+		t.Log("Split test on parent dataset fixture:", fixture.Summary)
 
 		// by convention we're always using msgid 1 in fixtures
 		sd, err := Split(fixture.Input, D_msgid)
