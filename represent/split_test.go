@@ -150,6 +150,14 @@ type FixtureCommitSplit struct {
 
 var F_Commit []FixtureCommitSplit
 
+type FixtureCommitMetaSplit struct {
+	Summary string
+	Input   interpret.CommitMeta
+	Output  []SplitData
+}
+
+var F_CommitMeta []FixtureCommitMetaSplit
+
 func init() {
 	D_commithash = []byte("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
 
@@ -459,6 +467,67 @@ func init() {
 			},
 		},
 	}
+
+	F_CommitMeta = []FixtureCommitMetaSplit{
+		{
+			Summary: "Commit meta, single tag",
+			Input: interpret.CommitMeta{
+				Sha1: D_commithash,
+				Tags: []string{"foo"},
+			},
+			Output: []SplitData{
+				{
+					Vertex: vcsLabelVertex{mapPropPairs(D_msgid, p{"name", "foo"})},
+					EdgeSpecs: []EdgeSpec{
+						SpecCommit{D_commithash},
+					},
+				},
+			},
+		},
+		{
+			Summary: "Commit meta, multiple tags",
+			Input: interpret.CommitMeta{
+				Sha1: D_commithash,
+				Tags: []string{"foo", "bar"},
+			},
+			Output: []SplitData{
+				{
+					Vertex: vcsLabelVertex{mapPropPairs(D_msgid, p{"name", "foo"})},
+					EdgeSpecs: []EdgeSpec{
+						SpecCommit{D_commithash},
+					},
+				},
+				{
+					Vertex: vcsLabelVertex{mapPropPairs(D_msgid, p{"name", "bar"})},
+					EdgeSpecs: []EdgeSpec{
+						SpecCommit{D_commithash},
+					},
+				},
+			},
+		},
+		{
+			Summary: "Commit meta, tag and status",
+			Input: interpret.CommitMeta{
+				Sha1:      D_commithash,
+				Tags:      []string{"foo"},
+				TestState: "passed", // or pending, or failed
+			},
+			Output: []SplitData{
+				{
+					Vertex: vcsLabelVertex{mapPropPairs(D_msgid, p{"name", "foo"})},
+					EdgeSpecs: []EdgeSpec{
+						SpecCommit{D_commithash},
+					},
+				},
+				{
+					Vertex: testResultVertex{mapPropPairs(D_msgid, p{"result", "passed"})},
+					EdgeSpecs: []EdgeSpec{
+						SpecCommit{D_commithash},
+					},
+				},
+			},
+		},
+	}
 }
 
 // ******** Utility funcs
@@ -566,6 +635,20 @@ func TestSplitProcess(t *testing.T) {
 func TestSplitCommit(t *testing.T) {
 	for _, fixture := range F_Commit {
 		t.Log("Split test on commit fixture:", fixture.Summary)
+
+		// by convention we're always using msgid 1 in fixtures
+		sd, err := Split(fixture.Input, D_msgid)
+		if err != nil {
+			t.Error(err)
+		}
+
+		compareSplitData(fixture.Output, sd, t)
+	}
+}
+
+func TestSplitCommitMeta(t *testing.T) {
+	for _, fixture := range F_CommitMeta {
+		t.Log("Split test on commit-meta fixture:", fixture.Summary)
 
 		// by convention we're always using msgid 1 in fixtures
 		sd, err := Split(fixture.Input, D_msgid)
