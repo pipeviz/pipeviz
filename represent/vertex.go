@@ -71,20 +71,20 @@ func assignAddress(mid int, a interpret.Address, m ps.Map, excl bool) ps.Map {
 
 // All of the vertex types behave identically for now, but this will change as things mature
 
-type environmentVertex struct {
+type vertexEnvironment struct {
 	props ps.Map
 }
 
-func (vtx environmentVertex) Props() ps.Map {
+func (vtx vertexEnvironment) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx environmentVertex) Typ() VType {
+func (vtx vertexEnvironment) Typ() VType {
 	return "environment"
 }
 
-func (vtx environmentVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(environmentVertex); !ok {
+func (vtx vertexEnvironment) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexEnvironment); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -93,20 +93,20 @@ func (vtx environmentVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type logicStateVertex struct {
+type vertexLogicState struct {
 	props ps.Map
 }
 
-func (vtx logicStateVertex) Props() ps.Map {
+func (vtx vertexLogicState) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx logicStateVertex) Typ() VType {
+func (vtx vertexLogicState) Typ() VType {
 	return "logic-state"
 }
 
-func (vtx logicStateVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(logicStateVertex); !ok {
+func (vtx vertexLogicState) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexLogicState); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -115,20 +115,20 @@ func (vtx logicStateVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type processVertex struct {
+type vertexProcess struct {
 	props ps.Map
 }
 
-func (vtx processVertex) Props() ps.Map {
+func (vtx vertexProcess) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx processVertex) Typ() VType {
+func (vtx vertexProcess) Typ() VType {
 	return "process"
 }
 
-func (vtx processVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(processVertex); !ok {
+func (vtx vertexProcess) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexProcess); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -137,20 +137,20 @@ func (vtx processVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type commVertex struct {
+type vertexComm struct {
 	props ps.Map
 }
 
-func (vtx commVertex) Props() ps.Map {
+func (vtx vertexComm) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx commVertex) Typ() VType {
+func (vtx vertexComm) Typ() VType {
 	return "comm"
 }
 
-func (vtx commVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(commVertex); !ok {
+func (vtx vertexComm) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexComm); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -159,20 +159,20 @@ func (vtx commVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type datasetVertex struct {
+type vertexDataset struct {
 	props ps.Map
 }
 
-func (vtx datasetVertex) Props() ps.Map {
+func (vtx vertexDataset) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx datasetVertex) Typ() VType {
+func (vtx vertexDataset) Typ() VType {
 	return "dataset"
 }
 
-func (vtx datasetVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(datasetVertex); !ok {
+func (vtx vertexDataset) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexDataset); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -181,20 +181,20 @@ func (vtx datasetVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type commitVertex struct {
+type vertexCommit struct {
 	props ps.Map
 }
 
-func (vtx commitVertex) Props() ps.Map {
+func (vtx vertexCommit) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx commitVertex) Typ() VType {
+func (vtx vertexCommit) Typ() VType {
 	return "commit"
 }
 
-func (vtx commitVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(commitVertex); !ok {
+func (vtx vertexCommit) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexCommit); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -203,20 +203,20 @@ func (vtx commitVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type vcsLabelVertex struct {
+type vertexVcsLabel struct {
 	props ps.Map
 }
 
-func (vtx vcsLabelVertex) Props() ps.Map {
+func (vtx vertexVcsLabel) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vcsLabelVertex) Typ() VType {
+func (vtx vertexVcsLabel) Typ() VType {
 	return "vcs-label"
 }
 
-func (vtx vcsLabelVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(vcsLabelVertex); !ok {
+func (vtx vertexVcsLabel) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexVcsLabel); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -225,20 +225,20 @@ func (vtx vcsLabelVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type testResultVertex struct {
+type vertexTestResult struct {
 	props ps.Map
 }
 
-func (vtx testResultVertex) Props() ps.Map {
+func (vtx vertexTestResult) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx testResultVertex) Typ() VType {
+func (vtx vertexTestResult) Typ() VType {
 	return "test-result"
 }
 
-func (vtx testResultVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(testResultVertex); !ok {
+func (vtx vertexTestResult) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexTestResult); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}
@@ -247,20 +247,20 @@ func (vtx testResultVertex) Merge(ivtx Vertex) (Vertex, error) {
 	return vtx, nil
 }
 
-type parentDatasetVertex struct {
+type vertexParentDataset struct {
 	props ps.Map
 }
 
-func (vtx parentDatasetVertex) Props() ps.Map {
+func (vtx vertexParentDataset) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx parentDatasetVertex) Typ() VType {
+func (vtx vertexParentDataset) Typ() VType {
 	return "parent-dataset"
 }
 
-func (vtx parentDatasetVertex) Merge(ivtx Vertex) (Vertex, error) {
-	if _, ok := ivtx.(parentDatasetVertex); !ok {
+func (vtx vertexParentDataset) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexParentDataset); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
 	}

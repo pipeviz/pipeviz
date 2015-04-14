@@ -59,7 +59,7 @@ func Split(d interface{}, id int) ([]SplitData, error) {
 
 func splitEnvironment(d interpret.Environment, id int) ([]SplitData, error) {
 	// seven distinct props
-	v := environmentVertex{props: ps.NewMap()}
+	v := vertexEnvironment{props: ps.NewMap()}
 	if d.Os != "" {
 		v.props = v.props.Set("os", Property{MsgSrc: id, Value: d.Os})
 	}
@@ -87,7 +87,7 @@ func splitEnvironment(d interpret.Environment, id int) ([]SplitData, error) {
 }
 
 func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
-	v := logicStateVertex{props: ps.NewMap()}
+	v := vertexLogicState{props: ps.NewMap()}
 	var edges EdgeSpecs
 
 	// TODO do IDs need different handling?
@@ -128,7 +128,7 @@ func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
-	v := processVertex{props: ps.NewMap()}
+	v := vertexProcess{props: ps.NewMap()}
 	var edges EdgeSpecs
 
 	v.props = v.props.Set("pid", Property{MsgSrc: id, Value: d.Pid})
@@ -147,7 +147,7 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 	}
 
 	for _, listen := range d.Listen {
-		v2 := commVertex{props: ps.NewMap()}
+		v2 := vertexComm{props: ps.NewMap()}
 
 		if listen.Type == "unix" {
 			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
@@ -167,7 +167,7 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 }
 
 func splitCommit(d interpret.Commit, id int) ([]SplitData, error) {
-	v := commitVertex{props: ps.NewMap()}
+	v := vertexCommit{props: ps.NewMap()}
 
 	v.props = v.props.Set("sha1", Property{MsgSrc: id, Value: d.Sha1})
 	v.props = v.props.Set("author", Property{MsgSrc: id, Value: d.Author})
@@ -187,13 +187,13 @@ func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
 	for _, tag := range d.Tags {
-		v := vcsLabelVertex{ps.NewMap()}
+		v := vertexVcsLabel{ps.NewMap()}
 		v.props = v.props.Set("name", Property{MsgSrc: id, Value: tag})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	if d.TestState != "" {
-		v := testResultVertex{ps.NewMap()}
+		v := vertexTestResult{ps.NewMap()}
 		v.props = v.props.Set("result", Property{MsgSrc: id, Value: d.TestState})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
@@ -202,7 +202,7 @@ func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
 }
 
 func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) {
-	v := parentDatasetVertex{props: ps.NewMap()}
+	v := vertexParentDataset{props: ps.NewMap()}
 	var edges EdgeSpecs
 
 	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
@@ -220,7 +220,7 @@ func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) 
 }
 
 func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
-	v := datasetVertex{props: ps.NewMap()}
+	v := vertexDataset{props: ps.NewMap()}
 	var edges EdgeSpecs
 
 	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})

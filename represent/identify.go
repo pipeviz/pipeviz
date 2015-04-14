@@ -30,16 +30,16 @@ type Identifier interface {
 type IdentifierEnvironment struct{}
 
 func (i IdentifierEnvironment) CanIdentify(data Vertex) bool {
-	_, ok := data.(environmentVertex)
+	_, ok := data.(vertexEnvironment)
 	return ok
 }
 
 func (i IdentifierEnvironment) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(environmentVertex)
+	l, ok := a.(vertexEnvironment)
 	if !ok {
 		return false
 	}
-	r, ok := b.(environmentVertex)
+	r, ok := b.(vertexEnvironment)
 	if !ok {
 		return false
 	}
@@ -72,16 +72,16 @@ func matchEnvLink(a, b ps.Map) bool {
 type IdentifierLogicState struct{}
 
 func (i IdentifierLogicState) CanIdentify(data Vertex) bool {
-	_, ok := data.(logicStateVertex)
+	_, ok := data.(vertexLogicState)
 	return ok
 }
 
 func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(logicStateVertex)
+	l, ok := a.(vertexLogicState)
 	if !ok {
 		return false
 	}
-	r, ok := b.(logicStateVertex)
+	r, ok := b.(vertexLogicState)
 	if !ok {
 		return false
 	}
@@ -98,16 +98,16 @@ func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
 type IdentifierDataset struct{}
 
 func (i IdentifierDataset) CanIdentify(data Vertex) bool {
-	_, ok := data.(datasetVertex)
+	_, ok := data.(vertexDataset)
 	return ok
 }
 
 func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(datasetVertex)
+	l, ok := a.(vertexDataset)
 	if !ok {
 		return false
 	}
-	r, ok := b.(datasetVertex)
+	r, ok := b.(vertexDataset)
 	if !ok {
 		return false
 	}
@@ -124,16 +124,16 @@ func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
 type IdentifierCommit struct{}
 
 func (i IdentifierCommit) CanIdentify(data Vertex) bool {
-	_, ok := data.(commitVertex)
+	_, ok := data.(vertexCommit)
 	return ok
 }
 
 func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(commitVertex)
+	l, ok := a.(vertexCommit)
 	if !ok {
 		return false
 	}
-	r, ok := b.(commitVertex)
+	r, ok := b.(vertexCommit)
 	if !ok {
 		return false
 	}
@@ -146,16 +146,16 @@ func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
 type IdentifierProcess struct{}
 
 func (i IdentifierProcess) CanIdentify(data Vertex) bool {
-	_, ok := data.(processVertex)
+	_, ok := data.(vertexProcess)
 	return ok
 }
 
 func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(processVertex)
+	l, ok := a.(vertexProcess)
 	if !ok {
 		return false
 	}
-	r, ok := b.(processVertex)
+	r, ok := b.(vertexProcess)
 	if !ok {
 		return false
 	}
