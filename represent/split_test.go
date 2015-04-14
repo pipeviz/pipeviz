@@ -18,6 +18,7 @@ const (
 	D_commit   string = "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
 	D_version  string = "2.2"
 	D_semver   string = "0.12.9"
+	D_msgid    int    = 1
 )
 
 // Default values for use in environments; these complement the constants
@@ -79,7 +80,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Output: []SplitData{
 			{
 				Vertex: environmentVertex{
-					mapPropPairs(1, p{"hostname", D_hostname}),
+					mapPropPairs(D_msgid, p{"hostname", D_hostname}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -91,7 +92,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Output: []SplitData{
 			{
 				Vertex: environmentVertex{
-					mapPropPairs(1, p{"nick", D_nick}, p{"hostname", D_hostname}),
+					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -103,7 +104,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Output: []SplitData{
 			{
 				Vertex: environmentVertex{
-					mapPropPairs(1, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"ipv4", D_ipv4}, p{"ipv6", D_ipv6}),
+					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"ipv4", D_ipv4}, p{"ipv6", D_ipv6}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -115,7 +116,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Output: []SplitData{
 			{
 				Vertex: environmentVertex{
-					mapPropPairs(1, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.Os}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
+					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.Os}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -174,7 +175,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
-						mapPropPairs(1, p{"path", D_ls.Path}),
+						mapPropPairs(D_msgid, p{"path", D_ls.Path}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						SpecCommit{[]byte(D_commit)},
@@ -189,7 +190,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
-						mapPropPairs(1, p{"path", D_ls.Path}, p{"version", D_version}),
+						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"version", D_version}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						M_envlink[1],
@@ -203,7 +204,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
-						mapPropPairs(1, p{"path", D_ls.Path}, p{"semver", D_semver}),
+						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						M_envlink[1],
@@ -224,7 +225,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
-						mapPropPairs(1, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
+						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						SpecCommit{[]byte(D_commit)},
@@ -244,7 +245,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
-						mapPropPairs(1, p{"path", D_ls.Path}, p{"semver", D_semver}),
+						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						datalinks[0],
@@ -265,7 +266,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: logicStateVertex{
-						mapPropPairs(1, p{"path", D_ls.Path}, p{"semver", D_semver}),
+						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						datalinks[2],
@@ -294,7 +295,7 @@ func compareSplitData(expect, actual []SplitData, t *testing.T) {
 			t.Errorf("Vertex type mismatch at SplitData index %v: expected %T, actual %T", k, esd.Vertex, asd.Vertex)
 		}
 
-		if !mapEq(esd.Vertex.Props(), asd.Vertex.Props(), t, false) {
+		if !mapEq(esd.Vertex.Props(), asd.Vertex.Props(), t, true) {
 			continue
 		}
 		if !assert.Equal(t, esd.EdgeSpecs, asd.EdgeSpecs, "EdgeSpecs are not equal") {
@@ -340,7 +341,7 @@ func TestSplitEnvironment(t *testing.T) {
 		t.Log("Split test on environment fixture:", fixture.Summary)
 
 		// by convention we're always using msgid 1 in fixtures
-		sd, err := Split(fixture.Input, 1)
+		sd, err := Split(fixture.Input, D_msgid)
 		if err != nil {
 			t.Error(err)
 		}
@@ -354,7 +355,7 @@ func TestSplitLogicState(t *testing.T) {
 		t.Log("Split test on logic state fixture:", fixture.Summary)
 
 		// by convention we're always using msgid 1 in fixtures
-		sd, err := Split(fixture.Input, 1)
+		sd, err := Split(fixture.Input, D_msgid)
 		if err != nil {
 			t.Error(err)
 		}
