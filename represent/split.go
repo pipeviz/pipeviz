@@ -133,13 +133,13 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 
 	v.props = v.props.Set("pid", Property{MsgSrc: id, Value: d.Pid})
 	if d.Cwd != "" {
-		v.props = v.props.Set("Cwd", Property{MsgSrc: id, Value: d.Cwd})
+		v.props = v.props.Set("cwd", Property{MsgSrc: id, Value: d.Cwd})
 	}
 	if d.Group != "" {
-		v.props = v.props.Set("Group", Property{MsgSrc: id, Value: d.Group})
+		v.props = v.props.Set("group", Property{MsgSrc: id, Value: d.Group})
 	}
 	if d.User != "" {
-		v.props = v.props.Set("User", Property{MsgSrc: id, Value: d.User})
+		v.props = v.props.Set("user", Property{MsgSrc: id, Value: d.User})
 	}
 
 	for _, ls := range d.LogicStates {
@@ -156,7 +156,7 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 			// FIXME protos are a slice, wtf do we do about this
 			v2.props = v2.props.Set("proto", Property{MsgSrc: id, Value: listen.Proto})
 		}
-		v2.props = v2.props.Set("type", listen.Type)
+		v2.props = v2.props.Set("type", Property{MsgSrc: id, Value: listen.Type})
 		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment, SpecProc{d.Pid}}})
 
 		edges = append(edges, listen)
