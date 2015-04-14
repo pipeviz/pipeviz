@@ -19,6 +19,7 @@ const (
 	D_version  string = "2.2"
 	D_semver   string = "0.12.9"
 	D_msgid    int    = 1
+	D_datetime string = "2015-01-09T02:01:20.000Z" // TODO don't let JS stupidity drive date format
 )
 
 var D_commithash []byte
@@ -157,6 +158,14 @@ type FixtureCommitMetaSplit struct {
 }
 
 var F_CommitMeta []FixtureCommitMetaSplit
+
+type FixtureDatasetSplit struct {
+	Summary string
+	Input   interpret.Dataset
+	Output  []SplitData
+}
+
+var F_Dataset []FixtureDatasetSplit
 
 func init() {
 	D_commithash = []byte("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
@@ -528,6 +537,57 @@ func init() {
 			},
 		},
 	}
+
+	F_Dataset = []FixtureDatasetSplit{
+		{
+			Summary: "Alpha genesis with time",
+			Input: interpret.Dataset{
+				Name:       "dataset-foo",
+				CreateTime: D_datetime,
+				Parent:     "parentdata",
+				Genesis:    interpret.DataAlpha("α"),
+			},
+			Output: []SplitData{
+				{
+					Vertex: datasetVertex{
+						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						SpecLocalDataset{[]string{"parentdata"}},
+						interpret.DataAlpha("α"),
+					},
+				},
+			},
+		},
+		{
+			Summary: "Provenance genesis with time",
+			Input: interpret.Dataset{
+				Name:       "dataset-foo",
+				CreateTime: D_datetime,
+				Parent:     "parentdata",
+				Genesis: interpret.DataProvenance{
+					Address:  M_addr[0],
+					Dataset:  []string{"parentset", "innerset"},
+					SnapTime: D_datetime,
+				},
+			},
+			Output: []SplitData{
+				{
+					Vertex: datasetVertex{
+						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						SpecLocalDataset{[]string{"parentdata"}},
+						interpret.DataProvenance{
+							Address:  M_addr[0],
+							Dataset:  []string{"parentset", "innerset"},
+							SnapTime: D_datetime,
+						},
+					},
+				},
+			},
+		},
+	}
 }
 
 // ******** Utility funcs
@@ -649,6 +709,20 @@ func TestSplitCommit(t *testing.T) {
 func TestSplitCommitMeta(t *testing.T) {
 	for _, fixture := range F_CommitMeta {
 		t.Log("Split test on commit-meta fixture:", fixture.Summary)
+
+		// by convention we're always using msgid 1 in fixtures
+		sd, err := Split(fixture.Input, D_msgid)
+		if err != nil {
+			t.Error(err)
+		}
+
+		compareSplitData(fixture.Output, sd, t)
+	}
+}
+
+func TestSplitDataset(t *testing.T) {
+	for _, fixture := range F_Dataset {
+		t.Log("Split test on dataset fixture:", fixture.Summary)
 
 		// by convention we're always using msgid 1 in fixtures
 		sd, err := Split(fixture.Input, D_msgid)
