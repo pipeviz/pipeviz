@@ -176,7 +176,10 @@ func init() {
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}),
 					},
-					EdgeSpecs: EdgeSpecs{SpecCommit{[]byte(D_commit)}, M_envlink[1]},
+					EdgeSpecs: EdgeSpecs{
+						SpecCommit{[]byte(D_commit)},
+						M_envlink[1],
+					},
 				},
 			},
 		},
@@ -188,7 +191,9 @@ func init() {
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"version", D_version}),
 					},
-					EdgeSpecs: EdgeSpecs{M_envlink[1]},
+					EdgeSpecs: EdgeSpecs{
+						M_envlink[1],
+					},
 				},
 			},
 		},
@@ -200,7 +205,9 @@ func init() {
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
-					EdgeSpecs: EdgeSpecs{M_envlink[1]},
+					EdgeSpecs: EdgeSpecs{
+						M_envlink[1],
+					},
 				},
 			},
 		},
@@ -219,7 +226,10 @@ func init() {
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
-					EdgeSpecs: EdgeSpecs{SpecCommit{[]byte(D_commit)}, M_envlink[1]},
+					EdgeSpecs: EdgeSpecs{
+						SpecCommit{[]byte(D_commit)},
+						M_envlink[1],
+					},
 				},
 			},
 		},
@@ -236,7 +246,11 @@ func init() {
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
-					EdgeSpecs: EdgeSpecs{datalinks[0], datalinks[1], M_envlink[0]},
+					EdgeSpecs: EdgeSpecs{
+						datalinks[0],
+						datalinks[1],
+						M_envlink[0],
+					},
 				},
 			},
 		},
@@ -253,12 +267,14 @@ func init() {
 					Vertex: logicStateVertex{
 						mapPropPairs(1, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
-					EdgeSpecs: EdgeSpecs{datalinks[2], M_envlink[6]},
+					EdgeSpecs: EdgeSpecs{
+						datalinks[2],
+						M_envlink[6],
+					},
 				},
 			},
 		},
 	}
-
 }
 
 // ******** Utility funcs
@@ -269,7 +285,6 @@ func compareSplitData(expect, actual []SplitData, t *testing.T) {
 		t.Errorf("SplitData slices are different lengths; guaranteed not equal. Expected len %v, actual %v", len(expect), len(actual))
 	}
 
-	// TODO Can't expect the EdgeSpecs order to be the same; should search for a match
 	for k, esd := range expect {
 		asd := actual[k]
 		et := reflect.TypeOf(esd.Vertex)
@@ -315,8 +330,6 @@ func mapEq(expect, actual ps.Map, t *testing.T, emitErr bool) (match bool) {
 			match = assert.Equal(new(testing.T), val, aval, "Values for key '%v' are not equal: expected %v, actual %v", k, val, aval)
 		}
 	})
-	// TODO if keys are missing/nonequal length, walk the actual map to find out what's not there and dump it?
-
 	return
 }
 
