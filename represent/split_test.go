@@ -9,6 +9,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/*
+HEY YOU, READ THIS
+
+This file contains tests for the 'split' subsystem, which is responsible for
+taking the hierarchical expression of data as it appears in messages and
+"splitting" it into graph components: vertices and edge specs (instruction
+sets for the resolution of edges).
+
+The tests here are not written with a black-box perspective, and are certainly
+not fuzz tests. Perhaps such things would be beneficial. However, for now these
+tests are mostly oriented towards ensuring that, given the set of possible inputs
+defined by the message input schema, they produce the correct number and type of
+vertices and edge specs, with the expected properties.
+
+Of particular importance is how the output changes when varying counts of
+are given of inputs that the schema allows to be variable-length. In such cases,
+testing lengths of 0 (if allowed), 1 and 2 is generally accepted as sufficient.
+*/
+
 // For tests that rely on a simple, single vertex value, this provides a standard set
 const (
 	D_hostname string = "foohost"
