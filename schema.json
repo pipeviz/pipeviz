@@ -313,7 +313,6 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
-                        "environment": { "$ref": "#/definitions/env-link" },
                         "create-time": { "format": "date-time" },
                         "genesis": { "enum": [ "α" ] }
                     },
@@ -323,7 +322,6 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
-                        "environment": { "$ref": "#/definitions/env-link" },
                         "create-time": { "format": "date-time" },
                         "genesis": {
                             "type": "object",
