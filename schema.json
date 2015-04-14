@@ -52,7 +52,7 @@
                 "address": {
                     "$ref": "#/definitions/address"
                 },
-                "nickname": {
+                "nick": {
                     "type": "string",
                     "description": "A nickname identifying this environment. Nicknames can be used as referents for defining the hierarchical relationship between an environment and its contents, but not for real network/addressable relationships. Need not correspond to any real state. Nicknames co-exist in a global namespace for all environments known to any pipeviz instance, so pick them wisely."
                 },
@@ -77,7 +77,7 @@
             },
             "additionalProperties": false,
             "anyOf": [
-                { "required": [ "nickname" ] },
+                { "required": [ "nick" ] },
                 { "required": [ "address" ] }
             ]
         },
@@ -133,25 +133,24 @@
                     "oneOf": [
                         {
                             "properties": {
-                                "repository": { "type": "string" },
                                 "commit": { "type" : "string" }
                             },
-                            "required": [ "repository", "commit" ],
-                            "additionProperties": false
+                            "required": [ "commit" ],
+                            "additionalProperties": false
                         },
                         {
                             "properties": {
                                 "version": { "type": "string" }
                             },
                             "required": [ "version" ],
-                            "additionProperties": false
+                            "additionalProperties": false
                         },
                         {
                             "properties": {
                                 "semver": { "type": "string" }
                             },
                             "required": [ "semver" ],
-                            "additionProperties": false
+                            "additionalProperties": false
                         }
                     ]
                 },
@@ -161,8 +160,8 @@
                     "items": { "$ref": "#/definitions/conn-data" }
                 }
             },
-            "additionalProperties": false,
-            "required": [ "path", "id" ]
+            "required": [ "path", "id" ],
+            "additionalProperties": false
         },
         "conn-data": {
             "type": "object",
@@ -201,9 +200,9 @@
                         "interaction": {
                             "enum": [ "rw", "ro" ]
                         },
-                        "path": { "type": "string" }
+                        "connUnix": { "$ref": "#/definitions/conn-unix" }
                     },
-                    "required": [ "interaction", "type", "path" ],
+                    "required": [ "interaction", "type", "connUnix" ],
                     "additionalProperties": false
                 }
             ]
@@ -314,7 +313,6 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
-                        "environment": { "$ref": "#/definitions/env-link" },
                         "create-time": { "format": "date-time" },
                         "genesis": { "enum": [ "α" ] }
                     },
@@ -324,7 +322,6 @@
                 {
                     "properties": {
                         "name": { "type": "string" },
-                        "environment": { "$ref": "#/definitions/env-link" },
                         "create-time": { "format": "date-time" },
                         "genesis": {
                             "type": "object",
@@ -365,6 +362,7 @@
             "description": "Describes a source control commit object. For now, just git. Probably for always, only SCMs that have atomic commits/a DAG.",
             "properties": {
                 "sha1": { "type": "string" },
+                "repository": { "type": "string" },
                 "date": { "type": "string" },
                 "author": { "type": "string" },
                 "subject": { "type": "string" },
@@ -374,7 +372,7 @@
                     "items": { "type": "string" }
                 }
             },
-            "required": [ "sha1", "date", "author", "subject", "parents" ],
+            "required": [ "sha1", "date", "author", "subject", "parents", "repository" ],
             "additionalProperties": false
         },
         "commit-meta": {

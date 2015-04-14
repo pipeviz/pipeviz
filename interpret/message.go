@@ -35,8 +35,8 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 		envlink := EnvLink{Address: Address{}}
 
 		// Create an envlink for any nested items, preferring nick, then hostname, ipv4, ipv6.
-		if e.Nickname != "" {
-			envlink.Nick = e.Nickname
+		if e.Nick != "" {
+			envlink.Nick = e.Nick
 		} else if e.Address.Hostname != "" {
 			envlink.Address.Hostname = e.Address.Hostname
 		} else if e.Address.Ipv4 != "" {
@@ -126,7 +126,7 @@ func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
 func findEnv(envs []Environment, el EnvLink) (Environment, bool) {
 	if el.Nick != "" {
 		for _, e := range envs {
-			if e.Nickname == el.Nick {
+			if e.Nick == el.Nick {
 				return e, true
 			}
 		}

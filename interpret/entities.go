@@ -5,7 +5,7 @@ type Environment struct {
 	Os          string          `json:"os"`
 	Provider    string          `json:"provider"`
 	Type        string          `json:"type"`
-	Nickname    string          `json:"nickname"`
+	Nick        string          `json:"nick"`
 	LogicStates []LogicState    `json:"logic-states"`
 	Datasets    []ParentDataset `json:"datasets"`
 	Processes   []Process       `json:"processes"`
@@ -26,10 +26,9 @@ type LogicState struct {
 	Datasets    []DataLink `json:"datasets"`
 	Environment EnvLink    `json:"environment"`
 	ID          struct {
-		Commit     string `json:"commit"`
-		Repository string `json:"repository"`
-		Version    string `json:"version"`
-		Semver     string `json:"semver"`
+		Commit  string `json:"commit"`
+		Version string `json:"version"`
+		Semver  string `json:"semver"`
 	} `json:"id"`
 	Lgroup string `json:"lgroup"`
 	Nick   string `json:"nick"`
@@ -65,11 +64,12 @@ type CommitMeta struct {
 }
 
 type Commit struct {
-	Author  string   `json:"author"`
-	Date    string   `json:"date"`
-	Parents [][]byte `json:"parents"`
-	Sha1    []byte   `json:"sha1"`
-	Subject string   `json:"subject"`
+	Author     string   `json:"author"`
+	Date       string   `json:"date"`
+	Parents    [][]byte `json:"parents"`
+	Sha1       []byte   `json:"sha1"`
+	Subject    string   `json:"subject"`
+	Repository string   `json:"repository"`
 }
 
 // FIXME this metaset/set design is not recursive, but it will need to be
