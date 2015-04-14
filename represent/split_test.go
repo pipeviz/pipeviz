@@ -132,6 +132,14 @@ type FixtureLogicStateSplit struct {
 
 var F_LogicState []FixtureLogicStateSplit
 
+type FixtureProcessSplit struct {
+	Summary string
+	Input   interpret.Process
+	Output  []SplitData
+}
+
+var F_Process []FixtureProcessSplit
+
 func init() {
 	lsIds := []struct {
 		Commit  string `json:"commit"`
@@ -276,6 +284,106 @@ func init() {
 			},
 		},
 	}
+
+	F_Process = []FixtureProcessSplit{
+		{
+			Summary: "Pid, envlink, one logic state, nothing else.",
+			Input: interpret.Process{
+				Pid:         42,
+				Environment: M_envlink[0],
+				LogicStates: []string{"/path/to/sth"},
+			},
+			Output: []SplitData{
+				{
+					Vertex: processVertex{mapPropPairs(D_msgid, p{"pid", 42})},
+					EdgeSpecs: []EdgeSpec{
+						SpecLocalLogic{"/path/to/sth"},
+						M_envlink[0],
+					},
+				},
+			},
+		},
+		{
+			Summary: "Pid, envlink, one logic state, all props, no listeners.",
+			Input: interpret.Process{
+				Pid:         42,
+				Environment: M_envlink[1],
+				LogicStates: []string{"/path/to/sth"},
+				Cwd:         "/usr/local/src",
+				Group:       "scuba",
+				User:        "pooja",
+			},
+			Output: []SplitData{
+				{
+					Vertex: processVertex{
+						mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						SpecLocalLogic{"/path/to/sth"},
+						M_envlink[1],
+					},
+				},
+			},
+		},
+		{
+			Summary: "Pid, envlink, two logic states, one single-proto net listener.",
+			Input: interpret.Process{
+				Pid:         42,
+				Environment: M_envlink[0],
+				LogicStates: []string{"/path/to/sth", "/usr/local/src/imaginationland"},
+				Listen: []interpret.ListenAddr{
+					{Type: "port", Port: 1025, Proto: []string{"tcp"}},
+				},
+			},
+			Output: []SplitData{
+				{
+					Vertex: processVertex{mapPropPairs(D_msgid, p{"pid", 42})},
+					EdgeSpecs: []EdgeSpec{
+						SpecLocalLogic{"/path/to/sth"},
+						SpecLocalLogic{"/usr/local/src/imaginationland"},
+						interpret.ListenAddr{Type: "port", Port: 1025, Proto: []string{"tcp"}},
+						M_envlink[0],
+					},
+				},
+				{
+					Vertex: commVertex{mapPropPairs(D_msgid, p{"port", 1025}, p{"proto", []string{"tcp"}}, p{"type", "port"})},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecProc{42},
+					},
+				},
+			},
+		},
+		{
+			Summary: "Pid, envlink, one logic state, one local sock listener.",
+			Input: interpret.Process{
+				Pid:         42,
+				Environment: M_envlink[0],
+				LogicStates: []string{"/usr/local/src/imaginationland"},
+				Listen: []interpret.ListenAddr{
+					{Type: "unix", Path: "/var/run/lookitsa.sock"},
+				},
+			},
+			Output: []SplitData{
+				{
+					Vertex: processVertex{mapPropPairs(D_msgid, p{"pid", 42})},
+					EdgeSpecs: []EdgeSpec{
+						SpecLocalLogic{"/usr/local/src/imaginationland"},
+						interpret.ListenAddr{Type: "unix", Path: "/var/run/lookitsa.sock"},
+						M_envlink[0],
+					},
+				},
+				{
+					Vertex: commVertex{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecProc{42},
+					},
+				},
+			},
+		},
+	}
+
 }
 
 // ******** Utility funcs
@@ -362,6 +470,19 @@ func TestSplitLogicState(t *testing.T) {
 
 		//fmt.Println(fixture.Summary)
 		//fmt.Printf("%T %v\n%T %v\n\n", expect, actual, expect, actual)
+		compareSplitData(fixture.Output, sd, t)
+	}
+}
+func TestSplitProcess(t *testing.T) {
+	for _, fixture := range F_Process {
+		t.Log("Split test on process fixture:", fixture.Summary)
+
+		// by convention we're always using msgid 1 in fixtures
+		sd, err := Split(fixture.Input, D_msgid)
+		if err != nil {
+			t.Error(err)
+		}
+
 		compareSplitData(fixture.Output, sd, t)
 	}
 }
