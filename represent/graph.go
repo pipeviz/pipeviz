@@ -46,6 +46,8 @@ type Vertex interface {
 	// Returns a persistent map with the vertex's properties.
 	// TODO generate more type-restricted versions of the map?
 	Props() ps.Map
+	// Reports the keys of the properties used as the distinguishing identifiers for this vertex.
+	//Ids() []string
 }
 
 type vtTuple struct {
@@ -146,70 +148,13 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 //
 // Either way, return value is the vid for the vertex.
 func (g *CoreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
-	var vid int
-	newvt := vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
+	vid := Identify(g, sd)
 
-	// FIXME so very hilariously O(n)
-	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
-	if len(matches) == 0 {
+	if vid == 0 {
+		final = vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		g.vserial += 1
-		newvt.id = g.vserial
+		final.id = g.vserial
 		g.vtuples = g.vtuples.Set(strconv.Itoa(g.vserial), final)
-		return newvt
-	}
-	// More than one match found. Iteratively narrow matches.
-
-	// First, see if we can resolve the primary identifying edge
-	for _, es := range sd.EdgeSpecs {
-		// FIXME totally not ok to hardcode the edge spec types
-		switch d := es.(type) {
-		default:
-			continue
-		case interpret.EnvLink:
-			edge, success := Resolve(g, msgid, newvt, d)
-			if success {
-				continue
-			}
-			break
-
-		case SpecLocalLogic:
-			edge, success := Resolve(g, msgid, newvt, d)
-			if !success {
-				continue
-			}
-			break
-		}
-	}
-
-	var chk Identifier
-	for _, idf := range Identifiers {
-		if idf.CanIdentify(sd.Vertex) {
-			chk = idf
-		}
-	}
-
-	if chk == nil {
-		// TODO obviously this is just to canary; change to error when stabilized
-		panic("missing identify checker")
-	}
-
-	// destructive zero-allocations filtering
-	filtered := matches[:0]
-	for _, vt := range matches {
-		// TODO calling off to dynamic code for comparison is not acceptable long term
-		// TODO identifiers are broken right now, they look for edge props on the vtx
-		if chk.Matches(sd.Vertex, vt.v) {
-			filtered = append(filtered, vt)
-		}
-	}
-
-	// Now just the ones left for which we need edges to differentiate
-	filtered2 := filtered[:0]
-	for _, vt := range filtered {
-		//for es := range vt.
-	}
-
-	if tuples == nil {
 	} else {
 		ivt, _ := g.vtuples.Lookup(strconv.Itoa(vid))
 		vt := ivt.(vtTuple)
@@ -218,7 +163,6 @@ func (g *CoreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 		nu, _ := vt.v.Merge(sd.Vertex)
 		final = vtTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
 		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
-		//g.list[vid] = vtTuple{id: vid, e: vt.e, v: nu}
 	}
 
 	return
