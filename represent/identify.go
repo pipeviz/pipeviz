@@ -9,16 +9,24 @@ import (
 
 func Identify(g *CoreGraph, sd SplitData) int {
 	switch v := sd.Vertex.(type) {
+	// TODO special casing here...
 	default:
-		return identifyDefault(g, sd)
+		ids := identifyDefault(g, sd)
+		if ids == nil {
+			return 0
+		} else if len(ids) == 1 {
+			return ids[0]
+		} else {
+			panic("how can have more than one w/out env namespacer?")
+		}
 	}
 }
 
-func identifyDefault(g *CoreGraph, sd SplitData) int {
+func identifyDefault(g *CoreGraph, sd SplitData) []int {
 	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
 	if len(matches) == 0 {
 		// no vertices of this type, safe to bail early
-		return 0
+		return nil
 	}
 
 	// do simple pass with identifiers to check possible matches
@@ -57,23 +65,25 @@ func identifyDefault(g *CoreGraph, sd SplitData) int {
 
 		if !success {
 			// FIXME failure to resolve envlink doesn't necessarily mean no match
-			return 0
+			return nil
 		}
 
-		filtered2 := filtered[:0]
 		var match bool
 		for _, candidate := range filtered {
 			for _, edge2 := range g.OutWith(candidate.id, qbe("envlink")) {
 				if edge2.Target == edge.Target {
-					return candidate.id
+					return []int{candidate.id}
 				}
 			}
 		}
-	} else if len(filtered) != 1 {
-		panic("how can have more than one w/out env namespacer?")
 	}
 
-	return filtered[0].id
+	var ret []int
+	for _, vt := range filtered {
+		ret = append(ret, vt.id)
+	}
+
+	return ret
 }
 
 // older stuff below
