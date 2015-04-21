@@ -168,13 +168,7 @@ func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	if !mapValEq(l.Props(), r.Props(), "path") {
-		return false
-	}
-
-	// Path matches; env has to match, too.
-	// TODO matching like this assumes that envlinks are always directly resolved, with no bounding context
-	return matchEnvLink(l.Props(), r.Props())
+	return mapValEq(l.Props(), r.Props(), "path")
 }
 
 type IdentifierDataset struct{}
@@ -194,13 +188,7 @@ func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	if !mapValEq(l.Props(), r.Props(), "name") {
-		return false
-	}
-
-	// Name matches; env has to match, too.
-	// TODO matching like this assumes that envlinks are always directly resolved, with no bounding context
-	return matchEnvLink(l.Props(), r.Props())
+	return mapValEq(l.Props(), r.Props(), "name")
 }
 
 type IdentifierCommit struct{}
@@ -220,6 +208,7 @@ func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
+	// TODO mapValEq should be able to handle this
 	lsha, lexists := l.Props().Lookup("sha1")
 	rsha, rexists := r.Props().Lookup("sha1")
 	return rexists && lexists && bytes.Equal(lsha.([]byte), rsha.([]byte))
@@ -243,5 +232,5 @@ func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 	}
 
 	// TODO numeric id within the 2^16 ring buffer that is pids is a horrible way to do this
-	return mapValEq(l.Props(), r.Props(), "pid") && matchEnvLink(l.Props(), r.Props())
+	return mapValEq(l.Props(), r.Props(), "pid")
 }
