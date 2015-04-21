@@ -13,7 +13,6 @@ var i2a = strconv.Itoa
 
 // the main graph construct
 type CoreGraph struct {
-	list map[int]vtTuple
 	// TODO experiment with replacing with a hash array-mapped trie
 	vtuples ps.Map
 	vserial int
