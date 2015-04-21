@@ -8,18 +8,18 @@ import (
 )
 
 func Identify(g CoreGraph, sd SplitData) int {
-	switch v := sd.Vertex.(type) {
-	// TODO special casing here...
-	default:
-		ids := identifyDefault(g, sd)
-		if ids == nil {
-			return 0
-		} else if len(ids) == 1 {
-			return ids[0]
-		} else {
-			panic("how can have more than one w/out env namespacer?")
-		}
+	//switch v := sd.Vertex.(type) {
+	//// TODO special casing here...
+	//default:
+	ids := identifyDefault(g, sd)
+	if ids == nil {
+		return 0
+	} else if len(ids) == 1 {
+		return ids[0]
+	} else {
+		panic("how can have more than one w/out env namespacer?")
 	}
+	//}
 }
 
 func identifyDefault(g CoreGraph, sd SplitData) []int {
@@ -68,7 +68,6 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 			return nil
 		}
 
-		var match bool
 		for _, candidate := range filtered {
 			for _, edge2 := range g.OutWith(candidate.id, qbe("envlink")) {
 				if edge2.Target == edge.Target {

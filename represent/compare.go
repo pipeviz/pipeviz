@@ -23,9 +23,9 @@ func mapValEq(l, r ps.Map, keys ...string) bool {
 
 		// Transparently convert properties into their values
 		if lpv, ok := lv.(Property); ok {
-			lv := lpv.Value
+			lv = lpv.Value
 			if rpv, ok := rv.(Property); ok {
-				rv := rpv.Value
+				rv = rpv.Value
 			} else {
 				return false
 			}
@@ -67,9 +67,9 @@ func mapValEqAnd(l, r ps.Map, keys ...string) bool {
 
 		// Transparently convert properties into their values
 		if lpv, ok := lv.(Property); ok {
-			lv := lpv.Value
+			lv = lpv.Value
 			if rpv, ok := rv.(Property); ok {
-				rv := rpv.Value
+				rv = rpv.Value
 			} else {
 				return false
 			}
