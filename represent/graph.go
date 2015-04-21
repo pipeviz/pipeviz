@@ -90,7 +90,7 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 		var tuples []vtTuple
 		for _, sd := range sds {
 			// TODO this can't work now, dammit, need edge context. UGH
-			tuples = append(tuples, g.ensureVertex(sd.Vertex))
+			tuples = append(tuples, g.ensureVertex(msg.Id, sd))
 		}
 
 		// Collect edge specs for later processing
@@ -145,68 +145,95 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *CoreGraph) ensureVertex(vtx Vertex) (final vtTuple) {
-	vid := g.Find(vtx)
+func (g *CoreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
+	var vid int
+	newvt := vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 
-	if vid != 0 {
+	// FIXME so very hilariously O(n)
+	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
+	if len(matches) == 0 {
+		g.vserial += 1
+		newvt.id = g.vserial
+		g.vtuples = g.vtuples.Set(strconv.Itoa(g.vserial), final)
+		return newvt
+	}
+	// More than one match found. Iteratively narrow matches.
+
+	// First, see if we can resolve the primary identifying edge
+	for _, es := range sd.EdgeSpecs {
+		// FIXME totally not ok to hardcode the edge spec types
+		switch d := es.(type) {
+		default:
+			continue
+		case interpret.EnvLink:
+			edge, success := Resolve(g, msgid, newvt, d)
+			if success {
+				continue
+			}
+			break
+
+		case SpecLocalLogic:
+			edge, success := Resolve(g, msgid, newvt, d)
+			if !success {
+				continue
+			}
+			break
+		}
+	}
+
+	var chk Identifier
+	for _, idf := range Identifiers {
+		if idf.CanIdentify(sd.Vertex) {
+			chk = idf
+		}
+	}
+
+	if chk == nil {
+		// TODO obviously this is just to canary; change to error when stabilized
+		panic("missing identify checker")
+	}
+
+	// destructive zero-allocations filtering
+	filtered := matches[:0]
+	for _, vt := range matches {
+		// TODO calling off to dynamic code for comparison is not acceptable long term
+		// TODO identifiers are broken right now, they look for edge props on the vtx
+		if chk.Matches(sd.Vertex, vt.v) {
+			filtered = append(filtered, vt)
+		}
+	}
+
+	// Now just the ones left for which we need edges to differentiate
+	filtered2 := filtered[:0]
+	for _, vt := range filtered {
+		//for es := range vt.
+	}
+
+	if tuples == nil {
+	} else {
 		ivt, _ := g.vtuples.Lookup(strconv.Itoa(vid))
 		vt := ivt.(vtTuple)
 
 		// TODO err
-		nu, _ := vt.v.Merge(vtx)
+		nu, _ := vt.v.Merge(sd.Vertex)
 		final = vtTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
 		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
 		//g.list[vid] = vtTuple{id: vid, e: vt.e, v: nu}
-	} else {
-		g.vserial++
-		vid = g.vserial
-		final = vtTuple{id: vid, v: vtx, ie: ps.NewMap(), oe: ps.NewMap()}
-		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
-		//g.list[g.vserial] = vtTuple{v: vtx}
 	}
 
 	return
 }
 
-// Searches for an instance of the vertex within the graph. If found,
-// returns the vertex id, otherwise returns 0.
-//
-// TODO this is really a querying method. needs to be replaced by that whole subsystem
-func (g *CoreGraph) Find(vtx Vertex) int {
-	// FIXME so very hilariously O(n)
-
-	var chk Identifier
-	for _, idf := range Identifiers {
-		if idf.CanIdentify(vtx) {
-			chk = idf
-		}
-	}
-
-	// we hit this case iff there's an object type our identifiers can't work
-	// with. which should, eventually, be structurally impossible by this point
-	if chk == nil {
-		return 0
-	}
-
-	for id, v := range g.list {
-		if chk.Matches(v.v, vtx) {
-			return id
-		}
-	}
-
-	return 0
-}
-
 // Gets the vtTuple for a given vertex id.
 func (g *CoreGraph) Get(id int) (vtTuple, error) {
 	if id > g.vserial {
-		return vtTuple{}, errors.New(fmt.Sprintf("Graph has only ", g.vserial, "elements, no vertex yet exists with id", id))
+		return vtTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
 	}
 
 	vtx, exists := g.vtuples.Lookup(strconv.Itoa(id))
 	if exists {
 		return vtx.(vtTuple), nil
 	} else {
-		return vtTuple{}, errors.New(fmt.Sprintf("No vertex exists with id", id, "at the present revision of the graph"))
+		return vtTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
 	}
 }

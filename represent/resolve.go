@@ -319,9 +319,11 @@ func findEnv(g *CoreGraph, vt vtTuple) (vid int, edge StandardEdge, success bool
 		EType:  "envlink",
 	}
 
-	re := g.OutWith(vt.id, qbe("envlink"))
-	if len(re) == 1 {
-		vid, edge, success = re[0].Target, re[0], true
+	if vid != 0 {
+		re := g.OutWith(vt.id, qbe("envlink"))
+		if len(re) == 1 {
+			vid, edge, success = re[0].Target, re[0], true
+		}
 	}
 
 	return
