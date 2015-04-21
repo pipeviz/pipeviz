@@ -7,7 +7,7 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
-func Identify(g *CoreGraph, sd SplitData) int {
+func Identify(g CoreGraph, sd SplitData) int {
 	switch v := sd.Vertex.(type) {
 	// TODO special casing here...
 	default:
@@ -22,7 +22,7 @@ func Identify(g *CoreGraph, sd SplitData) int {
 	}
 }
 
-func identifyDefault(g *CoreGraph, sd SplitData) []int {
+func identifyDefault(g CoreGraph, sd SplitData) []int {
 	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
 	if len(matches) == 0 {
 		// no vertices of this type, safe to bail early

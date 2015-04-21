@@ -11,8 +11,48 @@ import (
 
 var i2a = strconv.Itoa
 
+/*
+CoreGraph is the interface provided by pipeviz' main graph object.
+
+It is a persistent/immutable datastructure: only the Merge() method is able
+to change the graph, but that method returns a pointer to a new graph rather
+than updating in-place. (These copies typically share structure for efficiency)
+
+All other methods are read-only, and generally provide composable parts that
+work together to facilitate the creation of larger traversals/queries.
+*/
+type CoreGraph interface {
+	// Merge a message into the graph, returning a pointer to the new graph
+	// that contains the resulting updates.
+	Merge(msg interpret.Message) CoreGraph
+
+	// Enumerates the outgoing edges from the ego vertex, limiting the result set
+	// to those that pass the provided filter (if any).
+	OutWith(egoId int, ef EFilter) (es []StandardEdge)
+
+	// Enumerates the incoming edges from the ego vertex, limiting the result set
+	// to those that pass the provided filter (if any).
+	InWith(egoId int, ef EFilter) (es []StandardEdge)
+
+	// Enumerates the successors (targets of outgoing edges) from the ego vertex,
+	// limiting the result set to those that pass the provided edge and vertex
+	// filters (if any).
+	SuccessorsWith(egoId int, vef VEFilter) (vts []vtTuple)
+
+	// Enumerates the predecessors (sources of incoming edges) from the ego vertex,
+	// limiting the result set to those that pass the provided edge and vertex
+	// filters (if any).
+	PredecessorsWith(egoId int, vef VEFilter) (vts []vtTuple)
+
+	// Enumerates the vertices that pass the provided vertex filter (if any).
+	VerticesWith(vf VFilter) (vs []vtTuple)
+
+	// Gets the vertex tuple associated with a given id.
+	Get(id int) (vtTuple, error)
+}
+
 // the main graph construct
-type CoreGraph struct {
+type coreGraph struct {
 	// TODO experiment with replacing with a hash array-mapped trie
 	vtuples ps.Map
 	vserial int
@@ -78,7 +118,7 @@ func (ess edgeSpecSet) EdgeCount() (i int) {
 }
 
 // the method to merge a message into the graph
-func (g *CoreGraph) Merge(msg interpret.Message) {
+func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	var ess edgeSpecSet
 
 	// TODO see if some lookup + locality of reference perf benefit can be gained keeping all vertices loaded up locally
@@ -142,13 +182,14 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 	}
 
 	// TODO attempt to de-orphan items here?
+	return g
 }
 
 // Ensures the vertex is present. Merges according to type-specific logic if
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *CoreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
+func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 	vid := Identify(g, sd)
 
 	if vid == 0 {
@@ -170,7 +211,7 @@ func (g *CoreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 }
 
 // Gets the vtTuple for a given vertex id.
-func (g *CoreGraph) Get(id int) (vtTuple, error) {
+func (g *coreGraph) Get(id int) (vtTuple, error) {
 	if id > g.vserial {
 		return vtTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
 	}
