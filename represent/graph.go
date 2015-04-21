@@ -9,6 +9,8 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
+var i2a = strconv.Itoa
+
 // the main graph construct
 type CoreGraph struct {
 	list map[int]vtTuple
@@ -126,13 +128,13 @@ func (g *CoreGraph) Merge(msg interpret.Message) {
 					}
 
 					// FIXME make sure assignment makes it back into ess slice
-					info.vt.oe = info.vt.oe.Set(strconv.Itoa(edge.id), edge)
-					g.vtuples = g.vtuples.Set(strconv.Itoa(info.vt.id), info.vt)
+					info.vt.oe = info.vt.oe.Set(i2a(edge.id), edge)
+					g.vtuples = g.vtuples.Set(i2a(info.vt.id), info.vt)
 
 					// TODO setting multiple times is silly and wasteful
-					any, _ := g.vtuples.Lookup(strconv.Itoa(edge.Target))
+					any, _ := g.vtuples.Lookup(i2a(edge.Target))
 					tvt := any.(vtTuple)
-					tvt.ie = tvt.ie.Set(strconv.Itoa(edge.id), edge)
+					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
 
 					info.es = append(info.es[:k], info.es[k+1:]...)
 				}
@@ -154,15 +156,15 @@ func (g *CoreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 		final = vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		g.vserial += 1
 		final.id = g.vserial
-		g.vtuples = g.vtuples.Set(strconv.Itoa(g.vserial), final)
+		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
 	} else {
-		ivt, _ := g.vtuples.Lookup(strconv.Itoa(vid))
+		ivt, _ := g.vtuples.Lookup(i2a(vid))
 		vt := ivt.(vtTuple)
 
 		// TODO err
 		nu, _ := vt.v.Merge(sd.Vertex)
 		final = vtTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
-		g.vtuples = g.vtuples.Set(strconv.Itoa(vid), final)
+		g.vtuples = g.vtuples.Set(i2a(vid), final)
 	}
 
 	return
@@ -174,7 +176,7 @@ func (g *CoreGraph) Get(id int) (vtTuple, error) {
 		return vtTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
 	}
 
-	vtx, exists := g.vtuples.Lookup(strconv.Itoa(id))
+	vtx, exists := g.vtuples.Lookup(i2a(id))
 	if exists {
 		return vtx.(vtTuple), nil
 	} else {
