@@ -2,6 +2,7 @@ package represent
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -9,17 +10,25 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
+var msgs []interpret.Message
+
+func init() {
+	for i := range make([]struct{}, 8) {
+		m := interpret.Message{Id: i + 1}
+
+		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
+		f, err := ioutil.ReadFile(path)
+		if err != nil {
+			panic("json fnf: " + path)
+		}
+
+		err = json.Unmarshal(f, &m)
+		msgs = append(msgs, m)
+	}
+}
+
 func TestMerge(t *testing.T) {
 	var g CoreGraph = &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 
-	m := interpret.Message{Id: 1}
-
-	f, err := ioutil.ReadFile("../fixtures/ein/1.json")
-	if err != nil {
-		t.Error("fnf")
-	}
-
-	err = json.Unmarshal(f, &m)
-	//pretty.Print(m)
-	g = g.Merge(m)
+	g = g.Merge(msgs[0])
 }

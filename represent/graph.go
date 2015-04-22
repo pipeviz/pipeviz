@@ -128,11 +128,10 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 		// Split each input element into vertex and edge specs
 		// TODO errs
 		sds, _ := Split(d, msg.Id)
-		// Ensure vertices are present
 
+		// Ensure vertices are present
 		var tuples []vtTuple
 		for _, sd := range sds {
-			// TODO this can't work now, dammit, need edge context. UGH
 			tuples = append(tuples, g.ensureVertex(msg.Id, sd))
 		}
 
