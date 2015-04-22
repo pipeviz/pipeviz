@@ -303,7 +303,7 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
 	vtype, props := vf.VType(), vf.VProps()
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
 		vt := val.(vtTuple)
-		if vt.v.Typ() != vtype {
+		if vtype != VTypeNone && vt.v.Typ() != vtype {
 			return
 		}
 
