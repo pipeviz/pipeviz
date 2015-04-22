@@ -40,7 +40,7 @@ func getGraphFixture() *CoreGraph {
 		ie: ps.NewMap(),
 		oe: ps.NewMap(),
 	}
-	vt.oe = vt.oe.Set(strconv.Itoa(4), edge)
+	vt.ie = vt.ie.Set(strconv.Itoa(4), edge)
 
 	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt)
 
@@ -54,9 +54,10 @@ func getGraphFixture() *CoreGraph {
 		oe: ps.NewMap(),
 	}
 
-	vt.ie = vt.ie.Set(strconv.Itoa(4), edge)
+	vt.oe = vt.oe.Set(strconv.Itoa(4), edge)
 
 	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt)
+	g.vserial = 4
 
 	return g
 }
@@ -89,7 +90,6 @@ func TestVerticesWith(t *testing.T) {
 	g := getGraphFixture()
 	var result []vtTuple
 
-	// should retrieve them all
 	result = g.VerticesWith(qbv())
 	if len(result) != 3 {
 		t.Errorf("Should find 3 vertices with no filter; found %v", len(result))
@@ -119,4 +119,87 @@ func TestVerticesWith(t *testing.T) {
 	if len(result) != 1 {
 		t.Errorf("Should find one vertex when filtering to env types and on ipv4 prop; found %v", len(result))
 	}
+}
+
+// Tests arcWith(), which effectively tests both OutWith() and InWith().
+func TestOutInArcWith(t *testing.T) {
+	g := getGraphFixture()
+	var result []StandardEdge
+
+	result = g.arcWith(1, qbe(), false)
+	if len(result) != 0 {
+		t.Errorf("Vertex 1 has no edges at all, but still got %v out-edge results", len(result))
+	}
+
+	result = g.arcWith(1, qbe(), true)
+	if len(result) != 0 {
+		t.Errorf("Vertex 1 has no edges at all, but still got %v in-edge results", len(result))
+	}
+
+	result = g.arcWith(2, qbe(), true)
+	if len(result) != 1 {
+		t.Errorf("Vertex 2 should have one in-edge, but got %v edges", len(result))
+	}
+
+	result = g.InWith(2, qbe())
+	if len(result) != 1 {
+		t.Errorf("Vertex 2 should have one in-edge, but got %v edges (InWith calls arcWith correctly)", len(result))
+	}
+
+	result = g.arcWith(2, qbe(), false)
+	if len(result) != 0 {
+		t.Errorf("Vertex 2 has an in-edge, but no out-edge; still got %v in-edge results", len(result))
+	}
+
+	result = g.arcWith(3, qbe(), false)
+	if len(result) != 1 {
+		t.Errorf("Vertex 3 should have one out-edge, but got %v edges", len(result))
+	}
+
+	result = g.arcWith(3, qbe(ETypeNone), false)
+	if len(result) != 1 {
+		t.Errorf("ETypeNone does not correctly matches all edge types - should've gotten 1 out-edge, but got %v edges", len(result))
+	}
+
+	result = g.OutWith(3, qbe())
+	if len(result) != 1 {
+		t.Errorf("Vertex 3 should have one out-edge, but got %v edges (OutWith calls arcWith correctly)", len(result))
+	}
+
+	result = g.InWith(3, qbe())
+	if len(result) != 0 {
+		t.Errorf("Vertex 3 has an out-edge, but no in-edge; still got %v in-edge results", len(result))
+	}
+
+	result = g.InWith(2, qbe(EType("envlink")))
+	if len(result) != 1 {
+		t.Errorf("Vertex 2 should have one 'envlink'-typed in-edge, but got %v edges", len(result))
+	}
+
+	result = g.InWith(2, qbe(EType("not-envlink")))
+	if len(result) != 0 {
+		t.Errorf("Vertex 2 should have no 'not-envlink'-typed in-edges, but got %v edges", len(result))
+	}
+
+	result = g.OutWith(3, qbe(EType("envlink")))
+	if len(result) != 1 {
+		t.Errorf("Vertex 3 should have one 'envlink'-typed out-edge, but got %v edges", len(result))
+	}
+
+	result = g.OutWith(3, qbe(EType("not-envlink")))
+	if len(result) != 0 {
+		t.Errorf("Vertex 3 should have no 'not-envlink'-typed out-edges, but got %v edges", len(result))
+	}
+
+	result = g.OutWith(3, qbe(ETypeNone, "ipv4", D_ipv4))
+	if len(result) != 1 {
+		t.Errorf("Vertex 3 should have one out-edge with prop 'ipv4' at correct value, but got %v edges", len(result))
+	}
+
+	result = g.OutWith(3, qbe(ETypeNone, "ipv4", "wrong"))
+	if len(result) != 0 {
+		t.Errorf("Vertex 3 should have zero out-edges with prop 'ipv4' at the wrong value, but got %v edges", len(result))
+	}
+
+	// TODO add some cases to ensure N>1 works for number of edges and number of prop queries
 }

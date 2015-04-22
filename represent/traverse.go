@@ -155,14 +155,15 @@ func (g *CoreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) 
 		}
 
 		for _, p := range props {
-			prop, exists := edge.Props.Lookup(p.K)
+			eprop, exists := edge.Props.Lookup(p.K)
 			if !exists {
 				return
 			}
 
-			switch tv := prop.(type) {
+			deprop := eprop.(Property)
+			switch tv := deprop.Value.(type) {
 			default:
-				if prop != p.V {
+				if tv != p.V {
 					return
 				}
 			case []byte:
