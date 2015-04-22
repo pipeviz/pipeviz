@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mndrix/ps"
+	"github.com/stretchr/testify/assert"
 )
 
 func getGraphFixture() *CoreGraph {
@@ -60,6 +61,30 @@ func getGraphFixture() *CoreGraph {
 	return g
 }
 
+func Testqbv(t *testing.T) {
+	// ensure implement both VFilter and EFilter interfaces
+	var _ VEFilter = vertexFilter{}
+
+	assert.Equal(t, qbv(), vertexFilter{}, "qbv with no args creates an empty vertexFilter")
+	assert.Equal(t, qbv(), vertexFilter{vtype: VTypeNone}, "qbv with no args creates equivalent of passing VTypeNone as first arg")
+	assert.Equal(t, qbv(VType("foo")), vertexFilter{vtype: VType("foo")}, "qbv with single arg assigns to VType struct prop")
+	assert.Equal(t, qbv(VTypeNone, "foo"), vertexFilter{vtype: VTypeNone}, "qbv with two args ignores second (unpaired) arg")
+	assert.Equal(t, qbv(VTypeNone, "foo", "bar"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with three args creates one pair of second (key) and third (value) args")
+	assert.Equal(t, qbv(VTypeNone, "foo", "bar", "baz"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with four args creates one pair from 2nd and 3rd args, ignores 4th")
+}
+
+func Testqbe(t *testing.T) {
+	// ensure implement both VFilter and EFilter interfaces
+	var _ VEFilter = edgeFilter{}
+
+	assert.Equal(t, qbe(), edgeFilter{}, "qbe with no args creates an empty edgeFilter")
+	assert.Equal(t, qbe(), edgeFilter{etype: ETypeNone}, "qbe with no args creates equivalent of passing ETypeNone as first arg")
+	assert.Equal(t, qbe(EType("foo")), edgeFilter{etype: EType("foo")}, "qbe with single arg assigns to EType struct prop")
+	assert.Equal(t, qbe(ETypeNone, "foo"), edgeFilter{etype: ETypeNone}, "qbe with two args ignores second (unpaired) arg")
+	assert.Equal(t, qbe(ETypeNone, "foo", "bar"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with three args creates one pair of second (key) and third (value) args")
+	assert.Equal(t, qbe(ETypeNone, "foo", "bar", "baz"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with four args creates one pair from 2nd and 3rd args, ignores 4th")
+}
+
 func TestVerticesWith(t *testing.T) {
 	g := getGraphFixture()
 	var result []vtTuple
@@ -94,5 +119,4 @@ func TestVerticesWith(t *testing.T) {
 	if len(result) != 1 {
 		t.Errorf("Should find one vertex when filtering to env types and on ipv4 prop; found %v", len(result))
 	}
-
 }
