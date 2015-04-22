@@ -31,4 +31,14 @@ func TestMerge(t *testing.T) {
 	var g CoreGraph = &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 
 	g = g.Merge(msgs[0])
+
+	//for _, v := range g.VerticesWith(qbv()) {
+	//pretty.Print(v.flat())
+	//}
+
+	g = g.Merge(msgs[1])
+
+	//for _, v := range g.VerticesWith(qbv()) {
+	//pretty.Print(v.flat())
+	//}
 }
