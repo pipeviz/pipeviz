@@ -53,7 +53,7 @@ func resolveEnvLink(g CoreGraph, mid int, src vtTuple, es interpret.EnvLink) (e 
 		return
 	}
 
-	rv := g.VerticesWith(qbv("environment"))
+	rv := g.VerticesWith(qbv(VType("environment")))
 	for _, vt := range rv {
 		// TODO this'll be cross-package eventually - reorg needed
 		if matchEnvLink(e.Props, vt.v.Props()) {
@@ -79,7 +79,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		// FIXME this approach just always updates the mid, which is weird?
 		e.Props = e.Props.Set("name", Property{MsgSrc: mid, Value: es.Name})
 
-		re := g.OutWith(src.id, qbe("datalink", "name", es.Name))
+		re := g.OutWith(src.id, qbe(EType("datalink"), "name", es.Name))
 		if len(re) == 1 {
 			success = true
 			e = re[0]
@@ -129,7 +129,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 	// If net, must scan; if local, a bit easier.
 	if !isLocal {
 		// First, find the environment vertex
-		rv = g.VerticesWith(qbv("environment"))
+		rv = g.VerticesWith(qbv(VType("environment")))
 		var envid int
 		for _, vt := range rv {
 			// TODO matchAddress() func will need to be reorged to cross-package eventually - export!
@@ -150,7 +150,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		//{"port", es.ConnNet.Port},
 		//{"proto", es.ConnNet.Proto},
 		//}}
-		rv = g.PredecessorsWith(envid, qbv("comm", "port", es.ConnNet.Port, "proto", es.ConnNet.Proto).and(qbe("envlink")))
+		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "port", es.ConnNet.Port, "proto", es.ConnNet.Proto).and(qbe(EType("envlink"))))
 
 		if len(rv) != 1 {
 			return
@@ -167,7 +167,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		// Walk the graph to find the vertex representing the unix socket
 		//ef := edgeFilter{EType: "envlink"}
 		//vf := vertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
-		rv = g.PredecessorsWith(envid, qbv("comm", "path", es.ConnUnix).and(qbe("envlink")))
+		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "path", es.ConnUnix).and(qbe(EType("envlink"))))
 		if len(rv) != 1 {
 			return
 		}
@@ -175,13 +175,13 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 	}
 
 	// With sock in hand, now find its proc
-	rv = g.SuccessorsWith(sock.id, qbv("process"))
+	rv = g.SuccessorsWith(sock.id, qbv(VType("process")))
 	if len(rv) != 1 {
 		// TODO could/will we ever allow >1?
 		return
 	}
 
-	rv = g.SuccessorsWith(rv[0].id, qbv("dataset"))
+	rv = g.SuccessorsWith(rv[0].id, qbv(VType("dataset")))
 	if len(rv) != 1 {
 		return
 	}
@@ -189,7 +189,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 
 	// if the spec indicates a subset, find it
 	if es.Subset != "" {
-		rv = g.SuccessorsWith(rv[0].id, qbv("dataset", "name", es.Subset))
+		rv = g.SuccessorsWith(rv[0].id, qbv(VType("dataset"), "name", es.Subset))
 		if len(rv) != 1 {
 			return
 		}
@@ -211,7 +211,7 @@ func resolveSpecCommit(g CoreGraph, mid int, src vtTuple, es SpecCommit) (e Stan
 		EType:  "version",
 	}
 
-	re := g.OutWith(src.id, qbe("version", "sha1", es.Sha1))
+	re := g.OutWith(src.id, qbe(EType("version"), "sha1", es.Sha1))
 	// TODO could there ever be >1?
 	if len(re) == 1 {
 		success = true
@@ -320,7 +320,7 @@ func findEnv(g CoreGraph, vt vtTuple) (vid int, edge StandardEdge, success bool)
 	}
 
 	if vid != 0 {
-		re := g.OutWith(vt.id, qbe("envlink"))
+		re := g.OutWith(vt.id, qbe(EType("envlink")))
 		if len(re) == 1 {
 			vid, edge, success = re[0].Target, re[0], true
 		}

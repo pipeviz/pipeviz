@@ -69,7 +69,7 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 		}
 
 		for _, candidate := range filtered {
-			for _, edge2 := range g.OutWith(candidate.id, qbe("envlink")) {
+			for _, edge2 := range g.OutWith(candidate.id, qbe(EType("envlink"))) {
 				if edge2.Target == edge.Target {
 					return []int{candidate.id}
 				}
