@@ -109,12 +109,12 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		},
 	},
 	{
-		Summary: "Minimal environment with hostname and nick",
-		Input:   interpret.Environment{Address: M_addr[0], Nick: D_nick},
+		Summary: "Minimal environment with ipv4 and nick",
+		Input:   interpret.Environment{Address: M_addr[1], Nick: D_nick},
 		Output: []SplitData{
 			{
 				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}),
+					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"ipv4", D_ipv4}),
 				},
 				EdgeSpecs: nil,
 			},

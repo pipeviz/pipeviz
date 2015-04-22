@@ -308,14 +308,15 @@ func (g *CoreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
 		}
 
 		for _, p := range props {
-			prop, exists := vt.v.Props().Lookup(p.K)
+			vprop, exists := vt.v.Props().Lookup(p.K)
 			if !exists {
 				return
 			}
 
-			switch tv := prop.(type) {
+			dvprop := vprop.(Property)
+			switch tv := dvprop.Value.(type) {
 			default:
-				if prop != p.V {
+				if tv != p.V {
 					return
 				}
 			case []byte:
