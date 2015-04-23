@@ -96,20 +96,20 @@ func getGraphFixture() *CoreGraph {
 	// edge, id 13, connects vid 3 to vid 4. msgid 4. type "dummy-edge-type3". two props - "eprop2": "qux", "eprop3": 42.
 	edge13 := mkEdge(13, 3, 4, 4, "dummy-edge-type3", "eprop2", "bar", "eprop3", 42)
 
-	// vid 1, type "env". one prop - "prop1": "foo". msgid 1
-	vt1 := mkTuple(1, dummyVertex{1, "env", tprops{"prop1": "foo"}}, edge10, edge11) // one in, one out
+	// vid 1, type "env". two props - "prop1": "bar", "prop2": 42. msgid 1
+	vt1 := mkTuple(1, dummyVertex{1, "env", tprops{"prop1": "foo", "prop2": 42}}, edge10, edge11) // one in, one out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(1), vt1)
 
-	// vid 2, type "env". two props - "prop1": "bar", "prop2": "foo". msgid 2
-	vt2 := mkTuple(2, dummyVertex{2, "env", tprops{"prop1": "bar", "prop2": "foo"}}, edge10) // one in
+	// vid 2, type "env". : "one prop - "prop1": "foo". msgid 2
+	vt2 := mkTuple(2, dummyVertex{2, "env", tprops{"prop1": "bar"}}, edge10) // one in
 	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt2)
 
 	// vid 3, type "vt2". two props - "prop1": "bar", "bowser": "moo". msgid 3
 	vt3 := mkTuple(3, dummyVertex{3, "vt2", tprops{"prop1": "bar", "bowser": "moo"}}, edge11, edge12, edge13) // three out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt3)
 
-	// vid 4, type "vt3". two props - "prop1": "baz", "rawr": 42. msgid 4
-	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "rawr": 42}}, edge12, edge13) // two in, same origin
+	// vid 4, type "vt3". two props - "prop1": "baz", "prop2": 42. msgid 4
+	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "prop2": 42}}, edge12, edge13) // two in, same origin
 	g.vtuples = g.vtuples.Set(strconv.Itoa(4), vt4)
 
 	// vid 5, type "vt3". no props, no edges. msgid 5
@@ -202,6 +202,11 @@ func TestVerticesWith(t *testing.T) {
 	result = g.VerticesWith(qbv(VType("env"), "prop1", "foo"))
 	if len(result) != 1 {
 		t.Errorf("Should find one vertex when filtering to env types and with prop1 == \"foo\"; found %v", len(result))
+	}
+
+	result = g.VerticesWith(qbv(VType("env"), "prop2", 42))
+	if len(result) != 1 {
+		t.Errorf("Should find one vertex when filtering to env types and with prop2 == 42; found %v", len(result))
 	}
 }
 
@@ -319,5 +324,125 @@ func TestOutInArcWith(t *testing.T) {
 	result = g.OutWith(3, qbe(EType("dummy-edge-type2"), "eprop2", "bar"))
 	if len(result) != 1 {
 		t.Errorf("Vertex 3 should have one out-edges that is dummy type2 AND has \"eprop2\" at \"bar\", but got %v edges", len(result))
+	}
+}
+
+// Tests adjacentWith(), which effectively tests SuccessorsWith() and PredecessorsWith()
+func TestAdjacentWith(t *testing.T) {
+	g := getGraphFixture()
+	var result []vtTuple
+
+	// basic, unfiltered tests first to ensure the right data is coming through
+	// vtx 2 has just one in-edge
+	result = g.adjacentWith(2, qbv(), true)
+	if len(result) != 1 {
+		t.Errorf("Vertex 2 has one predecessor, but got %v vertices", len(result))
+	}
+
+	result = g.PredecessorsWith(2, qbv())
+	if len(result) != 1 {
+		t.Errorf("Vertex 2 has one predecessor, but got %v vertices", len(result))
+	}
+
+	// vtx 1 has one out-edge and one in-edge
+	result = g.adjacentWith(1, qbv(), false)
+	if len(result) != 1 {
+		t.Errorf("Vertex 1 has one successor, but got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(1, qbv())
+	if len(result) != 1 {
+		t.Errorf("Vertex 1 has one successor, but got %v vertices", len(result))
+	}
+
+	// vtx 5 is an isolate
+	result = g.adjacentWith(5, qbv(), true)
+	if len(result) != 0 {
+		t.Errorf("Vertex 5 has no predecessors, but got %v vertices", len(result))
+	}
+
+	result = g.PredecessorsWith(5, qbv())
+	if len(result) != 0 {
+		t.Errorf("Vertex 5 has no predecessors, but got %v vertices", len(result))
+	}
+
+	result = g.adjacentWith(5, qbv(), false)
+	if len(result) != 0 {
+		t.Errorf("Vertex 5 has no successors, but got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(5, qbv())
+	if len(result) != 0 {
+		t.Errorf("Vertex 5 has no successors, but got %v vertices", len(result))
+	}
+
+	// qbe w/out args should be equivalent
+	result = g.PredecessorsWith(2, qbe())
+	if len(result) != 1 {
+		t.Errorf("Vertex 2 has one predecessor, but got %v vertices (qbe)", len(result))
+	}
+
+	result = g.SuccessorsWith(1, qbe())
+	if len(result) != 1 {
+		t.Errorf("Vertex 1 has one successor, but got %v vertices (qbe)", len(result))
+	}
+
+	// deduping: vtx 4 has two in-edges and none out, but those edges are parallel so only one unique vtx
+	result = g.PredecessorsWith(4, qbv())
+	if len(result) != 1 {
+		t.Errorf("Vertex 4 has two in-edges, but only one unique predecessor; however, got %v vertices", len(result))
+	}
+
+	// vtx 3 is on the other side of vtx 4 - three out-edges, but only two uniques
+	result = g.SuccessorsWith(3, qbv())
+	if len(result) != 2 {
+		t.Errorf("Vertex 4 has three out-edges, but only two unique successors; however, got %v vertices", len(result))
+	}
+
+	// filter checks, beginning with edge and/or vertex typing
+	result = g.SuccessorsWith(3, qbv(VType("vt3")))
+	if len(result) != 1 {
+		t.Errorf("Vertex 4 has only one unique successor of type \"vt3\"; however, got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbe(EType("dummy-edge-type2")))
+	if len(result) != 2 {
+		t.Errorf("Vertex 4 has two out-edges of \"dummy-edge-type2\" and both point to different vertices, so expecting 2, but got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbe(EType("dummy-edge-type2")).and(qbv(VType("env"))))
+	if len(result) != 1 {
+		t.Errorf("Vertex 4 has two unique successors along \"dummy-edge-type2\" out-edges, but only one is vtype \"env\". However, got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbe(EType("dummy-edge-type3")).and(qbv(VType("env"))))
+	if len(result) != 0 {
+		t.Errorf("Vertex 4 has one unique successor along \"dummy-edge-type3\" out-edges, but it is not an \"env\" type. However, got %v vertices", len(result))
+	}
+
+	// prop-filtering checks
+	result = g.SuccessorsWith(3, qbv(VTypeNone, "prop2", 42))
+	if len(result) != 2 {
+		t.Errorf("Vertex 4 has only two unique successors with \"prop2\" at 42; however, got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbe(ETypeNone, "eprop2", "bar"))
+	if len(result) != 2 {
+		t.Errorf("Vertex 4 has two unique successors connected by two out-edges with \"eprop2\" at \"bar\"; however, got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbv(VTypeNone, "prop1", "baz", "prop2", 42))
+	if len(result) != 1 {
+		t.Errorf("Vertex 4 has only one unique successor with \"prop1\" at \"baz\" and \"prop2\" at 42; however, got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbe(ETypeNone, "eprop2", "bar").and(qbv(VTypeNone, "prop1", "baz")))
+	if len(result) != 1 {
+		t.Errorf("Vertex 4 has only one unique successor with \"prop1\" at \"baz\" along an out-edge with \"eprop2\" at \"bar\"; however, got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbe(ETypeNone, "eprop2", "bar").and(qbv(VType("vt3"), "prop1", "baz")))
+	if len(result) != 1 {
+		t.Errorf("Vertex 4 has one unique successor of type \"vt3\" with \"prop1\" at \"baz\" along an out-edge with \"eprop2\" at \"bar\"; however, got %v vertices", len(result))
 	}
 }
