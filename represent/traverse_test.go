@@ -62,7 +62,7 @@ func getGraphFixture() *CoreGraph {
 	return g
 }
 
-func Testqbv(t *testing.T) {
+func TestQbv(t *testing.T) {
 	// ensure implement both VFilter and EFilter interfaces
 	var _ VEFilter = vertexFilter{}
 
@@ -72,9 +72,22 @@ func Testqbv(t *testing.T) {
 	assert.Equal(t, qbv(VTypeNone, "foo"), vertexFilter{vtype: VTypeNone}, "qbv with two args ignores second (unpaired) arg")
 	assert.Equal(t, qbv(VTypeNone, "foo", "bar"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with three args creates one pair of second (key) and third (value) args")
 	assert.Equal(t, qbv(VTypeNone, "foo", "bar", "baz"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with four args creates one pair from 2nd and 3rd args, ignores 4th")
+
+	// ensure that some incorrect things owing to loose typing correctly panic
+	assert.Panics(t, func() {
+		qbv("foo")
+	}, "qbv panics on type conversion when passing a string instead of VType")
+
+	assert.Panics(t, func() {
+		qbv(VTypeNone, 1, "foo")
+	}, "qbv panics on type conversion when second argument (with corresponding pair val 3rd arg) is non-string")
+
+	assert.Panics(t, func() {
+		qbv(VTypeNone, "foo", "bar", 1, "baz")
+	}, "qbv panics on type conversion when Nth even argument (with corresponding pair val N+1 arg) is non-string")
 }
 
-func Testqbe(t *testing.T) {
+func TestQbe(t *testing.T) {
 	// ensure implement both VFilter and EFilter interfaces
 	var _ VEFilter = edgeFilter{}
 
@@ -84,6 +97,19 @@ func Testqbe(t *testing.T) {
 	assert.Equal(t, qbe(ETypeNone, "foo"), edgeFilter{etype: ETypeNone}, "qbe with two args ignores second (unpaired) arg")
 	assert.Equal(t, qbe(ETypeNone, "foo", "bar"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with three args creates one pair of second (key) and third (value) args")
 	assert.Equal(t, qbe(ETypeNone, "foo", "bar", "baz"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with four args creates one pair from 2nd and 3rd args, ignores 4th")
+
+	// ensure that some incorrect things owing to loose typing correctly panic
+	assert.Panics(t, func() {
+		qbe("foo")
+	}, "qbe panics on type conversion when passing a string instead of EType")
+
+	assert.Panics(t, func() {
+		qbe(ETypeNone, 1, "foo")
+	}, "qbe panics on type conversion when second argument (with corresponding pair val 3rd arg) is non-string")
+
+	assert.Panics(t, func() {
+		qbe(ETypeNone, "foo", "bar", 1, "baz")
+	}, "qbe panics on type conversion when Nth even argument (with corresponding pair val N+1 arg) is non-string")
 }
 
 func TestVerticesWith(t *testing.T) {
