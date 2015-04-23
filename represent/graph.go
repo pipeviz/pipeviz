@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/kr/pretty"
 	"github.com/mndrix/ps"
 	"github.com/sdboyer/pipeviz/interpret"
 )
@@ -151,13 +152,21 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	// This is a little wasteful, but it's the simplest way to let any possible
 	// dependencies between edges work themselves out. It has provably incorrect
 	// cases, however, and will need to be replaced.
-	var ec, lec int
-	for ec = ess.EdgeCount(); ec != lec; ec = ess.EdgeCount() {
+	var ec, lec, pass int
+	for ec = ess.EdgeCount(); ec != 0 && ec != lec; ec = ess.EdgeCount() {
+		pass += 1
+		fmt.Printf("\nEdge resolution pass #%v: edge count %v, last edge count %v\n\n", pass, ec, lec)
 		lec = ec
-		for _, info := range ess {
-			for k, spec := range info.es {
+		for infokey, info := range ess {
+			specs := info.es
+			info.es = info.es[:0]
+			for k, spec := range specs {
 				edge, success := Resolve(g, msg.Id, info.vt, spec)
 				if success {
+					fmt.Println("RESOLUTION SUCCESS - now on key", k)
+					fmt.Printf("source vid %v, target vid %v, type %v\n", info.vt.id, edge.Target, info.vt.v.Typ())
+					pretty.Println(spec)
+
 					edge.Source = info.vt.id
 					if edge.id == 0 {
 						// new edge, allocate a new id for it
@@ -165,7 +174,6 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 						edge.id = g.vserial
 					}
 
-					// FIXME make sure assignment makes it back into ess slice
 					info.vt.oe = info.vt.oe.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(info.vt.id), info.vt)
 
@@ -173,10 +181,19 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
 					tvt := any.(vtTuple)
 					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
+					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
+				} else {
+					// FIXME mem leaks if done this way...?
+					info.es = append(info.es, spec)
 
-					info.es = append(info.es[:k], info.es[k+1:]...)
+					fmt.Println("RESOLUTION FAILURE - on key", k)
+					fmt.Printf("Remaining spec set is now %v length\n", len(info.es))
+					fmt.Printf("source vid %v, type %v\n", info.vt.id, info.vt.v.Typ())
+					pretty.Println(spec)
 				}
 			}
+			// set the processing info back into its original position in the slice
+			ess[infokey] = info
 		}
 	}
 
