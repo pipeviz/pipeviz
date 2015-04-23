@@ -1,6 +1,7 @@
 package represent
 
 import (
+	"encoding/hex"
 	"reflect"
 	"testing"
 
@@ -55,9 +56,10 @@ var D_env interpret.Environment = interpret.Environment{
 // Default values for logic states; as defined, will induce no edges.
 var D_ls interpret.LogicState = interpret.LogicState{
 	ID: struct {
-		Commit  string `json:"commit"`
-		Version string `json:"version"`
-		Semver  string `json:"semver"`
+		Commit    []byte
+		CommitStr string `json:"commit"`
+		Version   string `json:"version"`
+		Semver    string `json:"semver"`
 	}{Version: D_version},
 	Lgroup: "bigparty",
 	Nick:   D_nick,
@@ -195,14 +197,20 @@ type FixtureParentDatasetSplit struct {
 var F_ParentDataset []FixtureParentDatasetSplit
 
 func init() {
-	D_commithash = []byte("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
+	hexify := func(hash string) (ret []byte) {
+		ret, _ = hex.DecodeString(hash)
+		return
+	}
+
+	D_commithash = hexify("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
 
 	lsIds := []struct {
-		Commit  string `json:"commit"`
-		Version string `json:"version"`
-		Semver  string `json:"semver"`
+		Commit    []byte
+		CommitStr string `json:"commit"`
+		Version   string `json:"version"`
+		Semver    string `json:"semver"`
 	}{
-		{Commit: D_commit},
+		{Commit: hexify(D_commit)},
 		{Version: D_version},
 		{Semver: D_semver},
 	}
@@ -242,7 +250,7 @@ func init() {
 						mapPropPairs(D_msgid, p{"path", D_ls.Path}),
 					},
 					EdgeSpecs: EdgeSpecs{
-						SpecCommit{[]byte(D_commit)},
+						SpecCommit{hexify(D_commit)},
 						M_envlink[1],
 					},
 				},
@@ -292,7 +300,7 @@ func init() {
 						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
 					EdgeSpecs: EdgeSpecs{
-						SpecCommit{[]byte(D_commit)},
+						SpecCommit{hexify(D_commit)},
 						M_envlink[1],
 					},
 				},
@@ -449,7 +457,7 @@ func init() {
 				Repository: "https://github.com/sdboyer/pipeviz",
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
-				Parents:    [][]byte{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0")},
+				Parents:    [][]byte{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
 			},
 			Output: []SplitData{
 				{
@@ -457,7 +465,7 @@ func init() {
 						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
-						SpecCommit{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0")},
+						SpecCommit{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
 					},
 				},
 			},
@@ -488,7 +496,7 @@ func init() {
 				Repository: "https://github.com/sdboyer/pipeviz",
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
-				Parents:    [][]byte{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0"), []byte("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
+				Parents:    [][]byte{hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
 			},
 			Output: []SplitData{
 				{
@@ -496,8 +504,8 @@ func init() {
 						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
-						SpecCommit{[]byte("1854930bef6511f688afd99c1018dcb99ae966b0")},
-						SpecCommit{[]byte("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
+						SpecCommit{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
+						SpecCommit{hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
 					},
 				},
 			},

@@ -1,6 +1,7 @@
 package interpret
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -74,6 +75,16 @@ func (m *Message) Each(f func(vertex interface{})) {
 		f(e)
 	}
 	for _, e := range m.m.Ls {
+		if e.ID.CommitStr != "" {
+			byts, err := hex.DecodeString(e.ID.CommitStr)
+			// TODO ...validation, logging, sth
+			if err != nil {
+				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			}
+			e.ID.Commit = byts
+			e.ID.CommitStr = ""
+		}
+
 		f(e)
 	}
 	for _, e := range m.m.Pds {
@@ -86,9 +97,32 @@ func (m *Message) Each(f func(vertex interface{})) {
 		f(e)
 	}
 	for _, e := range m.m.C {
+		byts, err := hex.DecodeString(e.Sha1Str)
+		if err != nil {
+			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+		}
+		e.Sha1 = byts
+		e.Sha1Str = ""
+
+		for _, pstr := range e.ParentsStr {
+			byts, err := hex.DecodeString(pstr)
+			if err != nil {
+				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			}
+			e.Parents = append(e.Parents, byts)
+		}
+		e.ParentsStr = nil
+
 		f(e)
 	}
 	for _, e := range m.m.Cm {
+		byts, err := hex.DecodeString(e.Sha1Str)
+		if err != nil {
+			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+		}
+		e.Sha1 = byts
+		e.Sha1Str = ""
+
 		f(e)
 	}
 }

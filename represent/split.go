@@ -114,10 +114,9 @@ func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 	}
 
 	// TODO should do anything with mutually exclusive properties here?
-	if d.ID.Commit != "" {
-		edges = append(edges, SpecCommit{[]byte(d.ID.Commit)})
+	if len(d.ID.Commit) != 0 {
+		edges = append(edges, SpecCommit{d.ID.Commit})
 	}
-	// FIXME this shouldn't be here, it's a property of the commit
 	if d.ID.Version != "" {
 		v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.ID.Version})
 	}

@@ -26,9 +26,10 @@ type LogicState struct {
 	Datasets    []DataLink `json:"datasets"`
 	Environment EnvLink    `json:"environment"`
 	ID          struct {
-		Commit  string `json:"commit"`
-		Version string `json:"version"`
-		Semver  string `json:"semver"`
+		Commit    []byte
+		CommitStr string `json:"commit"`
+		Version   string `json:"version"`
+		Semver    string `json:"semver"`
 	} `json:"id"`
 	Lgroup string `json:"lgroup"`
 	Nick   string `json:"nick"`
@@ -58,18 +59,21 @@ type ConnUnix struct {
 }
 
 type CommitMeta struct {
-	Sha1      []byte   `json:"sha1"`
+	Sha1      []byte
+	Sha1Str   string   `json:"sha1"`
 	Tags      []string `json:"tags"`
 	TestState string   `json:"testState"`
 }
 
 type Commit struct {
-	Author     string   `json:"author"`
-	Date       string   `json:"date"`
-	Parents    [][]byte `json:"parents"`
-	Sha1       []byte   `json:"sha1"`
-	Subject    string   `json:"subject"`
-	Repository string   `json:"repository"`
+	Author     string `json:"author"`
+	Date       string `json:"date"`
+	Parents    [][]byte
+	ParentsStr []string `json:"parents"`
+	Sha1       []byte
+	Sha1Str    string `json:"sha1"`
+	Subject    string `json:"subject"`
+	Repository string `json:"repository"`
 }
 
 // FIXME this metaset/set design is not recursive, but it will need to be
