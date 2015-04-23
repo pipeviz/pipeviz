@@ -3,33 +3,47 @@ package represent
 import (
 	"fmt"
 
+	"github.com/kr/pretty"
 	"github.com/mndrix/ps"
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
 func Identify(g CoreGraph, sd SplitData) int {
-	ids := identifyDefault(g, sd)
-	if ids == nil {
-		return 0
-	} else if len(ids) == 1 {
-		return ids[0]
-	}
-
+	ids, definitive := identifyDefault(g, sd)
 	// default one didn't do it, use specialists to narrow further
 
 	switch sd.Vertex.(type) {
 	default:
+		if ids == nil {
+			return 0
+		} else if len(ids) == 1 {
+			return ids[0]
+		}
+
 		panic("ZOMG CAN'T IDENTIFY")
+	case vertexLogicState, vertexProcess, vertexComm, vertexParentDataset:
+		if len(ids) == 1 && definitive {
+			return ids[0]
+		}
+		return 0
 	case vertexTestResult:
 		return identifyByGitHashSpec(g, sd, ids)
 	}
 }
 
-func identifyDefault(g CoreGraph, sd SplitData) []int {
+// Peforms a generalized search for vertex identification, with a particular head-nod to
+// those many vertices that need an EnvLink to fully resolve their identity.
+//
+// Returns a slice of candidate ids, and a bool indicating whether, if there is only one
+// result, that result should be considered a definitive match.
+//
+// FIXME the responsibility murkiness is making this a horrible snarl, fix this shit ASAP
+func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
+	pretty.Print("STARTING WORK ON", vtoflat(sd.Vertex), sd.EdgeSpecs)
 	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
 	if len(matches) == 0 {
 		// no vertices of this type, safe to bail early
-		return nil
+		return nil, false
 	}
 
 	// do simple pass with identifiers to check possible matches
@@ -71,14 +85,14 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 
 		if !success {
 			// FIXME failure to resolve envlink doesn't necessarily mean no match
-			return nil
+			return nil, false
 		}
 
 		for _, candidate := range filtered {
 			for _, edge2 := range g.OutWith(candidate.id, qbe(EType("envlink"))) {
 				filtered2 = append(filtered2, candidate)
 				if edge2.Target == edge.Target {
-					return []int{candidate.id}
+					return []int{candidate.id}, true
 				}
 			}
 		}
@@ -87,12 +101,11 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 		filtered2 = filtered
 	}
 
-	var ret []int
 	for _, vt := range filtered2 {
 		ret = append(ret, vt.id)
 	}
 
-	return ret
+	return ret, false
 }
 
 // Narrow a match list by looking for alignment on a git commit sha1
