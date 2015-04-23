@@ -62,6 +62,9 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 		}
 	}
 
+	// filter again to avoid multiple vertices overwriting each other
+	// TODO this is a temporary measure until we move identity edge resolution up into vtx identification process
+	filtered2 := filtered[:0]
 	if hasEl {
 		newvt := vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		edge, success := Resolve(g, 0, newvt, envlink)
@@ -73,15 +76,19 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 
 		for _, candidate := range filtered {
 			for _, edge2 := range g.OutWith(candidate.id, qbe(EType("envlink"))) {
+				filtered2 = append(filtered2, candidate)
 				if edge2.Target == edge.Target {
 					return []int{candidate.id}
 				}
 			}
 		}
+	} else {
+		// no el, suggesting our candidate list is good
+		filtered2 = filtered
 	}
 
 	var ret []int
-	for _, vt := range filtered {
+	for _, vt := range filtered2 {
 		ret = append(ret, vt.id)
 	}
 
