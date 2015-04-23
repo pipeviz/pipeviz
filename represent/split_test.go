@@ -597,7 +597,7 @@ func init() {
 		{
 			Summary: "Provenance genesis with time",
 			Input: interpret.Dataset{
-				Name:       "dataset-foo",
+				Name:       "dataset-bar",
 				CreateTime: D_datetime,
 				Parent:     "parentdata",
 				Genesis: interpret.DataProvenance{
@@ -609,7 +609,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+						mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecDatasetHierarchy{[]string{"parentdata"}},
@@ -651,9 +651,8 @@ func init() {
 				Name:        "froofroo",
 				Subsets: []interpret.Dataset{
 					{
-						Name:       "childset1",
+						Name:       "dataset-foo",
 						CreateTime: D_datetime,
-						Parent:     "parentdata",
 						Genesis:    interpret.DataAlpha("α"),
 					},
 				},
@@ -665,7 +664,16 @@ func init() {
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
-						SpecDatasetHierarchy{[]string{"froofroo", "childset1"}},
+					},
+				},
+				{
+					Vertex: vertexDataset{
+						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecDatasetHierarchy{[]string{"froofroo"}},
+						interpret.DataAlpha("α"),
 					},
 				},
 			},
@@ -678,16 +686,18 @@ func init() {
 				Name:        "froofroo",
 				Subsets: []interpret.Dataset{
 					{
-						Name:       "childset1",
+						Name:       "dataset-foo",
 						CreateTime: D_datetime,
-						Parent:     "parentdata",
 						Genesis:    interpret.DataAlpha("α"),
 					},
 					{
-						Name:       "childset2",
+						Name:       "dataset-bar",
 						CreateTime: D_datetime,
-						Parent:     "parentdata",
-						Genesis:    interpret.DataAlpha("α"),
+						Genesis: interpret.DataProvenance{
+							Address:  M_addr[0],
+							Dataset:  []string{"parentset", "innerset"},
+							SnapTime: D_datetime,
+						},
 					},
 				},
 			},
@@ -698,8 +708,30 @@ func init() {
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
-						SpecDatasetHierarchy{[]string{"froofroo", "childset1"}},
-						SpecDatasetHierarchy{[]string{"froofroo", "childset2"}},
+					},
+				},
+				{
+					Vertex: vertexDataset{
+						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecDatasetHierarchy{[]string{"froofroo"}},
+						interpret.DataAlpha("α"),
+					},
+				},
+				{
+					Vertex: vertexDataset{
+						mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
+					},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecDatasetHierarchy{[]string{"froofroo"}},
+						interpret.DataProvenance{
+							Address:  M_addr[0],
+							Dataset:  []string{"parentset", "innerset"},
+							SnapTime: D_datetime,
+						},
 					},
 				},
 			},

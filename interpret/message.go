@@ -34,7 +34,6 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	// first, dump all top-level objects into the graph.
 	for _, e := range m.m.Env {
 		envlink := EnvLink{Address: Address{}}
-
 		// Create an envlink for any nested items, preferring nick, then hostname, ipv4, ipv6.
 		if e.Nick != "" {
 			envlink.Nick = e.Nick
@@ -56,12 +55,6 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 			m.m.P = append(m.m.P, p)
 		}
 		for _, pds := range e.Datasets {
-			for _, ds := range pds.Subsets {
-				// FIXME this doesn't really work as a good linkage
-				ds.Parent = pds.Name
-				m.m.Ds = append(m.m.Ds, ds)
-			}
-
 			pds.Environment = envlink
 			m.m.Pds = append(m.m.Pds, pds)
 		}

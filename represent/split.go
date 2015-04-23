@@ -220,11 +220,19 @@ func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) 
 
 	edges = append(edges, d.Environment)
 
-	for _, sds := range d.Subsets {
-		edges = append(edges, SpecDatasetHierarchy{[]string{d.Name, sds.Name}})
+	ret := []SplitData{{v, edges}}
+
+	for _, sub := range d.Subsets {
+		sub.Parent = d.Name
+		sds, _ := Split(sub, id)
+		// can only be one
+		sd := sds[0]
+		// FIXME having this here is cool, but the schema does allow top-level datasets, which won't pass thru and so are guaranteed orphans
+		sd.EdgeSpecs = append(EdgeSpecs{d.Environment}, sd.EdgeSpecs...)
+		ret = append(ret, sd)
 	}
 
-	return []SplitData{{v, edges}}, nil
+	return ret, nil
 }
 
 func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {

@@ -302,7 +302,7 @@ func resolveDataProvenance(g CoreGraph, mid int, src vtTuple, es interpret.DataP
 	}
 	e.Props = assignAddress(mid, es.Address, e.Props, false)
 
-	re := g.OutWith(src.id, qbe("data-provenance"))
+	re := g.OutWith(src.id, qbe(EType("data-provenance")))
 	if len(re) == 1 {
 		// TODO wasteful, blargh
 		reresolve := mapValEqAnd(e.Props, re[0].Props, "hostname", "ipv4", "ipv6")
@@ -340,7 +340,7 @@ func resolveDataAlpha(g CoreGraph, mid int, src vtTuple, es interpret.DataAlpha)
 		EType:  "data-provenance",
 	}
 
-	re := g.OutWith(src.id, qbe("data-provenance"))
+	re := g.OutWith(src.id, qbe(EType("data-provenance")))
 	if len(re) == 1 {
 		e = re[0]
 	}
