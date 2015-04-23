@@ -1,25 +1,28 @@
 package represent
 
 import (
-	"bytes"
+	"fmt"
 
 	"github.com/mndrix/ps"
 	"github.com/sdboyer/pipeviz/interpret"
 )
 
 func Identify(g CoreGraph, sd SplitData) int {
-	//switch v := sd.Vertex.(type) {
-	//// TODO special casing here...
-	//default:
 	ids := identifyDefault(g, sd)
 	if ids == nil {
 		return 0
 	} else if len(ids) == 1 {
 		return ids[0]
-	} else {
-		panic("how can have more than one w/out env namespacer?")
 	}
-	//}
+
+	// default one didn't do it, use specialists to narrow further
+
+	switch sd.Vertex.(type) {
+	default:
+		panic("ZOMG CAN'T IDENTIFY")
+	case vertexTestResult:
+		return identifyByGitHashSpec(g, sd, ids)
+	}
 }
 
 func identifyDefault(g CoreGraph, sd SplitData) []int {
@@ -39,7 +42,7 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 
 	if chk == nil {
 		// TODO obviously this is just to canary; change to error when stabilized
-		panic("missing identify checker")
+		panic(fmt.Sprintf("missing identify checker for type %T", sd.Vertex))
 	}
 
 	filtered := matches[:0] // destructive zero-alloc filtering
@@ -85,6 +88,26 @@ func identifyDefault(g CoreGraph, sd SplitData) []int {
 	return ret
 }
 
+// Narrow a match list by looking for alignment on a git commit sha1
+func identifyByGitHashSpec(g CoreGraph, sd SplitData, matches []int) int {
+	for _, es := range sd.EdgeSpecs {
+		// first find the commit spec
+		if spec, ok := es.(SpecCommit); ok {
+			// then search otherwise-matching vertices for a corresponding sha1 edge
+			for _, matchvid := range matches {
+				if len(g.OutWith(matchvid, qbe(EType("version"), "sha1", spec.Sha1))) == 1 {
+					return matchvid
+				}
+			}
+
+			break // there *should* be one and only one
+		}
+	}
+
+	// no match, it's a newbie
+	return 0
+}
+
 // older stuff below
 
 var Identifiers []Identifier
@@ -96,6 +119,8 @@ func init() {
 		IdentifierDataset{},
 		IdentifierProcess{},
 		IdentifierCommit{},
+		IdentifierVcsLabel{},
+		IdentifierTestResult{},
 	}
 }
 
@@ -208,9 +233,10 @@ func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
 	}
 
 	// TODO mapValEq should be able to handle this
-	lsha, lexists := l.Props().Lookup("sha1")
-	rsha, rexists := r.Props().Lookup("sha1")
-	return rexists && lexists && bytes.Equal(lsha.([]byte), rsha.([]byte))
+	//lsha, lexists := l.Props().Lookup("sha1")
+	//rsha, rexists := r.Props().Lookup("sha1")
+	//return rexists && lexists && bytes.Equal(lsha.(Property).Value.([]byte), rsha.(Property).Value.([]byte))
+	return mapValEq(l.Props(), r.Props(), "sha1")
 }
 
 type IdentifierProcess struct{}
@@ -232,4 +258,44 @@ func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 
 	// TODO numeric id within the 2^16 ring buffer that is pids is a horrible way to do this
 	return mapValEq(l.Props(), r.Props(), "pid")
+}
+
+type IdentifierVcsLabel struct{}
+
+func (i IdentifierVcsLabel) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexVcsLabel)
+	return ok
+}
+
+func (i IdentifierVcsLabel) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexVcsLabel)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexVcsLabel)
+	if !ok {
+		return false
+	}
+
+	return mapValEq(l.Props(), r.Props(), "name")
+}
+
+type IdentifierTestResult struct{}
+
+func (i IdentifierTestResult) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexTestResult)
+	return ok
+}
+
+func (i IdentifierTestResult) Matches(a Vertex, b Vertex) bool {
+	_, ok := a.(vertexTestResult)
+	if !ok {
+		return false
+	}
+	_, ok = b.(vertexTestResult)
+	if !ok {
+		return false
+	}
+
+	return true // TODO LOLOLOL totally demonstrating how this system is broken
 }
