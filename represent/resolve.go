@@ -217,6 +217,12 @@ func resolveSpecCommit(g CoreGraph, mid int, src vtTuple, es SpecCommit) (e Stan
 		success = true
 		e.Target = re[0].Target
 		e.id = re[0].id
+	} else {
+		rv := g.VerticesWith(qbv(VType("commit"), "sha1", es.Sha1))
+		if len(rv) == 1 {
+			success = true
+			e.Target = rv[0].id
+		}
 	}
 
 	return
