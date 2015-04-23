@@ -240,7 +240,7 @@ func resolveSpecLocalLogic(g CoreGraph, mid int, src vtTuple, es SpecLocalLogic)
 	}
 
 	// search for existing link
-	re := g.OutWith(src.id, qbe("logic-link", "path", es.Path))
+	re := g.OutWith(src.id, qbe(EType("logic-link"), "path", es.Path))
 	if len(re) == 1 {
 		// TODO don't set the path prop again, it's the unique id...meh, same question here w/uniqueness as above
 		success = true
@@ -250,7 +250,7 @@ func resolveSpecLocalLogic(g CoreGraph, mid int, src vtTuple, es SpecLocalLogic)
 
 	// no existing link found, search for proc directly
 	envid, _, _ := findEnv(g, src)
-	rv := g.PredecessorsWith(envid, qbv("logic-state", "path", es.Path))
+	rv := g.PredecessorsWith(envid, qbv(VType("logic-state"), "path", es.Path))
 	if len(rv) == 1 {
 		success = true
 		e.Target = rv[0].id
@@ -358,7 +358,7 @@ func findEnv(g CoreGraph, vt vtTuple) (vid int, edge StandardEdge, success bool)
 		EType:  "envlink",
 	}
 
-	if vid != 0 {
+	if vt.id != 0 {
 		re := g.OutWith(vt.id, qbe(EType("envlink")))
 		if len(re) == 1 {
 			vid, edge, success = re[0].Target, re[0], true

@@ -213,10 +213,12 @@ func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 		final = vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		g.vserial += 1
 		final.id = g.vserial
+		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
 		// TODO remove this - temporarily cheat here by promoting EnvLink resolution, since so much relies on it
 		for _, spec := range sd.EdgeSpecs {
-			if el, ok := spec.(interpret.EnvLink); ok {
-				edge, success := Resolve(g, msgid, final, el)
+			switch spec.(type) {
+			case interpret.EnvLink, SpecDatasetHierarchy:
+				edge, success := Resolve(g, msgid, final, spec)
 				if success { // could fail if corresponding env not yet declared
 					g.vserial += 1
 					edge.id = g.vserial
@@ -227,11 +229,11 @@ func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 					tvt := any.(vtTuple)
 					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
+					g.vtuples = g.vtuples.Set(i2a(final.id), final)
 				}
 			}
 		}
 
-		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
 		//pretty.Print("NEW VERTEX:", final.flat())
 	} else {
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
