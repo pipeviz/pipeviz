@@ -21,3 +21,10 @@ _testmain.go
 
 *.exe
 *.test
+
+# delve leaves these around
+.dbg_history
+
+# ignore js things
+node_modules
+bower_components

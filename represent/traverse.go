@@ -155,14 +155,15 @@ func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) 
 		}
 
 		for _, p := range props {
-			prop, exists := edge.Props.Lookup(p.K)
+			eprop, exists := edge.Props.Lookup(p.K)
 			if !exists {
 				return
 			}
 
-			switch tv := prop.(type) {
+			deprop := eprop.(Property)
+			switch tv := deprop.Value.(type) {
 			default:
-				if prop != p.V {
+				if tv != p.V {
 					return
 				}
 			case []byte:
@@ -222,14 +223,15 @@ func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTupl
 		}
 
 		for _, p := range eprops {
-			prop, exists := edge.Props.Lookup(p.K)
+			eprop, exists := edge.Props.Lookup(p.K)
 			if !exists {
 				return
 			}
 
-			switch tv := prop.(type) {
+			deprop := eprop.(Property)
+			switch tv := deprop.Value.(type) {
 			default:
-				if prop != p.V {
+				if tv != p.V {
 					return
 				}
 			case []byte:
@@ -256,7 +258,17 @@ func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTupl
 		close(vidchan)
 	}()
 
+	// Keep track of the vertices we've collected, for deduping
+	visited := make(map[int]struct{})
+VertexInspector:
 	for vid := range vidchan {
+		if _, seenit := visited[vid]; seenit {
+			// already visited this vertex; go back to waiting on the chan
+			continue
+		}
+		// mark this vertex as black
+		visited[vid] = struct{}{}
+
 		adjvt, err := g.Get(vid)
 		if err != nil {
 			// TODO panic, really?
@@ -269,20 +281,21 @@ func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTupl
 		}
 
 		for _, p := range vprops {
-			prop, exists := adjvt.v.Props().Lookup(p.K)
+			vprop, exists := adjvt.v.Props().Lookup(p.K)
 			if !exists {
 				return
 			}
 
-			switch tv := prop.(type) {
+			dvprop := vprop.(Property)
+			switch tv := dvprop.Value.(type) {
 			default:
-				if prop != p.V {
-					return
+				if tv != p.V {
+					continue VertexInspector
 				}
 			case []byte:
 				cmptv, ok := p.V.([]byte)
 				if !ok || !bytes.Equal(tv, cmptv) {
-					return
+					continue VertexInspector
 				}
 			}
 		}
@@ -308,14 +321,15 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
 		}
 
 		for _, p := range props {
-			prop, exists := vt.v.Props().Lookup(p.K)
+			vprop, exists := vt.v.Props().Lookup(p.K)
 			if !exists {
 				return
 			}
 
-			switch tv := prop.(type) {
+			dvprop := vprop.(Property)
+			switch tv := dvprop.Value.(type) {
 			default:
-				if prop != p.V {
+				if tv != p.V {
 					return
 				}
 			case []byte:
