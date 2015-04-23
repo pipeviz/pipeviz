@@ -37,7 +37,7 @@ type SpecProc struct {
 	Pid int
 }
 
-type SpecLocalDataset struct {
+type SpecDatasetHierarchy struct {
 	NamePath []string // path through the series of names that arrives at the final dataset
 }
 
@@ -221,7 +221,7 @@ func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) 
 	edges = append(edges, d.Environment)
 
 	for _, sds := range d.Subsets {
-		edges = append(edges, SpecLocalDataset{[]string{d.Name, sds.Name}})
+		edges = append(edges, SpecDatasetHierarchy{[]string{d.Name, sds.Name}})
 	}
 
 	return []SplitData{{v, edges}}, nil
@@ -239,7 +239,7 @@ func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
 		v.props = v.props.Set("create-time", Property{MsgSrc: id, Value: d.CreateTime})
 	}
 
-	edges = append(edges, SpecLocalDataset{[]string{d.Parent}})
+	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
 	edges = append(edges, d.Genesis)
 
 	return []SplitData{{v, edges}}, nil

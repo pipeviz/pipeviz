@@ -22,10 +22,14 @@ func Resolve(g CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool)
 		return resolveSpecCommit(g, mid, src, es)
 	case SpecLocalLogic:
 		return resolveSpecLocalLogic(g, mid, src, es)
+	case SpecDatasetHierarchy:
+		return resolveSpecDatasetHierarchy(g, mid, src, es)
 	case interpret.DataProvenance:
 		return resolveDataProvenance(g, mid, src, es)
 	case interpret.DataAlpha:
 		return resolveDataAlpha(g, mid, src, es)
+	default:
+		panic("OMG WUT NO SUPPORT") // FIXME panic lulz
 	}
 
 	return StandardEdge{}, false
@@ -248,6 +252,35 @@ func resolveSpecLocalLogic(g CoreGraph, mid int, src vtTuple, es SpecLocalLogic)
 	envid, _, _ := findEnv(g, src)
 	rv := g.PredecessorsWith(envid, qbv("logic-state", "path", es.Path))
 	if len(rv) == 1 {
+		success = true
+		e.Target = rv[0].id
+	}
+
+	return
+}
+
+func resolveSpecDatasetHierarchy(g CoreGraph, mid int, src vtTuple, es SpecDatasetHierarchy) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "dataset-hierarchy",
+	}
+	e.Props = e.Props.Set("parent", Property{MsgSrc: mid, Value: es.NamePath[0]})
+
+	// check for existing link - there can be only be one
+	re := g.OutWith(src.id, qbe(EType("dataset-hierarchy")))
+	if len(re) == 1 {
+		success = true
+		e = re[0]
+		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
+		e.Props = e.Props.Set("parent", Property{MsgSrc: mid, Value: es.NamePath[0]})
+		return
+	}
+
+	// no existing link found; search for proc directly
+	envid, _, _ := findEnv(g, src)
+	rv := g.PredecessorsWith(envid, qbv(VType("parent-dataset"), "name", es.NamePath[0]))
+	if len(rv) != 0 { // >1 shouldn't be possible
 		success = true
 		e.Target = rv[0].id
 	}

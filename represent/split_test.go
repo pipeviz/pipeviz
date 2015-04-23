@@ -588,7 +588,7 @@ func init() {
 						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
-						SpecLocalDataset{[]string{"parentdata"}},
+						SpecDatasetHierarchy{[]string{"parentdata"}},
 						interpret.DataAlpha("α"),
 					},
 				},
@@ -612,7 +612,7 @@ func init() {
 						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
-						SpecLocalDataset{[]string{"parentdata"}},
+						SpecDatasetHierarchy{[]string{"parentdata"}},
 						interpret.DataProvenance{
 							Address:  M_addr[0],
 							Dataset:  []string{"parentset", "innerset"},
@@ -665,7 +665,7 @@ func init() {
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
-						SpecLocalDataset{[]string{"froofroo", "childset1"}},
+						SpecDatasetHierarchy{[]string{"froofroo", "childset1"}},
 					},
 				},
 			},
@@ -698,8 +698,8 @@ func init() {
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
-						SpecLocalDataset{[]string{"froofroo", "childset1"}},
-						SpecLocalDataset{[]string{"froofroo", "childset2"}},
+						SpecDatasetHierarchy{[]string{"froofroo", "childset1"}},
+						SpecDatasetHierarchy{[]string{"froofroo", "childset2"}},
 					},
 				},
 			},
