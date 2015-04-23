@@ -128,6 +128,7 @@ func init() {
 		IdentifierCommit{},
 		IdentifierVcsLabel{},
 		IdentifierTestResult{},
+		IdentifierParentDataset{},
 	}
 }
 
@@ -305,4 +306,24 @@ func (i IdentifierTestResult) Matches(a Vertex, b Vertex) bool {
 	}
 
 	return true // TODO LOLOLOL totally demonstrating how this system is broken
+}
+
+type IdentifierParentDataset struct{}
+
+func (i IdentifierParentDataset) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexParentDataset)
+	return ok
+}
+
+func (i IdentifierParentDataset) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexParentDataset)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexParentDataset)
+	if !ok {
+		return false
+	}
+
+	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
 }
