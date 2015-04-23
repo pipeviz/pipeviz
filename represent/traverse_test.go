@@ -81,8 +81,8 @@ func mkEdge(id, source, target, msgid int, etype string, props ...interface{}) S
 	return e
 }
 
-func getGraphFixture() *CoreGraph {
-	g := &CoreGraph{vtuples: ps.NewMap(), vserial: 0}
+func getGraphFixture() *coreGraph {
+	g := &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 
 	// Manually populate the graph with some dummy vertices and edges.
 	// These don't necessarily line up with any real schemas, on purpose.
