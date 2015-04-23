@@ -8,56 +8,114 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// just convenient shorthand
+type tprops map[string]interface{}
+
+type dummyVertex struct {
+	msgid int
+	typ   string
+	props tprops
+}
+
+func (v dummyVertex) Props() ps.Map {
+	ret := ps.NewMap()
+
+	for k, val := range v.props {
+		ret = ret.Set(k, Property{MsgSrc: v.msgid, Value: val})
+	}
+
+	return ret
+}
+
+// this breaks the rule that it can't change, but shouldn't matter and the whole
+// method should be going away soon anyway
+func (v dummyVertex) Typ() VType {
+	return VType(v.typ)
+}
+
+// non-functional impl for now b/c this is probably going away
+func (vtx dummyVertex) Merge(ivtx Vertex) (Vertex, error) {
+	return vtx, nil
+}
+
+// utility func to create a vtTuple. puts edges in the right place by
+// checking source/target ids. panics if they don't line up!
+func mkTuple(vid int, vtx dummyVertex, edges ...StandardEdge) vtTuple {
+	vt := vtTuple{
+		id: vid,
+		v:  vtx,
+		ie: ps.NewMap(),
+		oe: ps.NewMap(),
+	}
+
+	for _, e := range edges {
+		if e.Source == vid {
+			vt.oe = vt.oe.Set(strconv.Itoa(e.id), e)
+		} else if e.Target == vid {
+			vt.ie = vt.ie.Set(strconv.Itoa(e.id), e)
+		} else {
+			panic("edge had neither source nor target of vid")
+		}
+	}
+
+	return vt
+}
+
+// utility func to create a StandardEdge.
+func mkEdge(id, source, target, msgid int, etype string, props ...interface{}) StandardEdge {
+	e := StandardEdge{
+		id:     id,
+		Source: source,
+		Target: target,
+		EType:  EType(etype),
+		Props:  ps.NewMap(),
+	}
+
+	var k string
+	var v interface{}
+	for len(props) > 1 {
+		k, v, props = props[0].(string), props[1], props[2:]
+		e.Props = e.Props.Set(k, Property{MsgSrc: msgid, Value: v})
+	}
+
+	return e
+}
+
 func getGraphFixture() *CoreGraph {
 	g := &CoreGraph{vtuples: ps.NewMap(), vserial: 0}
-	var vt vtTuple
 
-	// Manually populate the graph with a couple envs and logic states
-	// env #1
-	sd, _ := Split(F_Environment[0].Input, 1)
-	vt = vtTuple{
-		id: 1,
-		v:  sd[0].Vertex,
-		ie: ps.NewMap(),
-		oe: ps.NewMap(),
-	}
-	g.vtuples = g.vtuples.Set(strconv.Itoa(1), vt)
+	// Manually populate the graph with some dummy vertices and edges.
+	// These don't necessarily line up with any real schemas, on purpose.
 
-	// env #2
-	sd, _ = Split(F_Environment[1].Input, 2)
-	// create the edge w/map that will connect to this env
-	edge := StandardEdge{
-		id:     4,
-		Source: 3,
-		Target: 2,
-		EType:  EType("envlink"),
-		Props:  mapPropPairs(3, p{"ipv4", D_ipv4}),
-	}
+	// edge, id 10, connects vid 1 to vid 2. msgid 2. type "dummy-edge-type1". one prop - "eprop1": "foo".
+	edge10 := mkEdge(10, 1, 2, 2, "dummy-edge-type1", "eprop1", "foo")
+	// edge, id 11, connects vid 3 to vid 1. msgid 3. type "dummy-edge-type2". one prop - "eprop2": "bar".
+	edge11 := mkEdge(11, 3, 1, 3, "dummy-edge-type2", "eprop2", "bar")
+	// edge, id 12, connects vid 3 to vid 2. msgid 3. type "dummy-edge-type2". one prop - "eprop2": "baz".
+	edge12 := mkEdge(12, 3, 2, 3, "dummy-edge-type2", "eprop2", "baz")
+	// edge, id 13, connects vid 3 to vid 4. msgid 4. type "dummy-edge-type3". two props - "eprop2": "qux", "eprop3": 42.
+	edge13 := mkEdge(13, 3, 4, 4, "dummy-edge-type3", "eprop2", "bar", "eprop3", 42)
 
-	vt = vtTuple{
-		id: 2,
-		v:  sd[0].Vertex,
-		ie: ps.NewMap(),
-		oe: ps.NewMap(),
-	}
-	vt.ie = vt.ie.Set(strconv.Itoa(4), edge)
+	// vid 1, type "env". one prop - "prop1": "foo". msgid 1
+	vt1 := mkTuple(1, dummyVertex{1, "env", tprops{"prop1": "foo"}}, edge10, edge11) // one in, one out
+	g.vtuples = g.vtuples.Set(strconv.Itoa(1), vt1)
 
-	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt)
+	// vid 2, type "env". two props - "prop1": "bar", "prop2": "foo". msgid 2
+	vt2 := mkTuple(2, dummyVertex{2, "env", tprops{"prop1": "bar", "prop2": "foo"}}, edge10, edge12) // two in
+	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt2)
 
-	// and the logic state
-	sd, _ = Split(F_LogicState[1].Input, 3)
+	// vid 3, type "vt2". two props - "prop1": "bar", "bowser": "moo". msgid 3
+	vt3 := mkTuple(3, dummyVertex{3, "vt2", tprops{"prop1": "bar", "bowser": "moo"}}, edge11, edge12, edge13) // three out
+	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt3)
 
-	vt = vtTuple{
-		id: 3,
-		v:  sd[0].Vertex,
-		ie: ps.NewMap(),
-		oe: ps.NewMap(),
-	}
+	// vid 4, type "vt3". two props - "prop1": "baz", "rawr": 42. msgid 4
+	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "rawr": 42}}, edge13) // one in
+	g.vtuples = g.vtuples.Set(strconv.Itoa(4), vt4)
 
-	vt.oe = vt.oe.Set(strconv.Itoa(4), edge)
-
-	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt)
-	g.vserial = 4
+	// vid 5, type "vt3". no props, no edges. msgid 5
+	vt5 := mkTuple(5, dummyVertex{5, "vt3", nil}) // one in
+	g.vtuples = g.vtuples.Set(strconv.Itoa(5), vt5)
+	g.vserial = 13
 
 	return g
 }
@@ -117,33 +175,33 @@ func TestVerticesWith(t *testing.T) {
 	var result []vtTuple
 
 	result = g.VerticesWith(qbv())
-	if len(result) != 3 {
-		t.Errorf("Should find 3 vertices with no filter; found %v", len(result))
+	if len(result) != 5 {
+		t.Errorf("Should find 4 vertices with no filter; found %v", len(result))
 	}
 
-	result = g.VerticesWith(qbv(VType("environment")))
+	result = g.VerticesWith(qbv(VType("env")))
 	if len(result) != 2 {
 		t.Errorf("Should find 2 vertices when filtering to type env; found %v", len(result))
 	}
 
-	result = g.VerticesWith(qbv(VType("commit")))
+	result = g.VerticesWith(qbv(VType("nonexistent-type")))
 	if len(result) != 0 {
-		t.Errorf("Should find no vertices when filtering to type env; found %v", len(result))
+		t.Errorf("Should find no vertices when filtering on type that's not present; found %v", len(result))
 	}
 
-	result = g.VerticesWith(qbv(VTypeNone, "ipv4", D_ipv4))
-	if len(result) != 1 {
-		t.Errorf("Should find one vertex when filtering on ipv4 prop; found %v", len(result))
+	result = g.VerticesWith(qbv(VTypeNone, "prop1", "bar"))
+	if len(result) != 2 {
+		t.Errorf("Should find two vertices with prop1 == 'bar'; found %v", len(result))
 	}
 
-	result = g.VerticesWith(qbv(VTypeNone, "ipv4", D_ipv6))
+	result = g.VerticesWith(qbv(VTypeNone, "none-have-this-prop-key", "doesn't matter"))
 	if len(result) != 0 {
-		t.Errorf("Should find no vertices when filtering on bad value for ipv4 prop; found %v", len(result))
+		t.Errorf("Should find no vertices when filtering on nonexistent prop key; found %v", len(result))
 	}
 
-	result = g.VerticesWith(qbv(VType("environment"), "ipv4", D_ipv4))
+	result = g.VerticesWith(qbv(VType("env"), "prop1", "foo"))
 	if len(result) != 1 {
-		t.Errorf("Should find one vertex when filtering to env types and on ipv4 prop; found %v", len(result))
+		t.Errorf("Should find one vertex when filtering to env types and with prop1 == 'foo'; found %v", len(result))
 	}
 }
 
@@ -152,80 +210,114 @@ func TestOutInArcWith(t *testing.T) {
 	g := getGraphFixture()
 	var result []StandardEdge
 
-	result = g.arcWith(1, qbe(), false)
+	// first test zero-case - vtx 5 has no edges
+	result = g.arcWith(5, qbe(), false)
 	if len(result) != 0 {
-		t.Errorf("Vertex 1 has no edges at all, but still got %v out-edge results", len(result))
+		t.Errorf("Vertex 5 has no edges at all, but still got %v out-edge results", len(result))
 	}
 
+	result = g.arcWith(5, qbe(), true)
+	if len(result) != 0 {
+		t.Errorf("Vertex 5 has no edges at all, but still got %v in-edge results", len(result))
+	}
+
+	// next test single case - vtx 1 has one in, one out
 	result = g.arcWith(1, qbe(), true)
-	if len(result) != 0 {
-		t.Errorf("Vertex 1 has no edges at all, but still got %v in-edge results", len(result))
+	if len(result) != 1 {
+		t.Errorf("Vertex 1 should have one in-edge, but got %v edges", len(result))
 	}
 
-	result = g.arcWith(2, qbe(), true)
+	// ensure InWith behaves same as arcWith + arg
+	result = g.InWith(1, qbe())
 	if len(result) != 1 {
-		t.Errorf("Vertex 2 should have one in-edge, but got %v edges", len(result))
+		t.Errorf("Vertex 1 should have one in-edge, but got %v edges (InWith calls arcWith correctly)", len(result))
+	}
+
+	result = g.arcWith(1, qbe(), false)
+	if len(result) != 1 {
+		t.Errorf("Vertex 1 should have one out-edge, but got %v edges", len(result))
+	}
+
+	result = g.OutWith(1, qbe())
+	if len(result) != 1 {
+		t.Errorf("Vertex 1 should have one out-edge, but got %v edges (OutWith calls arcWith correctly)", len(result))
+	}
+
+	// last of basic tests - N>1 number of edges
+	result = g.arcWith(2, qbe(), true)
+	if len(result) != 2 {
+		t.Errorf("Vertex 2 has two in-edges, but got %v in-edge results", len(result))
 	}
 
 	result = g.InWith(2, qbe())
-	if len(result) != 1 {
-		t.Errorf("Vertex 2 should have one in-edge, but got %v edges (InWith calls arcWith correctly)", len(result))
-	}
-
-	result = g.arcWith(2, qbe(), false)
-	if len(result) != 0 {
-		t.Errorf("Vertex 2 has an in-edge, but no out-edge; still got %v in-edge results", len(result))
+	if len(result) != 2 {
+		t.Errorf("Vertex 2 has two in-edges, but got %v in-edge results (InWith calls arcWith correctly)", len(result))
 	}
 
 	result = g.arcWith(3, qbe(), false)
-	if len(result) != 1 {
-		t.Errorf("Vertex 3 should have one out-edge, but got %v edges", len(result))
-	}
-
-	result = g.arcWith(3, qbe(ETypeNone), false)
-	if len(result) != 1 {
-		t.Errorf("ETypeNone does not correctly matches all edge types - should've gotten 1 out-edge, but got %v edges", len(result))
+	if len(result) != 3 {
+		t.Errorf("Vertex 3 should have three out-edges, but got %v edges", len(result))
 	}
 
 	result = g.OutWith(3, qbe())
-	if len(result) != 1 {
-		t.Errorf("Vertex 3 should have one out-edge, but got %v edges (OutWith calls arcWith correctly)", len(result))
+	if len(result) != 3 {
+		t.Errorf("Vertex 3 should have three out-edges, but got %v edges (OutWith calls arcWith correctly)", len(result))
 	}
 
 	result = g.InWith(3, qbe())
 	if len(result) != 0 {
-		t.Errorf("Vertex 3 has an out-edge, but no in-edge; still got %v in-edge results", len(result))
+		t.Errorf("Vertex 3 has out-edges but no in-edge; still got %v in-edge results", len(result))
 	}
 
-	result = g.InWith(2, qbe(EType("envlink")))
-	if len(result) != 1 {
-		t.Errorf("Vertex 2 should have one 'envlink'-typed in-edge, but got %v edges", len(result))
+	// now, tests that actually exercise the filter
+	result = g.OutWith(3, qbe(ETypeNone))
+	if len(result) != 3 {
+		t.Errorf("ETypeNone does not correctly matches all edge types - should've gotten 3 out-edges, but got %v edges", len(result))
 	}
 
-	result = g.InWith(2, qbe(EType("not-envlink")))
+	// basic edge type filtering
+	result = g.OutWith(3, qbe(EType("dummy-edge-type2")))
+	if len(result) != 2 {
+		t.Errorf("Vertex 2 should have two 'dummy-edge-type2'-typed out-edges, but got %v edges", len(result))
+	}
+
+	// nonexistent type means no results
+	result = g.InWith(2, qbe(EType("nonexistent-type")))
 	if len(result) != 0 {
-		t.Errorf("Vertex 2 should have no 'not-envlink'-typed in-edges, but got %v edges", len(result))
+		t.Errorf("Vertex 2 should have no edges of a nonexistent type, but got %v edges", len(result))
 	}
 
-	result = g.OutWith(3, qbe(EType("envlink")))
-	if len(result) != 1 {
-		t.Errorf("Vertex 3 should have one 'envlink'-typed out-edge, but got %v edges", len(result))
-	}
-
-	result = g.OutWith(3, qbe(EType("not-envlink")))
+	// existing edge type, but not one this vt has
+	result = g.InWith(3, qbe(EType("dummy-edge-type1")))
 	if len(result) != 0 {
-		t.Errorf("Vertex 3 should have no 'not-envlink'-typed out-edges, but got %v edges", len(result))
+		t.Errorf("Vertex 3 has none of the 'dummy-edge-type1' edges (though it is a real type in the graph); however, got %v edges", len(result))
 	}
 
-	result = g.OutWith(3, qbe(ETypeNone, "ipv4", D_ipv4))
+	// test prop-checking
+	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "baz"))
 	if len(result) != 1 {
-		t.Errorf("Vertex 3 should have one out-edge with prop 'ipv4' at correct value, but got %v edges", len(result))
+		t.Errorf("Vertex 3 should have one out-edge with 'eprop2' at 'baz', but got %v edges", len(result))
 	}
 
-	result = g.OutWith(3, qbe(ETypeNone, "ipv4", "wrong"))
+	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "bar"))
+	if len(result) != 2 {
+		t.Errorf("Vertex 3 should have two out-edges with 'eprop2' at 'bar', but got %v edges", len(result))
+	}
+
+	// test multi-prop checking - ensure they're ANDed
+	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "bar", "eprop3", 42))
+	if len(result) != 1 {
+		t.Errorf("Vertex 3 should have one out-edge with 'eprop2' at 'bar' AND 'eprop3' at 42, but got %v edges", len(result))
+	}
+
+	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "baz", "eprop3", 42))
 	if len(result) != 0 {
-		t.Errorf("Vertex 3 should have zero out-edges with prop 'ipv4' at the wrong value, but got %v edges", len(result))
+		// OR would've here would produce 2 edges
+		t.Errorf("Vertex 3 should have no out-edges with 'eprop2' at 'baz' AND 'eprop3' at 42 , but got %v edges", len(result))
 	}
 
-	// TODO add some cases to ensure N>1 works for number of edges and number of prop queries
+	result = g.OutWith(3, qbe(EType("dummy-edge-type2"), "eprop2", "bar"))
+	if len(result) != 1 {
+		t.Errorf("Vertex 3 should have one out-edges that is dummy type2 AND has 'eprop2' at 'bar', but got %v edges", len(result))
+	}
 }
