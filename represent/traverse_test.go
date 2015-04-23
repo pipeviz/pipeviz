@@ -91,8 +91,8 @@ func getGraphFixture() *CoreGraph {
 	edge10 := mkEdge(10, 1, 2, 2, "dummy-edge-type1", "eprop1", "foo")
 	// edge, id 11, connects vid 3 to vid 1. msgid 3. type "dummy-edge-type2". one prop - "eprop2": "bar".
 	edge11 := mkEdge(11, 3, 1, 3, "dummy-edge-type2", "eprop2", "bar")
-	// edge, id 12, connects vid 3 to vid 2. msgid 3. type "dummy-edge-type2". one prop - "eprop2": "baz".
-	edge12 := mkEdge(12, 3, 2, 3, "dummy-edge-type2", "eprop2", "baz")
+	// edge, id 12, connects vid 3 to vid 4. msgid 4. type "dummy-edge-type2". one prop - "eprop2": "baz".
+	edge12 := mkEdge(12, 3, 4, 3, "dummy-edge-type2", "eprop2", "baz")
 	// edge, id 13, connects vid 3 to vid 4. msgid 4. type "dummy-edge-type3". two props - "eprop2": "qux", "eprop3": 42.
 	edge13 := mkEdge(13, 3, 4, 4, "dummy-edge-type3", "eprop2", "bar", "eprop3", 42)
 
@@ -101,7 +101,7 @@ func getGraphFixture() *CoreGraph {
 	g.vtuples = g.vtuples.Set(strconv.Itoa(1), vt1)
 
 	// vid 2, type "env". two props - "prop1": "bar", "prop2": "foo". msgid 2
-	vt2 := mkTuple(2, dummyVertex{2, "env", tprops{"prop1": "bar", "prop2": "foo"}}, edge10, edge12) // two in
+	vt2 := mkTuple(2, dummyVertex{2, "env", tprops{"prop1": "bar", "prop2": "foo"}}, edge10) // one in
 	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt2)
 
 	// vid 3, type "vt2". two props - "prop1": "bar", "bowser": "moo". msgid 3
@@ -109,11 +109,11 @@ func getGraphFixture() *CoreGraph {
 	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt3)
 
 	// vid 4, type "vt3". two props - "prop1": "baz", "rawr": 42. msgid 4
-	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "rawr": 42}}, edge13) // one in
+	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "rawr": 42}}, edge12, edge13) // two in, same origin
 	g.vtuples = g.vtuples.Set(strconv.Itoa(4), vt4)
 
 	// vid 5, type "vt3". no props, no edges. msgid 5
-	vt5 := mkTuple(5, dummyVertex{5, "vt3", nil}) // one in
+	vt5 := mkTuple(5, dummyVertex{5, "vt3", nil}) // none in or out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(5), vt5)
 	g.vserial = 13
 
@@ -191,7 +191,7 @@ func TestVerticesWith(t *testing.T) {
 
 	result = g.VerticesWith(qbv(VTypeNone, "prop1", "bar"))
 	if len(result) != 2 {
-		t.Errorf("Should find two vertices with prop1 == 'bar'; found %v", len(result))
+		t.Errorf("Should find two vertices with prop1 == \"bar\"; found %v", len(result))
 	}
 
 	result = g.VerticesWith(qbv(VTypeNone, "none-have-this-prop-key", "doesn't matter"))
@@ -201,7 +201,7 @@ func TestVerticesWith(t *testing.T) {
 
 	result = g.VerticesWith(qbv(VType("env"), "prop1", "foo"))
 	if len(result) != 1 {
-		t.Errorf("Should find one vertex when filtering to env types and with prop1 == 'foo'; found %v", len(result))
+		t.Errorf("Should find one vertex when filtering to env types and with prop1 == \"foo\"; found %v", len(result))
 	}
 }
 
@@ -244,14 +244,14 @@ func TestOutInArcWith(t *testing.T) {
 	}
 
 	// last of basic tests - N>1 number of edges
-	result = g.arcWith(2, qbe(), true)
+	result = g.arcWith(4, qbe(), true)
 	if len(result) != 2 {
-		t.Errorf("Vertex 2 has two in-edges, but got %v in-edge results", len(result))
+		t.Errorf("Vertex 4 has two in-edges, but got %v in-edge results", len(result))
 	}
 
-	result = g.InWith(2, qbe())
+	result = g.InWith(4, qbe())
 	if len(result) != 2 {
-		t.Errorf("Vertex 2 has two in-edges, but got %v in-edge results (InWith calls arcWith correctly)", len(result))
+		t.Errorf("Vertex 4 has two in-edges, but got %v in-edge results (InWith calls arcWith correctly)", len(result))
 	}
 
 	result = g.arcWith(3, qbe(), false)
@@ -278,7 +278,7 @@ func TestOutInArcWith(t *testing.T) {
 	// basic edge type filtering
 	result = g.OutWith(3, qbe(EType("dummy-edge-type2")))
 	if len(result) != 2 {
-		t.Errorf("Vertex 2 should have two 'dummy-edge-type2'-typed out-edges, but got %v edges", len(result))
+		t.Errorf("Vertex 2 should have two \"dummy-edge-type2\"-typed out-edges, but got %v edges", len(result))
 	}
 
 	// nonexistent type means no results
@@ -290,34 +290,34 @@ func TestOutInArcWith(t *testing.T) {
 	// existing edge type, but not one this vt has
 	result = g.InWith(3, qbe(EType("dummy-edge-type1")))
 	if len(result) != 0 {
-		t.Errorf("Vertex 3 has none of the 'dummy-edge-type1' edges (though it is a real type in the graph); however, got %v edges", len(result))
+		t.Errorf("Vertex 3 has none of the \"dummy-edge-type1\" edges (though it is a real type in the graph); however, got %v edges", len(result))
 	}
 
 	// test prop-checking
 	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "baz"))
 	if len(result) != 1 {
-		t.Errorf("Vertex 3 should have one out-edge with 'eprop2' at 'baz', but got %v edges", len(result))
+		t.Errorf("Vertex 3 should have one out-edge with \"eprop2\" at \"baz\", but got %v edges", len(result))
 	}
 
 	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "bar"))
 	if len(result) != 2 {
-		t.Errorf("Vertex 3 should have two out-edges with 'eprop2' at 'bar', but got %v edges", len(result))
+		t.Errorf("Vertex 3 should have two out-edges with \"eprop2\" at \"bar\", but got %v edges", len(result))
 	}
 
-	// test multi-prop checking - ensure they're ANDed
+	// test multi-prop checking - ensure they\"re ANDed
 	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "bar", "eprop3", 42))
 	if len(result) != 1 {
-		t.Errorf("Vertex 3 should have one out-edge with 'eprop2' at 'bar' AND 'eprop3' at 42, but got %v edges", len(result))
+		t.Errorf("Vertex 3 should have one out-edge with \"eprop2\" at \"bar\" AND \"eprop3\" at 42, but got %v edges", len(result))
 	}
 
 	result = g.OutWith(3, qbe(ETypeNone, "eprop2", "baz", "eprop3", 42))
 	if len(result) != 0 {
-		// OR would've here would produce 2 edges
-		t.Errorf("Vertex 3 should have no out-edges with 'eprop2' at 'baz' AND 'eprop3' at 42 , but got %v edges", len(result))
+		// OR would\"ve here would produce 2 edges
+		t.Errorf("Vertex 3 should have no out-edges with \"eprop2\" at \"baz\" AND \"eprop3\" at 42 , but got %v edges", len(result))
 	}
 
 	result = g.OutWith(3, qbe(EType("dummy-edge-type2"), "eprop2", "bar"))
 	if len(result) != 1 {
-		t.Errorf("Vertex 3 should have one out-edges that is dummy type2 AND has 'eprop2' at 'bar', but got %v edges", len(result))
+		t.Errorf("Vertex 3 should have one out-edges that is dummy type2 AND has \"eprop2\" at \"bar\", but got %v edges", len(result))
 	}
 }
