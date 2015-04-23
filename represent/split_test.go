@@ -410,10 +410,9 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"port", 1025}, p{"proto", []string{"tcp"}}, p{"type", "port"})},
+					Vertex: vertexComm{mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"})},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
-						SpecProc{42},
 					},
 				},
 			},
@@ -441,7 +440,6 @@ func init() {
 					Vertex: vertexComm{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
-						SpecProc{42},
 					},
 				},
 			},

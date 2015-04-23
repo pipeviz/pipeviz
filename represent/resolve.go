@@ -1,6 +1,8 @@
 package represent
 
 import (
+	"fmt"
+
 	"github.com/mndrix/ps"
 	"github.com/sdboyer/pipeviz/interpret"
 )
@@ -22,6 +24,8 @@ func Resolve(g CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool)
 		return resolveSpecCommit(g, mid, src, es)
 	case SpecLocalLogic:
 		return resolveSpecLocalLogic(g, mid, src, es)
+	case interpret.ListenAddr:
+		return resolveListenAddr(g, mid, src, es)
 	case SpecDatasetHierarchy:
 		return resolveSpecDatasetHierarchy(g, mid, src, es)
 	case interpret.DataProvenance:
@@ -29,7 +33,7 @@ func Resolve(g CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool)
 	case interpret.DataAlpha:
 		return resolveDataAlpha(g, mid, src, es)
 	default:
-		panic("OMG WUT NO SUPPORT") // FIXME panic lulz
+		panic(fmt.Sprintf("OMG WUT NO SUPPORT FER %T", d)) // FIXME panic lulz
 	}
 
 	return StandardEdge{}, false
@@ -257,6 +261,24 @@ func resolveSpecLocalLogic(g CoreGraph, mid int, src vtTuple, es SpecLocalLogic)
 	}
 
 	return
+}
+
+func resolveListenAddr(g CoreGraph, mid int, src vtTuple, es interpret.ListenAddr) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "listening",
+	}
+
+	// TODO actually do this when back to working on edge resolvers
+	if es.Type == "unix" {
+		e.Props = e.Props.Set("path", Property{MsgSrc: mid, Value: es.Path})
+	} else {
+		e.Props = e.Props.Set("port", Property{MsgSrc: mid, Value: es.Port})
+		e.Props = e.Props.Set("proto", Property{MsgSrc: mid, Value: es.Proto})
+	}
+
+	return e, false
 }
 
 func resolveSpecDatasetHierarchy(g CoreGraph, mid int, src vtTuple, es SpecDatasetHierarchy) (e StandardEdge, success bool) {

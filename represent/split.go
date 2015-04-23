@@ -33,10 +33,6 @@ type SpecLocalLogic struct {
 	Path string
 }
 
-type SpecProc struct {
-	Pid int
-}
-
 type SpecDatasetHierarchy struct {
 	NamePath []string // path through the series of names that arrives at the final dataset
 }
@@ -155,17 +151,17 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 	}
 
 	for _, listen := range d.Listen {
+		// TODO change this to use diff vtx types for unix domain sock and network sock
 		v2 := vertexComm{props: ps.NewMap()}
 
 		if listen.Type == "unix" {
 			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
 		} else {
+			// TODO emit one edge per proto listened on - they're not mutex
 			v2.props = v2.props.Set("port", Property{MsgSrc: id, Value: listen.Port})
-			// FIXME protos are a slice, wtf do we do about this
-			v2.props = v2.props.Set("proto", Property{MsgSrc: id, Value: listen.Proto})
 		}
 		v2.props = v2.props.Set("type", Property{MsgSrc: id, Value: listen.Type})
-		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment, SpecProc{d.Pid}}})
+		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment}})
 
 		edges = append(edges, listen)
 	}

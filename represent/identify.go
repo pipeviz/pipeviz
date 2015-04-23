@@ -129,6 +129,7 @@ func init() {
 		IdentifierVcsLabel{},
 		IdentifierTestResult{},
 		IdentifierParentDataset{},
+		IdentifierComm{},
 	}
 }
 
@@ -321,6 +322,26 @@ func (i IdentifierParentDataset) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 	r, ok := b.(vertexParentDataset)
+	if !ok {
+		return false
+	}
+
+	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
+}
+
+type IdentifierComm struct{}
+
+func (i IdentifierComm) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexComm)
+	return ok
+}
+
+func (i IdentifierComm) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexComm)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexComm)
 	if !ok {
 		return false
 	}
