@@ -2,6 +2,7 @@ package interpret_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -9,6 +10,23 @@ import (
 	"github.com/sdboyer/pipeviz/interpret"
 	gjs "github.com/xeipuuv/gojsonschema"
 )
+
+var Msgs []*interpret.Message
+
+func init() {
+	for i := range make([]struct{}, 8) {
+		m := &interpret.Message{Id: i + 1}
+
+		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
+		f, err := ioutil.ReadFile(path)
+		if err != nil {
+			panic("json fnf: " + path)
+		}
+
+		err = json.Unmarshal(f, m)
+		Msgs = append(Msgs, m)
+	}
+}
 
 // Reads all message fixtures from fixtures/ein and validates them
 // against the master message schema (schema.json).
@@ -54,6 +72,7 @@ func TestMessageValidity(t *testing.T) {
 		}
 	}
 }
+
 func TestUnmarshal(t *testing.T) {
 	m := interpret.Message{}
 

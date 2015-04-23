@@ -1,6 +1,7 @@
 package interpret
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,7 +34,6 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	// first, dump all top-level objects into the graph.
 	for _, e := range m.m.Env {
 		envlink := EnvLink{Address: Address{}}
-
 		// Create an envlink for any nested items, preferring nick, then hostname, ipv4, ipv6.
 		if e.Nick != "" {
 			envlink.Nick = e.Nick
@@ -55,12 +55,6 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 			m.m.P = append(m.m.P, p)
 		}
 		for _, pds := range e.Datasets {
-			for _, ds := range pds.Subsets {
-				// FIXME this doesn't really work as a good linkage
-				ds.Parent = pds.Name
-				m.m.Ds = append(m.m.Ds, ds)
-			}
-
 			pds.Environment = envlink
 			m.m.Pds = append(m.m.Pds, pds)
 		}
@@ -74,6 +68,16 @@ func (m *Message) Each(f func(vertex interface{})) {
 		f(e)
 	}
 	for _, e := range m.m.Ls {
+		if e.ID.CommitStr != "" {
+			byts, err := hex.DecodeString(e.ID.CommitStr)
+			// TODO ...validation, logging, sth
+			if err != nil {
+				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			}
+			e.ID.Commit = byts
+			e.ID.CommitStr = ""
+		}
+
 		f(e)
 	}
 	for _, e := range m.m.Pds {
@@ -86,9 +90,32 @@ func (m *Message) Each(f func(vertex interface{})) {
 		f(e)
 	}
 	for _, e := range m.m.C {
+		byts, err := hex.DecodeString(e.Sha1Str)
+		if err != nil {
+			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+		}
+		e.Sha1 = byts
+		e.Sha1Str = ""
+
+		for _, pstr := range e.ParentsStr {
+			byts, err := hex.DecodeString(pstr)
+			if err != nil {
+				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			}
+			e.Parents = append(e.Parents, byts)
+		}
+		e.ParentsStr = nil
+
 		f(e)
 	}
 	for _, e := range m.m.Cm {
+		byts, err := hex.DecodeString(e.Sha1Str)
+		if err != nil {
+			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+		}
+		e.Sha1 = byts
+		e.Sha1Str = ""
+
 		f(e)
 	}
 }

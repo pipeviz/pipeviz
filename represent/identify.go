@@ -1,10 +1,134 @@
 package represent
 
 import (
-	"bytes"
+	"fmt"
 
+	"github.com/kr/pretty"
 	"github.com/mndrix/ps"
+	"github.com/sdboyer/pipeviz/interpret"
 )
+
+func Identify(g CoreGraph, sd SplitData) int {
+	ids, definitive := identifyDefault(g, sd)
+	// default one didn't do it, use specialists to narrow further
+
+	switch sd.Vertex.(type) {
+	default:
+		if ids == nil {
+			return 0
+		} else if len(ids) == 1 {
+			return ids[0]
+		}
+
+		panic("ZOMG CAN'T IDENTIFY")
+	case vertexLogicState, vertexProcess, vertexComm, vertexParentDataset:
+		if len(ids) == 1 && definitive {
+			return ids[0]
+		}
+		return 0
+	case vertexTestResult:
+		return identifyByGitHashSpec(g, sd, ids)
+	}
+}
+
+// Peforms a generalized search for vertex identification, with a particular head-nod to
+// those many vertices that need an EnvLink to fully resolve their identity.
+//
+// Returns a slice of candidate ids, and a bool indicating whether, if there is only one
+// result, that result should be considered a definitive match.
+//
+// FIXME the responsibility murkiness is making this a horrible snarl, fix this shit ASAP
+func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
+	pretty.Print("STARTING WORK ON", vtoflat(sd.Vertex), sd.EdgeSpecs)
+	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
+	if len(matches) == 0 {
+		// no vertices of this type, safe to bail early
+		return nil, false
+	}
+
+	// do simple pass with identifiers to check possible matches
+	var chk Identifier
+	for _, idf := range Identifiers {
+		if idf.CanIdentify(sd.Vertex) {
+			chk = idf
+		}
+	}
+
+	if chk == nil {
+		// TODO obviously this is just to canary; change to error when stabilized
+		panic(fmt.Sprintf("missing identify checker for type %T", sd.Vertex))
+	}
+
+	filtered := matches[:0] // destructive zero-alloc filtering
+	for _, candidate := range matches {
+		if chk.Matches(sd.Vertex, candidate.v) {
+			filtered = append(filtered, candidate)
+		}
+	}
+
+	var envlink interpret.EnvLink
+	var hasEl bool
+	// see if we have an envlink in the edgespecs - if so, filter with it
+	for _, es := range sd.EdgeSpecs {
+		if el, ok := es.(interpret.EnvLink); ok {
+			hasEl = true
+			envlink = el
+		}
+	}
+
+	// filter again to avoid multiple vertices overwriting each other
+	// TODO this is a temporary measure until we move identity edge resolution up into vtx identification process
+	filtered2 := filtered[:0]
+	if hasEl {
+		newvt := vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
+		edge, success := Resolve(g, 0, newvt, envlink)
+
+		if !success {
+			// FIXME failure to resolve envlink doesn't necessarily mean no match
+			return nil, false
+		}
+
+		for _, candidate := range filtered {
+			for _, edge2 := range g.OutWith(candidate.id, qbe(EType("envlink"))) {
+				filtered2 = append(filtered2, candidate)
+				if edge2.Target == edge.Target {
+					return []int{candidate.id}, true
+				}
+			}
+		}
+	} else {
+		// no el, suggesting our candidate list is good
+		filtered2 = filtered
+	}
+
+	for _, vt := range filtered2 {
+		ret = append(ret, vt.id)
+	}
+
+	return ret, false
+}
+
+// Narrow a match list by looking for alignment on a git commit sha1
+func identifyByGitHashSpec(g CoreGraph, sd SplitData, matches []int) int {
+	for _, es := range sd.EdgeSpecs {
+		// first find the commit spec
+		if spec, ok := es.(SpecCommit); ok {
+			// then search otherwise-matching vertices for a corresponding sha1 edge
+			for _, matchvid := range matches {
+				if len(g.OutWith(matchvid, qbe(EType("version"), "sha1", spec.Sha1))) == 1 {
+					return matchvid
+				}
+			}
+
+			break // there *should* be one and only one
+		}
+	}
+
+	// no match, it's a newbie
+	return 0
+}
+
+// older stuff below
 
 var Identifiers []Identifier
 
@@ -15,6 +139,10 @@ func init() {
 		IdentifierDataset{},
 		IdentifierProcess{},
 		IdentifierCommit{},
+		IdentifierVcsLabel{},
+		IdentifierTestResult{},
+		IdentifierParentDataset{},
+		IdentifierComm{},
 	}
 }
 
@@ -86,13 +214,7 @@ func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	if !mapValEq(l.Props(), r.Props(), "path") {
-		return false
-	}
-
-	// Path matches; env has to match, too.
-	// TODO matching like this assumes that envlinks are always directly resolved, with no bounding context
-	return matchEnvLink(l.Props(), r.Props())
+	return mapValEq(l.Props(), r.Props(), "path")
 }
 
 type IdentifierDataset struct{}
@@ -112,13 +234,7 @@ func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	if !mapValEq(l.Props(), r.Props(), "name") {
-		return false
-	}
-
-	// Name matches; env has to match, too.
-	// TODO matching like this assumes that envlinks are always directly resolved, with no bounding context
-	return matchEnvLink(l.Props(), r.Props())
+	return mapValEq(l.Props(), r.Props(), "name")
 }
 
 type IdentifierCommit struct{}
@@ -138,9 +254,11 @@ func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	lsha, lexists := l.Props().Lookup("sha1")
-	rsha, rexists := r.Props().Lookup("sha1")
-	return rexists && lexists && bytes.Equal(lsha.([]byte), rsha.([]byte))
+	// TODO mapValEq should be able to handle this
+	//lsha, lexists := l.Props().Lookup("sha1")
+	//rsha, rexists := r.Props().Lookup("sha1")
+	//return rexists && lexists && bytes.Equal(lsha.(Property).Value.([]byte), rsha.(Property).Value.([]byte))
+	return mapValEq(l.Props(), r.Props(), "sha1")
 }
 
 type IdentifierProcess struct{}
@@ -161,5 +279,85 @@ func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 	}
 
 	// TODO numeric id within the 2^16 ring buffer that is pids is a horrible way to do this
-	return mapValEq(l.Props(), r.Props(), "pid") && matchEnvLink(l.Props(), r.Props())
+	return mapValEq(l.Props(), r.Props(), "pid")
+}
+
+type IdentifierVcsLabel struct{}
+
+func (i IdentifierVcsLabel) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexVcsLabel)
+	return ok
+}
+
+func (i IdentifierVcsLabel) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexVcsLabel)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexVcsLabel)
+	if !ok {
+		return false
+	}
+
+	return mapValEq(l.Props(), r.Props(), "name")
+}
+
+type IdentifierTestResult struct{}
+
+func (i IdentifierTestResult) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexTestResult)
+	return ok
+}
+
+func (i IdentifierTestResult) Matches(a Vertex, b Vertex) bool {
+	_, ok := a.(vertexTestResult)
+	if !ok {
+		return false
+	}
+	_, ok = b.(vertexTestResult)
+	if !ok {
+		return false
+	}
+
+	return true // TODO LOLOLOL totally demonstrating how this system is broken
+}
+
+type IdentifierParentDataset struct{}
+
+func (i IdentifierParentDataset) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexParentDataset)
+	return ok
+}
+
+func (i IdentifierParentDataset) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexParentDataset)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexParentDataset)
+	if !ok {
+		return false
+	}
+
+	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
+}
+
+type IdentifierComm struct{}
+
+func (i IdentifierComm) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexComm)
+	return ok
+}
+
+func (i IdentifierComm) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexComm)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexComm)
+	if !ok {
+		return false
+	}
+
+	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
 }

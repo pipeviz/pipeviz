@@ -125,7 +125,7 @@ func qbe(v ...interface{}) edgeFilter {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *CoreGraph) OutWith(egoId int, ef EFilter) (es []StandardEdge) {
+func (g *coreGraph) OutWith(egoId int, ef EFilter) (es []StandardEdge) {
 	return g.arcWith(egoId, ef, false)
 }
 
@@ -133,11 +133,11 @@ func (g *CoreGraph) OutWith(egoId int, ef EFilter) (es []StandardEdge) {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *CoreGraph) InWith(egoId int, ef EFilter) (es []StandardEdge) {
+func (g *coreGraph) InWith(egoId int, ef EFilter) (es []StandardEdge) {
 	return g.arcWith(egoId, ef, true)
 }
 
-func (g *CoreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) {
+func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) {
 	etype, props := ef.EType(), ef.EProps()
 	vt, err := g.Get(egoId)
 	if err != nil {
@@ -189,18 +189,18 @@ func (g *CoreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) 
 // Return a slice of vtTuples that are successors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the successor
 // vertices pass the VertexFilter.
-func (g *CoreGraph) SuccessorsWith(egoId int, vef VEFilter) (vts []vtTuple) {
+func (g *coreGraph) SuccessorsWith(egoId int, vef VEFilter) (vts []vtTuple) {
 	return g.adjacentWith(egoId, vef, false)
 }
 
 // Return a slice of vtTuples that are predecessors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the predecessor
 // vertices pass the VertexFilter.
-func (g *CoreGraph) PredecessorsWith(egoId int, vef VEFilter) (vts []vtTuple) {
+func (g *coreGraph) PredecessorsWith(egoId int, vef VEFilter) (vts []vtTuple) {
 	return g.adjacentWith(egoId, vef, true)
 }
 
-func (g *CoreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTuple) {
+func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []vtTuple) {
 	etype, eprops := vef.EType(), vef.EProps()
 	vtype, vprops := vef.VType(), vef.VProps()
 	vt, err := g.Get(egoId)
@@ -312,7 +312,7 @@ VertexInspector:
 // will bypass the filter.
 //
 // The second parameter allows filtering on a k/v property pair.
-func (g *CoreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
+func (g *coreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
 	vtype, props := vf.VType(), vf.VProps()
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
 		vt := val.(vtTuple)
@@ -346,8 +346,8 @@ func (g *CoreGraph) VerticesWith(vf VFilter) (vs []vtTuple) {
 	return vs
 }
 
-func (g *CoreGraph) findEnvironment(props ps.Map) (envid int, success bool) {
-	rv := g.VerticesWith(qbv("environment"))
+func FindEnvironment(g CoreGraph, props ps.Map) (envid int, success bool) {
+	rv := g.VerticesWith(qbv(VType("environment")))
 	for _, vt := range rv {
 		if matchEnvLink(props, vt.v.Props()) {
 			return vt.id, true
@@ -357,9 +357,9 @@ func (g *CoreGraph) findEnvironment(props ps.Map) (envid int, success bool) {
 	return
 }
 
-func (g *CoreGraph) findDataset(envid int, name []string) (id int, success bool) {
+func FindDataset(g CoreGraph, envid int, name []string) (id int, success bool) {
 	// first time through use the parent type
-	vtype := "parent-dataset"
+	vtype := VType("parent-dataset")
 
 	var n string
 	for len(name) > 0 {

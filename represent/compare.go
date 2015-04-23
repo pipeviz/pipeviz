@@ -21,6 +21,16 @@ func mapValEq(l, r ps.Map, keys ...string) bool {
 			return false
 		}
 
+		// Transparently convert properties into their values
+		if lpv, ok := lv.(Property); ok {
+			lv = lpv.Value
+			if rpv, ok := rv.(Property); ok {
+				rv = rpv.Value
+			} else {
+				return false
+			}
+		}
+
 		switch tlv := lv.(type) {
 		default:
 			if rv != lv {
@@ -53,6 +63,16 @@ func mapValEqAnd(l, r ps.Map, keys ...string) bool {
 		// if neither exist, skip
 		if !lexists {
 			continue
+		}
+
+		// Transparently convert properties into their values
+		if lpv, ok := lv.(Property); ok {
+			lv = lpv.Value
+			if rpv, ok := rv.(Property); ok {
+				rv = rpv.Value
+			} else {
+				return false
+			}
 		}
 
 		switch tlv := lv.(type) {

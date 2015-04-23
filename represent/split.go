@@ -22,6 +22,7 @@ type EdgeSpec interface {
 	// any existing edge (as returned from FindExisting)
 	//Resolve(*CoreGraph, vtTuple, int) (StandardEdge, bool)
 }
+
 type EdgeSpecs []EdgeSpec
 
 type SpecCommit struct {
@@ -32,11 +33,7 @@ type SpecLocalLogic struct {
 	Path string
 }
 
-type SpecProc struct {
-	Pid int
-}
-
-type SpecLocalDataset struct {
+type SpecDatasetHierarchy struct {
 	NamePath []string // path through the series of names that arrives at the final dataset
 }
 
@@ -113,10 +110,9 @@ func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 	}
 
 	// TODO should do anything with mutually exclusive properties here?
-	if d.ID.Commit != "" {
-		edges = append(edges, SpecCommit{[]byte(d.ID.Commit)})
+	if len(d.ID.Commit) != 0 {
+		edges = append(edges, SpecCommit{d.ID.Commit})
 	}
-	// FIXME this shouldn't be here, it's a property of the commit
 	if d.ID.Version != "" {
 		v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.ID.Version})
 	}
@@ -155,17 +151,17 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 	}
 
 	for _, listen := range d.Listen {
+		// TODO change this to use diff vtx types for unix domain sock and network sock
 		v2 := vertexComm{props: ps.NewMap()}
 
 		if listen.Type == "unix" {
 			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
 		} else {
+			// TODO emit one edge per proto listened on - they're not mutex
 			v2.props = v2.props.Set("port", Property{MsgSrc: id, Value: listen.Port})
-			// FIXME protos are a slice, wtf do we do about this
-			v2.props = v2.props.Set("proto", Property{MsgSrc: id, Value: listen.Proto})
 		}
 		v2.props = v2.props.Set("type", Property{MsgSrc: id, Value: listen.Type})
-		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment, SpecProc{d.Pid}}})
+		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment}})
 
 		edges = append(edges, listen)
 	}
@@ -220,11 +216,19 @@ func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) 
 
 	edges = append(edges, d.Environment)
 
-	for _, sds := range d.Subsets {
-		edges = append(edges, SpecLocalDataset{[]string{d.Name, sds.Name}})
+	ret := []SplitData{{v, edges}}
+
+	for _, sub := range d.Subsets {
+		sub.Parent = d.Name
+		sds, _ := Split(sub, id)
+		// can only be one
+		sd := sds[0]
+		// FIXME having this here is cool, but the schema does allow top-level datasets, which won't pass thru and so are guaranteed orphans
+		sd.EdgeSpecs = append(EdgeSpecs{d.Environment}, sd.EdgeSpecs...)
+		ret = append(ret, sd)
 	}
 
-	return []SplitData{{v, edges}}, nil
+	return ret, nil
 }
 
 func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
@@ -239,7 +243,7 @@ func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
 		v.props = v.props.Set("create-time", Property{MsgSrc: id, Value: d.CreateTime})
 	}
 
-	edges = append(edges, SpecLocalDataset{[]string{d.Parent}})
+	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
 	edges = append(edges, d.Genesis)
 
 	return []SplitData{{v, edges}}, nil
