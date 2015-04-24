@@ -3,7 +3,6 @@ package represent
 import (
 	"fmt"
 
-	"github.com/kr/pretty"
 	"github.com/mndrix/ps"
 	"github.com/sdboyer/pipeviz/interpret"
 )
@@ -39,7 +38,6 @@ func Identify(g CoreGraph, sd SplitData) int {
 //
 // FIXME the responsibility murkiness is making this a horrible snarl, fix this shit ASAP
 func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
-	pretty.Print("STARTING WORK ON", vtoflat(sd.Vertex), sd.EdgeSpecs)
 	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
 	if len(matches) == 0 {
 		// no vertices of this type, safe to bail early
