@@ -20,7 +20,8 @@ func Identify(g CoreGraph, sd SplitData) int {
 		}
 
 		panic("ZOMG CAN'T IDENTIFY")
-	case vertexLogicState, vertexProcess, vertexComm, vertexParentDataset:
+	case vertexLogicState, vertexProcess, vertexComm, vertexParentDataset, vertexDataset:
+		// TODO vertexDataset needs special disambiguation; it has a second structural edge (poor idea anyway)
 		if len(ids) == 1 && definitive {
 			return ids[0]
 		}
