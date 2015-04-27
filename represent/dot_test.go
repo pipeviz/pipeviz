@@ -26,5 +26,5 @@ func TestDrawDot(t *testing.T) {
 	// processes msg
 	g = g.Merge(msgs[7])
 
-	ioutil.WriteFile("graph.dot", generateDot(g), 0644)
+	ioutil.WriteFile("graph.dot", GenerateDot(g), 0644)
 }

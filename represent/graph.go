@@ -58,6 +58,10 @@ type coreGraph struct {
 	vserial int
 }
 
+func NewGraph() CoreGraph {
+	return &coreGraph{vtuples: ps.NewMap(), vserial: 0}
+}
+
 type (
 	// A value indicating a vertex's type. For now, done as a string.
 	VType string

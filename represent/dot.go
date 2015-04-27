@@ -9,7 +9,7 @@ import (
 
 // Generates a .dot-format representation of the given CoreGraph, suitable for
 // rendering into output by graphviz (or other utilities).
-func generateDot(g CoreGraph) []byte {
+func GenerateDot(g CoreGraph) []byte {
 	buf := new(bytes.Buffer)
 
 	// begin the graph
