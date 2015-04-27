@@ -56,6 +56,7 @@ type coreGraph struct {
 	// TODO experiment with replacing with a hash array-mapped trie
 	vtuples ps.Map
 	vserial int
+	orphans edgeSpecSet // FIXME breaks immut
 }
 
 func NewGraph() CoreGraph {
@@ -108,8 +109,9 @@ type Property struct {
 }
 
 type veProcessingInfo struct {
-	vt vtTuple
-	es EdgeSpecs
+	vt    vtTuple
+	es    EdgeSpecs
+	msgid int
 }
 
 type edgeSpecSet []*veProcessingInfo
@@ -124,8 +126,6 @@ func (ess edgeSpecSet) EdgeCount() (i int) {
 // the method to merge a message into the graph
 func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	var ess edgeSpecSet
-
-	// TODO see if some lookup + locality of reference perf benefit can be gained keeping all vertices loaded up locally
 
 	// Process incoming elements from the message
 	msg.Each(func(d interface{}) {
@@ -142,11 +142,35 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 		// Collect edge specs for later processing
 		for k, tuple := range tuples {
 			ess = append(ess, &veProcessingInfo{
-				vt: tuple,
-				es: sds[k].EdgeSpecs,
+				vt:    tuple,
+				es:    sds[k].EdgeSpecs,
+				msgid: msg.Id,
 			})
 		}
 	})
+
+	// Reinclude the held-over set of orphans for edge (re-)resolutions
+	var ess2 edgeSpecSet
+	// TODO lots of things very wrong with this approach, but works for first pass
+	for _, orphan := range g.orphans {
+		// vertex ident failed; try again now that new vertices are present
+		if orphan.vt.id == 0 {
+			orphan.vt = g.ensureVertex(orphan.msgid, SplitData{orphan.vt.v, orphan.es})
+		} else {
+			// ensure we have latest version of vt
+			vt, err := g.Get(orphan.vt.id)
+			if err != nil {
+				// but if that vid has gone away, forget about it completely
+				continue
+			}
+			orphan.vt = vt
+		}
+
+		ess2 = append(ess2, orphan)
+	}
+
+	// Put orphan stuff first so that it's guaranteed to be overwritten on conflict
+	ess = append(ess2, ess...)
 
 	// All vertices processed. now, process edges in passes, ensuring that each
 	// pass diminishes the number of remaining edges. If it doesn't, the remaining
@@ -202,7 +226,16 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 		//fmt.Printf("\nFinishing edge resolution pass #%v: edge count %v, last edge count %v\n\n", pass, ess.EdgeCount(), lec)
 	}
 
-	// TODO attempt to de-orphan items here?
+	g.orphans = g.orphans[:0]
+	for _, info := range ess {
+		if len(info.es) == 0 {
+			continue
+		}
+
+		//pretty.Println(info.vt.flat(), info.es)
+		g.orphans = append(g.orphans, info)
+	}
+
 	return g
 }
 
