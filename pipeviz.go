@@ -14,7 +14,7 @@ import (
 )
 
 type Message struct {
-	Id  uint64
+	Id  int
 	Raw []byte
 }
 
@@ -42,12 +42,14 @@ func main() {
 	go interpret(interpretChan)
 
 	// Pipeviz has two fully separated HTTP ports - one for input into the logic
-	// machine, and one for graph data consumption. This is done because the
-	// semantics are so fundamentally different for the two cases.
+	// machine, and one for graph data consumption. This is done primarily
+	// because security/firewall concerns are completely different, and having
+	// separate ports makes it much easier to implement separate policies.
+	// Differing semantics are a contributing, but lesser consideration.
 	mb := web.New()
 	mb.Post("/", handle)
 
-	// because Cayte
+	// 2309, because Cayte
 	graceful.ListenAndServe("127.0.0.1:2309", mb)
 }
 
@@ -70,10 +72,11 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 		// super-sloppy write back to client, but does the trick
 		w.WriteHeader(202) // use 202 because it's a little more correct
-		w.Write([]byte(strconv.FormatUint(id, 10)))
+		w.Write([]byte(strconv.Itoa(id)))
 
 		// FIXME passing directly from here means it's possible for messages to arrive
 		// at the interpretation layer in a different order than they went into the log
+		// if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
 
 		interpretChan <- Message{Id: id, Raw: b}
 	} else {
@@ -86,6 +89,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func interpret(c <-chan Message) {
+func interpret(m <-chan Message) {
 
 }
