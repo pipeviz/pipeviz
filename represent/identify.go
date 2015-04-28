@@ -358,5 +358,10 @@ func (i IdentifierComm) Matches(a Vertex, b Vertex) bool {
 		return false
 	}
 
-	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
+	_, haspath := l.Props().Lookup("path")
+	if haspath {
+		return mapValEqAnd(l.Props(), r.Props(), "type", "path")
+	} else {
+		return mapValEqAnd(l.Props(), r.Props(), "type", "port")
+	}
 }
