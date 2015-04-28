@@ -33,6 +33,15 @@ type SpecLocalLogic struct {
 	Path string
 }
 
+type SpecNetListener struct {
+	Port  int
+	Proto string
+}
+
+type SpecUnixDomainListener struct {
+	Path string
+}
+
 type SpecDatasetHierarchy struct {
 	NamePath []string // path through the series of names that arrives at the final dataset
 }
@@ -155,15 +164,16 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 		v2 := vertexComm{props: ps.NewMap()}
 
 		if listen.Type == "unix" {
+			edges = append(edges, SpecUnixDomainListener{Path: listen.Path})
 			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
 		} else {
-			// TODO emit one edge per proto listened on - they're not mutex
+			for _, proto := range listen.Proto {
+				edges = append(edges, SpecNetListener{Port: listen.Port, Proto: proto})
+			}
 			v2.props = v2.props.Set("port", Property{MsgSrc: id, Value: listen.Port})
 		}
 		v2.props = v2.props.Set("type", Property{MsgSrc: id, Value: listen.Type})
 		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment}})
-
-		edges = append(edges, listen)
 	}
 
 	edges = append(edges, d.Environment)

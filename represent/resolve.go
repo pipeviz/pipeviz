@@ -24,8 +24,10 @@ func Resolve(g CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool)
 		return resolveSpecCommit(g, mid, src, es)
 	case SpecLocalLogic:
 		return resolveSpecLocalLogic(g, mid, src, es)
-	case interpret.ListenAddr:
-		return resolveListenAddr(g, mid, src, es)
+	case SpecNetListener:
+		return resolveNetListener(g, mid, src, es)
+	case SpecUnixDomainListener:
+		return resolveUnixDomainListener(g, mid, src, es)
 	case SpecDatasetHierarchy:
 		return resolveSpecDatasetHierarchy(g, mid, src, es)
 	case interpret.DataProvenance:
@@ -263,22 +265,59 @@ func resolveSpecLocalLogic(g CoreGraph, mid int, src vtTuple, es SpecLocalLogic)
 	return
 }
 
-func resolveListenAddr(g CoreGraph, mid int, src vtTuple, es interpret.ListenAddr) (e StandardEdge, success bool) {
+func resolveNetListener(g CoreGraph, mid int, src vtTuple, es SpecNetListener) (e StandardEdge, success bool) {
+	// check for existing edge; this one is quite straightforward
+	re := g.OutWith(src.id, qbe(EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
+	if len(re) == 1 {
+		return re[0], success
+	}
+
 	e = StandardEdge{
 		Source: src.id,
 		Props:  ps.NewMap(),
 		EType:  "listening",
 	}
 
-	// TODO actually do this when back to working on edge resolvers
-	if es.Type == "unix" {
-		e.Props = e.Props.Set("path", Property{MsgSrc: mid, Value: es.Path})
-	} else {
-		e.Props = e.Props.Set("port", Property{MsgSrc: mid, Value: es.Port})
-		e.Props = e.Props.Set("proto", Property{MsgSrc: mid, Value: es.Proto})
+	e.Props = e.Props.Set("port", Property{MsgSrc: mid, Value: es.Port})
+	e.Props = e.Props.Set("proto", Property{MsgSrc: mid, Value: es.Proto})
+
+	envid, _, hasenv := findEnv(g, src)
+	if hasenv {
+		rv := g.PredecessorsWith(envid, qbv(VType("comm"), "type", "port", "port", es.Port))
+		if len(rv) == 1 {
+			success = true
+			e.Target = rv[0].id
+		}
 	}
 
-	return e, false
+	return
+}
+
+func resolveUnixDomainListener(g CoreGraph, mid int, src vtTuple, es SpecUnixDomainListener) (e StandardEdge, success bool) {
+	// check for existing edge; this one is quite straightforward
+	re := g.OutWith(src.id, qbe(EType("listening"), "type", "unix", "path", es.Path))
+	if len(re) == 1 {
+		return re[0], success
+	}
+
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "listening",
+	}
+
+	e.Props = e.Props.Set("path", Property{MsgSrc: mid, Value: es.Path})
+
+	envid, _, hasenv := findEnv(g, src)
+	if hasenv {
+		rv := g.PredecessorsWith(envid, qbv(VType("comm"), "type", "unix", "path", es.Path))
+		if len(rv) == 1 {
+			success = true
+			e.Target = rv[0].id
+		}
+	}
+
+	return
 }
 
 func resolveSpecDatasetHierarchy(g CoreGraph, mid int, src vtTuple, es SpecDatasetHierarchy) (e StandardEdge, success bool) {
