@@ -165,7 +165,6 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		sock = rv[0]
 
 		// With sock in hand, now find its proc
-		fmt.Println("sock id:", sock.id)
 		rv = g.PredecessorsWith(sock.id, qbe(EType("listening"), "proto", es.ConnNet.Proto).and(qbv(VType("process"))))
 		if len(rv) != 1 {
 			// TODO could/will we ever allow >1?
