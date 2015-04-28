@@ -108,8 +108,8 @@ func getGraphFixture() *coreGraph {
 	vt3 := mkTuple(3, dummyVertex{3, "vt2", tprops{"prop1": "bar", "bowser": "moo"}}, edge11, edge12, edge13) // three out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt3)
 
-	// vid 4, type "vt3". two props - "prop1": "baz", "prop2": 42. msgid 4
-	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "prop2": 42}}, edge12, edge13) // two in, same origin
+	// vid 4, type "vt3". three props - "prop1": "baz", "prop2": 42, "prop3": "qux". msgid 4
+	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "prop2": 42, "prop3": "qux"}}, edge12, edge13) // two in, same origin
 	g.vtuples = g.vtuples.Set(strconv.Itoa(4), vt4)
 
 	// vid 5, type "vt3". no props, no edges. msgid 5
@@ -434,6 +434,11 @@ func TestAdjacentWith(t *testing.T) {
 	result = g.SuccessorsWith(3, qbv(VTypeNone, "prop1", "baz", "prop2", 42))
 	if len(result) != 1 {
 		t.Errorf("Vertex 4 has only one unique successor with \"prop1\" at \"baz\" and \"prop2\" at 42; however, got %v vertices", len(result))
+	}
+
+	result = g.SuccessorsWith(3, qbv(VTypeNone, "prop3", "qux", "prop2", 42))
+	if len(result) != 1 {
+		t.Errorf("Vertex 4 has only one unique successor with BOTH \"prop3\" at \"qux\" and \"prop2\" at 42; however, got %v vertices", len(result))
 	}
 
 	result = g.SuccessorsWith(3, qbe(ETypeNone, "eprop2", "bar").and(qbv(VTypeNone, "prop1", "baz")))

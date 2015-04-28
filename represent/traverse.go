@@ -283,18 +283,21 @@ VertexInspector:
 		for _, p := range vprops {
 			vprop, exists := adjvt.v.Props().Lookup(p.K)
 			if !exists {
-				return
+				//fmt.Printf("key %v not found in vtx %v, want %T %v\n", p.K, adjvt.id, p.V, p.V)
+				continue VertexInspector
 			}
 
 			dvprop := vprop.(Property)
 			switch tv := dvprop.Value.(type) {
 			default:
 				if tv != p.V {
+					//fmt.Printf("blew up on k %v w/vtx %v, found %T %v want %T %v\n", p.K, adjvt.id, tv, tv, p.V, p.V)
 					continue VertexInspector
 				}
 			case []byte:
 				cmptv, ok := p.V.([]byte)
 				if !ok || !bytes.Equal(tv, cmptv) {
+					//fmt.Printf("blew up on k %v w/vtx %v, found %v want %v\n", p.K, adjvt.id, tv, p.V)
 					continue VertexInspector
 				}
 			}
