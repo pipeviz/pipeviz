@@ -157,17 +157,20 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		}
 
 		// Now, walk the environment's edges to find the vertex representing the port
-		//ef := edgeFilter{EType: "envlink"}
-		//vf := vertexFilter{VType: "comm", Props: []PropQ{
-		//{"port", es.ConnNet.Port},
-		//{"proto", es.ConnNet.Proto},
-		//}}
-		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "port", es.ConnNet.Port, "proto", es.ConnNet.Proto).and(qbe(EType("envlink"))))
+		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "type", "port", "port", es.ConnNet.Port).and(qbe(EType("envlink"))))
 
 		if len(rv) != 1 {
 			return
 		}
 		sock = rv[0]
+
+		// With sock in hand, now find its proc
+		fmt.Println("sock id:", sock.id)
+		rv = g.PredecessorsWith(sock.id, qbe(EType("listening"), "proto", es.ConnNet.Proto).and(qbv(VType("process"))))
+		if len(rv) != 1 {
+			// TODO could/will we ever allow >1?
+			return
+		}
 	} else {
 		envid, _, exists := findEnv(g, src)
 
@@ -177,23 +180,22 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		}
 
 		// Walk the graph to find the vertex representing the unix socket
-		//ef := edgeFilter{EType: "envlink"}
-		//vf := vertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
-		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "path", es.ConnUnix).and(qbe(EType("envlink"))))
+		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "path", es.ConnUnix.Path).and(qbe(EType("envlink"))))
 		if len(rv) != 1 {
 			return
 		}
 		sock = rv[0]
+
+		// With sock in hand, now find its proc
+		rv = g.PredecessorsWith(sock.id, qbv(VType("process")).and(qbe(EType("listening"))))
+		if len(rv) != 1 {
+			// TODO could/will we ever allow >1?
+			return
+		}
 	}
 
-	// With sock in hand, now find its proc
-	rv = g.SuccessorsWith(sock.id, qbv(VType("process")))
-	if len(rv) != 1 {
-		// TODO could/will we ever allow >1?
-		return
-	}
-
-	rv = g.SuccessorsWith(rv[0].id, qbv(VType("dataset")))
+	rv = g.SuccessorsWith(rv[0].id, qbv(VType("parent-dataset")))
+	// FIXME this absolutely could be more than 1
 	if len(rv) != 1 {
 		return
 	}
@@ -201,7 +203,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 
 	// if the spec indicates a subset, find it
 	if es.Subset != "" {
-		rv = g.SuccessorsWith(rv[0].id, qbv(VType("dataset"), "name", es.Subset))
+		rv = g.PredecessorsWith(rv[0].id, qbv(VType("dataset"), "name", es.Subset).and(qbe(EType("dataset-hierarchy"))))
 		if len(rv) != 1 {
 			return
 		}
@@ -271,7 +273,7 @@ func resolveNetListener(g CoreGraph, mid int, src vtTuple, es SpecNetListener) (
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.id, qbe(EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
 	if len(re) == 1 {
-		return re[0], success
+		return re[0], true
 	}
 
 	e = StandardEdge{
@@ -299,7 +301,7 @@ func resolveUnixDomainListener(g CoreGraph, mid int, src vtTuple, es SpecUnixDom
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.id, qbe(EType("listening"), "type", "unix", "path", es.Path))
 	if len(re) == 1 {
-		return re[0], success
+		return re[0], true
 	}
 
 	e = StandardEdge{
