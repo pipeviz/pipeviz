@@ -40,8 +40,8 @@ func GenerateDot(g CoreGraph) []byte {
 		}
 
 		buf.WriteString(fmt.Sprintf(
-			"\t\"v%d\" [%s%s=\"vtype: %s",
-			v.id, props, lbltype, v.v.Typ()))
+			"\t\"v%d\" [%s%s=\"id: %d\nvtype: %s",
+			v.id, props, lbltype, v.id, v.v.Typ()))
 
 		v.v.Props().ForEach(func(k string, val ps.Any) {
 			prop := val.(Property)
@@ -69,8 +69,8 @@ func GenerateDot(g CoreGraph) []byte {
 		v.oe.ForEach(func(k string, val ps.Any) {
 			edge := val.(StandardEdge)
 			buf.WriteString(fmt.Sprintf(
-				"\t\"v%d\" -> \"v%d\" [\n\tlabel=\"etype: %s",
-				edge.Source, edge.Target, edge.EType))
+				"\t\"v%d\" -> \"v%d\" [\n\tlabel=\"id: %d\netype: %s",
+				edge.Source, edge.Target, edge.id, edge.EType))
 
 			edge.Props.ForEach(func(k2 string, val2 ps.Any) {
 				prop := val2.(Property)
