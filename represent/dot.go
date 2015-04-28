@@ -80,6 +80,8 @@ func GenerateDot(g CoreGraph) []byte {
 					format = "%s"
 				case []byte:
 					format = "%x"
+				case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
+					format = "%d"
 				}
 				buf.WriteString(fmt.Sprintf(
 					"\n%s: "+format+" (%d)",
