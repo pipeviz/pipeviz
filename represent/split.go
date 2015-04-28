@@ -42,6 +42,10 @@ type SpecUnixDomainListener struct {
 	Path string
 }
 
+type SpecParentDataset struct {
+	Name string
+}
+
 type SpecDatasetHierarchy struct {
 	NamePath []string // path through the series of names that arrives at the final dataset
 }
@@ -143,6 +147,7 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 
 	v := vertexProcess{props: ps.NewMap()}
 	var edges EdgeSpecs
+	edges = append(edges, d.Environment)
 
 	v.props = v.props.Set("pid", Property{MsgSrc: id, Value: d.Pid})
 	if d.Cwd != "" {
@@ -157,6 +162,10 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 
 	for _, ls := range d.LogicStates {
 		edges = append(edges, SpecLocalLogic{ls})
+	}
+
+	if d.Dataset != "" {
+		edges = append(edges, SpecParentDataset{Name: d.Dataset})
 	}
 
 	for _, listen := range d.Listen {
@@ -176,7 +185,6 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment}})
 	}
 
-	edges = append(edges, d.Environment)
 	return append([]SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
 }
 

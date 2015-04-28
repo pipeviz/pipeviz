@@ -30,6 +30,8 @@ func Resolve(g CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool)
 		return resolveUnixDomainListener(g, mid, src, es)
 	case SpecDatasetHierarchy:
 		return resolveSpecDatasetHierarchy(g, mid, src, es)
+	case SpecParentDataset:
+		return resolveSpecParentDataset(g, mid, src, es)
 	case interpret.DataProvenance:
 		return resolveDataProvenance(g, mid, src, es)
 	case interpret.DataAlpha:
@@ -344,6 +346,34 @@ func resolveSpecDatasetHierarchy(g CoreGraph, mid int, src vtTuple, es SpecDatas
 	if len(rv) != 0 { // >1 shouldn't be possible
 		success = true
 		e.Target = rv[0].id
+	}
+
+	return
+}
+
+func resolveSpecParentDataset(g CoreGraph, mid int, src vtTuple, es SpecParentDataset) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "dataset-gateway",
+	}
+	e.Props = e.Props.Set("name", Property{MsgSrc: mid, Value: es.Name})
+
+	// check for existing link - there can be only be one
+	re := g.OutWith(src.id, qbe(EType("dataset-gateway")))
+	if len(re) == 1 {
+		success = true
+		e = re[0]
+		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
+	} else {
+
+		// no existing link found; search for proc directly
+		envid, _, _ := findEnv(g, src)
+		rv := g.PredecessorsWith(envid, qbv(VType("parent-dataset"), "name", es.Name))
+		if len(rv) != 0 { // >1 shouldn't be possible
+			success = true
+			e.Target = rv[0].id
+		}
 	}
 
 	return
