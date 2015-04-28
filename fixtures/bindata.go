@@ -5,12 +5,12 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"strings"
 	"os"
+	"time"
+	"io/ioutil"
 	"path"
 	"path/filepath"
-	"strings"
-	"time"
 )
 
 func bindata_read(data []byte, name string) ([]byte, error) {
@@ -36,9 +36,9 @@ type asset struct {
 }
 
 type bindata_file_info struct {
-	name    string
-	size    int64
-	mode    os.FileMode
+	name string
+	size int64
+	mode os.FileMode
 	modTime time.Time
 }
 
@@ -76,8 +76,8 @@ func _1_json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "1.json", size: 897, mode: os.FileMode(420), modTime: time.Unix(1427428792, 0)}
-	a := &asset{bytes: bytes, info: info}
+	info := bindata_file_info{name: "1.json", size: 897, mode: os.FileMode(420), modTime: time.Unix(1430149743, 0)}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
@@ -97,7 +97,7 @@ func _2_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "2.json", size: 3780, mode: os.FileMode(420), modTime: time.Unix(1429042363, 0)}
-	a := &asset{bytes: bytes, info: info}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
@@ -117,7 +117,7 @@ func _3_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "3.json", size: 11114, mode: os.FileMode(420), modTime: time.Unix(1429888460, 0)}
-	a := &asset{bytes: bytes, info: info}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
@@ -137,7 +137,7 @@ func _4_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "4.json", size: 355, mode: os.FileMode(420), modTime: time.Unix(1427428792, 0)}
-	a := &asset{bytes: bytes, info: info}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
@@ -157,7 +157,7 @@ func _5_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "5.json", size: 1928, mode: os.FileMode(420), modTime: time.Unix(1427428792, 0)}
-	a := &asset{bytes: bytes, info: info}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
@@ -177,7 +177,7 @@ func _6_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "6.json", size: 3229, mode: os.FileMode(420), modTime: time.Unix(1428807415, 0)}
-	a := &asset{bytes: bytes, info: info}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
@@ -197,11 +197,11 @@ func _7_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "7.json", size: 1558, mode: os.FileMode(420), modTime: time.Unix(1427428792, 0)}
-	a := &asset{bytes: bytes, info: info}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
-var __8_json = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xec\x97\xdb\x8e\x82\x30\x10\x86\xef\x79\x0a\xd2\x6b\xdd\x96\x83\xa0\xbe\xca\xc6\x8b\x4a\x1b\x25\x8b\xb4\xb6\x45\x34\xc6\x77\x5f\x0e\xae\x2e\xa7\x75\x93\x0d\xba\x0d\xf4\xc2\x68\xe7\xb7\x33\x9d\xf9\xf2\x07\xce\x86\x99\x2d\xc0\x05\x0b\xa8\x94\x54\x82\xa5\xf9\x5e\x6c\xe5\xeb\x7c\xfb\x56\x88\x22\xb6\x09\x83\xa9\x54\x58\x95\x3a\x13\xc0\x44\x0a\x18\xb1\x00\x47\x70\x1d\xc6\x10\x73\x0e\x26\xd7\x5d\x99\x6f\x6c\x95\xe2\x04\x98\xab\x49\xf5\xa0\x44\x52\x91\x1d\x00\xd2\x34\x05\xb5\xd0\x46\xb0\x84\x77\xc4\x82\x94\xe4\x11\x78\xc0\x02\x8a\xe4\x9a\xae\x2a\xe1\x61\x2e\xf1\x6c\xcb\xae\x05\x68\x7c\x08\x05\x8b\x77\x34\x56\x99\xa0\x7a\xb1\x42\x80\x09\x11\x59\x07\x5a\x83\x85\x60\xcb\xa4\x8a\xf1\x8e\xe6\x25\x64\xed\x22\xd3\x94\xae\x91\x05\x1a\xe2\x4b\x65\xe7\x52\xab\x23\x0a\xa5\xa2\x71\xa5\xcb\x5f\xab\x23\xaf\x3a\xf1\x32\x27\x13\xaa\x76\xdd\xfb\xb5\x05\x53\xac\x1c\x89\x0a\x78\xa3\xe1\x77\x5d\x7e\xc6\xd2\x9c\xa3\x07\x55\xaf\x8c\x96\xfa\x7f\x49\x43\xb8\xa6\x47\x1a\xc0\xdd\x49\xee\xa3\x1f\x66\x5f\xc4\x3b\xa7\xdf\x1a\x25\x58\x61\x49\xd5\x8d\x81\x2c\x15\x6c\x15\x96\x14\xd8\x1e\x7a\x06\x06\x44\x57\x0a\x1c\x07\x79\xcd\xba\x9b\xff\x79\x50\x51\x12\x87\xc7\xce\x8a\xb0\xda\x36\xc7\x55\x7e\xbe\x49\x16\x7c\x3c\x6a\xdc\x5f\x40\xfc\x77\xb6\xe4\xb8\xbe\xe7\xf6\x0a\x64\xd6\x84\x0d\xd5\x12\xc6\x61\x58\x92\x3f\xf3\xfc\x11\x80\x9a\x6e\x74\xa3\xd7\xb8\xd1\xdc\x75\x66\xbd\xc2\xb8\xc7\x5a\x92\x38\x0c\x2b\xb2\xdc\xf9\xc2\x1a\xc7\xff\x5d\x37\x1a\xd1\x4b\x8c\xc8\x9e\x2d\x7c\xd4\x2b\x89\x84\x1e\x34\x7d\x46\x1f\x86\x17\x39\x08\x39\xfd\xbe\xa9\xe9\x4b\xc0\x68\x47\xcf\xb6\x23\x64\x5b\x5e\xef\x30\xda\x5a\xc2\x38\x10\x3b\xf2\x9d\xc5\x48\x40\x5d\xa7\xa5\x1d\x19\xe5\xef\x8b\xf1\x19\x00\x00\xff\xff\x6a\xe8\x7e\x3d\xe8\x16\x00\x00")
+var __8_json = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xec\x97\xdd\x8e\xb2\x30\x10\x86\xcf\xb9\x0a\xd2\x63\xfd\x28\x3f\x82\x7a\x2b\x5f\x3c\xa8\xb4\x51\xb2\xd8\xd6\xb6\x88\xc6\x78\xef\x5b\x20\xab\xcb\xdf\x92\x6c\x82\xd9\x06\x7a\x60\x84\x79\xdb\x99\xe9\x3c\x79\xa3\x77\xcb\xd6\x0b\x70\xc1\x62\x22\x25\x91\x60\x6b\xff\x2f\x5f\x15\xeb\xfe\xfc\x56\x8a\x52\x76\x48\xe2\xa5\x54\x48\x55\x3a\x1b\x38\x17\x24\x9c\x3c\xcf\x1d\xc4\x39\x58\xe8\xe7\x4c\x0a\x47\xee\x13\xea\x1c\x95\xe2\x18\xd8\xbb\x45\xfd\x88\x4c\x12\xa1\xb7\x02\xbd\x07\x34\x42\x07\xc1\x32\xde\x13\x8b\x73\x5c\x44\xca\x74\x22\xa3\x55\xba\xba\x84\x27\x85\x24\xf4\x5c\xaf\x11\x20\xf4\x92\x08\x46\x4f\x84\x2a\x2d\xa8\xb7\x54\x0a\x10\xc6\x42\xf7\xde\x19\x2c\x05\x47\x26\x15\x45\x27\x52\x94\xa0\x2f\x0a\x2f\x73\xb2\x87\x2e\x68\x89\x1f\xb5\x37\x8f\x46\x1d\x69\x22\x15\xa1\xb5\xfb\xfd\x5a\x3d\x79\xd5\x8d\x57\x39\x99\x50\x8d\x76\x5f\x6d\x0b\xa6\x58\x35\x0c\x15\xf3\xd6\x85\xbf\x74\xc5\x19\x5b\x7b\x0d\x07\xaa\xde\x59\x1d\xf5\x0f\x73\x50\xcc\x3d\x4d\xf6\xe4\x4a\x62\xe7\x74\x93\xe7\xf4\x87\xd9\x97\xf1\xde\xe9\x77\x46\x31\x52\x48\x12\xf5\x64\x40\xa7\x72\x3a\x85\x15\x05\x5e\x08\xdf\x81\x01\x36\x95\x02\xdf\x87\x61\xbb\xee\xf6\x9e\x81\x8a\x32\x9a\x5c\x7b\x2b\x42\xea\xd8\x1e\x57\xf5\xf9\x4f\xb2\xf8\x63\xe8\xe2\x7e\x09\xe2\x5f\x33\x24\x3f\x88\xc2\x60\x54\x14\x75\xfb\x07\x62\x24\x86\xd3\x30\xa3\x68\x15\x46\x33\x00\x0d\xdd\xec\x43\xef\xf6\xa1\x75\xe0\xaf\x46\xc5\xf0\x8c\x8c\x64\x70\x1a\x26\xe4\x06\xeb\x8d\x3b\x8f\xff\xbb\x6e\xb6\xa0\x37\x5b\x90\xb7\xda\x44\x70\x54\x06\x31\xb9\x18\xfa\x8b\x7c\x1a\x2e\xe4\x43\xe8\x8f\xfb\xbf\xcc\x5c\x02\x66\x23\x7a\x1e\x31\xba\x11\x41\xcf\x0d\x47\xc7\xd0\x33\x12\xc3\x89\x18\x51\xe4\x6f\x66\x02\x9a\x3a\x23\x8d\xc8\xaa\x9e\x1f\xd6\x67\x00\x00\x00\xff\xff\x77\x55\x92\x6c\xca\x16\x00\x00")
 
 func _8_json_bytes() ([]byte, error) {
 	return bindata_read(
@@ -216,8 +216,8 @@ func _8_json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "8.json", size: 5864, mode: os.FileMode(420), modTime: time.Unix(1427428792, 0)}
-	a := &asset{bytes: bytes, info: info}
+	info := bindata_file_info{name: "8.json", size: 5834, mode: os.FileMode(420), modTime: time.Unix(1430194959, 0)}
+	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
 
@@ -308,63 +308,71 @@ func AssetDir(name string) ([]string, error) {
 }
 
 type _bintree_t struct {
-	Func     func() (*asset, error)
+	Func func() (*asset, error)
 	Children map[string]*_bintree_t
 }
-
 var _bintree = &_bintree_t{nil, map[string]*_bintree_t{
-	"1.json": &_bintree_t{_1_json, map[string]*_bintree_t{}},
-	"2.json": &_bintree_t{_2_json, map[string]*_bintree_t{}},
-	"3.json": &_bintree_t{_3_json, map[string]*_bintree_t{}},
-	"4.json": &_bintree_t{_4_json, map[string]*_bintree_t{}},
-	"5.json": &_bintree_t{_5_json, map[string]*_bintree_t{}},
-	"6.json": &_bintree_t{_6_json, map[string]*_bintree_t{}},
-	"7.json": &_bintree_t{_7_json, map[string]*_bintree_t{}},
-	"8.json": &_bintree_t{_8_json, map[string]*_bintree_t{}},
+	"1.json": &_bintree_t{_1_json, map[string]*_bintree_t{
+	}},
+	"2.json": &_bintree_t{_2_json, map[string]*_bintree_t{
+	}},
+	"3.json": &_bintree_t{_3_json, map[string]*_bintree_t{
+	}},
+	"4.json": &_bintree_t{_4_json, map[string]*_bintree_t{
+	}},
+	"5.json": &_bintree_t{_5_json, map[string]*_bintree_t{
+	}},
+	"6.json": &_bintree_t{_6_json, map[string]*_bintree_t{
+	}},
+	"7.json": &_bintree_t{_7_json, map[string]*_bintree_t{
+	}},
+	"8.json": &_bintree_t{_8_json, map[string]*_bintree_t{
+	}},
 }}
 
 // Restore an asset under the given directory
 func RestoreAsset(dir, name string) error {
-	data, err := Asset(name)
-	if err != nil {
-		return err
-	}
-	info, err := AssetInfo(name)
-	if err != nil {
-		return err
-	}
-	err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
-	if err != nil {
-		return err
-	}
-	err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
-	if err != nil {
-		return err
-	}
-	err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
-	if err != nil {
-		return err
-	}
-	return nil
+        data, err := Asset(name)
+        if err != nil {
+                return err
+        }
+        info, err := AssetInfo(name)
+        if err != nil {
+                return err
+        }
+        err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
+        if err != nil {
+                return err
+        }
+        err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
+        if err != nil {
+                return err
+        }
+        err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
+        if err != nil {
+                return err
+        }
+        return nil
 }
 
 // Restore assets under the given directory recursively
 func RestoreAssets(dir, name string) error {
-	children, err := AssetDir(name)
-	if err != nil { // File
-		return RestoreAsset(dir, name)
-	} else { // Dir
-		for _, child := range children {
-			err = RestoreAssets(dir, path.Join(name, child))
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+        children, err := AssetDir(name)
+        if err != nil { // File
+                return RestoreAsset(dir, name)
+        } else { // Dir
+                for _, child := range children {
+                        err = RestoreAssets(dir, path.Join(name, child))
+                        if err != nil {
+                                return err
+                        }
+                }
+        }
+        return nil
 }
 
 func _filePath(dir, name string) string {
-	cannonicalName := strings.Replace(name, "\\", "/", -1)
-	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
+        cannonicalName := strings.Replace(name, "\\", "/", -1)
+        return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+

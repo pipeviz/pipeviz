@@ -1,7 +1,7 @@
 {
     "processes": [
         {
-            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
@@ -43,7 +43,7 @@
             ]
         },
         {
-            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
@@ -85,7 +85,7 @@
             ]
         },
         {
-            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
@@ -127,7 +127,7 @@
             ]
         },
         {
-            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",
@@ -169,7 +169,7 @@
             ]
         },
         {
-            "logic-states": [ "/usr/local/bin/app", "/usr/sbin/httpd" ],
+            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
             "user": "www",
             "group": "www",
             "cwd": "/var/run/app",

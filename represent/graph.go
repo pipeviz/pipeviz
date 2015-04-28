@@ -182,18 +182,13 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	var ec, lec, pass int
 	for ec = ess.EdgeCount(); ec != 0 && ec != lec; ec = ess.EdgeCount() {
 		pass += 1
-		//fmt.Printf("\nEdge resolution pass #%v: edge count %v, last edge count %v\n\n", pass, ec, lec)
 		lec = ec
 		for infokey, info := range ess {
 			specs := info.es
 			info.es = info.es[:0]
 			for _, spec := range specs {
-				//for k, spec := range specs {
 				edge, success := Resolve(g, msg.Id, info.vt, spec)
 				if success {
-					//fmt.Println("RESOLUTION SUCCESS - now on key", k)
-					//fmt.Printf("source vid %v, target vid %v, type %v\n", info.vt.id, edge.Target, info.vt.v.Typ())
-					//pretty.Println(spec)
 
 					edge.Source = info.vt.id
 					if edge.id == 0 {
@@ -212,18 +207,11 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 				} else {
 					// FIXME mem leaks if done this way...?
 					info.es = append(info.es, spec)
-
-					//fmt.Println("RESOLUTION FAILURE - on key", k)
-					//fmt.Printf("Remaining spec set is now %v length\n", len(info.es))
-					//fmt.Printf("source vid %v, type %v\n", info.vt.id, info.vt.v.Typ())
-					//pretty.Println(spec)
 				}
 			}
 			// set the processing info back into its original position in the slice
 			ess[infokey] = info
 		}
-
-		//fmt.Printf("\nFinishing edge resolution pass #%v: edge count %v, last edge count %v\n\n", pass, ess.EdgeCount(), lec)
 	}
 
 	g.orphans = g.orphans[:0]
@@ -232,7 +220,6 @@ func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
 			continue
 		}
 
-		//pretty.Println(info.vt.flat(), info.es)
 		g.orphans = append(g.orphans, info)
 	}
 
@@ -270,8 +257,6 @@ func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 				}
 			}
 		}
-
-		//pretty.Print("NEW VERTEX:", final.flat())
 	} else {
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
 		vt := ivt.(vtTuple)
@@ -280,7 +265,6 @@ func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 		nu, _ := vt.v.Merge(sd.Vertex)
 		final = vtTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
 		g.vtuples = g.vtuples.Set(i2a(vid), final)
-		//pretty.Print("EXISTING VERTEX:", final.flat())
 	}
 
 	return

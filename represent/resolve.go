@@ -24,10 +24,14 @@ func Resolve(g CoreGraph, mid int, src vtTuple, d EdgeSpec) (StandardEdge, bool)
 		return resolveSpecCommit(g, mid, src, es)
 	case SpecLocalLogic:
 		return resolveSpecLocalLogic(g, mid, src, es)
-	case interpret.ListenAddr:
-		return resolveListenAddr(g, mid, src, es)
+	case SpecNetListener:
+		return resolveNetListener(g, mid, src, es)
+	case SpecUnixDomainListener:
+		return resolveUnixDomainListener(g, mid, src, es)
 	case SpecDatasetHierarchy:
 		return resolveSpecDatasetHierarchy(g, mid, src, es)
+	case SpecParentDataset:
+		return resolveSpecParentDataset(g, mid, src, es)
 	case interpret.DataProvenance:
 		return resolveDataProvenance(g, mid, src, es)
 	case interpret.DataAlpha:
@@ -153,17 +157,19 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		}
 
 		// Now, walk the environment's edges to find the vertex representing the port
-		//ef := edgeFilter{EType: "envlink"}
-		//vf := vertexFilter{VType: "comm", Props: []PropQ{
-		//{"port", es.ConnNet.Port},
-		//{"proto", es.ConnNet.Proto},
-		//}}
-		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "port", es.ConnNet.Port, "proto", es.ConnNet.Proto).and(qbe(EType("envlink"))))
+		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "type", "port", "port", es.ConnNet.Port).and(qbe(EType("envlink"))))
 
 		if len(rv) != 1 {
 			return
 		}
 		sock = rv[0]
+
+		// With sock in hand, now find its proc
+		rv = g.PredecessorsWith(sock.id, qbe(EType("listening"), "proto", es.ConnNet.Proto).and(qbv(VType("process"))))
+		if len(rv) != 1 {
+			// TODO could/will we ever allow >1?
+			return
+		}
 	} else {
 		envid, _, exists := findEnv(g, src)
 
@@ -173,23 +179,22 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		}
 
 		// Walk the graph to find the vertex representing the unix socket
-		//ef := edgeFilter{EType: "envlink"}
-		//vf := vertexFilter{VType: "comm", Props: []PropQ{{"path", es.ConnUnix.Path}}}
-		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "path", es.ConnUnix).and(qbe(EType("envlink"))))
+		rv = g.PredecessorsWith(envid, qbv(VType("comm"), "path", es.ConnUnix.Path).and(qbe(EType("envlink"))))
 		if len(rv) != 1 {
 			return
 		}
 		sock = rv[0]
+
+		// With sock in hand, now find its proc
+		rv = g.PredecessorsWith(sock.id, qbv(VType("process")).and(qbe(EType("listening"))))
+		if len(rv) != 1 {
+			// TODO could/will we ever allow >1?
+			return
+		}
 	}
 
-	// With sock in hand, now find its proc
-	rv = g.SuccessorsWith(sock.id, qbv(VType("process")))
-	if len(rv) != 1 {
-		// TODO could/will we ever allow >1?
-		return
-	}
-
-	rv = g.SuccessorsWith(rv[0].id, qbv(VType("dataset")))
+	rv = g.SuccessorsWith(rv[0].id, qbv(VType("parent-dataset")))
+	// FIXME this absolutely could be more than 1
 	if len(rv) != 1 {
 		return
 	}
@@ -197,7 +202,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 
 	// if the spec indicates a subset, find it
 	if es.Subset != "" {
-		rv = g.SuccessorsWith(rv[0].id, qbv(VType("dataset"), "name", es.Subset))
+		rv = g.PredecessorsWith(rv[0].id, qbv(VType("dataset"), "name", es.Subset).and(qbe(EType("dataset-hierarchy"))))
 		if len(rv) != 1 {
 			return
 		}
@@ -263,22 +268,59 @@ func resolveSpecLocalLogic(g CoreGraph, mid int, src vtTuple, es SpecLocalLogic)
 	return
 }
 
-func resolveListenAddr(g CoreGraph, mid int, src vtTuple, es interpret.ListenAddr) (e StandardEdge, success bool) {
+func resolveNetListener(g CoreGraph, mid int, src vtTuple, es SpecNetListener) (e StandardEdge, success bool) {
+	// check for existing edge; this one is quite straightforward
+	re := g.OutWith(src.id, qbe(EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
+	if len(re) == 1 {
+		return re[0], true
+	}
+
 	e = StandardEdge{
 		Source: src.id,
 		Props:  ps.NewMap(),
 		EType:  "listening",
 	}
 
-	// TODO actually do this when back to working on edge resolvers
-	if es.Type == "unix" {
-		e.Props = e.Props.Set("path", Property{MsgSrc: mid, Value: es.Path})
-	} else {
-		e.Props = e.Props.Set("port", Property{MsgSrc: mid, Value: es.Port})
-		e.Props = e.Props.Set("proto", Property{MsgSrc: mid, Value: es.Proto})
+	e.Props = e.Props.Set("port", Property{MsgSrc: mid, Value: es.Port})
+	e.Props = e.Props.Set("proto", Property{MsgSrc: mid, Value: es.Proto})
+
+	envid, _, hasenv := findEnv(g, src)
+	if hasenv {
+		rv := g.PredecessorsWith(envid, qbv(VType("comm"), "type", "port", "port", es.Port))
+		if len(rv) == 1 {
+			success = true
+			e.Target = rv[0].id
+		}
 	}
 
-	return e, false
+	return
+}
+
+func resolveUnixDomainListener(g CoreGraph, mid int, src vtTuple, es SpecUnixDomainListener) (e StandardEdge, success bool) {
+	// check for existing edge; this one is quite straightforward
+	re := g.OutWith(src.id, qbe(EType("listening"), "type", "unix", "path", es.Path))
+	if len(re) == 1 {
+		return re[0], true
+	}
+
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "listening",
+	}
+
+	e.Props = e.Props.Set("path", Property{MsgSrc: mid, Value: es.Path})
+
+	envid, _, hasenv := findEnv(g, src)
+	if hasenv {
+		rv := g.PredecessorsWith(envid, qbv(VType("comm"), "type", "unix", "path", es.Path))
+		if len(rv) == 1 {
+			success = true
+			e.Target = rv[0].id
+		}
+	}
+
+	return
 }
 
 func resolveSpecDatasetHierarchy(g CoreGraph, mid int, src vtTuple, es SpecDatasetHierarchy) (e StandardEdge, success bool) {
@@ -305,6 +347,34 @@ func resolveSpecDatasetHierarchy(g CoreGraph, mid int, src vtTuple, es SpecDatas
 	if len(rv) != 0 { // >1 shouldn't be possible
 		success = true
 		e.Target = rv[0].id
+	}
+
+	return
+}
+
+func resolveSpecParentDataset(g CoreGraph, mid int, src vtTuple, es SpecParentDataset) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "dataset-gateway",
+	}
+	e.Props = e.Props.Set("name", Property{MsgSrc: mid, Value: es.Name})
+
+	// check for existing link - there can be only be one
+	re := g.OutWith(src.id, qbe(EType("dataset-gateway")))
+	if len(re) == 1 {
+		success = true
+		e = re[0]
+		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
+	} else {
+
+		// no existing link found; search for proc directly
+		envid, _, _ := findEnv(g, src)
+		rv := g.PredecessorsWith(envid, qbv(VType("parent-dataset"), "name", es.Name))
+		if len(rv) != 0 { // >1 shouldn't be possible
+			success = true
+			e.Target = rv[0].id
+		}
 	}
 
 	return

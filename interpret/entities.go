@@ -111,6 +111,7 @@ func (d DataProvenance) _dg() {}
 type Process struct {
 	Pid         int          `json:"pid"`
 	Cwd         string       `json:"cwd"`
+	Dataset     string       `json:"dataset"`
 	Environment EnvLink      `json:"environment"`
 	Group       string       `json:"group"`
 	Listen      []ListenAddr `json:"listen"`
