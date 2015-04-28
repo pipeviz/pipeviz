@@ -361,8 +361,8 @@ func init() {
 				{
 					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
 					EdgeSpecs: []EdgeSpec{
-						SpecLocalLogic{"/path/to/sth"},
 						M_envlink[0],
+						SpecLocalLogic{"/path/to/sth"},
 					},
 				},
 			},
@@ -383,8 +383,8 @@ func init() {
 						mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
 					},
 					EdgeSpecs: []EdgeSpec{
-						SpecLocalLogic{"/path/to/sth"},
 						M_envlink[1],
+						SpecLocalLogic{"/path/to/sth"},
 					},
 				},
 			},
@@ -403,10 +403,10 @@ func init() {
 				{
 					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
 					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
 						SpecLocalLogic{"/usr/local/src/imaginationland"},
-						interpret.ListenAddr{Type: "port", Port: 1025, Proto: []string{"tcp"}},
-						M_envlink[0],
+						SpecNetListener{Port: 1025, Proto: "tcp"},
 					},
 				},
 				{
@@ -431,13 +431,50 @@ func init() {
 				{
 					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
 					EdgeSpecs: []EdgeSpec{
-						SpecLocalLogic{"/usr/local/src/imaginationland"},
-						interpret.ListenAddr{Type: "unix", Path: "/var/run/lookitsa.sock"},
 						M_envlink[0],
+						SpecLocalLogic{"/usr/local/src/imaginationland"},
+						SpecUnixDomainListener{Path: "/var/run/lookitsa.sock"},
 					},
 				},
 				{
 					Vertex: vertexComm{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+					},
+				},
+			},
+		},
+		{
+			Summary: "Pid, envlink, two logic states, one local sock and one net listener, but two protos.",
+			Input: interpret.Process{
+				Pid:         42,
+				Environment: M_envlink[0],
+				LogicStates: []string{"/path/to/sth", "/usr/local/src/imaginationland"},
+				Listen: []interpret.ListenAddr{
+					{Type: "unix", Path: "/var/run/lookitsa.sock"},
+					{Type: "port", Port: 1025, Proto: []string{"tcp", "udp"}},
+				},
+			},
+			Output: []SplitData{
+				{
+					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+						SpecLocalLogic{"/path/to/sth"},
+						SpecLocalLogic{"/usr/local/src/imaginationland"},
+						SpecUnixDomainListener{Path: "/var/run/lookitsa.sock"},
+						SpecNetListener{Port: 1025, Proto: "tcp"},
+						SpecNetListener{Port: 1025, Proto: "udp"},
+					},
+				},
+				{
+					Vertex: vertexComm{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
+					EdgeSpecs: []EdgeSpec{
+						M_envlink[0],
+					},
+				},
+				{
+					Vertex: vertexComm{mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"})},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
