@@ -7,31 +7,20 @@ import (
 	"strings"
 
 	"github.com/sdboyer/pipeviz/persist"
+	"github.com/sdboyer/pipeviz/webapp"
 	gjs "github.com/xeipuuv/gojsonschema"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 )
-
-type Vertex struct {
-	vtype    string
-	changeId uint64
-	scanId   uint64
-}
-
-type Property struct {
-	value    interface{}
-	changeId uint64
-	scanId   uint64
-}
 
 type Message struct {
 	Id  uint64
 	Raw []byte
 }
 
-// Channel for handling persisted messages. 100 cap to allow some wiggle room
+// Channel for handling persisted messages. 1000 cap to allow some wiggle room
 // if there's a sudden burst of messages
-var interpretChan chan Message = make(chan Message, 100)
+var interpretChan chan Message = make(chan Message, 1000)
 
 var masterSchema *gjs.Schema
 
@@ -46,13 +35,20 @@ func main() {
 		panic(err.Error())
 	}
 
+	// TODO hardcoded 8008 for http frontend
+	mf := webapp.NewMux()
+	go graceful.ListenAndServe("127.0.0.1:8008", mf)
+
 	go interpret(interpretChan)
 
-	m := web.New()
-	m.Put("/environment", handle)
+	// Pipeviz has two fully separated HTTP ports - one for input into the logic
+	// machine, and one for graph data consumption. This is done because the
+	// semantics are so fundamentally different for the two cases.
+	mb := web.New()
+	mb.Post("/", handle)
 
 	// because Cayte
-	graceful.ListenAndServe("127.0.0.1:2309", m)
+	graceful.ListenAndServe("127.0.0.1:2309", mb)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +69,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		id := persist.Append(b, r.RemoteAddr)
 
 		// super-sloppy write back to client, but does the trick
-		// TODO not writing the id back at all might make things simpler
 		w.WriteHeader(202) // use 202 because it's a little more correct
 		w.Write([]byte(strconv.FormatUint(id, 10)))
 
