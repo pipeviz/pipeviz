@@ -1,28 +1,33 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/sdboyer/pipeviz/interpret"
 	"github.com/sdboyer/pipeviz/persist"
+	"github.com/sdboyer/pipeviz/represent"
 	"github.com/sdboyer/pipeviz/webapp"
 	gjs "github.com/xeipuuv/gojsonschema"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 )
 
-type Message struct {
+type message struct {
 	Id  int
 	Raw []byte
 }
 
 // Channel for handling persisted messages. 1000 cap to allow some wiggle room
 // if there's a sudden burst of messages
-var interpretChan chan Message = make(chan Message, 1000)
+var interpretChan chan message = make(chan message, 1000)
 
 var masterSchema *gjs.Schema
+
+var masterGraph represent.CoreGraph
 
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
@@ -35,11 +40,15 @@ func main() {
 		panic(err.Error())
 	}
 
+	// Initialize the central graph object. For now, we're just controlling this
+	// by having it be an unexported pkg var, but this will need to change.
+	masterGraph = represent.NewGraph()
+
 	// TODO hardcoded 8008 for http frontend
 	mf := webapp.NewMux()
-	go graceful.ListenAndServe("127.0.0.1:8008", mf)
+	graceful.ListenAndServe("127.0.0.1:8008", mf)
 
-	go interpret(interpretChan)
+	go interp(interpretChan)
 
 	// Pipeviz has two fully separated HTTP ports - one for input into the logic
 	// machine, and one for graph data consumption. This is done primarily
@@ -51,6 +60,7 @@ func main() {
 
 	// 2309, because Cayte
 	graceful.ListenAndServe("127.0.0.1:2309", mb)
+	graceful.Wait()
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +88,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		// at the interpretation layer in a different order than they went into the log
 		// if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
 
-		interpretChan <- Message{Id: id, Raw: b}
+		interpretChan <- message{Id: id, Raw: b}
 	} else {
 		w.WriteHeader(422)
 		var resp []string
@@ -89,6 +99,14 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func interpret(m <-chan Message) {
+// The main message-interpretation loop. This receives messages that have been
+// validated and persisted, merges them into the graph, then sends the new
+// graph along to listeners, workers, etc.
+func interp(c <-chan message) {
+	for m := range c {
+		im := interpret.Message{Id: m.Id}
+		json.Unmarshal(m.Raw, &im)
 
+		masterGraph = masterGraph.Merge(im)
+	}
 }
