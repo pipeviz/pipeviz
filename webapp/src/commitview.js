@@ -1,7 +1,7 @@
-var d3 = require('../bower_components/d3/d3'),
-    queue = require('../bower_components/queue-async/queue'),
-    _ = require('../bower_components/lodash/dist/lodash'),
-    React = require('../bower_components/react/react-with-addons.js');
+var d3 = require('bower_components/d3/d3'),
+    queue = require('bower_components/queue-async/queue'),
+    _ = require('bower_components/lodash/dist/lodash'),
+    React = require('bower_components/react/react-with-addons.js');
 
 var Container = require('./Container'),
     LogicState = require('./LogicState'),
