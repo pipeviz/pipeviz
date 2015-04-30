@@ -27,6 +27,23 @@ func init() {
 	}
 }
 
+func TestClone(t *testing.T) {
+	var g *coreGraph = &coreGraph{vtuples: ps.NewMap(), vserial: 0}
+	g.vserial = 2
+	g.vtuples = g.vtuples.Set("foo", "val")
+
+	var g2 *coreGraph = g.clone()
+	g2.vserial = 4
+	g2.vtuples = g2.vtuples.Set("foo", "newval")
+
+	if g.vserial != 2 {
+		t.Errorf("changes in cloned graph propagated back to original")
+	}
+	if val, _ := g2.vtuples.Lookup("foo"); val != "newval" {
+		t.Errorf("map somehow propagated changes back up to original map")
+	}
+}
+
 func TestMerge(t *testing.T) {
 	var g CoreGraph = &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 
