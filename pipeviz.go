@@ -106,7 +106,14 @@ func interp(c <-chan message) {
 	for m := range c {
 		im := interpret.Message{Id: m.Id}
 		json.Unmarshal(m.Raw, &im)
-
 		masterGraph = masterGraph.Merge(im)
+
+		go dispatchLatest(masterGraph)
 	}
+}
+
+// Dispatches the latest version of the graph out to all listeners.
+func dispatchLatest(g represent.CoreGraph) {
+	// TODO so hacke much import
+	webapp.GraphListen <- masterGraph
 }
