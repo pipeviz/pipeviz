@@ -8,14 +8,14 @@ package persist
 var msgs [][]byte
 
 // Appends a new message to the log, returning the id of the message.
-func Append(msg []byte, remoteAddr string) uint64 {
+func Append(msg []byte, remoteAddr string) int { // TODO uint64 for ids
 	// TODO allow err
 	msgs = append(msgs, msg)
-	return uint64(len(msgs) + 1)
+	return len(msgs) + 1
 }
 
 // Returns the message associated with the given id.
-func Get(id uint64) []byte {
+func Get(id int) []byte { // TODO uint64 for ids
 	// TODO allow err
 	return msgs[id-1]
 }

@@ -1,39 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/sdboyer/pipeviz/broker"
+	"github.com/sdboyer/pipeviz/interpret"
 	"github.com/sdboyer/pipeviz/persist"
+	"github.com/sdboyer/pipeviz/represent"
+	"github.com/sdboyer/pipeviz/webapp"
 	gjs "github.com/xeipuuv/gojsonschema"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 )
 
-type Vertex struct {
-	vtype    string
-	changeId uint64
-	scanId   uint64
-}
-
-type Property struct {
-	value    interface{}
-	changeId uint64
-	scanId   uint64
-}
-
-type Message struct {
-	Id  uint64
+type message struct {
+	Id  int
 	Raw []byte
 }
 
-// Channel for handling persisted messages. 100 cap to allow some wiggle room
-// if there's a sudden burst of messages
-var interpretChan chan Message = make(chan Message, 100)
+var (
+	// Channel for handling persisted messages. 1000 cap to allow some wiggle room
+	// if there's a sudden burst of messages
+	interpretChan chan message = make(chan message, 1000)
 
-var masterSchema *gjs.Schema
+	// The master JSON schema used for validating all incoming messages
+	masterSchema *gjs.Schema
+
+	// The current version of the graph that is the state of the machine
+	masterGraph represent.CoreGraph
+
+	// The channel for communicating to the broker
+	brokerChan chan represent.CoreGraph
+)
 
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
@@ -46,13 +48,33 @@ func main() {
 		panic(err.Error())
 	}
 
-	go interpret(interpretChan)
+	// Initialize the central graph object. For now, we're just controlling this
+	// by having it be an unexported pkg var, but this will need to change.
+	masterGraph = represent.NewGraph()
 
-	m := web.New()
-	m.Put("/environment", handle)
+	// Kick off fanout on the master/singleton graph broker. This will bridge between
+	// the state machine's and the listeners interested in the machine's state.
+	brokerChan = make(chan represent.CoreGraph, 0)
+	broker.Get().Fanout(brokerChan)
 
-	// because Cayte
-	graceful.ListenAndServe("127.0.0.1:2309", m)
+	// Kick off the goroutine that
+	go interp(interpretChan)
+
+	// TODO hardcoded 8008 for http frontend
+	mf := webapp.NewMux()
+	graceful.ListenAndServe("127.0.0.1:8008", mf)
+
+	// Pipeviz has two fully separated HTTP ports - one for input into the logic
+	// machine, and one for graph data consumption. This is done primarily
+	// because security/firewall concerns are completely different, and having
+	// separate ports makes it much easier to implement separate policies.
+	// Differing semantics are a contributing, but lesser consideration.
+	mb := web.New()
+	mb.Post("/", handle)
+
+	// 2309, because Cayte
+	graceful.ListenAndServe("127.0.0.1:2309", mb)
+	graceful.Wait()
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -73,14 +95,14 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		id := persist.Append(b, r.RemoteAddr)
 
 		// super-sloppy write back to client, but does the trick
-		// TODO not writing the id back at all might make things simpler
 		w.WriteHeader(202) // use 202 because it's a little more correct
-		w.Write([]byte(strconv.FormatUint(id, 10)))
+		w.Write([]byte(strconv.Itoa(id)))
 
 		// FIXME passing directly from here means it's possible for messages to arrive
 		// at the interpretation layer in a different order than they went into the log
+		// if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
 
-		interpretChan <- Message{Id: id, Raw: b}
+		interpretChan <- message{Id: id, Raw: b}
 	} else {
 		w.WriteHeader(422)
 		var resp []string
@@ -91,6 +113,15 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func interpret(c <-chan Message) {
+// The main message interpret/merge loop. This receives messages that have been
+// validated and persisted, merges them into the graph, then sends the new
+// graph along to listeners, workers, etc.
+func interp(c <-chan message) {
+	for m := range c {
+		im := interpret.Message{Id: m.Id}
+		json.Unmarshal(m.Raw, &im)
+		masterGraph = masterGraph.Merge(im)
 
+		brokerChan <- masterGraph
+	}
 }

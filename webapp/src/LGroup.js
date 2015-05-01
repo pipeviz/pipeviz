@@ -1,4 +1,4 @@
-var _ = require('../bower_components/lodash/dist/lodash');
+var _ = require('bower_components/lodash/dist/lodash');
 
 function LGroup(name, obj) {
     this._name = name;

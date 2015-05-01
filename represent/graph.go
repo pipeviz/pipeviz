@@ -54,9 +54,9 @@ type CoreGraph interface {
 // the main graph construct
 type coreGraph struct {
 	// TODO experiment with replacing with a hash array-mapped trie
-	vtuples ps.Map
-	vserial int
-	orphans edgeSpecSet // FIXME breaks immut
+	msgid, vserial int
+	vtuples        ps.Map
+	orphans        edgeSpecSet // FIXME breaks immut
 }
 
 func NewGraph() CoreGraph {
@@ -123,9 +123,19 @@ func (ess edgeSpecSet) EdgeCount() (i int) {
 	return
 }
 
+// Clones the graph object, and the map pointers it contains.
+func (g *coreGraph) clone() *coreGraph {
+	var cp coreGraph
+	cp = *g
+	return &cp
+}
+
 // the method to merge a message into the graph
-func (g *coreGraph) Merge(msg interpret.Message) CoreGraph {
+func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	var ess edgeSpecSet
+
+	g := og.clone()
+	g.msgid = msg.Id
 
 	// Process incoming elements from the message
 	msg.Each(func(d interface{}) {
