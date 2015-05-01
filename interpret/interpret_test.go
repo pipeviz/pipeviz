@@ -7,9 +7,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sdboyer/pipeviz/fixtures"
 	"github.com/sdboyer/pipeviz/interpret"
 	gjs "github.com/xeipuuv/gojsonschema"
 )
+
+var schema *gjs.Schema
 
 var Msgs []*interpret.Message
 
@@ -26,22 +29,21 @@ func init() {
 		err = json.Unmarshal(f, m)
 		Msgs = append(Msgs, m)
 	}
+
+	src, err := ioutil.ReadFile("../schema.json")
+	if err != nil {
+		panic(fmt.Sprint("Failed to open master schema file, test must abort. Note: this test must be run from the pipeviz repo root. message:", err.Error()))
+	}
+
+	schema, err = gjs.NewSchema(gjs.NewStringLoader(string(src)))
+	if err != nil {
+		panic(fmt.Sprint("Failed to create a schema object from the master schema.json:", err.Error()))
+	}
 }
 
 // Reads all message fixtures from fixtures/ein and validates them
 // against the master message schema (schema.json).
 func TestMessageValidity(t *testing.T) {
-	src, err := ioutil.ReadFile("../schema.json")
-	if err != nil {
-		t.Error("Failed to open master schema file, test must abort. Note: this test must be run from the pipeviz repo root. message:", err.Error())
-		t.FailNow()
-	}
-
-	schema, err := gjs.NewSchema(gjs.NewStringLoader(string(src)))
-	if err != nil {
-		t.Error("Failed to create a schema object from the master schema.json:", err.Error())
-	}
-
 	files, err := ioutil.ReadDir("../fixtures/ein/")
 	if err != nil {
 		t.Error("Failed to scan message fixtures dir:", err.Error())
@@ -53,7 +55,7 @@ func TestMessageValidity(t *testing.T) {
 			t.Log("Beginning validation on", f.Name())
 		}
 
-		src, _ = ioutil.ReadFile("../fixtures/ein/" + f.Name())
+		src, _ := ioutil.ReadFile("../fixtures/ein/" + f.Name())
 		msg := gjs.NewStringLoader(string(src))
 		result, err := schema.Validate(msg)
 
@@ -73,13 +75,63 @@ func TestMessageValidity(t *testing.T) {
 	}
 }
 
-func TestUnmarshal(t *testing.T) {
-	m := interpret.Message{}
+func BenchmarkUnmarshalMessageOne(b *testing.B) {
+	d, _ := fixtures.Asset("1.json")
 
-	f, err := ioutil.ReadFile("../fixtures/ein/6.json")
-	if err != nil {
-		t.Error("fnf")
+	for i := 0; i < b.N; i++ {
+		m := &interpret.Message{}
+		json.Unmarshal(d, m)
 	}
+}
 
-	err = json.Unmarshal(f, &m)
+func BenchmarkUnmarshalMessageTwo(b *testing.B) {
+	d, _ := fixtures.Asset("2.json")
+
+	for i := 0; i < b.N; i++ {
+		m := &interpret.Message{}
+		json.Unmarshal(d, m)
+	}
+}
+
+func BenchmarkUnmarshalMessageOneAndTwo(b *testing.B) {
+	d1, _ := fixtures.Asset("1.json")
+	d2, _ := fixtures.Asset("2.json")
+
+	for i := 0; i < b.N; i++ {
+		m1 := &interpret.Message{}
+		json.Unmarshal(d1, m1)
+
+		m2 := &interpret.Message{}
+		json.Unmarshal(d2, m2)
+	}
+}
+
+func BenchmarkValidateMessageOne(b *testing.B) {
+	d, _ := fixtures.Asset("1.json")
+	msg := gjs.NewStringLoader(string(d))
+
+	for i := 0; i < b.N; i++ {
+		schema.Validate(msg)
+	}
+}
+
+func BenchmarkValidateMessageTwo(b *testing.B) {
+	d, _ := fixtures.Asset("1.json")
+	msg := gjs.NewStringLoader(string(d))
+
+	for i := 0; i < b.N; i++ {
+		schema.Validate(msg)
+	}
+}
+
+func BenchmarkValidateMessageOneAndTwo(b *testing.B) {
+	d1, _ := fixtures.Asset("1.json")
+	d2, _ := fixtures.Asset("2.json")
+	msg1 := gjs.NewStringLoader(string(d1))
+	msg2 := gjs.NewStringLoader(string(d2))
+
+	for i := 0; i < b.N; i++ {
+		schema.Validate(msg1)
+		schema.Validate(msg2)
+	}
 }

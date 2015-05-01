@@ -27,18 +27,19 @@ func init() {
 	}
 }
 
-func TestMerge(t *testing.T) {
-	var g CoreGraph = &coreGraph{vtuples: ps.NewMap(), vserial: 0}
+func BenchmarkMergeMessageOne(b *testing.B) {
+	var g CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 
-	g = g.Merge(msgs[0])
+	for i := 0; i < b.N; i++ {
+		g.Merge(msgs[0])
+	}
+}
 
-	//for _, v := range g.VerticesWith(qbv()) {
-	//pretty.Print(v.flat())
-	//}
+func BenchmarkMergeMessageOneAndTwo(b *testing.B) {
+	var g CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 
-	g = g.Merge(msgs[1])
-
-	//for _, v := range g.VerticesWith(qbv()) {
-	//pretty.Print(v.flat())
-	//}
+	for i := 0; i < b.N; i++ {
+		g.Merge(msgs[0])
+		g.Merge(msgs[1])
+	}
 }
