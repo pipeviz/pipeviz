@@ -38,13 +38,20 @@ func TestBroker(t *testing.T) {
 		}
 	}()
 
-	// Start off with just one listener
-	go lstn(br.Subscribe())
-	// Kick off fanout goroutine
+	// Kick off fanout goroutine with no listeners registered
 	br.Fanout(input)
-
 	input <- g
 	// give a bit of time for the channels to pass it through
+	time.Sleep(time.Millisecond)
+
+	if tally != 0 {
+		t.Fatalf("Broker has no listeners, fanout should not have increased the tally, but somehow %v message made it through", tally)
+	}
+
+	// Now add one listener
+	go lstn(br.Subscribe())
+
+	input <- g
 	time.Sleep(time.Millisecond)
 
 	if tally != 1 {
@@ -84,4 +91,8 @@ func TestBroker(t *testing.T) {
 	if tally != 2 {
 		t.Fatalf("Two fanouts to what should be one listener after unsubscribing failed; should have gotten one message, but got %v", tally)
 	}
+
+	close(input)
+	close(input2)
+	close(tallyChan)
 }
