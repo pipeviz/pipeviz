@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/sdboyer/pipeviz/broker"
 	"github.com/sdboyer/pipeviz/represent"
 	"github.com/zenazn/goji/web"
 	"github.com/zenazn/goji/web/middleware"
@@ -19,16 +20,16 @@ var (
 
 var (
 	// TODO crappily hardcoded, for now
-	GraphListen chan represent.CoreGraph
-	latestGraph represent.CoreGraph
+	brokerListen broker.GraphReceiver
+	latestGraph  represent.CoreGraph
 )
 
 func init() {
+	// Subscribe to the master broker and store latest locally as it comes
+	brokerListen = broker.Get().Subscribe()
 	// FIXME spawning a goroutine in init() used to crappy, is it still?
-	// Temporary - set up a goroutine that just receives the latest graph
-	// and assigns it to a package var
 	go func() {
-		for g := range GraphListen {
+		for g := range brokerListen {
 			latestGraph = g
 		}
 	}()

@@ -13,23 +13,12 @@ import (
 )
 
 // TODO switch to doing this all with DI instead, i think
-var singletonBroker *GraphBroker
+var singletonBroker *GraphBroker = New()
 
 // Get returns the singleton graph broker that (is assumed to) consume from the
 // main state machine's processing loop.
 func Get() *GraphBroker {
 	return singletonBroker
-}
-
-// Set injects a GraphBroker for use as the main, singleton broker.
-//
-// Panics if it's called twice, and the main binary package calls it from
-// main() - cheap, dirty way to maintain control (initially) :)
-func Set(gb *GraphBroker) {
-	if singletonBroker != nil {
-		panic("attempted to set the singleton broker twice")
-	}
-	singletonBroker = gb
 }
 
 type GraphSender chan<- represent.CoreGraph

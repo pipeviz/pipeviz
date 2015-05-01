@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sdboyer/pipeviz/broker"
 	"github.com/sdboyer/pipeviz/interpret"
 	"github.com/sdboyer/pipeviz/persist"
 	"github.com/sdboyer/pipeviz/represent"
@@ -21,13 +22,20 @@ type message struct {
 	Raw []byte
 }
 
-// Channel for handling persisted messages. 1000 cap to allow some wiggle room
-// if there's a sudden burst of messages
-var interpretChan chan message = make(chan message, 1000)
+var (
+	// Channel for handling persisted messages. 1000 cap to allow some wiggle room
+	// if there's a sudden burst of messages
+	interpretChan chan message = make(chan message, 1000)
 
-var masterSchema *gjs.Schema
+	// The master JSON schema used for validating all incoming messages
+	masterSchema *gjs.Schema
 
-var masterGraph represent.CoreGraph
+	// The current version of the graph that is the state of the machine
+	masterGraph represent.CoreGraph
+
+	// The channel for communicating to the broker
+	brokerChan chan represent.CoreGraph
+)
 
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
@@ -44,11 +52,17 @@ func main() {
 	// by having it be an unexported pkg var, but this will need to change.
 	masterGraph = represent.NewGraph()
 
+	// Kick off fanout on the master/singleton graph broker. This will bridge between
+	// the state machine's and the listeners interested in the machine's state.
+	brokerChan = make(chan represent.CoreGraph, 0)
+	broker.Get().Fanout(brokerChan)
+
+	// Kick off the goroutine that
+	go interp(interpretChan)
+
 	// TODO hardcoded 8008 for http frontend
 	mf := webapp.NewMux()
 	graceful.ListenAndServe("127.0.0.1:8008", mf)
-
-	go interp(interpretChan)
 
 	// Pipeviz has two fully separated HTTP ports - one for input into the logic
 	// machine, and one for graph data consumption. This is done primarily
@@ -99,7 +113,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// The main message-interpretation loop. This receives messages that have been
+// The main message interpret/merge loop. This receives messages that have been
 // validated and persisted, merges them into the graph, then sends the new
 // graph along to listeners, workers, etc.
 func interp(c <-chan message) {
@@ -108,12 +122,6 @@ func interp(c <-chan message) {
 		json.Unmarshal(m.Raw, &im)
 		masterGraph = masterGraph.Merge(im)
 
-		go dispatchLatest(masterGraph)
+		brokerChan <- masterGraph
 	}
-}
-
-// Dispatches the latest version of the graph out to all listeners.
-func dispatchLatest(g represent.CoreGraph) {
-	// TODO so hacke much import
-	webapp.GraphListen <- masterGraph
 }
