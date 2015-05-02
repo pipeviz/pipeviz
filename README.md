@@ -19,7 +19,7 @@ $ go get -f github.com/sdboyer/pipeviz
 
 The `-f` flag will make `go get` ignore the fact that the repo is set to clone over ssh instead of http, and just update it that way instead. At which point, it should build you a pipeviz binary.
 
-However, the main binary isn’t actually that useful yet. At this stage, what’s more useful is the `pvutil` binary that it can also build, which can then be used to create dot files representing the results of interpreting message fixtures, which can then be transformed by graphviz (dot, specifically) into visualizations.
+However, the main binary isn’t actually that useful (yet). The `pvutil` binary, on the other hand, can be used to create dot files representing the results of interpreting message fixtures, which can then be transformed by graphviz (dot, specifically) into visualizations.
 
 To build pvutil, `cd` into the root of the pipeviz repository, then run `make; make install`. The `pvutil` binary should then be installed to `$GOPATH/bin`, at which point you can run `pvutil dotdump` to create the dot output file, or simply pipe it to dot: `pvutil dotdump -a | dot -Tpng > output.png`.
 
