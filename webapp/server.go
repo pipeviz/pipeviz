@@ -42,12 +42,12 @@ func NewMux() *web.Mux {
 	m.Use(middleware.Logger)
 	m.Get("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetDir))))
 	m.Get("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir(jsDir))))
-	m.Get("/", RootEntry)
+	m.Get("/", WebRoot)
 
 	return m
 }
 
-func RootEntry(w http.ResponseWriter, r *http.Request) {
+func WebRoot(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
 		Title string
 	}{
