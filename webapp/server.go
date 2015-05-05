@@ -27,7 +27,7 @@ var (
 func init() {
 	// Subscribe to the master broker and store latest locally as it comes
 	brokerListen = broker.Get().Subscribe()
-	// FIXME spawning a goroutine in init() used to crappy, is it still?
+	// FIXME spawning a goroutine in init() used to be crappy, is it still?
 	go func() {
 		for g := range brokerListen {
 			latestGraph = g
@@ -53,6 +53,9 @@ func WebRoot(w http.ResponseWriter, r *http.Request) {
 	}{
 		Title: "pipeviz",
 	}
+
+	// TODO we start by kitchen sink-ing - just sending back everything.
+	//vertices := latestGraph.VerticesWith()
 
 	t, err := template.ParseFiles(filepath.Join(tmplDir, "index.html"))
 	if err != nil {

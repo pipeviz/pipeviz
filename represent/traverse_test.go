@@ -40,8 +40,8 @@ func (vtx dummyVertex) Merge(ivtx Vertex) (Vertex, error) {
 
 // utility func to create a vtTuple. puts edges in the right place by
 // checking source/target ids. panics if they don't line up!
-func mkTuple(vid int, vtx dummyVertex, edges ...StandardEdge) vtTuple {
-	vt := vtTuple{
+func mkTuple(vid int, vtx dummyVertex, edges ...StandardEdge) VertexTuple {
+	vt := VertexTuple{
 		id: vid,
 		v:  vtx,
 		ie: ps.NewMap(),
@@ -172,7 +172,7 @@ func TestQbe(t *testing.T) {
 
 func TestVerticesWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []vtTuple
+	var result []VertexTuple
 
 	result = g.VerticesWith(qbv())
 	if len(result) != 5 {
@@ -330,7 +330,7 @@ func TestOutInArcWith(t *testing.T) {
 // Tests adjacentWith(), which effectively tests SuccessorsWith() and PredecessorsWith()
 func TestAdjacentWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []vtTuple
+	var result []VertexTuple
 
 	// basic, unfiltered tests first to ensure the right data is coming through
 	// vtx 2 has just one in-edge

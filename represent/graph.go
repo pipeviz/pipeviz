@@ -37,18 +37,18 @@ type CoreGraph interface {
 	// Enumerates the successors (targets of outgoing edges) from the ego vertex,
 	// limiting the result set to those that pass the provided edge and vertex
 	// filters (if any).
-	SuccessorsWith(egoId int, vef VEFilter) (vts []vtTuple)
+	SuccessorsWith(egoId int, vef VEFilter) (vts []VertexTuple)
 
 	// Enumerates the predecessors (sources of incoming edges) from the ego vertex,
 	// limiting the result set to those that pass the provided edge and vertex
 	// filters (if any).
-	PredecessorsWith(egoId int, vef VEFilter) (vts []vtTuple)
+	PredecessorsWith(egoId int, vef VEFilter) (vts []VertexTuple)
 
 	// Enumerates the vertices that pass the provided vertex filter (if any).
-	VerticesWith(vf VFilter) (vs []vtTuple)
+	VerticesWith(vf VFilter) (vs []VertexTuple)
 
 	// Gets the vertex tuple associated with a given id.
-	Get(id int) (vtTuple, error)
+	Get(id int) (VertexTuple, error)
 }
 
 // the main graph construct
@@ -96,11 +96,32 @@ type Vertex interface {
 	//Ids() []string
 }
 
-type vtTuple struct {
+type VertexTuple struct {
 	id int
 	v  Vertex
 	ie ps.Map
 	oe ps.Map
+}
+
+// Returns the numeric id of the vertex tuple.
+func (vt VertexTuple) Id() int {
+	return vt.id
+}
+
+// Returns the vertex data of the vertex tuple.
+func (vt VertexTuple) Vertex() Vertex {
+	return vt.v
+}
+
+// Returns the out-edges of the vertex tuple.
+func (vt VertexTuple) OutEdges() []StandardEdge {
+	var ret []StandardEdge
+
+	vt.oe.ForEach(func(k string, v ps.Any) {
+		ret = append(ret, v.(StandardEdge))
+	})
+
+	return ret
 }
 
 type Property struct {
@@ -109,7 +130,7 @@ type Property struct {
 }
 
 type veProcessingInfo struct {
-	vt    vtTuple
+	vt    VertexTuple
 	es    EdgeSpecs
 	msgid int
 }
@@ -144,7 +165,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 		sds, _ := Split(d, msg.Id)
 
 		// Ensure vertices are present
-		var tuples []vtTuple
+		var tuples []VertexTuple
 		for _, sd := range sds {
 			tuples = append(tuples, g.ensureVertex(msg.Id, sd))
 		}
@@ -211,7 +232,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 					g.vtuples = g.vtuples.Set(i2a(info.vt.id), info.vt)
 
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
-					tvt := any.(vtTuple)
+					tvt := any.(VertexTuple)
 					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
 				} else {
@@ -240,11 +261,11 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
+func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final VertexTuple) {
 	vid := Identify(g, sd)
 
 	if vid == 0 {
-		final = vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
+		final = VertexTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		g.vserial += 1
 		final.id = g.vserial
 		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
@@ -260,7 +281,7 @@ func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 
 					// set edge in reverse direction, too
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
-					tvt := any.(vtTuple)
+					tvt := any.(VertexTuple)
 					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
 					g.vtuples = g.vtuples.Set(i2a(final.id), final)
@@ -269,11 +290,11 @@ func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 		}
 	} else {
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
-		vt := ivt.(vtTuple)
+		vt := ivt.(VertexTuple)
 
 		// TODO err
 		nu, _ := vt.v.Merge(sd.Vertex)
-		final = vtTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
+		final = VertexTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
 		g.vtuples = g.vtuples.Set(i2a(vid), final)
 	}
 
@@ -281,15 +302,15 @@ func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final vtTuple) {
 }
 
 // Gets the vtTuple for a given vertex id.
-func (g *coreGraph) Get(id int) (vtTuple, error) {
+func (g *coreGraph) Get(id int) (VertexTuple, error) {
 	if id > g.vserial {
-		return vtTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
+		return VertexTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
 	}
 
 	vtx, exists := g.vtuples.Lookup(i2a(id))
 	if exists {
-		return vtx.(vtTuple), nil
+		return vtx.(VertexTuple), nil
 	} else {
-		return vtTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
+		return VertexTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
 	}
 }

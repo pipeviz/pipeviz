@@ -79,7 +79,7 @@ func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
 	// TODO this is a temporary measure until we move identity edge resolution up into vtx identification process
 	filtered2 := filtered[:0]
 	if hasEl {
-		newvt := vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
+		newvt := VertexTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		edge, success := Resolve(g, 0, newvt, envlink)
 
 		if !success {

@@ -72,7 +72,7 @@ func etoflat(e StandardEdge) (flat flatEdge) {
 }
 
 // flatten the persistent structures in the vtTuple down into conventional ones (typically for easy printing).
-func (vt vtTuple) flat() (flat flatVTuple) {
+func (vt VertexTuple) flat() (flat flatVTuple) {
 	flat.Id = vt.id
 	flat.V = vtoflat(vt.v)
 
