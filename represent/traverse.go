@@ -78,7 +78,7 @@ func (ef edgeFilter) and(vf VFilter) VEFilter {
 }
 
 // first string is vtype, then pairs after that are props
-func qbv(v ...interface{}) vertexFilter {
+func Qbv(v ...interface{}) vertexFilter {
 	switch len(v) {
 	case 0:
 		return vertexFilter{VTypeNone, nil}
@@ -100,7 +100,7 @@ func qbv(v ...interface{}) vertexFilter {
 }
 
 // first string is etype, then pairs after that are props
-func qbe(v ...interface{}) edgeFilter {
+func Qbe(v ...interface{}) edgeFilter {
 	switch len(v) {
 	case 0:
 		return edgeFilter{ETypeNone, nil}
@@ -347,7 +347,7 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []VertexTuple) {
 }
 
 func FindEnvironment(g CoreGraph, props ps.Map) (envid int, success bool) {
-	rv := g.VerticesWith(qbv(VType("environment")))
+	rv := g.VerticesWith(Qbv(VType("environment")))
 	for _, vt := range rv {
 		if matchEnvLink(props, vt.v.Props()) {
 			return vt.id, true
@@ -364,7 +364,7 @@ func FindDataset(g CoreGraph, envid int, name []string) (id int, success bool) {
 	var n string
 	for len(name) > 0 {
 		n, name = name[0], name[1:]
-		rv := g.PredecessorsWith(envid, qbv(vtype, "name", n))
+		rv := g.PredecessorsWith(envid, Qbv(vtype, "name", n))
 		vtype = "dataset"
 
 		if len(rv) != 1 {

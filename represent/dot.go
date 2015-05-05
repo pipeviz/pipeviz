@@ -17,7 +17,7 @@ func GenerateDot(g CoreGraph) []byte {
 	buf.WriteString("fontsize=16")
 
 	// first, write all vertices
-	for _, v := range g.VerticesWith(qbv()) {
+	for _, v := range g.VerticesWith(Qbv()) {
 		lbltype := "label"
 		var props string
 		switch v.v.(type) {
@@ -65,7 +65,7 @@ func GenerateDot(g CoreGraph) []byte {
 	}
 
 	// pass through a second time to write all edges
-	for _, v := range g.VerticesWith(qbv()) {
+	for _, v := range g.VerticesWith(Qbv()) {
 		v.oe.ForEach(func(k string, val ps.Any) {
 			edge := val.(StandardEdge)
 			buf.WriteString(fmt.Sprintf(
