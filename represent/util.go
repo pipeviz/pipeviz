@@ -25,24 +25,23 @@ func mapPropPairs(mid int, pairs ...p) (m ps.Map) {
 }
 
 type flatVTuple struct {
-	Id       int
-	V        flatVertex
-	InEdges  []flatEdge
-	OutEdges []flatEdge
+	Id       int        `json:"id"`
+	V        flatVertex `json:"vertex"`
+	InEdges  []flatEdge `json:"-"`
+	OutEdges []flatEdge `json:"outEdges"`
 }
 
 type flatVertex struct {
-	VType VType
-	Props map[string]Property
+	VType VType               `json:"type"`
+	Props map[string]Property `json:"properties"`
 }
 
 type flatEdge struct {
-	Id     int
-	Source int
-	Target int
-	EType  EType
-	// TODO do these *actually* need to be persistent structures?
-	Props map[string]Property
+	Id     int                 `json:"id"`
+	Source int                 `json:"source"`
+	Target int                 `json:"target"`
+	EType  EType               `json:"etype"`
+	Props  map[string]Property `json:"properties"`
 }
 
 func vtoflat(v Vertex) (flat flatVertex) {
@@ -72,7 +71,8 @@ func etoflat(e StandardEdge) (flat flatEdge) {
 }
 
 // flatten the persistent structures in the vtTuple down into conventional ones (typically for easy printing).
-func (vt VertexTuple) flat() (flat flatVTuple) {
+// TODO if this is gonna be exported, it's gotta be cleaned up
+func (vt VertexTuple) Flat() (flat flatVTuple) {
 	flat.Id = vt.id
 	flat.V = vtoflat(vt.v)
 
