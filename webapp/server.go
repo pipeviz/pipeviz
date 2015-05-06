@@ -1,6 +1,7 @@
 package webapp
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -33,6 +34,9 @@ func init() {
 			latestGraph = g
 		}
 	}()
+
+	// Iniitally set the latestGraph to a new, empty one to avoid nil pointer
+	latestGraph = represent.NewGraph()
 }
 
 // Creates a Goji *web.Mux that can act as the http muxer for the frontend app.
@@ -48,14 +52,20 @@ func NewMux() *web.Mux {
 }
 
 func WebRoot(w http.ResponseWriter, r *http.Request) {
-	vars := struct {
-		Title string
-	}{
-		Title: "pipeviz",
+	// TODO first step here is just kitchen sink-ing - send everything.
+	var vertices []interface{}
+	for _, v := range latestGraph.VerticesWith(represent.Qbv(represent.VTypeNone)) {
+		vertices = append(vertices, v.Flat())
 	}
+	j, err := json.Marshal(vertices)
 
-	// TODO we start by kitchen sink-ing - just sending back everything.
-	//vertices := latestGraph.VerticesWith()
+	vars := struct {
+		Title    string
+		Vertices string
+	}{
+		Title:    "pipeviz",
+		Vertices: string(j),
+	}
 
 	t, err := template.ParseFiles(filepath.Join(tmplDir, "index.html"))
 	if err != nil {
