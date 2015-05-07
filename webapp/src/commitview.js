@@ -523,11 +523,6 @@ var App = React.createClass({
             </div>
         );
     },
-    componentDidMount: function() {
-        var cmp = this;
-
-        this.setState({gData: JSON.parse(document.getElementById("pipe-graph").innerHTML)})
-    }
 });
 
-React.renderComponent(App(), document.body);
+React.render(React.createElement(App, {gData: JSON.parse(document.getElementById("pipe-graph").innerHTML)}), document.body);
