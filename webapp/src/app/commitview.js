@@ -33,7 +33,7 @@ define(function (require) {
 
     Anchor.prototype.name = function() {
         return '';
-    }
+    };
 
     function DataSet(obj, name, space) {
         _.assign(this, obj);
@@ -166,8 +166,9 @@ define(function (require) {
 
             return ds;
         }) : {};
-        this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, that) }) : {};
-        this._processes = _.has(obj, 'processes') ? _.map(obj.processes, function(p) { return new Process(p, that) }) : {};
+
+        this._logics = _.has(obj, 'logic states') ? _.mapValues(obj['logic states'], function(l, path) { return new LogicState(l, path, that); }) : {};
+        this._processes = _.has(obj, 'processes') ? _.map(obj.processes, function(p) { return new Process(p, that); }) : {};
     }
 
     Container.prototype = new _sharedId();
@@ -203,35 +204,35 @@ define(function (require) {
             hostname: this.hostname,
             ipv4: this.ipv4.toString(),
             type: this.type,
-        }
-    }
+        };
+    };
 
     Container.prototype.findProcess = function(loc) {
         var f, found = false;
         if (loc.type === "unix") {
             f = function(proc) {
                 return _.find(proc.listen, function(ingress) {
-                    if (ingress.type !== 'unix') return false;
-                    return loc.path == ingress.path
+                    if (ingress.type !== 'unix') {return false;}
+                    return loc.path === ingress.path;
                 }) ? proc : false;
-            }
+            };
         } else {
             f = function(proc) {
                 return _.find(proc.listen, function(ingress) {
-                    if (ingress.type != 'net' && ingress.type != 'port') return false;
-                    if (loc.port != ingress.number) return false;
+                    if (ingress.type !== 'net' && ingress.type !== 'port') {return false;}
+                    if (loc.port !== ingress.number) {return false;}
                     if (_.isString(ingress.proto)) {
-                        return loc.proto == ingress.proto;
-                    } else {
-                        return _.contains(ingress.proto, loc.proto);
+                        return loc.proto === ingress.proto;
                     }
+
+                    return _.contains(ingress.proto, loc.proto);
                 }) ? proc : false;
-            }
+            };
         }
 
         _.each(this.processes(), function(p) {
             found = f(p);
-            if (found) return false;
+            if (found) {return false;}
         });
 
         return found;
@@ -755,6 +756,7 @@ define(function (require) {
             if (funcs.length > 0) {
                 // if any filter func returns false, we throw it out (logical OR)
                 return function(node) {
+                    var i;
                     for (i = 0; i < funcs.length; i++) {
                         if (!funcs[i](node)) {
                             return false;
@@ -762,9 +764,8 @@ define(function (require) {
                     }
                     return true;
                 };
-            } else {
-                return false;
             }
+            return false;
         },
         buildLinkFilter: function() {
             // TODO atm we have no direct link filtering, this just
