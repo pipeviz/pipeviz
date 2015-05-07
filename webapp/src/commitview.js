@@ -264,6 +264,7 @@ var App = React.createClass({
             // in viz child class' state leaves us no choice for now
             anchorL: new Anchor(0, this.props.vizHeight/2),
             anchorR: new Anchor(this.props.vizWidth, this.props.vizHeight/2),
+            gData: {},
             commits: [],
             commitsort: true,
             commitMeta: {},
@@ -525,14 +526,7 @@ var App = React.createClass({
     componentDidMount: function() {
         var cmp = this;
 
-        // TODO this whole retrieval/population pattern will all change
-        d3.json('fixtures/ein.json', function(err, res) {
-            if (err) {
-                return;
-            }
-
-            cmp.setState({commitMeta: res.commitMeta, commits: res.commits, pvd: cmp.populatePVDFromJSON(cmp.state.pvd, res.containers)});
-        });
+        this.setState({gData: JSON.parse(document.getElementById("pipe-graph").innerHTML)})
     }
 });
 
