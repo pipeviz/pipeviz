@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mndrix/ps"
-	"github.com/sdboyer/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/interpret"
 )
 
 // Attempts to resolve an EdgeSpec into a real edge. This process has two steps:
@@ -209,7 +209,7 @@ func resolveDataLink(g CoreGraph, mid int, src vtTuple, es interpret.DataLink) (
 		dataset = rv[0]
 	}
 
-	// FIXME only recording the final target id is totally broken; see https://github.com/sdboyer/pipeviz/issues/37
+	// FIXME only recording the final target id is totally broken; see https://github.com/tag1consulting/pipeviz/issues/37
 
 	// Aaaand we found our target.
 	success = true

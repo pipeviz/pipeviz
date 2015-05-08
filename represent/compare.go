@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/mndrix/ps"
-	"github.com/sdboyer/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/interpret"
 )
 
 // Performs simple equality comparison on the provided keys between two persistent maps.

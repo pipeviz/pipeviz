@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sdboyer/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent"
 )
 
 // Make sure brokers are initialized correctly

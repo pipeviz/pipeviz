@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mndrix/ps"
-	"github.com/sdboyer/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/interpret"
 )
 
 func Identify(g CoreGraph, sd SplitData) int {

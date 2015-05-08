@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sdboyer/pipeviz/fixtures"
-	"github.com/sdboyer/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/fixtures"
+	"github.com/tag1consulting/pipeviz/interpret"
 	gjs "github.com/xeipuuv/gojsonschema"
 )
 

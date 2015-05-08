@@ -9,7 +9,7 @@ package broker
 import (
 	"sync"
 
-	"github.com/sdboyer/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent"
 )
 
 // TODO switch to doing this all with DI instead, i think

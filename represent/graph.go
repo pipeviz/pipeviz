@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/mndrix/ps"
-	"github.com/sdboyer/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/interpret"
 )
 
 var i2a = strconv.Itoa

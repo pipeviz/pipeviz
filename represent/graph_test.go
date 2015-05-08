@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/mndrix/ps"
-	"github.com/sdboyer/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/interpret"
 )
 
 var msgs []interpret.Message

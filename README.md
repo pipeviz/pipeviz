@@ -5,16 +5,16 @@
 Pipeviz is, for now, structured as a standard executable Go program where, given a functioning local Go environment, simply running
 
 ```
-go get github.com/sdboyer/pipeviz
+go get github.com/tag1consulting/pipeviz
 ```
 
 will download and build an executable binary, placing it at `$GOPATH/bin/pipeviz`. However, because the repository is currently private, and because `go get` operates over http, it will require that you provide your Github credentials for http cloning. This can be a bit of a pain, so there’s an alternative:
 
 ```
 $ cd $GOPATH/src
-$ mkdir -p github.com/sdboyer
-$ git clone git@github.com:sdboyer/pipeviz github.com/sdboyer/pipeviz
-$ go get -f github.com/sdboyer/pipeviz
+$ mkdir -p github.com/tag1consulting
+$ git clone git@github.com:tag1consulting/pipeviz github.com/tag1consulting/pipeviz
+$ go get -u -f github.com/tag1consulting/pipeviz
 ```
 
 The `-f` flag will make `go get` ignore the fact that the repo is set to clone over ssh instead of http, and just update it that way instead. At which point, it should build you a pipeviz binary.

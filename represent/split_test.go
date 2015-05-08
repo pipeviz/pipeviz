@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/mndrix/ps"
-	"github.com/sdboyer/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -489,7 +489,7 @@ func init() {
 			Input: interpret.Commit{
 				Author:     "Sam Boyer <tech@samboyer.org>",
 				Date:       "Fri Jan 9 15:00:08 2015 -0500",
-				Repository: "https://github.com/sdboyer/pipeviz",
+				Repository: "https://github.com/tag1consulting/pipeviz",
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
 				Parents:    [][]byte{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
@@ -497,7 +497,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
@@ -510,14 +510,14 @@ func init() {
 			Input: interpret.Commit{
 				Author:     "Sam Boyer <tech@samboyer.org>",
 				Date:       "Fri Jan 9 15:00:08 2015 -0500",
-				Repository: "https://github.com/sdboyer/pipeviz",
+				Repository: "https://github.com/tag1consulting/pipeviz",
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
 			},
 			Output: []SplitData{
 				{
 					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: nil,
 				},
@@ -528,7 +528,7 @@ func init() {
 			Input: interpret.Commit{
 				Author:     "Sam Boyer <tech@samboyer.org>",
 				Date:       "Fri Jan 9 15:00:08 2015 -0500",
-				Repository: "https://github.com/sdboyer/pipeviz",
+				Repository: "https://github.com/tag1consulting/pipeviz",
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
 				Parents:    [][]byte{hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
@@ -536,7 +536,7 @@ func init() {
 			Output: []SplitData{
 				{
 					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/sdboyer/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},

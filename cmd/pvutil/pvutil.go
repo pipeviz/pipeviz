@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sdboyer/pipeviz/fixtures"
-	"github.com/sdboyer/pipeviz/interpret"
-	"github.com/sdboyer/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/fixtures"
+	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/spf13/cobra"
 )
 

@@ -6,16 +6,16 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/sdboyer/pipeviz/broker"
-	"github.com/sdboyer/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/broker"
+	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/zenazn/goji/web"
 	"github.com/zenazn/goji/web/middleware"
 )
 
 var (
-	assetDir = filepath.Join(defaultBase("github.com/sdboyer/pipeviz/webapp"), "assets")
-	jsDir    = filepath.Join(defaultBase("github.com/sdboyer/pipeviz/webapp"), "src")
-	tmplDir  = filepath.Join(defaultBase("github.com/sdboyer/pipeviz/webapp"), "tmpl")
+	assetDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "assets")
+	jsDir    = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "src")
+	tmplDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "tmpl")
 )
 
 var (
