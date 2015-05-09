@@ -1,8 +1,8 @@
-define(function (require) {
+//define(function (require) {
 
-    var _ = require('lodash/dist/lodash'),
-    d3 = require('d3/d3'),
-    React = require('react/react-with-addons');
+    //var _ = require('lodash/dist/lodash'),
+    //d3 = require('d3/d3'),
+    //React = require('react/react-with-addons');
     //graphlib = require('graphlib/dist/graphlib.core');
 
     /* All the helper objects (just copied over for now) */
@@ -934,4 +934,4 @@ define(function (require) {
     });
 
     React.render(React.createElement(App, {gData: JSON.parse(document.getElementById("pipe-graph").innerHTML)}), document.body);
-});
+//});
