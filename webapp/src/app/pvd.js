@@ -1,3 +1,6 @@
+// just so my syntastic complains less
+var _ = _ || {};
+
 function pvVertex(obj, g) {
     this.id = obj.id;
     this.vertex = obj.vertex;

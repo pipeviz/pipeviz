@@ -1,3 +1,6 @@
+// just so my syntastic complains less
+var React = React || {};
+
 var data = new pvGraph(JSON.parse(document.getElementById("pipe-graph").innerHTML));
 
 var App = React.createClass({
@@ -6,6 +9,9 @@ var App = React.createClass({
         return {
             graph: {}
         };
+    },
+    render: function() {
+        return React.createElement("div", {id: "pipeviz"});
     },
 });
 
