@@ -173,8 +173,8 @@ var App = React.createClass({
     },
     getDefaultProps: function() {
         return {
-            //vizWidth: window.innerWidth * 0.83,
-            vizWidth: window.innerWidth,
+            vizWidth: window.innerWidth * 0.83,
+            //vizWidth: window.innerWidth,
             vizHeight: window.innerHeight,
         };
     },

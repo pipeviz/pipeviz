@@ -49,6 +49,11 @@ type CoreGraph interface {
 
 	// Gets the vertex tuple associated with a given id.
 	Get(id int) (VertexTuple, error)
+
+	// Returns the message id for the current version of the graph. The graph's
+	// contents are guaranteed to represent the state resulting from a correct
+	// in-order interpretation of the messages up to the id, inclusive.
+	MsgId() int
 }
 
 // the main graph construct
@@ -149,6 +154,10 @@ func (g *coreGraph) clone() *coreGraph {
 	var cp coreGraph
 	cp = *g
 	return &cp
+}
+
+func (g *coreGraph) MsgId() int {
+	return g.msgid
 }
 
 // the method to merge a message into the graph

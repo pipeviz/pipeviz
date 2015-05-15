@@ -60,14 +60,14 @@ Anchor.prototype.isVertex = function() {
 function pvGraph(gdata) {
     // contains all objects, vertices and edges, keyed by objid
     this._objects = {};
+    this.id = gdata.id;
 
     var that = this;
-    var o = this._objects;
-    _.each(gdata, function(d) {
+    _.each(gdata.vertices, function(d) {
         // capture vertex
-        o[d.id] = new pvVertex(d, that);
+        that._objects[d.id] = new pvVertex(d, that);
         // and its out-edges
-        _.each(d.outEdges, function(d2) { o[d2.id] = new pvEdge(d2, that); });
+        _.each(d.outEdges, function(d2) { that._objects[d2.id] = new pvEdge(d2, that); });
     });
 }
 

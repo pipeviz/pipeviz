@@ -54,10 +54,17 @@ func NewMux() *web.Mux {
 func WebRoot(w http.ResponseWriter, r *http.Request) {
 	// TODO first step here is just kitchen sink-ing - send everything.
 	var vertices []interface{}
-	for _, v := range latestGraph.VerticesWith(represent.Qbv(represent.VTypeNone)) {
+	g := latestGraph // copy pointer to avoid inconsistent read
+	for _, v := range g.VerticesWith(represent.Qbv(represent.VTypeNone)) {
 		vertices = append(vertices, v.Flat())
 	}
-	j, err := json.Marshal(vertices)
+	j, err := json.Marshal(struct {
+		Id       int           `json:"id"`
+		Vertices []interface{} `json:"vertices"`
+	}{
+		Id:       g.MsgId(),
+		Vertices: vertices,
+	})
 
 	vars := struct {
 		Title    string
