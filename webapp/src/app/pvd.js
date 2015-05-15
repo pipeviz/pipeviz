@@ -31,6 +31,30 @@ pvEdge.prototype.Typ = function() {
     return this.etype;
 };
 
+// TODO get rid of this anchor shit, replace with well-formed tree rendering
+function Anchor(id, x, y) {
+    this.fixed = true; // tells d3 not to move it
+    this.x = x || 0;
+    this.y = y || 0;
+    this.id = id;
+}
+
+Anchor.prototype.vType = function() {
+    return 'sort-anchor';
+};
+
+Anchor.prototype.name = function() {
+    return '';
+};
+
+Anchor.prototype.Typ = function() {
+    return 'anchor';
+};
+
+Anchor.prototype.isVertex = function() {
+    return true;
+};
+
 // TODO this pretty much mirrors what we have serverside...for now. ugh.
 // pipeviz datastore
 function pvGraph(gdata) {
