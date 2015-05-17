@@ -46,13 +46,13 @@ var Viz = React.createClass({
         this.state.force.nodes(this.props.nodes);
         this.state.force.links(this.props.links);
 
-        return graphRender(this.getDOMNode(), this.state, this.props);
+        return this.graphRender(this.getDOMNode(), this.state, this.props);
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
-        .data(props.links, function(d) { return d.source.objid() + '-' + d.target.objid(); }),
+            .data(props.links, function(d) { return d.source.objid() + '-' + d.target.objid(); }),
         node = d3.select(el).selectAll('.node')
-        .data(props.nodes, function(d) { return d.objid(); });
+            .data(props.nodes, function(d) { return d.id; });
 
         link.enter().append('line')
         .attr('class', function(d) {
@@ -77,8 +77,11 @@ var Viz = React.createClass({
         .attr('x', 0)
         .attr('y', 0)
         .attr('r', function(d) {
-            if (d.Typ() === "lgroup") {
+            if (d.Typ() === "logic-state") {
                 return 45;
+            }
+            if (d.Typ() === "commit") {
+                return 3;
             }
             if (d.Typ() === "anchor") {
                 return 0;
@@ -93,21 +96,16 @@ var Viz = React.createClass({
         .attr('y', '-37')
         .attr('x', '-10')
         .attr('xlink:href', function(d) {
-            if (d.Typ() === "anchor") {
-                return;
+            if (d.Typ() === "logic-state" && _.has(d.vertex, "provider")) {
+                return "assets/" + d.vertex.provider + ".svg";
             }
-
-            // FIXME hahahahahhahahahahahahhaha hardcoded
-            return 'assets/' + d.ref()._container.provider + '.svg';
         });
 
         var nodetext = nodeg.append('text');
-        nodetext.append('tspan')
-        .text(function(d) { return d.name(); });
-        nodetext.append('tspan')
-        .text(function(d) {
+        nodetext.append('tspan').text(function(d) { return d.name(); });
+        nodetext.append('tspan').text(function(d) {
             // FIXME omg terrible
-            if (d.Typ() === "anchor") {
+            if (d.Typ() !== "logic-state") {
                 return '';
             }
 
@@ -116,7 +114,7 @@ var Viz = React.createClass({
         .attr('dy', "1.4em")
         .attr('x', 0)
         .attr('class', function(d) {
-            if (d.Typ() === "anchor") {
+            if (d.Typ() !== "logic-state") {
                 return;
             }
 

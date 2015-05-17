@@ -60,7 +60,7 @@ Anchor.prototype.isVertex = function() {
 function pvGraph(gdata) {
     // contains all objects, vertices and edges, keyed by objid
     this._objects = {};
-    this.id = gdata.id;
+    this.mid = gdata.id;
 
     var that = this;
     _.each(gdata.vertices, function(d) {
