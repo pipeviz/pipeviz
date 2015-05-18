@@ -262,6 +262,10 @@
             "testState": "passed"
         },
         {
+            "sha1": "c5bd38eb24eb0dfd4ab23957dbedcab73becc4c7",
+            "tags": ["1.0.1"]
+        },
+        {
             "sha1": "3f7bde72dd71b833378ee839cc6913d44574b793",
             "testState": "pending"
         },
