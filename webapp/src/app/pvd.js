@@ -18,6 +18,12 @@ pvVertex.prototype.Typ = function() {
     return this.vertex.type;
 };
 
+pvVertex.prototype.prop = function(path) {
+    if (_.has(this.vertex.properties, path)) {
+        return this.vertex.properties[path];
+    }
+};
+
 function pvEdge(obj, g) {
     _.assign(this, obj);
     this._g = g;
@@ -106,10 +112,9 @@ pvGraph.prototype.commitGraph = function() {
     _.each(_.filter(this._objects, function(d) { return filters.vertices(d) && isType("commit")(d); }), function(commit) {
         g.setNode(commit.id);
         _.each(_.filter(_.map(commit.outEdges, function(edgeId) { return that.get(edgeId); }), isType("version")), function (edge) {
-            g.setEdge(commit.id, edge.id);
+            g.setEdge(commit.id, edge.target);
         });
     });
 
     return g;
 };
-
