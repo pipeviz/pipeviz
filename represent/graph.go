@@ -130,8 +130,8 @@ func (vt VertexTuple) OutEdges() []StandardEdge {
 }
 
 type Property struct {
-	MsgSrc int
-	Value  interface{}
+	MsgSrc int         `json:"msgsrc"`
+	Value  interface{} `json:"value"`
 }
 
 type veProcessingInfo struct {
