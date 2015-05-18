@@ -174,7 +174,7 @@ var VizPrep = React.createClass({
                     members[vedges[0].target] = [];
                 }
                 // have to copy objects for d3's prop intrusion
-                members[vedges[0].target].push({commit: vedges[0].target, obj: _.assign({}, v)});
+                members[vedges[0].target].push(_.assign({}, v));
             }
             return false;
         });
@@ -186,30 +186,54 @@ var VizPrep = React.createClass({
                 if (!_.has(members, vedges[0].target)) {
                     members[vedges[0].target] = [];
                 }
-                members[vedges[0].target].push({commit: vedges[0].target, obj: _.assign({}, l)});
+                members[vedges[0].target].push(_.assign({}, l));
             }
         });
 
-        // walker to *just* discover 'joints' - otherwise uninteresting commits with
-        // multiple descendents that will necessitate creating a node later
+        // walker to discover 'joints' - otherwise uninteresting commits with
+        // multiple descendents that will necessitate creating a node later. also
+        // identifies the 'interesting' sources and sinks (apps) that should actually
+        // be used, rather than sinks/sources of the commit graph on its own.
         var visited = [], // "black" list - vertices that have been visited
-        jointwalk = function(v) {
+        deepestApp, // var to hold the deepest app we've visited (for sink tracking)
+        npath = [], // the current path, but only with logic states
+        isources = [], // interesting sources
+        isinks = [], // interesting sinks
+        prepwalk = function(v) {
             // DAG, so skip grey/back-edge
+            var has_app = false;
+            // check if this commit has an app
+            if (_.has(members, v) && _.filter(members[v], isType("logic-state").length !== 0)) {
+                if (npath.length === 0) {
+                    // nothing in the npath, this is a source
+                    isources.push(v);
+                }
+                has_app = true;
+                npath.push(v);
+                deepestApp = v;
+            }
             // if black, and nothing in members about the commit, it's a joint
             if (visited.indexOf(v) !== -1 && !_.has(members, v)) {
                 members[v] = [{commit: v, obj: _.assign({}, cmp.props.graph.get(v))}];
             }
 
             g.successors(v).map(function(s) {
-                jointwalk(s);
+                prepwalk(s);
             });
 
             visited.push(v);
+            if (has_app) {
+                npath.pop();
+                // if deepestApp is self, it's because we found no apps further down the dag,
+                // so this is effectively a sink
+                if (deepestApp === v) {
+                    isinks.push(v);
+                }
+            }
         };
 
         // now traverse depth-first to figure out the overlaid edge structure
         var path = [], // the current path of interstitial commits
-        npath = [], // the current path, but only with logic states
         labels = [], // the set of non-app-coinciding labels and their relative positions
         lpnodes = {}, // the set of non-app-coinciding labels that have found their origin, but not their target
         v, // vertex (commit) currently being visited
@@ -298,10 +322,13 @@ var VizPrep = React.createClass({
                 }
             }
 
-            // recursive call, the crux of this depth-first traversal
-            g.successors(v).map(function(s) {
-                walk(s);
-            });
+            // recursive call, the crux of this depth-first traversal. but we
+            // skip it if the first search proved this to be a sink
+            if (isinks.indexOf(v) !== -1) {
+                g.successors(v).map(function(s) {
+                    walk(s);
+                });
+            }
 
             // Mark commit black/visited...but only if it's a member-associated
             // commit. This is OK to do because we already traversed once and
@@ -315,34 +342,43 @@ var VizPrep = React.createClass({
             }
 
             // decrement lpnodes values, and filter out any that reach 0;
-            // they're not between any apps and thus won't be displayed
+            // they're not between any apps and thus won't be displayed.
+            // this SHOULD be unnecessary b/c we preselected good sinks and
+            // sources, but just in case.
             lpnodes = _(lpnodes)
                 .mapValues(function(v) { return v-1; })
                 .filter(function(v) { return v > 0; }) // > 1?
                 .values();
         };
 
-        var stack = _.reduce(g.sources(), function(accum, commit) {
-            // as long as we're in here, put the source anchor link in
-            _.each(members[commit], function(member) {
-                links.push({ source: cmp.state.anchorL, target: member.obj });
-            });
-
-            // FIXME this assumes the sources of the commit graph we have happen to
-            // align with commits we have in other logic states
-            return _.has(members, commit) ? accum.concat(members[commit]) : accum;
-        }, []);
-
-        _.each(g.sinks(), function(commit) {
-            _.each(members[commit], function(member) {
-                links.push({ source: member.obj, target: cmp.state.anchorR });
-            });
-        });
-
+        var stack = g.sources();
         // DF walk, working from source commit members
         while (stack.length !== 0) {
             v = stack.pop();
-            npath.push(members[v.commit]);
+            prepwalk(v);
+        }
+
+        // put the source anchor links in
+        _.each(isources, function(commit) {
+            _.each(_.filter(members[commit], isType("logic-state")), function(member) {
+                links.push({ source: cmp.state.anchorL, target: member });
+            });
+        });
+
+        // and the sink anchor links
+        _.each(isinks, function(commit) {
+            _.each(_.filter(members[commit], isType("logic-state")), function(member) {
+                links.push({ source: member, target: cmp.state.anchorR });
+            });
+        });
+
+        // reset search path vars
+        npath = [];
+        visited = [];
+
+        while (isources.length !== 0) {
+            v = isources.pop();
+            //npath.push(members[v.commit]);
             walk(v.commit);
         }
 
