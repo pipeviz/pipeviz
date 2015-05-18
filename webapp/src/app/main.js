@@ -173,34 +173,47 @@ var VizPrep = React.createClass({
                 if (!_.has(members, vedges[0].target)) {
                     members[vedges[0].target] = [];
                 }
-                members[vedges[0].target].push({commit: vedges[0].target, obj: v});
+                // have to copy objects for d3's prop intrusion
+                members[vedges[0].target].push({commit: vedges[0].target, obj: _.assign({}, v)});
             }
             return false;
-        }),
-        lbls = _.filter(this.props.graph.verticesWithType("vcs-label"), function(l) {
+        });
+
+        _.each(this.props.graph.verticesWithType("vcs-label"), function(l) {
             var vedges = _.filter(_.map(l.outEdges, function(edgeId) { return this.props.graph.get(edgeId); }), isType("version"));
 
             if (this.props.graph.get(vedges[0].target).prop("repository").value === repo) {
                 if (!_.has(members, vedges[0].target)) {
                     members[vedges[0].target] = [];
                 }
-                members[vedges[0].target].push({commit: vedges[0].target, obj: l});
+                members[vedges[0].target].push({commit: vedges[0].target, obj: _.assign({}, l)});
             }
         });
 
-        // TODO UGHHHHH to create joints at commit/non-app points, will have to fully walk the commit graph twice
+        // walker to *just* discover 'joints' - otherwise uninteresting commits with
+        // multiple descendents that will necessitate creating a node later
+        var visited = [], // "black" list - vertices that have been visited
+        jointwalk = function(v) {
+            // DAG, so skip grey/back-edge
+            // if black, and nothing in members about the commit, it's a joint
+            if (visited.indexOf(v) !== -1 && !_.has(members, v)) {
+                members[v] = [{commit: v, obj: _.assign({}, cmp.props.graph.get(v))}];
+            }
+
+            g.successors(v).map(function(s) {
+                jointwalk(s);
+            });
+
+            visited.push(v);
+        };
 
         // now traverse depth-first to figure out the overlaid edge structure
-        var visited = [], // "black" list - vertices that have been visited
-        path = [], // the current path of interstitial commits
+        var path = [], // the current path of interstitial commits
         npath = [], // the current path, but only with logic states
         labels = [], // the set of non-app-coinciding labels and their relative positions
         lpnodes = {}, // the set of non-app-coinciding labels that have found their origin, but not their target
-        v; // vertex (commit) currently being visited
-
-        // TODO experiment with using an immut list for paths; shared state will minimize memory usage
-
-        var walk = function(v) {
+        v, // vertex (commit) currently being visited
+        walk = function(v) { // main depth-first walker
             // git guarantees commit graph is acyclic, thus safe to skip grey/back-edge
 
             var pop_npath = false;
@@ -208,13 +221,23 @@ var VizPrep = React.createClass({
             var from = npath.length === 0 ? false : npath[npath.length - 1];
 
             if (visited.indexOf(v) !== -1) {
-                // Commit vertex is black/visited; create link and return.
+                // Commit vertex is black/visited; create links, update lpnodes, and return.
                 _.each(members[v], function(tgt) {
                     from.map(function(src) {
                         // slice guarantees path array is copied
                         links.push({ source: src.obj, target: tgt.obj, path: path.slice(0) });
                     });
                 });
+
+                // process all label nodes we have waiting around
+                _.forOwn(lpnodes, function(id, llen) {
+                    // need to push the actual objects on so the viz can cheat and track x/y props
+                    labels.push({id: id, l: from[0].obj, r: ls[0].obj, pos: llen / (path.length+1)});
+                });
+
+                // zero out lpnodes set
+                lpnodes = {};
+                // zero out interstitial commit path tracker
                 path = [];
                 return;
             }
@@ -223,8 +246,10 @@ var VizPrep = React.createClass({
             if (from[0].commit !== v) {
                 // see if this is a commit that's interesting (has an app instance or label)
                 if (_.has(members, v)) {
-                    // different behavior depending on whether we're finding app or label (or both)
-                    var ls = _.filter(members[v], isType("logic-state"));
+                    // different behavior depending on whether we're finding commit or (app and/or label)
+                    // app handling is identical to commit handling, so we reuse
+                    var ls = _.union(_.filter(members[v], isType("logic-state")),
+                                     _.filter(members[v], isType("commit")));
                     var lbls = _.filter(members[v], isType("vcs-label"));
                     if (ls.length !== 0) {
                         // has at least one app. create link from last app to this app
@@ -279,11 +304,8 @@ var VizPrep = React.createClass({
             });
 
             // Mark commit black/visited...but only if it's a member-associated
-            // one. This trades CPU for memory, as it triggers a graph
-            // re-traversal interstitial commits until one associated with an
-            // instance is found. The alternative is keeping a map from ALL
-            // interstitial commits to the eventual instance they arrive at...
-            // and that's icky.
+            // commit. This is OK to do because we already traversed once and
+            // found all the joints, and those are guaranteed to be members
             if (_.has(members, v)) {
                 visited.push(v);
             }
