@@ -32,8 +32,9 @@ var Viz = React.createClass({
     },
     getDefaultProps: function() {
         return {
-            vertices: {},
-            edges: {},
+            nodes: [],
+            links: [],
+            labels: [],
         };
     },
     render: function() {
@@ -50,7 +51,7 @@ var Viz = React.createClass({
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
-            .data(props.links, function(d) { return d.source.objid() + '-' + d.target.objid(); }),
+            .data(props.links, function(d) { return d.source.id + '-' + d.target.id; }),
         node = d3.select(el).selectAll('.node')
             .data(props.nodes, function(d) { return d.id; });
 
@@ -70,7 +71,7 @@ var Viz = React.createClass({
 
         var nodeg = node.enter().append('g')
         .attr('class', function(d) {
-            return 'node ' + d.vType();
+            return 'node ' + d.Typ();
         });
 
         nodeg.append('circle')
@@ -102,14 +103,16 @@ var Viz = React.createClass({
         });
 
         var nodetext = nodeg.append('text');
-        nodetext.append('tspan').text(function(d) { return d.name(); });
+        //nodetext.append('tspan').text(function(d) { return d.name(); });
+        nodetext.append('tspan').text(function(d) { return "sthing"; });
         nodetext.append('tspan').text(function(d) {
             // FIXME omg terrible
             if (d.Typ() !== "logic-state") {
                 return '';
             }
 
-            return d.ref().id.commit.slice(0, 7);
+            return "hashher";
+            //return d.ref().id.commit.slice(0, 7);
         })
         .attr('dy', "1.4em")
         .attr('x', 0)
@@ -119,7 +122,8 @@ var Viz = React.createClass({
             }
 
             var output = 'commit-subtext',
-            commit = d.ref().id.commit;
+            //commit = d.ref().id.commit;
+            commit = "BLAAAAAAAAAAAAH";
 
             if (_.has(props.commitMeta, commit) &&
                 _.has(props.commitMeta[commit], 'testState')) {
@@ -217,7 +221,11 @@ var VizPrep = React.createClass({
             // if black, and nothing in members about the commit, it's a joint
             if (visited.indexOf(v) !== -1 && !_.has(members, v)) {
                 members[v] = [_.create(pvVertex.prototype, cmp.props.graph.get(v))];
-                //return;
+                // if the sinkmap knows about v, set that as the deepest app
+                if (_.has(sinkmap, v)) {
+                    deepestApp = sinkmap[v];
+                }
+                return;
             }
 
             path.push(v);
@@ -234,7 +242,7 @@ var VizPrep = React.createClass({
                 if (deepestApp === v) {
                     isinks.push(v);
                     // write this vertex into the sinkmap for all current paths
-                    _.merge(sinkmap, _.zipObject(_.zip(path, _.fill(v, path.length))));
+                    _.merge(sinkmap, _.zipObject(_.zip(path, _.map(_.range(path.length), function() { return v; })))); // _.fill comes in lodash v.3.8.0
                 }
             }
         };
@@ -255,14 +263,14 @@ var VizPrep = React.createClass({
                 _.each(members[v], function(tgt) {
                     from.map(function(src) {
                         // slice guarantees path array is copied
-                        links.push({ source: src.obj, target: tgt.obj, path: path.slice(0) });
+                        links.push({ source: src, target: tgt, path: path.slice(0) });
                     });
                 });
 
                 // process all label nodes we have waiting around
-                _.forOwn(lpnodes, function(id, llen) {
+                _.forOwn(lpnodes, function(llen, id) {
                     // need to push the actual objects on so the viz can cheat and track x/y props
-                    labels.push({id: id, l: from[0].obj, r: ls[0].obj, pos: llen / (path.length+1)});
+                    labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
                 });
 
                 // zero out lpnodes set
@@ -292,7 +300,7 @@ var VizPrep = React.createClass({
                         });
 
                         // process all label nodes we have waiting around
-                        _.forOwn(lpnodes, function(id, llen) {
+                        _.forOwn(lpnodes, function(llen, id) {
                             // need to push the actual objects on so the viz can cheat and track x/y props
                             labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
                         });
@@ -331,7 +339,7 @@ var VizPrep = React.createClass({
 
             // recursive call, the crux of this depth-first traversal. but we
             // skip it if the first search proved this to be a sink
-            if (isinks.indexOf(v) !== -1) {
+            if (isinks.indexOf(v) === -1) {
                 g.successors(v).map(function(s) {
                     walk(s);
                 });
@@ -389,10 +397,10 @@ var VizPrep = React.createClass({
         // reset search path vars
         npath = [];
         visited = [];
+        path = [];
 
         while (isources.length !== 0) {
             v = isources.pop();
-            //npath.push(members[v.commit]);
             walk(v);
         }
 
@@ -404,22 +412,18 @@ var VizPrep = React.createClass({
     },
     render: function() {
         var vizdata = this.extractVizGraph("https://github.com/sdboyer/pipeviz");
-        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0], links: vizdata[1], labels: vizdata[2]})
+        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]})
     },
 });
 
 var App = React.createClass({
     dispayName: "pipeviz",
-    getInitialState: function() {
-        return {
-            graph: {},
-        };
-    },
     getDefaultProps: function() {
         return {
             vizWidth: window.innerWidth * 0.83,
             //vizWidth: window.innerWidth,
             vizHeight: window.innerHeight,
+            graph: new pvGraph({id: 0, vertices: []}),
         };
     },
     render: function() {
@@ -429,4 +433,5 @@ var App = React.createClass({
     },
 });
 
-React.render(React.createElement(App, {graph: data}), document.body)
+var e = React.render(React.createElement(App), document.body);
+e.setProps({graph: data});
