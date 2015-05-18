@@ -74,7 +74,7 @@ func (m *Message) Each(f func(vertex interface{})) {
 			if err != nil {
 				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
 			}
-			e.ID.Commit = byts
+			copy(e.ID.Commit[:], byts[0:20])
 			e.ID.CommitStr = ""
 		}
 
@@ -94,7 +94,7 @@ func (m *Message) Each(f func(vertex interface{})) {
 		if err != nil {
 			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
 		}
-		e.Sha1 = byts
+		copy(e.Sha1[:], byts[0:20])
 		e.Sha1Str = ""
 
 		for _, pstr := range e.ParentsStr {
@@ -102,7 +102,9 @@ func (m *Message) Each(f func(vertex interface{})) {
 			if err != nil {
 				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
 			}
-			e.Parents = append(e.Parents, byts)
+			var sha1 Sha1
+			copy(sha1[:], byts[0:20])
+			e.Parents = append(e.Parents, sha1)
 		}
 		e.ParentsStr = nil
 
@@ -113,7 +115,7 @@ func (m *Message) Each(f func(vertex interface{})) {
 		if err != nil {
 			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
 		}
-		e.Sha1 = byts
+		copy(e.Sha1[:], byts[0:20])
 		e.Sha1Str = ""
 
 		f(e)
