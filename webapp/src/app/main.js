@@ -250,7 +250,6 @@ var VizPrep = React.createClass({
         // now traverse depth-first to figure out the overlaid edge structure
         var labels = [], // the set of non-app-coinciding labels and their relative positions
         lpnodes = {}, // the set of non-app-coinciding labels that have found their origin, but not their target
-        v, // vertex (commit) currently being visited
         walk = function(v) { // main depth-first walker
             // git guarantees commit graph is acyclic, thus safe to skip grey/back-edge
 
@@ -373,8 +372,7 @@ var VizPrep = React.createClass({
         });
         // DF walk, working from source commit members
         while (stack.length !== 0) {
-            v = stack.pop();
-            prepwalk(v);
+            prepwalk(stack.pop());
         }
 
         // traversal pattern almost guarantees duplicate sinks
@@ -400,8 +398,7 @@ var VizPrep = React.createClass({
         path = [];
 
         while (isources.length !== 0) {
-            v = isources.pop();
-            walk(v);
+            walk(isources.pop());
         }
 
         return [nodes, links, labels];
@@ -412,7 +409,7 @@ var VizPrep = React.createClass({
     },
     render: function() {
         var vizdata = this.extractVizGraph("https://github.com/sdboyer/pipeviz");
-        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]})
+        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
     },
 });
 
