@@ -104,15 +104,20 @@ var Viz = React.createClass({
 
         var nodetext = nodeg.append('text');
         //nodetext.append('tspan').text(function(d) { return d.name(); });
-        nodetext.append('tspan').text(function(d) { return "sthing"; });
+        nodetext.append('tspan').text(function(d) {
+            var v = d.prop("lgroup");
+            if (v !== undefined) {
+                return v.value;
+            }
+            return;
+        });
         nodetext.append('tspan').text(function(d) {
             // FIXME omg terrible
             if (d.Typ() !== "logic-state") {
                 return '';
             }
 
-            return "hashher";
-            //return d.ref().id.commit.slice(0, 7);
+            return getCommit(props.graph, d).prop("sha1").value.slice(0, 7);
         })
         .attr('dy', "1.4em")
         .attr('x', 0)
@@ -122,12 +127,10 @@ var Viz = React.createClass({
             }
 
             var output = 'commit-subtext',
-            //commit = d.ref().id.commit;
-            commit = "BLAAAAAAAAAAAAH";
-
-            if (_.has(props.commitMeta, commit) &&
-                _.has(props.commitMeta[commit], 'testState')) {
-                output += ' commit-' + props.commitMeta[commit].testState;
+                commit = getCommit(props.graph, d),
+                testState = getTestState(props.graph, commit);
+            if (testState !== undefined) {
+                output += ' commit-' + testState;
             }
 
             return output;

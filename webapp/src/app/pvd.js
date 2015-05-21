@@ -9,10 +9,6 @@ function Anchor(id, x, y) {
     this.id = id;
 }
 
-Anchor.prototype.vType = function() {
-    return 'sort-anchor';
-};
-
 Anchor.prototype.name = function() {
     return '';
 };
@@ -23,6 +19,10 @@ Anchor.prototype.Typ = function() {
 
 Anchor.prototype.isVertex = function() {
     return true;
+};
+
+Anchor.prototype.prop = function() {
+    return;
 };
 
 var vertexProto = {
