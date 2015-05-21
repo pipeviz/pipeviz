@@ -42,7 +42,7 @@ const (
 	D_datetime string = "2015-01-09T02:01:20.000Z" // TODO don't let JS stupidity drive date format
 )
 
-var D_commithash []byte
+var D_commithash interpret.Sha1
 
 // Default values for use in environments; these complement the constants
 var D_env interpret.Environment = interpret.Environment{
@@ -56,7 +56,7 @@ var D_env interpret.Environment = interpret.Environment{
 // Default values for logic states; as defined, will induce no edges.
 var D_ls interpret.LogicState = interpret.LogicState{
 	ID: struct {
-		Commit    []byte
+		Commit    interpret.Sha1
 		CommitStr string `json:"commit"`
 		Version   string `json:"version"`
 		Semver    string `json:"semver"`
@@ -197,15 +197,16 @@ type FixtureParentDatasetSplit struct {
 var F_ParentDataset []FixtureParentDatasetSplit
 
 func init() {
-	hexify := func(hash string) (ret []byte) {
-		ret, _ = hex.DecodeString(hash)
+	hexify := func(hash string) (ret interpret.Sha1) {
+		byts, _ := hex.DecodeString(hash)
+		copy(ret[:], byts[0:20])
 		return
 	}
 
 	D_commithash = hexify("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
 
 	lsIds := []struct {
-		Commit    []byte
+		Commit    interpret.Sha1
 		CommitStr string `json:"commit"`
 		Version   string `json:"version"`
 		Semver    string `json:"semver"`
@@ -492,7 +493,7 @@ func init() {
 				Repository: "https://github.com/tag1consulting/pipeviz",
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
-				Parents:    [][]byte{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
+				Parents:    []interpret.Sha1{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
 			},
 			Output: []SplitData{
 				{
@@ -531,7 +532,7 @@ func init() {
 				Repository: "https://github.com/tag1consulting/pipeviz",
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
-				Parents:    [][]byte{hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
+				Parents:    []interpret.Sha1{hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
 			},
 			Output: []SplitData{
 				{

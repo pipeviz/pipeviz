@@ -26,7 +26,7 @@ type EdgeSpec interface {
 type EdgeSpecs []EdgeSpec
 
 type SpecCommit struct {
-	Sha1 []byte
+	Sha1 interpret.Sha1
 }
 
 type SpecLocalLogic struct {
@@ -123,7 +123,7 @@ func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 	}
 
 	// TODO should do anything with mutually exclusive properties here?
-	if len(d.ID.Commit) != 0 {
+	if !d.ID.Commit.IsEmpty() {
 		edges = append(edges, SpecCommit{d.ID.Commit})
 	}
 	if d.ID.Version != "" {

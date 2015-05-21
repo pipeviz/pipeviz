@@ -1,5 +1,10 @@
 package interpret
 
+import (
+	"bytes"
+	"encoding/hex"
+)
+
 type Environment struct {
 	Address     Address         `json:"address"`
 	Os          string          `json:"os"`
@@ -26,7 +31,7 @@ type LogicState struct {
 	Datasets    []DataLink `json:"datasets"`
 	Environment EnvLink    `json:"environment"`
 	ID          struct {
-		Commit    []byte
+		Commit    Sha1
 		CommitStr string `json:"commit"`
 		Version   string `json:"version"`
 		Semver    string `json:"semver"`
@@ -58,8 +63,24 @@ type ConnUnix struct {
 	Path string `json:"path"`
 }
 
+type Sha1 [20]byte
+
+func (s Sha1) MarshalJSON() ([]byte, error) {
+	buf := bytes.NewBuffer(make([]byte, 0, 42))
+	buf.WriteString(`"`)
+	buf.WriteString(hex.EncodeToString(s[:]))
+	buf.WriteString(`"`)
+	return buf.Bytes(), nil
+}
+
+// IsEmpty checks to see if the Sha1 is equal to the null sha1 (40 zeroes)
+// TODO this may have some odd semantic side effects, as git does use the null sha1 to indicate a nonexistent head in some cases
+func (s Sha1) IsEmpty() bool {
+	return s == [20]byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}
+}
+
 type CommitMeta struct {
-	Sha1      []byte
+	Sha1      Sha1
 	Sha1Str   string   `json:"sha1"`
 	Tags      []string `json:"tags"`
 	TestState string   `json:"testState"`
@@ -68,9 +89,9 @@ type CommitMeta struct {
 type Commit struct {
 	Author     string `json:"author"`
 	Date       string `json:"date"`
-	Parents    [][]byte
+	Parents    []Sha1
 	ParentsStr []string `json:"parents"`
-	Sha1       []byte
+	Sha1       Sha1
 	Sha1Str    string `json:"sha1"`
 	Subject    string `json:"subject"`
 	Repository string `json:"repository"`

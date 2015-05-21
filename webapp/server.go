@@ -1,6 +1,7 @@
 package webapp
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -27,12 +28,15 @@ var (
 func init() {
 	// Subscribe to the master broker and store latest locally as it comes
 	brokerListen = broker.Get().Subscribe()
-	// FIXME spawning a goroutine in init() used to crappy, is it still?
+	// FIXME spawning a goroutine in init() used to be crappy, is it still?
 	go func() {
 		for g := range brokerListen {
 			latestGraph = g
 		}
 	}()
+
+	// Iniitally set the latestGraph to a new, empty one to avoid nil pointer
+	latestGraph = represent.NewGraph()
 }
 
 // Creates a Goji *web.Mux that can act as the http muxer for the frontend app.
@@ -48,10 +52,26 @@ func NewMux() *web.Mux {
 }
 
 func WebRoot(w http.ResponseWriter, r *http.Request) {
-	vars := struct {
-		Title string
+	// TODO first step here is just kitchen sink-ing - send everything.
+	var vertices []interface{}
+	g := latestGraph // copy pointer to avoid inconsistent read
+	for _, v := range g.VerticesWith(represent.Qbv(represent.VTypeNone)) {
+		vertices = append(vertices, v.Flat())
+	}
+	j, err := json.Marshal(struct {
+		Id       int           `json:"id"`
+		Vertices []interface{} `json:"vertices"`
 	}{
-		Title: "pipeviz",
+		Id:       g.MsgId(),
+		Vertices: vertices,
+	})
+
+	vars := struct {
+		Title    string
+		Vertices string
+	}{
+		Title:    "pipeviz",
+		Vertices: string(j),
 	}
 
 	t, err := template.ParseFiles(filepath.Join(tmplDir, "index.html"))

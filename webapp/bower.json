@@ -1,7 +1,7 @@
 {
   "name": "pipeviz",
   "main": "index.html",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "homepage": "https://github.com/sdboyer/pipeviz",
   "authors": [
     "Sam Boyer <tech@samboyer.org>"
@@ -9,15 +9,11 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "graphlib": "~0.9.1",
+    "graphlib": "~1.0.1",
     "lodash": "~2.4.1",
     "d3": "~3.5.3",
-    "react-commonjs": "~0.0.0",
     "queue-async": "~1.0.7",
-    "react": "~0.12.2"
-  },
-  "resolutions": {
-    "d3": "~3.5.3",
-    "react": "~0.12.2"
+    "react": "~0.13.2",
+    "requirejs": "~2.1.17"
   }
 }
