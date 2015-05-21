@@ -81,6 +81,18 @@ image.provider-logo {
     stroke-width: 5px;
 }
 
+.vcs-label rect {
+    fill: #ff7f0e;
+}
+
+.vcs-label text {
+    /*stroke: #ff7f0e;*/
+    /*fill: #ff7f0e;*/
+    stroke: #EFFFCD;
+    fill: #EFFFCD;
+    text-anchor: middle;
+}
+
 text {
     font: 14px sans-serif;
     pointer-events: none;

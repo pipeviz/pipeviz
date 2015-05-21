@@ -14,13 +14,13 @@ var Viz = React.createClass({
             .chargeDistance(250)
             .size([this.props.width, this.props.height])
             .linkStrength(function(link) {
-                if (link.source.Typ() == "environment") {
+                if (link.source.Typ() == "logic-state") {
                     return 0.5;
                 }
                 if (link.source.Typ() === "anchor" || link.target.Typ() === "anchor") {
                     return 1;
                 }
-                return 0.3;
+                return 0.1;
             })
             .linkDistance(function(link) {
                 if (link.source.Typ() === "anchor" || link.target.Typ() === "anchor") {
@@ -136,8 +136,18 @@ var Viz = React.createClass({
             return output;
         });
 
-        node.exit().remove();
-        link.exit().remove();
+        // Attach the vcs labels
+        var label = d3.select(el).selectAll('.vcs-label')
+            .data(props.labels, function(d) { return d.id; });
+        var labelg = label.enter().append("g")
+            .attr("class", "vcs-label");
+
+        // ...ugh scaling around text
+        labelg.append("rect").attr("width", 50).attr("height", 20).attr("x", -25).attr("y", -15);
+        labelg.append("text")
+            .text(function(d) {
+                return props.graph.get(d.id).prop("name").value;
+            });
 
         state.force.on('tick', function() {
             link.attr("x1", function(d) { return d.source.x; })
@@ -146,9 +156,20 @@ var Viz = React.createClass({
             .attr("y2", function(d) { return d.target.y; });
 
             node.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; });
+            label.attr("transform", function(d) {
+                if (d.pos === 0) {
+                    return "translate(" + d.l.x + "," + (d.l.y - 65) + ") rotate(90)";
+                }
+                return "translate(" + (d.l.x + ((d.r.x - d.l.x) * d.pos)) + "," + (d.l.y + ((d.r.y - d.l.y) * d.pos) - 20) + ") rotate(90)";
+            });
         });
 
+        node.exit().remove();
+        link.exit().remove();
+        label.exit().remove();
+
         state.force.start();
+
         return false;
     }
 });
