@@ -1,42 +1,6 @@
 // just so my syntastic complains less
 var _ = _ || {};
 
-function pvVertex(obj, g) {
-    this.id = obj.id;
-    this.vertex = obj.vertex;
-
-    // strip out the actual edge objects
-    this.outEdges = _.map(obj.outEdges, function(d) { return d.id; });
-    this._g = g;
-}
-
-pvVertex.prototype.isVertex = function() {
-    return true;
-};
-
-pvVertex.prototype.Typ = function() {
-    return this.vertex.type;
-};
-
-pvVertex.prototype.prop = function(path) {
-    if (_.has(this.vertex.properties, path)) {
-        return this.vertex.properties[path];
-    }
-};
-
-function pvEdge(obj, g) {
-    _.assign(this, obj);
-    this._g = g;
-}
-
-pvEdge.prototype.isVertex = function() {
-    return false;
-};
-
-pvEdge.prototype.Typ = function() {
-    return this.etype;
-};
-
 // TODO get rid of this anchor shit, replace with well-formed tree rendering
 function Anchor(id, x, y) {
     this.fixed = true; // tells d3 not to move it
@@ -61,6 +25,36 @@ Anchor.prototype.isVertex = function() {
     return true;
 };
 
+var vertexProto = {
+    isVertex: function() { return true; },
+    Typ: function() { return this.vertex.type; },
+    prop: function(path) {
+        if (_.has(this.vertex.properties, path)) {
+            return this.vertex.properties[path];
+        }
+    }
+};
+
+// vertex factory
+var Vertex = function(obj) {
+    return _.assign(Object.create(vertexProto),
+        obj, { outEdges: _.map(obj.outEdges, function(d) { return d.id; })}
+    );
+};
+
+var edgeProto = {
+    isVertex: function() { return false; },
+    Typ: function() { return this.etype; },
+    prop: function(path) {
+        if (_.has(this.properties, path)) {
+            return this.properties[path];
+        }
+    }
+};
+
+// edge factory
+var Edge = function(obj) { return _.assign(Object.create(edgeProto), obj); };
+
 // TODO this pretty much mirrors what we have serverside...for now. ugh.
 // pipeviz datastore
 function pvGraph(gdata) {
@@ -71,9 +65,9 @@ function pvGraph(gdata) {
     var that = this;
     _.each(gdata.vertices, function(d) {
         // capture vertex
-        that._objects[d.id] = new pvVertex(d, that);
+        that._objects[d.id] = Vertex(d);
         // and its out-edges
-        _.each(d.outEdges, function(d2) { that._objects[d2.id] = new pvEdge(d2, that); });
+        _.each(d.outEdges, function(d2) { that._objects[d2.id] = Edge(d2); });
     });
 }
 

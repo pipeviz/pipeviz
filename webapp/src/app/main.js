@@ -162,7 +162,7 @@ var VizPrep = React.createClass({
         links = [],
         cmp = this,
         members = {},
-        nodes = _.filter(_.map(this.props.graph.verticesWithType("logic-state"), function(d) { return _.create(pvVertex.prototype, d); }), function(v) {
+        nodes = _.filter(_.map(this.props.graph.verticesWithType("logic-state"), function(d) { return _.create(vertexProto, d); }), function(v) {
             var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
             if (vedges.length === 0) {
                 return false;
@@ -186,7 +186,7 @@ var VizPrep = React.createClass({
                 if (!_.has(members, vedges[0].target)) {
                     members[vedges[0].target] = [];
                 }
-                members[vedges[0].target].push(_.create(pvVertex.prototype, l));
+                members[vedges[0].target].push(_.create(vertexProto, l));
             }
         });
 
@@ -220,7 +220,7 @@ var VizPrep = React.createClass({
             }
             // if black, and nothing in members about the commit, it's a joint
             if (visited.indexOf(v) !== -1 && !_.has(members, v)) {
-                members[v] = [_.create(pvVertex.prototype, cmp.props.graph.get(v))];
+                members[v] = [_.create(vertexProto, cmp.props.graph.get(v))];
                 // if the sinkmap knows about v, set that as the deepest app
                 if (_.has(sinkmap, v)) {
                     deepestApp = sinkmap[v];
