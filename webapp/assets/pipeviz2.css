@@ -41,7 +41,7 @@ image.provider-logo {
     -o-transition: opacity 0.25s ease-in-out;
 }
 
-.node.lgroup {
+.node.lgroup, .node.logic-state {
     stroke: #fff;
     stroke-width: 1.5px;
 }
@@ -50,7 +50,7 @@ image.provider-logo {
     fill: #ff7f0e;
 }
 
-.node.logic circle {
+.node.logic-state circle {
     fill: #9467bd;
 }
 
