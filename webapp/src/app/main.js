@@ -3,8 +3,6 @@ var React = React || {},
     _ = _ || {},
     d3 = d3 || {};
 
-var data = new pvGraph(JSON.parse(document.getElementById("pipe-graph").innerHTML));
-
 var Viz = React.createClass({
     displayName: "pipeviz-graph",
     getInitialState: function() {
@@ -455,4 +453,8 @@ var App = React.createClass({
 });
 
 var e = React.render(React.createElement(App), document.body);
-e.setProps({graph: data});
+var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
+genesis.onmessage = function(m) {
+    //console.log(m);
+    e.setProps({graph: new pvGraph(JSON.parse(m.data))});
+};
