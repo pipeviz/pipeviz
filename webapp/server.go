@@ -85,14 +85,10 @@ func graphToJson(g represent.CoreGraph) ([]byte, error) {
 }
 
 func WebRoot(w http.ResponseWriter, r *http.Request) {
-	// TODO first step here is just kitchen sink-ing - send everything.
-	j, err := graphToJson(latestGraph)
 	vars := struct {
-		Title    string
-		Vertices string
+		Title string
 	}{
-		Title:    "pipeviz",
-		Vertices: string(j),
+		Title: "pipeviz",
 	}
 
 	t, err := template.ParseFiles(filepath.Join(tmplDir, "index.html"))
