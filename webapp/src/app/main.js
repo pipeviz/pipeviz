@@ -439,8 +439,7 @@ var App = React.createClass({
     dispayName: "pipeviz",
     getDefaultProps: function() {
         return {
-            vizWidth: window.innerWidth * 0.83,
-            //vizWidth: window.innerWidth,
+            vizWidth: window.innerWidth,
             vizHeight: window.innerHeight,
             graph: new pvGraph({id: 0, vertices: []}),
         };
