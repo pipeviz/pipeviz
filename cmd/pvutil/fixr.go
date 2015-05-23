@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -14,9 +17,9 @@ import (
 
 func fixrCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "fixr [-p|--prompt] ([-t|--target] <server>) <dir>",
+		Use:   "fixr [-p|--prompt] ([-t|--target] <server>) <dir>...",
 		Short: "Reads JSON message fixtures from a directory and sends them to a pipeviz daemon.",
-		Long:  `Given a directory containing a set of JSON pipeviz message fixtures, the fixr command reads those fixtures in lexical order, sending them to the target server in order.`,
+		Long:  `Given one or more directories containing a set of JSON pipeviz message fixtures, the fixr command reads those fixtures in lexical order, sending them to the target server in order.`,
 		Run:   runFixr,
 	}
 
@@ -36,6 +39,9 @@ type fileInfo struct {
 
 // Main entry point for running fixr subcommand.
 func runFixr(cmd *cobra.Command, args []string) {
+	if len(args) < 1 {
+		log.Fatalf("Must provide at least one directory argument to fixr.")
+	}
 	files := make([]fileInfo, 0)
 	for _, dir := range args {
 		fl, err := ioutil.ReadDir(dir)
@@ -57,10 +63,58 @@ func runFixr(cmd *cobra.Command, args []string) {
 	}
 }
 
+// Performs the fixr run with user interaction, confirming for each message.
 func runFixrInteractive(cmd *cobra.Command, files []fileInfo) {
+	client := http.Client{Timeout: 5 * time.Second}
+FileLoop:
+	for k, f := range files {
+		src, err := ioutil.ReadFile(f.d + "/" + f.f.Name())
+		if err != nil {
+			log.Printf("Failed to read file '%v/%v' with error %v\n", f.d, f.f.Name(), err)
+			continue
+		}
+		fmt.Printf("Contents of %v/%v:\n%s\n\n", f.d, f.f.Name(), src)
 
+		for {
+			fmt.Printf("Message #%v: (S)end, s(k)ip, or (q)uit? ", k+1)
+			reader := bufio.NewReader(os.Stdin)
+
+			raw, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatalf("Quitting...\n")
+			}
+
+			input := strings.Split(strings.Trim(raw, " \n"), " ")
+			if len(input) < 1 {
+				log.Fatalf("TODO huh how would this happen")
+			}
+			switch input[0] {
+			case "k", "skip":
+				continue FileLoop
+			case "", "s", "send":
+				resp, err := client.Post(cmd.Flags().Lookup("target").Value.String(), "application/json", bytes.NewReader(src))
+				fmt.Printf("Sending %v/%v...", f.d, f.f.Name())
+				if err != nil {
+					log.Println(err)
+				}
+
+				bod, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					log.Println(err)
+				}
+				resp.Body.Close()
+
+				fmt.Printf("%v, msgid %v\n", resp.StatusCode, string(bod))
+				continue FileLoop
+			case "q", "quit":
+				fmt.Printf("Quitting...\n")
+				os.Exit(1)
+			}
+		}
+	}
 }
 
+// Performs the fixr run in a batch, sending all fixtures found immediately and without confirmation.
 func runFixrBatch(cmd *cobra.Command, files []fileInfo) {
 	client := http.Client{Timeout: 5 * time.Second}
 	for _, f := range files {
@@ -71,17 +125,17 @@ func runFixrBatch(cmd *cobra.Command, files []fileInfo) {
 		}
 
 		resp, err := client.Post(cmd.Flags().Lookup("target").Value.String(), "application/json", bytes.NewReader(src))
-		log.Printf("Sent %v/%v...", f.d, f.f.Name())
+		fmt.Printf("Sending %v/%v...", f.d, f.f.Name())
 		if err != nil {
-			log.Print(err)
+			log.Println(err)
 		}
 
 		bod, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Print(err)
+			log.Println(err)
 		}
 		resp.Body.Close()
 
-		log.Printf("%v, msgid %v", resp.StatusCode, string(bod))
+		fmt.Printf("%v, msgid %v", resp.StatusCode, string(bod))
 	}
 }
