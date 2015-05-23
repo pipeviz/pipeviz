@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/fixtures"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/represent"
-	"github.com/spf13/cobra"
 )
 
 func main() {
@@ -31,6 +31,7 @@ func main() {
 	cmd.Flags().StringVarP(&path, "output", "o", "", "Specifies a file to write dot output to. Otherwise, prints to stdout.")
 
 	root.AddCommand(cmd)
+	root.AddCommand(fixrCommand())
 	root.Execute()
 }
 

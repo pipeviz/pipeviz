@@ -11,7 +11,7 @@ var msgs [][]byte
 func Append(msg []byte, remoteAddr string) int { // TODO uint64 for ids
 	// TODO allow err
 	msgs = append(msgs, msg)
-	return len(msgs) + 1
+	return len(msgs)
 }
 
 // Returns the message associated with the given id.

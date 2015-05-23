@@ -2,13 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/sdboyer/pipeviz/fixtures"
 	"github.com/tag1consulting/pipeviz/broker"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/persist"
@@ -62,12 +60,9 @@ func main() {
 	// Kick off the goroutine that
 	go interp(interpretChan)
 
-	// FIXME Prepopulate the graph - totally temp hack
-	tmpPullItAllIn()
-
 	// TODO hardcoded 8008 for http frontend
 	mf := webapp.NewMux()
-	graceful.ListenAndServe("127.0.0.1:8008", mf)
+	go graceful.ListenAndServe("127.0.0.1:8008", mf)
 
 	// Pipeviz has two fully separated HTTP ports - one for input into the logic
 	// machine, and one for graph data consumption. This is done primarily
@@ -79,7 +74,6 @@ func main() {
 
 	// 2309, because Cayte
 	graceful.ListenAndServe("127.0.0.1:2309", mb)
-	graceful.Wait()
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -127,25 +121,6 @@ func interp(c <-chan message) {
 		json.Unmarshal(m.Raw, &im)
 		masterGraph = masterGraph.Merge(im)
 
-		brokerChan <- masterGraph
-	}
-}
-
-// Temporary func - just loads up the graph with all our fixtures, always
-func tmpPullItAllIn() {
-	for _, name := range fixtures.AssetNames() {
-		d, _ := fixtures.Asset(name)
-
-		parts := strings.Split(name, ".")
-		i, err := strconv.Atoi(parts[0])
-		if err != nil {
-			// will only error if we stop using numbered names
-			panic(fmt.Sprintf("Non-numeric fixture filename encountered: %q", name))
-		}
-		m := interpret.Message{Id: i}
-
-		json.Unmarshal(d, &m)
-		masterGraph = masterGraph.Merge(m)
 		brokerChan <- masterGraph
 	}
 }
