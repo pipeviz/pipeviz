@@ -67,7 +67,7 @@ func main() {
 
 	// TODO hardcoded 8008 for http frontend
 	mf := webapp.NewMux()
-	graceful.ListenAndServe("127.0.0.1:8008", mf)
+	go graceful.ListenAndServe("127.0.0.1:8008", mf)
 
 	// Pipeviz has two fully separated HTTP ports - one for input into the logic
 	// machine, and one for graph data consumption. This is done primarily
@@ -79,7 +79,6 @@ func main() {
 
 	// 2309, because Cayte
 	graceful.ListenAndServe("127.0.0.1:2309", mb)
-	graceful.Wait()
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
