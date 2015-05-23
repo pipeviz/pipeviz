@@ -47,12 +47,12 @@ func GenerateDot(g CoreGraph) []byte {
 			prop := val.(Property)
 			var format string
 			switch prop.Value.(type) {
-			default:
-				format = "%s"
 			case []byte:
 				format = "%x"
 			case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
 				format = "%d"
+			default:
+				format = "%s"
 			}
 			buf.WriteString(fmt.Sprintf(
 				"\n%s: "+format+" (%d)",
@@ -76,12 +76,12 @@ func GenerateDot(g CoreGraph) []byte {
 				prop := val2.(Property)
 				var format string
 				switch prop.Value.(type) {
-				default:
-					format = "%s"
 				case []byte:
 					format = "%x"
 				case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
 					format = "%d"
+				default:
+					format = "%s"
 				}
 				buf.WriteString(fmt.Sprintf(
 					"\n%s: "+format+" (%d)",

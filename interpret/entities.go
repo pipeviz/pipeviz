@@ -79,6 +79,11 @@ func (s Sha1) IsEmpty() bool {
 	return s == [20]byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}
 }
 
+// String converts a sha1 to the standard 40-char lower-case hexadecimal representation.
+func (s Sha1) String() string {
+	return hex.EncodeToString(s[:])
+}
+
 type CommitMeta struct {
 	Sha1      Sha1
 	Sha1Str   string   `json:"sha1"`
