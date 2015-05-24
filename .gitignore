@@ -26,5 +26,4 @@ _testmain.go
 .dbg_history
 
 # ignore js things
-node_modules
 bower_components
