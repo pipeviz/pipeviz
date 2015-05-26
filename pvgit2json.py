@@ -15,43 +15,21 @@ def grab_args():
     return args
 
 def jsonify(repo, destination=False):
+    output = []
     last = repo[repo.head.target]
-    first = True
-    intro = "["
-    if args.pretty:
-        intro += "\n"
-    if destination:
-        destination.write(intro)
-    else:
-        sys.stdout.write(intro)
     for commit in repo.walk(last.id, pygit2.GIT_SORT_TIME):
-        output = {}
-        output['sha1'] = str(commit.id)
-        output['subject'] = shorten(commit.message)
-        output['author'] = '"{}" <{}>'.format(commit.author.name, commit.author.email)
-        output['date'] = datetime.datetime.fromtimestamp(commit.commit_time).strftime('%c') + " {:=02d}{:02d}".format(commit.commit_time_offset//60, commit.commit_time_offset % 60)
-        output['repository'] = repo.remotes["origin"].url
-        output['parents'] = list(map(str, commit.parent_ids))
-        if destination:
-            if not first:
-                destination.write(",")
-                if args.pretty:
-                    destination.write("\n")
-            json.dump(output, destination, indent=args.pretty)
-        else:
-            if not first:
-                sys.stdout.write(",")
-                if args.pretty:
-                    sys.stdout.write("\n")
-            sys.stdout.write(json.dumps(output, indent=args.pretty))
-        first = False
-    conclude = "]"
-    if args.pretty:
-        conclude = "\n]"
+        row = {}
+        row['sha1'] = str(commit.id)
+        row['subject'] = shorten(commit.message)
+        row['author'] = '"{}" <{}>'.format(commit.author.name, commit.author.email)
+        row['date'] = datetime.datetime.fromtimestamp(commit.commit_time).strftime('%c') + " {:=02d}{:02d}".format(commit.commit_time_offset//60, commit.commit_time_offset % 60)
+        row['repository'] = repo.remotes["origin"].url
+        row['parents'] = list(map(str, commit.parent_ids))
+        output.append(row)
     if destination:
-        destination.write(conclude)
+        json.dump(output, destination, indent=args.pretty)
     else:
-        sys.stdout.write(conclude)
+        sys.stdout.write(json.dumps(output, indent=args.pretty))
 
 def shorten(message, lines=1, length=50):
     keep_lines = '\n'.join(message.split('\n')[0:lines])
