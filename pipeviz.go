@@ -15,6 +15,7 @@ import (
 	gjs "github.com/xeipuuv/gojsonschema"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
+	"github.com/zenazn/goji/web/middleware"
 )
 
 type message struct {
@@ -30,6 +31,7 @@ type message struct {
 const (
 	DefaultIngestionPort = 2309 // 2309, because Cayte
 	DefaultAppPort       = 8008
+	MaxMessageSize       = 5 << 20 // Max input message size is 5MB
 )
 
 func main() {
@@ -81,18 +83,36 @@ func main() {
 // Closes the provided interpretation channel if/when the http server terminates.
 func RunHttpIngestor(addr string, schema *gjs.Schema, ich chan<- message) {
 	mb := web.New()
+	// TODO use more appropriate logger
+	mb.Use(middleware.Logger)
+	// Add middleware limiting body length to MaxMessageSize
+	mb.Use(func(h http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, MaxMessageSize)
+			h.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	})
+
 	mb.Post("/", func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
-		// FIXME limit this, prevent overflowing memory from a malicious message
+		// pulling this out of buffer is incorrect: http://jmoiron.net/blog/crossing-streams-a-love-letter-to-ioreader/
+		// but for now gojsonschema leaves us no choice
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			// FIXME send back an error
+			// Too long, or otherwise malformed request body
+			// TODO add a body
+			w.WriteHeader(400)
+			return
 		}
 
 		result, err := schema.Validate(gjs.NewStringLoader(string(b)))
 		if err != nil {
-			// FIXME send back an error
+			// Malformed JSON, likely
+			// TODO add a body
+			w.WriteHeader(400)
+			return
 		}
 
 		if result.Valid() {
@@ -108,6 +128,7 @@ func RunHttpIngestor(addr string, schema *gjs.Schema, ich chan<- message) {
 
 			ich <- message{Id: id, Raw: b}
 		} else {
+			// Invalid results, so write back 422 for malformed entity
 			w.WriteHeader(422)
 			var resp []string
 			for _, desc := range result.Errors() {
