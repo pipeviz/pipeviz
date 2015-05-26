@@ -8,7 +8,7 @@ import sys
 def grab_args():
     parser = argparse.ArgumentParser(description='Options for converting git repo data into Pipeviz JSON.')
     parser.add_argument('-r', '--repo', default='.', help='repo directory to work with')
-    parser.add_argument('-p', '--pretty', default=None, help='Output human readable JSON.', 
+    parser.add_argument('-p', '--pretty', default=None, help='Output human readable JSON.',
         action='store_const', const=4)
     parser.add_argument('-o', '--output', default='-', help='Destination file to write JSON. Default - to STDOUT')
     args = parser.parse_args()
@@ -18,7 +18,7 @@ def jsonify(repo, destination=False):
     last = repo[repo.head.target]
     for commit in repo.walk(last.id, pygit2.GIT_SORT_TIME):
         output = {}
-        output['sha1'] = str(commit.tree_id)
+        output['sha1'] = str(commit.id)
         output['subject'] = shorten(commit.message)
         output['author'] = '"{}" <{}>'.format(commit.author.name, commit.author.email)
         output['date'] = datetime.datetime.fromtimestamp(commit.commit_time).strftime('%c') + " {:=02d}{:02d}".format(commit.commit_time_offset//60, commit.commit_time_offset % 60)
