@@ -32,35 +32,22 @@ const (
 	DefaultAppPort       = 8008
 )
 
-var (
-	// Channel for handling persisted messages. 1000 cap to allow some wiggle room
-	// if there's a sudden burst of messages
-	interpretChan chan message = make(chan message, 1000)
-
-	// The master JSON schema used for validating all incoming messages
-	masterSchema *gjs.Schema
-
-	// The current version of the graph that is the state of the machine
-	masterGraph represent.CoreGraph
-
-	// The channel for communicating to the broker
-	brokerChan chan represent.CoreGraph
-)
-
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
 	if err != nil {
 		panic(err.Error())
 	}
 
-	masterSchema, err = gjs.NewSchema(gjs.NewStringLoader(string(src)))
+	// The master JSON schema used for validating all incoming messages
+	masterSchema, err := gjs.NewSchema(gjs.NewStringLoader(string(src)))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	// Initialize the central graph object. For now, we're just controlling this
-	// by having it be an unexported pkg var, but this will need to change.
-	masterGraph = represent.NewGraph()
+	// Channel to receive persisted messages from HTTP workers. 1000 cap to allow
+	// some wiggle room if there's a sudden burst of messages and the interpreter
+	// gets behind.
+	interpretChan := make(chan message, 1000)
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
@@ -68,13 +55,13 @@ func main() {
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
-	brokerChan = make(chan represent.CoreGraph, 0)
+	brokerChan := make(chan represent.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
 
 	// Kick off the intermediary interpretation goroutine that receives persisted
 	// messages from the ingestor, merges them into the state graph, then passes
 	// them along to the graph broker.
-	go Interpret(masterGraph, interpretChan, brokerChan)
+	go Interpret(represent.NewGraph(), interpretChan, brokerChan) // for now, always a new graph
 
 	// And finally, kick off the webapp.
 	// TODO let config/params control address
@@ -140,6 +127,9 @@ func RunHttpIngestor(addr string, schema *gjs.Schema, ich chan<- message) {
 //
 // The provided CoreGraph operates as the initial state into which received
 // messages will be successively merged.
+//
+// When the interpret channel is closed (and emptied), this function also closes
+// the broker channel.
 func Interpret(g represent.CoreGraph, ich <-chan message, bch chan<- represent.CoreGraph) {
 	for m := range ich {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
@@ -149,6 +139,7 @@ func Interpret(g represent.CoreGraph, ich <-chan message, bch chan<- represent.C
 
 		bch <- g
 	}
+	close(bch)
 }
 
 // RunWebapp runs the pipeviz http frontend webapp on the provided address.
