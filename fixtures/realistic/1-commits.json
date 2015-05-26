@@ -1,0 +1,3889 @@
+{
+   "commits" : [
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1af28b4877eddcd999a186652c1ce931168a8284"
+         ],
+         "sha1" : "46ade7cac075c2d3c04ce86ee47f3900cf092e23",
+         "date" : "Tue May 26 15:39:45 2015 -400",
+         "subject" : "Add middleware to limit message body length (5MB)",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Get rid of unnecessary global pkg vars",
+         "date" : "Tue May 26 14:31:42 2015 -400",
+         "sha1" : "1af28b4877eddcd999a186652c1ce931168a8284",
+         "parents" : [
+            "813b3d02b2154ade56725a4655bf2ddead067ee7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "20bbd916a0bfcdc0c923e9dc2c99378c00cc2ec4"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Refactor pipeviz main() to be more organized",
+         "date" : "Tue May 26 13:53:20 2015 -400",
+         "sha1" : "813b3d02b2154ade56725a4655bf2ddead067ee7"
+      },
+      {
+         "subject" : "Quit fixr with fatal error if http send fails",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "20bbd916a0bfcdc0c923e9dc2c99378c00cc2ec4",
+         "date" : "Tue May 26 00:28:00 2015 -400",
+         "parents" : [
+            "719a5e714180b9d662260d48b22a63046b228e42"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "719a5e714180b9d662260d48b22a63046b228e42",
+         "date" : "Tue May 26 00:23:22 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Have `make install` also install pipeviz (root)",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "26cf9e7509d3ec54d2428213e401e19a9c3371d2"
+         ]
+      },
+      {
+         "parents" : [
+            "cad9567f93b12b0f866f49ccaa6bce6553733e64"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Don't need to exclude node_modules anymore",
+         "date" : "Sun May 24 13:15:13 2015 -400",
+         "sha1" : "26cf9e7509d3ec54d2428213e401e19a9c3371d2"
+      },
+      {
+         "subject" : "Ensure Sha1 always gets string()'d into hex",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sat May 23 04:41:47 2015 -400",
+         "sha1" : "cad9567f93b12b0f866f49ccaa6bce6553733e64",
+         "parents" : [
+            "40db6d3a10f2027d9971f21db6aa64f9ec64d1df"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "e2380c9819bc45a79c5ad37980139cee98d5c7fd"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Separate dotdumper into its own file",
+         "sha1" : "40db6d3a10f2027d9971f21db6aa64f9ec64d1df",
+         "date" : "Sat May 23 04:12:32 2015 -400"
+      },
+      {
+         "subject" : "Merge pull request #78 from tag1consulting/websock",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sat May 23 04:06:15 2015 -400",
+         "sha1" : "e2380c9819bc45a79c5ad37980139cee98d5c7fd",
+         "parents" : [
+            "1b2b87d6ff6570a4501808bc9bf27d8da7e42c8b",
+            "9b40850723142cf888be2b3e5b601c55f7eda8c8"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Get user-prompting fixr working, too",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "9b40850723142cf888be2b3e5b601c55f7eda8c8",
+         "date" : "Sat May 23 04:03:06 2015 -400",
+         "parents" : [
+            "2835cd2010ee5d901428423788cba2442dc5a026"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "2835cd2010ee5d901428423788cba2442dc5a026",
+         "date" : "Sat May 23 03:04:16 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add skeleton of fixr subcommand to pvutil",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c4a267af84fa94af842fe1b74859317bc2890ad0"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Errwhoops persist was skipping first id",
+         "date" : "Sat May 23 03:03:40 2015 -400",
+         "sha1" : "c4a267af84fa94af842fe1b74859317bc2890ad0",
+         "parents" : [
+            "19a604952c4fd328949045918cedb590d20e1090"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Stop auto-loading fixtures into the main daemon",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sat May 23 03:03:13 2015 -400",
+         "sha1" : "19a604952c4fd328949045918cedb590d20e1090",
+         "parents" : [
+            "71cb3a364f8b4c1edd8ed04b8df92629ac517ac4"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "1f6fbe94ec7519f981d1de81a347e3b15cfad07f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Actually spawn both http listeners, lol",
+         "sha1" : "71cb3a364f8b4c1edd8ed04b8df92629ac517ac4",
+         "date" : "Sat May 23 02:41:38 2015 -400"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Just get rid of the info bar, for now",
+         "sha1" : "1f6fbe94ec7519f981d1de81a347e3b15cfad07f",
+         "date" : "Fri May 22 21:27:47 2015 -400",
+         "parents" : [
+            "02bdf0a3414fafb7845d709a32b4a0048d75b1d1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Remove graph dump from initial request",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri May 22 21:05:24 2015 -400",
+         "sha1" : "02bdf0a3414fafb7845d709a32b4a0048d75b1d1",
+         "parents" : [
+            "4e59c3426443a75ee0a0031cbaee06162cbfe94d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "799e348d44f92463ce5212d13a996a32d7f99130"
+         ],
+         "date" : "Fri May 22 21:04:35 2015 -400",
+         "sha1" : "4e59c3426443a75ee0a0031cbaee06162cbfe94d",
+         "subject" : "Make frontend consume from websocket instead",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "799e348d44f92463ce5212d13a996a32d7f99130",
+         "date" : "Fri May 22 21:03:50 2015 -400",
+         "subject" : "Implement websocket handler and callback",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1c64a6b81768cd131d7991f2658ebd6b53c972d0"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge pull request #76 from halstead/master",
+         "sha1" : "1b2b87d6ff6570a4501808bc9bf27d8da7e42c8b",
+         "date" : "Fri May 22 14:37:31 2015 -400",
+         "parents" : [
+            "1c64a6b81768cd131d7991f2658ebd6b53c972d0",
+            "fac2025de289ff74cbd30b42872a2a744d1c5d57"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "b29586c563657c159d3f0d31448bb25e8199ed72",
+            "fe07ee25998b9f19cb4aa07cb416be3ffbb4c4be"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge pull request #70 from sdboyer/fp-frontend",
+         "sha1" : "1c64a6b81768cd131d7991f2658ebd6b53c972d0",
+         "date" : "Thu May 21 21:36:42 2015 -400"
+      },
+      {
+         "date" : "Thu May 21 21:11:06 2015 -400",
+         "sha1" : "fe07ee25998b9f19cb4aa07cb416be3ffbb4c4be",
+         "subject" : "Add the vcs labels, with horribleness",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "ff30f1030ddd655e539959d88e250e16b5d98d1b"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "2f7b0d0543f44ae7ff63379b21608aa48e531258"
+         ],
+         "date" : "Thu May 21 13:36:06 2015 -400",
+         "sha1" : "ff30f1030ddd655e539959d88e250e16b5d98d1b",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "css tweaky tweaky"
+      },
+      {
+         "parents" : [
+            "714511878022365eba1a7dd1221a073fbc0e6781"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Let there be (correct) strings",
+         "date" : "Thu May 21 13:32:11 2015 -400",
+         "sha1" : "2f7b0d0543f44ae7ff63379b21608aa48e531258"
+      },
+      {
+         "date" : "Thu May 21 03:44:10 2015 -700",
+         "sha1" : "fac2025de289ff74cbd30b42872a2a744d1c5d57",
+         "subject" : "Python script to produce Pipeviz compatible JSON f",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Michael Halstead\" <mhalstead@linuxfoundation.org>",
+         "parents" : [
+            "b29586c563657c159d3f0d31448bb25e8199ed72"
+         ]
+      },
+      {
+         "subject" : "Replace vtx/edge constructor funcs w/factories",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Thu May 21 03:39:56 2015 -400",
+         "sha1" : "714511878022365eba1a7dd1221a073fbc0e6781",
+         "parents" : [
+            "7118f5d0d6f938a19c13cfe937336a9ab84c193d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c5afe9fb24595158ea768b04006d63ba12a322fb"
+         ],
+         "sha1" : "7118f5d0d6f938a19c13cfe937336a9ab84c193d",
+         "date" : "Tue May 19 19:12:13 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Remove a bit of cruft"
+      },
+      {
+         "subject" : "FIRST REAL RENDER (with silly strings)",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Mon May 18 22:29:12 2015 -400",
+         "sha1" : "c5afe9fb24595158ea768b04006d63ba12a322fb",
+         "parents" : [
+            "0cb462b36cb1566dc0512da8a1cec89fe1341a23"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "5fef5f15a6acc5191af4c05c5ee9db26d624166c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add another tag on interstitial commit",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Mon May 18 22:28:15 2015 -400",
+         "sha1" : "0cb462b36cb1566dc0512da8a1cec89fe1341a23"
+      },
+      {
+         "sha1" : "5fef5f15a6acc5191af4c05c5ee9db26d624166c",
+         "date" : "Mon May 18 21:14:58 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Bunch of df logic fixes, but not done yet",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "79eb713d38a7706c2ffcc9be023e312e1ea84f30"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "d4510c28c5f47cd536c4b756fde0f92255b8c400"
+         ],
+         "date" : "Mon May 18 19:52:50 2015 -400",
+         "sha1" : "79eb713d38a7706c2ffcc9be023e312e1ea84f30",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Create a Sha1 type and add JSON marshaling"
+      },
+      {
+         "parents" : [
+            "1cf7577241fe0ce56e6f0a11cdfcb33cdb8c5bb4"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Hopefully last untested pass on the df walk",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "d4510c28c5f47cd536c4b756fde0f92255b8c400",
+         "date" : "Mon May 18 15:32:08 2015 -400"
+      },
+      {
+         "parents" : [
+            "74c4f2a29c096dbb91ec2a7fa9ffd5bcd73271b8"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Walk graph twice, for joints",
+         "sha1" : "1cf7577241fe0ce56e6f0a11cdfcb33cdb8c5bb4",
+         "date" : "Mon May 18 05:41:24 2015 -400"
+      },
+      {
+         "sha1" : "74c4f2a29c096dbb91ec2a7fa9ffd5bcd73271b8",
+         "date" : "Mon May 18 04:49:52 2015 -400",
+         "subject" : "Add the new DF search algo",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8d55026126d571d2770d524a0c1ce80dc3ca90f8"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "bc79a1e06cc2de33e65ff832bc086cbe59dde288"
+         ],
+         "date" : "Mon May 18 02:31:10 2015 -400",
+         "sha1" : "8d55026126d571d2770d524a0c1ce80dc3ca90f8",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make Property structs json-encode to lower case"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix up some bits of the d3 rendering",
+         "date" : "Sun May 17 02:08:16 2015 -400",
+         "sha1" : "bc79a1e06cc2de33e65ff832bc086cbe59dde288",
+         "parents" : [
+            "0f819a30d7795ea15b4a03d02148f0b6bec646ce"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "35f457ecf17c94d71fc1efe540da1b4715a59f6e"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Let graphs report msgid and send it to frontend",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "0f819a30d7795ea15b4a03d02148f0b6bec646ce",
+         "date" : "Fri May 15 18:08:58 2015 -400"
+      },
+      {
+         "sha1" : "35f457ecf17c94d71fc1efe540da1b4715a59f6e",
+         "date" : "Fri May 15 18:04:51 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add & separate frontend layers a bit more",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1e9d8e71f332194a17c3b6ea4573e44d6eeb7f9b"
+         ]
+      },
+      {
+         "parents" : [
+            "0c1b6d50b167ea998f1609b664e42a1307d81271"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "OMG shut up syntastic",
+         "date" : "Thu May 14 02:10:17 2015 -400",
+         "sha1" : "1e9d8e71f332194a17c3b6ea4573e44d6eeb7f9b"
+      },
+      {
+         "parents" : [
+            "ddb35588b600a9edb0195cf97101778818b81ea7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add funcs thing to build commit subgraph",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed May 13 03:40:55 2015 -400",
+         "sha1" : "0c1b6d50b167ea998f1609b664e42a1307d81271"
+      },
+      {
+         "sha1" : "ddb35588b600a9edb0195cf97101778818b81ea7",
+         "date" : "Tue May 12 03:13:07 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix pvd a bit, add very incomplete main.js",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3c5b03d14c7e259c2cf4ecdecd6e3ad8cdf47bd5"
+         ]
+      },
+      {
+         "parents" : [
+            "9e4120478f55825798f1f7f4c0a4faf075e1b671"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Start in again on a new pvd",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sun May 10 16:41:21 2015 -400",
+         "sha1" : "3c5b03d14c7e259c2cf4ecdecd6e3ad8cdf47bd5"
+      },
+      {
+         "subject" : "Get rid of require.js - KISS as long as possible",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "9e4120478f55825798f1f7f4c0a4faf075e1b671",
+         "date" : "Sat May  9 22:14:44 2015 -400",
+         "parents" : [
+            "5781ae6beecfd335eedae19029ce1ca0b94b417f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Update everything for the repo namespace change",
+         "sha1" : "b29586c563657c159d3f0d31448bb25e8199ed72",
+         "date" : "Fri May  8 19:47:24 2015 -400",
+         "parents" : [
+            "a755274bb77fa90f9f98747e7b065eec06b2e2d6"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "a65334ce8447a57b4509cc6d5314bfe03a477fae"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make syntastic mostly stfu",
+         "date" : "Thu May  7 05:10:58 2015 -400",
+         "sha1" : "5781ae6beecfd335eedae19029ce1ca0b94b417f"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "022eb04c57e9c7d149d008cdbfd12f09b5e5377a"
+         ],
+         "date" : "Thu May  7 05:03:04 2015 -400",
+         "sha1" : "a65334ce8447a57b4509cc6d5314bfe03a477fae",
+         "subject" : "Update bower.json, add .bowerrc, fix html",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "f02f52a8c5ebc4a0096e94e5996a433b0e84d37f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Consolidate, because stupid require.js whatever",
+         "sha1" : "022eb04c57e9c7d149d008cdbfd12f09b5e5377a",
+         "date" : "Thu May  7 05:00:44 2015 -400"
+      },
+      {
+         "parents" : [
+            "6753f1585fe75b4b03859c613e2c6a6184f3d04e"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Move app files into further subdir",
+         "sha1" : "f02f52a8c5ebc4a0096e94e5996a433b0e84d37f",
+         "date" : "Thu May  7 04:59:01 2015 -400"
+      },
+      {
+         "date" : "Thu May  7 04:26:30 2015 -400",
+         "sha1" : "6753f1585fe75b4b03859c613e2c6a6184f3d04e",
+         "subject" : "Don't need package.json anymore",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "9c1fc3474fb44f3ab14e2f687dccb42ed993ba61"
+         ]
+      },
+      {
+         "subject" : "Use React.render() properly; create an element",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Thu May  7 03:52:05 2015 -400",
+         "sha1" : "9c1fc3474fb44f3ab14e2f687dccb42ed993ba61",
+         "parents" : [
+            "3a4a2f0e9de14d1999365221052fbbb92edf634c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "At least get initial data from the right place",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "3a4a2f0e9de14d1999365221052fbbb92edf634c",
+         "date" : "Thu May  7 03:24:21 2015 -400",
+         "parents" : [
+            "ae8a041f3e0fd20d2af3964b55f3def06d2f1592"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "ae8a041f3e0fd20d2af3964b55f3def06d2f1592",
+         "date" : "Wed May  6 02:26:03 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Don't need old app.js",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8132208bfbc9011c81669d8993971858869b7be9"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Remove old index.html file",
+         "sha1" : "8132208bfbc9011c81669d8993971858869b7be9",
+         "date" : "Wed May  6 01:57:46 2015 -400",
+         "parents" : [
+            "fc04a723c2b0cd0b755fc99cc96890dfb8e64949"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "4dbc4a9c19a9ef47499f065fb05ce02051c59fbe"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Process in all fixtures on daemon start (lol)",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed May  6 01:38:35 2015 -400",
+         "sha1" : "fc04a723c2b0cd0b755fc99cc96890dfb8e64949"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Dump the entire graph to JSON for starters",
+         "date" : "Wed May  6 01:38:02 2015 -400",
+         "sha1" : "4dbc4a9c19a9ef47499f065fb05ce02051c59fbe",
+         "parents" : [
+            "74d9f4187733da794d5e11903f6d582de2588dc1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Wed May  6 01:37:49 2015 -400",
+         "sha1" : "74d9f4187733da794d5e11903f6d582de2588dc1",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Reuse 'flat()'ening logic for marshaling JSON",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "b6b0ffb51d5ab458bcbac3599b4ce19fb26883c7"
+         ]
+      },
+      {
+         "subject" : "s/qb{v,e}/Qb{v,e}/ too - easy \"querying.\"",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue May  5 23:12:23 2015 -400",
+         "sha1" : "b6b0ffb51d5ab458bcbac3599b4ce19fb26883c7",
+         "parents" : [
+            "ff8288ed1279205d866a906296c8088246a01d65"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "a755274bb77fa90f9f98747e7b065eec06b2e2d6"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "s/vtTuple/VertexTuple. Other packages need it now",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue May  5 23:10:37 2015 -400",
+         "sha1" : "ff8288ed1279205d866a906296c8088246a01d65"
+      },
+      {
+         "sha1" : "a755274bb77fa90f9f98747e7b065eec06b2e2d6",
+         "date" : "Sun May  3 14:37:31 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Better name for root route",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8b7984591910d9cd94562cdbb4b3e13c19cb459b"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "855be95c2fc680e39147dbfa077a13cf5334ed3a"
+         ],
+         "date" : "Sat May  2 18:11:44 2015 -400",
+         "sha1" : "8b7984591910d9cd94562cdbb4b3e13c19cb459b",
+         "subject" : "Tweak README a little",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "9ab8abe1e2890f53de84122ff37468142614274c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Update README a squidge",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri May  1 19:28:43 2015 -400",
+         "sha1" : "855be95c2fc680e39147dbfa077a13cf5334ed3a"
+      },
+      {
+         "parents" : [
+            "b26ca61134e0f178997b222edb932eb464b966f0",
+            "afd972ec96efb7ea63390658f727f5bae8bc1371"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge branch 'broker'",
+         "sha1" : "9ab8abe1e2890f53de84122ff37468142614274c",
+         "date" : "Fri May  1 04:12:58 2015 -400"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Get broker all hooked up, and into webapp",
+         "date" : "Fri May  1 04:01:40 2015 -400",
+         "sha1" : "afd972ec96efb7ea63390658f727f5bae8bc1371",
+         "parents" : [
+            "de1b00a7802b5e1e0eef52d1f4a3b95e635fe86f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Test broker zero case better, and close chans",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "de1b00a7802b5e1e0eef52d1f4a3b95e635fe86f",
+         "date" : "Fri May  1 03:43:41 2015 -400",
+         "parents" : [
+            "a10b43f786ca81f4c7307dd44699cab0901fbdc2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "d3f244da3e44619d81daa69daa578acbf0db8f3b"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add thorough GraphBroker tests",
+         "sha1" : "a10b43f786ca81f4c7307dd44699cab0901fbdc2",
+         "date" : "Fri May  1 03:32:26 2015 -400"
+      },
+      {
+         "parents" : [
+            "717e2823d6e5716d3b45109c05428aa607d0d698"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add three sets of basic benchmarks",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "b26ca61134e0f178997b222edb932eb464b966f0",
+         "date" : "Fri May  1 02:12:12 2015 -400"
+      },
+      {
+         "date" : "Fri May  1 01:36:00 2015 -400",
+         "sha1" : "d3f244da3e44619d81daa69daa578acbf0db8f3b",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Just export GraphBroker; drop the interface",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3772c2c3c1cbb9733cecb742645f0040f3217fc1"
+         ]
+      },
+      {
+         "parents" : [
+            "f3afaf509c80831436e1337c8753e40b1e1f2856"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add broker pkg and initial implementation",
+         "date" : "Fri May  1 01:30:57 2015 -400",
+         "sha1" : "3772c2c3c1cbb9733cecb742645f0040f3217fc1"
+      },
+      {
+         "subject" : "Send latest graph after merge to webapp",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "f3afaf509c80831436e1337c8753e40b1e1f2856",
+         "date" : "Thu Apr 30 20:25:15 2015 -400",
+         "parents" : [
+            "b8e7d171330093b6b46b084a05693ea920484878"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "4911dda8cac89f7273bacd5547349729857cec31"
+         ],
+         "sha1" : "b8e7d171330093b6b46b084a05693ea920484878",
+         "date" : "Thu Apr 30 18:03:55 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Clone the graph as first step of merge"
+      },
+      {
+         "parents" : [
+            "05f28f75cbff181804b53c645f8abea88004e5a1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Adapt js require's for new httpd context",
+         "date" : "Wed Apr 29 05:05:54 2015 -400",
+         "sha1" : "4911dda8cac89f7273bacd5547349729857cec31"
+      },
+      {
+         "date" : "Wed Apr 29 04:51:57 2015 -400",
+         "sha1" : "05f28f75cbff181804b53c645f8abea88004e5a1",
+         "subject" : "Get basic frontend httpd working",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "368ead4e0bc2e51c8086dbd6512a1b588cb6c3b4"
+         ]
+      },
+      {
+         "sha1" : "368ead4e0bc2e51c8086dbd6512a1b588cb6c3b4",
+         "date" : "Wed Apr 29 04:18:15 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Get the main binary in basically good shape",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "0cbec76d8ac41d6206998fa77602beadb4893f81"
+         ]
+      },
+      {
+         "parents" : [
+            "ac0910749173e1d3cf458fca9ed3269de21c528b"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Use int instead of uint64 for message id",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 28 17:12:25 2015 -400",
+         "sha1" : "0cbec76d8ac41d6206998fa77602beadb4893f81"
+      },
+      {
+         "subject" : "Basic webapp pkg; start dual-http server from main",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "ac0910749173e1d3cf458fca9ed3269de21c528b",
+         "date" : "Tue Apr 28 15:13:14 2015 -400",
+         "parents" : [
+            "79f25143b1b1f7c8ca3a498b8330c37c0d6d9511"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "717e2823d6e5716d3b45109c05428aa607d0d698"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Relocate all frontend things under webapp/",
+         "sha1" : "79f25143b1b1f7c8ca3a498b8330c37c0d6d9511",
+         "date" : "Tue Apr 28 14:16:47 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "913f8f4cbdb805f5bde990ec2199ab74a81e4ce7"
+         ],
+         "date" : "Tue Apr 28 14:06:01 2015 -400",
+         "sha1" : "717e2823d6e5716d3b45109c05428aa607d0d698",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Update split tests for new comm/process handling"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "2ec0bf3b8129d97491e678a57d8573037a3e5bd3",
+            "7b701b8b385887e5760502509b82ee2a760c3468"
+         ],
+         "date" : "Tue Apr 28 05:15:12 2015 -400",
+         "sha1" : "913f8f4cbdb805f5bde990ec2199ab74a81e4ce7",
+         "subject" : "Merge pull request #61 from sdboyer/edge-resolve-2",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "7b701b8b385887e5760502509b82ee2a760c3468",
+         "date" : "Tue Apr 28 05:13:19 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Remove a ton of debugging output",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "58fa6fca8f4661eae99d7b056208212efecdd2a8"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "e150c98089b24a64cdb7add7b9502297ff5367dd"
+         ],
+         "sha1" : "58fa6fca8f4661eae99d7b056208212efecdd2a8",
+         "date" : "Tue Apr 28 05:10:37 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "FINALLY get datasets all resolving, WOOT"
+      },
+      {
+         "parents" : [
+            "59fa27a06f177cd4650a11a099d4cd791a9c87c2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add proc -> parent dataset link",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 28 05:10:14 2015 -400",
+         "sha1" : "e150c98089b24a64cdb7add7b9502297ff5367dd"
+      },
+      {
+         "subject" : "Fix comm identifier, ugh ugh",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 28 04:38:31 2015 -400",
+         "sha1" : "59fa27a06f177cd4650a11a099d4cd791a9c87c2",
+         "parents" : [
+            "19099c5b3b3534b86219e145629e7baf9a832d83"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Include vtx/edge id on dot output",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "19099c5b3b3534b86219e145629e7baf9a832d83",
+         "date" : "Tue Apr 28 04:38:13 2015 -400",
+         "parents" : [
+            "caad3fc1642eb4f70bae682f2b08c73b1206cf85"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix wrong path in fixtures",
+         "sha1" : "caad3fc1642eb4f70bae682f2b08c73b1206cf85",
+         "date" : "Tue Apr 28 04:23:09 2015 -400",
+         "parents" : [
+            "93f6f23c56b9825fe6a8f89de9d9301fcd7833be"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "2ec0bf3b8129d97491e678a57d8573037a3e5bd3"
+         ],
+         "sha1" : "93f6f23c56b9825fe6a8f89de9d9301fcd7833be",
+         "date" : "Tue Apr 28 03:33:33 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add separate listener specs for net and local unix"
+      },
+      {
+         "parents" : [
+            "2d0bad61cdeedd230c2cffe51889afaac3bb93e2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add numeric dump support to dot output",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 28 03:32:23 2015 -400",
+         "sha1" : "2ec0bf3b8129d97491e678a57d8573037a3e5bd3"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Continue, not return, on traverse cmp fail (derp)",
+         "date" : "Tue Apr 28 02:57:09 2015 -400",
+         "sha1" : "2d0bad61cdeedd230c2cffe51889afaac3bb93e2",
+         "parents" : [
+            "e9155a00ccef3db30450f3e35dd827f1d46bbd68"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Tue Apr 28 02:54:26 2015 -400",
+         "sha1" : "e9155a00ccef3db30450f3e35dd827f1d46bbd68",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge pull request #60 from sdboyer/orphans",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "e29c83c412553c6ae54849a1e828c0a38345193b",
+            "6e1975d52197602e2d001b73f3852e354510a1f4"
+         ]
+      },
+      {
+         "subject" : "First pass on orphan handling",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Mon Apr 27 21:12:52 2015 -400",
+         "sha1" : "6e1975d52197602e2d001b73f3852e354510a1f4",
+         "parents" : [
+            "2c5439c69f02338072d373e72a779da36e31478b"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "e29c83c412553c6ae54849a1e828c0a38345193b"
+         ],
+         "date" : "Mon Apr 27 21:10:40 2015 -400",
+         "sha1" : "2c5439c69f02338072d373e72a779da36e31478b",
+         "subject" : "Add vertexDataset to ident envlink special case",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "eece459b6130866636cb10cc467d6e0d59ee8250"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix the Makefile. Sorta. This is stupid",
+         "sha1" : "e29c83c412553c6ae54849a1e828c0a38345193b",
+         "date" : "Mon Apr 27 20:01:51 2015 -400"
+      },
+      {
+         "parents" : [
+            "a22960afec08247cef9a005b3bef2ded872a0333"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Recursive get/build in Makefile",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Mon Apr 27 16:59:16 2015 -400",
+         "sha1" : "eece459b6130866636cb10cc467d6e0d59ee8250"
+      },
+      {
+         "date" : "Mon Apr 27 16:09:48 2015 -400",
+         "sha1" : "a22960afec08247cef9a005b3bef2ded872a0333",
+         "subject" : "Stop using a test to dump dot output",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "07ee430070a861f9e654534686a12d6831f75d53"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add quick and dirty Makefile",
+         "sha1" : "07ee430070a861f9e654534686a12d6831f75d53",
+         "date" : "Mon Apr 27 15:56:47 2015 -400",
+         "parents" : [
+            "b98f6757338f2a7a9119a618dae4242767818f78"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "5410e2bf918c9137323ad4c60fa099d594bd7586"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Remove validate.rb",
+         "date" : "Mon Apr 27 15:50:50 2015 -400",
+         "sha1" : "b98f6757338f2a7a9119a618dae4242767818f78"
+      },
+      {
+         "subject" : "Add validate.rb just so its in history, b/c...",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "5410e2bf918c9137323ad4c60fa099d594bd7586",
+         "date" : "Mon Apr 27 15:50:36 2015 -400",
+         "parents" : [
+            "ba896abe9b3b3d146816920a204729eb55ab1608"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "ba896abe9b3b3d146816920a204729eb55ab1608",
+         "date" : "Mon Apr 27 15:38:34 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add fixture bindata",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "62d5fbf0e2ff1ebba89a0878f8e85809332bd211"
+         ]
+      },
+      {
+         "sha1" : "62d5fbf0e2ff1ebba89a0878f8e85809332bd211",
+         "date" : "Mon Apr 27 15:31:04 2015 -400",
+         "subject" : "Create a proper command to generate dot output",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "0d05d324b7b1cfd556229fffae15a83bc44a6ef4"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "980005b4dba30dc62cac2cf8c0c333c622684b40"
+         ],
+         "date" : "Sat Apr 25 19:19:04 2015 -400",
+         "sha1" : "0d05d324b7b1cfd556229fffae15a83bc44a6ef4",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "It's the little things"
+      },
+      {
+         "date" : "Fri Apr 24 16:03:34 2015 -400",
+         "sha1" : "980005b4dba30dc62cac2cf8c0c333c622684b40",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Accidentally left a debug statement in",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "cd2e5a185588eeba0dbb676cdd68202bf1d08950"
+         ]
+      },
+      {
+         "subject" : "Merge branch 'dot'",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "cd2e5a185588eeba0dbb676cdd68202bf1d08950",
+         "date" : "Fri Apr 24 15:14:20 2015 -400",
+         "parents" : [
+            "7a189185b9c7f244d4ee029fcafb165f5cbd58b9",
+            "af77fbd265faf6514e8b130f5b7fa08e4ab4bc90"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "0623f755214b7b7bbe5542c0b12263004cc6f9f5"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Pull out some commits from fixtures",
+         "sha1" : "af77fbd265faf6514e8b130f5b7fa08e4ab4bc90",
+         "date" : "Fri Apr 24 15:12:07 2015 -400"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add basic dot dumper",
+         "date" : "Fri Apr 24 15:11:10 2015 -400",
+         "sha1" : "0623f755214b7b7bbe5542c0b12263004cc6f9f5",
+         "parents" : [
+            "7a189185b9c7f244d4ee029fcafb165f5cbd58b9"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "626faa6045954a5e7215d33d749c46ed424ec362",
+            "2864ba22a7f588e8c0855c4e2a4804a92918b054"
+         ],
+         "date" : "Thu Apr 23 22:03:57 2015 -400",
+         "sha1" : "7a189185b9c7f244d4ee029fcafb165f5cbd58b9",
+         "subject" : "Merge pull request #54 from sdboyer/vresolve",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Big fat hacks to improve vertex ident",
+         "sha1" : "2864ba22a7f588e8c0855c4e2a4804a92918b054",
+         "date" : "Thu Apr 23 22:01:56 2015 -400",
+         "parents" : [
+            "50cf5e910a4bdc7948c22bcc0c6411f9ee48d366"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "0c7c15d4cf467b16a99c00532ad6a7f7e37b84fe"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Several proc-related fixups",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Thu Apr 23 21:04:40 2015 -400",
+         "sha1" : "50cf5e910a4bdc7948c22bcc0c6411f9ee48d366"
+      },
+      {
+         "parents" : [
+            "90e5d8ca52334a714d4032ebf628942b8ca1ccf2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Couple more small ident-edge resolution fixes",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "0c7c15d4cf467b16a99c00532ad6a7f7e37b84fe",
+         "date" : "Thu Apr 23 16:55:55 2015 -400"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix parent dataset, dataset split & msg handling",
+         "sha1" : "90e5d8ca52334a714d4032ebf628942b8ca1ccf2",
+         "date" : "Thu Apr 23 16:44:44 2015 -400",
+         "parents" : [
+            "2b73cf0a7d5c4c3cfe794e3883bb67bc6c8b3368"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Promote envlink resolve to vt ident phase (temp)",
+         "date" : "Thu Apr 23 15:45:25 2015 -400",
+         "sha1" : "2b73cf0a7d5c4c3cfe794e3883bb67bc6c8b3368",
+         "parents" : [
+            "799731d1f27d63b821154f1baaa539ae92e743f6"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "s/SpecLocalDataset/SpecDatasetHierarchy/",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Thu Apr 23 15:09:44 2015 -400",
+         "sha1" : "799731d1f27d63b821154f1baaa539ae92e743f6",
+         "parents" : [
+            "2b0aea8f42d9d13863f5987aa1cf4b36d9085bc7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add IdentifierParentDataset",
+         "sha1" : "2b0aea8f42d9d13863f5987aa1cf4b36d9085bc7",
+         "date" : "Thu Apr 23 15:08:00 2015 -400",
+         "parents" : [
+            "9beb2c500659de2cd8366e3bcebc0dccdec3b5f0"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "75d5e7ba0c43fa552854861fe8fda8bde15e9fd7"
+         ],
+         "sha1" : "9beb2c500659de2cd8366e3bcebc0dccdec3b5f0",
+         "date" : "Thu Apr 23 15:06:17 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Prevent in-message vtx identity clobbering"
+      },
+      {
+         "date" : "Thu Apr 23 06:46:40 2015 -400",
+         "sha1" : "75d5e7ba0c43fa552854861fe8fda8bde15e9fd7",
+         "subject" : "Fix JSON unmarshaling of sha1s across all types",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3d13a53aeb58154cc3aeeb852851c9842f7f8635"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "970eeb757a9e20a8cca7fb83b732b93b82812e79"
+         ],
+         "date" : "Thu Apr 23 05:49:53 2015 -400",
+         "sha1" : "3d13a53aeb58154cc3aeeb852851c9842f7f8635",
+         "subject" : "Fix up the edge resolution loop a ton",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "subject" : "Actually resolve SpecCommits if not already there",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "970eeb757a9e20a8cca7fb83b732b93b82812e79",
+         "date" : "Thu Apr 23 05:23:57 2015 -400",
+         "parents" : [
+            "cef625b4bcc3304828ce7c3dd05c210b76545221"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix up several Identifiers, add SpecCommit case",
+         "sha1" : "cef625b4bcc3304828ce7c3dd05c210b76545221",
+         "date" : "Thu Apr 23 05:23:23 2015 -400",
+         "parents" : [
+            "aa0e18b0f384021e85f09805e9e1ce7ab4844ebf"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "aa0e18b0f384021e85f09805e9e1ce7ab4844ebf",
+         "date" : "Thu Apr 23 04:05:27 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Update work from traversal: s/CoreGraph/coreGraph/",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c67e64b90b1f9b6825219d660c7928a9641dee98"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "685989c2dc8e57a8720934bccf5a08c178223b9d",
+            "626faa6045954a5e7215d33d749c46ed424ec362"
+         ],
+         "date" : "Thu Apr 23 04:02:59 2015 -400",
+         "sha1" : "c67e64b90b1f9b6825219d660c7928a9641dee98",
+         "subject" : "Catch up to master - need traversal fixes, tests",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "date" : "Thu Apr 23 03:59:00 2015 -400",
+         "sha1" : "626faa6045954a5e7215d33d749c46ed424ec362",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge pull request #57 from sdboyer/traversal-test",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "0eb418590eb5afb478130a60ad557ad43808d08e",
+            "044fe6efadb8ae0ecd3ca624eaf569d5177d4006"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add adjacentWith() tests and related fixes",
+         "date" : "Thu Apr 23 03:57:38 2015 -400",
+         "sha1" : "044fe6efadb8ae0ecd3ca624eaf569d5177d4006",
+         "parents" : [
+            "a236383214f191e3f0827b56a9acb4ff3561025a"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Thu Apr 23 02:44:13 2015 -400",
+         "sha1" : "a236383214f191e3f0827b56a9acb4ff3561025a",
+         "subject" : "Incorporate parallel edges into graph fixture",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "ce27b9d2c540a7134f359702315073949dc8c616"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "4affcc340fea7400d0c89f46b8f1ca2f3dd68691"
+         ],
+         "date" : "Thu Apr 23 02:02:16 2015 -400",
+         "sha1" : "ce27b9d2c540a7134f359702315073949dc8c616",
+         "subject" : "More rigorous graph fixtures w/fully dummy data",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make qbe/qbv tests actually run, and check panics",
+         "sha1" : "4affcc340fea7400d0c89f46b8f1ca2f3dd68691",
+         "date" : "Thu Apr 23 00:24:57 2015 -400",
+         "parents" : [
+            "5cdf59c97f0f075e429a6296bc8c6a0c3fe76d8c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Wed Apr 22 23:10:56 2015 -400",
+         "sha1" : "5cdf59c97f0f075e429a6296bc8c6a0c3fe76d8c",
+         "subject" : "Add Out/In/arcWith() tests and prop eq fix",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1e5f8f9e3625ff2174660842aaccfb440f890264"
+         ]
+      },
+      {
+         "subject" : "Add tests for qbe(), qbv()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed Apr 22 22:17:40 2015 -400",
+         "sha1" : "1e5f8f9e3625ff2174660842aaccfb440f890264",
+         "parents" : [
+            "53544264a19057ca5fd7a1663125dbd3b37d7c78"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "b1d0378b082f176d6f95e3cd9859065951d3e5e7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "First real traversal tests, for VerticesWith()",
+         "sha1" : "53544264a19057ca5fd7a1663125dbd3b37d7c78",
+         "date" : "Wed Apr 22 22:02:08 2015 -400"
+      },
+      {
+         "date" : "Wed Apr 22 20:31:42 2015 -400",
+         "sha1" : "0eb418590eb5afb478130a60ad557ad43808d08e",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Move fixture validation test into interpret pkg",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "9035c6a5e6321f307b71a50bb7c2ec90cb72b4e4"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "120bda23522be86ac3bf1c0504be62a8d6635a68"
+         ],
+         "sha1" : "685989c2dc8e57a8720934bccf5a08c178223b9d",
+         "date" : "Wed Apr 22 19:55:46 2015 -400",
+         "subject" : "Separate out vertex & edge flattener funcs",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "a69232916f32390dc4a8608b92015d4a563fc28e"
+         ],
+         "sha1" : "120bda23522be86ac3bf1c0504be62a8d6635a68",
+         "date" : "Wed Apr 22 17:16:06 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Always pass VType/EType type to qbv()/qbe()"
+      },
+      {
+         "subject" : "Merge messages 1 and 2",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "a69232916f32390dc4a8608b92015d4a563fc28e",
+         "date" : "Wed Apr 22 17:13:50 2015 -400",
+         "parents" : [
+            "7fbe9d37e0b0cd9eca5ddbd46e49e98ef86e06ac"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "fe62ee8652c1a5431f0ee005c82f1f97d82ddd93"
+         ],
+         "date" : "Wed Apr 22 16:48:38 2015 -400",
+         "sha1" : "7fbe9d37e0b0cd9eca5ddbd46e49e98ef86e06ac",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Ensure vtype != VTypeNone in VerticesWith()"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Parse all msgs in represent tests init, too",
+         "date" : "Wed Apr 22 16:47:59 2015 -400",
+         "sha1" : "fe62ee8652c1a5431f0ee005c82f1f97d82ddd93",
+         "parents" : [
+            "be04e4505df513f769c54dca2be4f3e739f77072"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Add utility funcs to make vtTuples printable",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "be04e4505df513f769c54dca2be4f3e739f77072",
+         "date" : "Wed Apr 22 16:30:59 2015 -400",
+         "parents" : [
+            "85a9159ed9017984377288c3862c6f6efd111c36"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "6662c1a5c18df369985d9b0c86c3daf7595038ee"
+         ],
+         "sha1" : "85a9159ed9017984377288c3862c6f6efd111c36",
+         "date" : "Wed Apr 22 15:36:32 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "First little tests of message merging into graph"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "da02be227b1f402fbac75835fdda61811b7b9a04"
+         ],
+         "date" : "Wed Apr 22 15:06:53 2015 -400",
+         "sha1" : "6662c1a5c18df369985d9b0c86c3daf7595038ee",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Unpack all fixture messages in a test init func"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "48a24cd59e13984a43bfcfaa2938265dc891b514"
+         ],
+         "date" : "Tue Apr 21 21:12:49 2015 -400",
+         "sha1" : "da02be227b1f402fbac75835fdda61811b7b9a04",
+         "subject" : "Fix a few careless compile errors",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "a4ac7cec3b80a96e0b1e9414a5c242762655298b"
+         ],
+         "sha1" : "48a24cd59e13984a43bfcfaa2938265dc891b514",
+         "date" : "Tue Apr 21 21:11:22 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make CoreGraph an interface & use it that way"
+      },
+      {
+         "subject" : "Get rid of CoreGraph's map/list - immut ftw",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 21 20:35:40 2015 -400",
+         "sha1" : "a4ac7cec3b80a96e0b1e9414a5c242762655298b",
+         "parents" : [
+            "64c9c7fc6567fb90314fa878a0231199e67591fb"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Use i2a as shorthand alias for strconv.Itoa",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "64c9c7fc6567fb90314fa878a0231199e67591fb",
+         "date" : "Tue Apr 21 20:33:12 2015 -400",
+         "parents" : [
+            "38eed75c2be03af5cdbb6b53507adfd07a822445"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Use new Identify subsystem for vertex matching",
+         "sha1" : "38eed75c2be03af5cdbb6b53507adfd07a822445",
+         "date" : "Tue Apr 21 20:31:28 2015 -400",
+         "parents" : [
+            "d3ce0c9bf4e3c2b13315cef2eb18720818904049"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "9ee6250b2a5f73314c912fbc92c1dc94a6627e7b"
+         ],
+         "date" : "Tue Apr 21 20:22:20 2015 -400",
+         "sha1" : "d3ce0c9bf4e3c2b13315cef2eb18720818904049",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Pull out edge-comparing bits from old Identifiers"
+      },
+      {
+         "parents" : [
+            "665b0ff2bee552a7653f8510843fddf919a695bc"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Make mapValEq[And]() handle Properties (derp)",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 21 20:20:24 2015 -400",
+         "sha1" : "9ee6250b2a5f73314c912fbc92c1dc94a6627e7b"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Just go straight generic w/identifying for now",
+         "sha1" : "665b0ff2bee552a7653f8510843fddf919a695bc",
+         "date" : "Tue Apr 21 20:01:00 2015 -400",
+         "parents" : [
+            "d2d9b993ed361d88554cf8c081940790fb2e9a65"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "d2d9b993ed361d88554cf8c081940790fb2e9a65",
+         "date" : "Tue Apr 21 19:40:49 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add func Identify() for logic indirection",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "2de43eeca6976f8246a66b23bc1802512fbde3d3"
+         ]
+      },
+      {
+         "subject" : "Incremental checkin of multi-vertex resolver",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 21 17:33:35 2015 -400",
+         "sha1" : "2de43eeca6976f8246a66b23bc1802512fbde3d3",
+         "parents" : [
+            "d6b7fda063d3693d35abca7fa48cc471e53d3e4a"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "de5ad8b39b0e7ca01a971bb1daf6a59906937503"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Always pass VType/EType type to qbv()/qbe()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sat Apr 18 22:41:21 2015 -500",
+         "sha1" : "b1d0378b082f176d6f95e3cd9859065951d3e5e7"
+      },
+      {
+         "subject" : "Ensure vtype != VTypeNone in VerticesWith()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "de5ad8b39b0e7ca01a971bb1daf6a59906937503",
+         "date" : "Fri Apr 17 16:21:40 2015 -500",
+         "parents" : [
+            "01aae30d9ec44ade23d88ce37eda74d7f9a12802"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "de891fa92dc4d1f705a7059dd23a27dc4aa46381"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add commented methods to EdgeSpec; future plans",
+         "sha1" : "01aae30d9ec44ade23d88ce37eda74d7f9a12802",
+         "date" : "Thu Apr 16 15:12:30 2015 -500"
+      },
+      {
+         "sha1" : "d6b7fda063d3693d35abca7fa48cc471e53d3e4a",
+         "date" : "Wed Apr 15 03:29:11 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add commented methods to EdgeSpec; future plans",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "de891fa92dc4d1f705a7059dd23a27dc4aa46381"
+         ]
+      },
+      {
+         "subject" : "Use 'vertex' as type name prefix instead of suffix",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 14 20:12:50 2015 -400",
+         "sha1" : "de891fa92dc4d1f705a7059dd23a27dc4aa46381",
+         "parents" : [
+            "5acaa131bef5f6e9028c8c54beb6e92da46691f8"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Tue Apr 14 14:41:35 2015 -400",
+         "sha1" : "5acaa131bef5f6e9028c8c54beb6e92da46691f8",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge pull request #43 from sdboyer/split-tests",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "618e7a57e0b9c8f78528cee4ad7dd9f664b1ce0e",
+            "7db2def5c76cad599bf6cc27c58097905eced72b"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add fixtures and test for splitParentDataset()",
+         "date" : "Tue Apr 14 14:39:07 2015 -400",
+         "sha1" : "7db2def5c76cad599bf6cc27c58097905eced72b",
+         "parents" : [
+            "112a600740f6fce3c9ea41b4465c92e7fa9b2410"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "847dec9d49e88a767dcd4e8ea774a24eb4e44ec3"
+         ],
+         "date" : "Tue Apr 14 14:38:10 2015 -400",
+         "sha1" : "112a600740f6fce3c9ea41b4465c92e7fa9b2410",
+         "subject" : "Add a little informative note about split tests",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "2ef23c5b17a079e3307216db0134f26c2b138c0c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Disallow direct envlinks for data subsets",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 14 13:52:57 2015 -400",
+         "sha1" : "847dec9d49e88a767dcd4e8ea774a24eb4e44ec3"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c2c216de6646af3892fe7317cf263f4f9b37b3c8"
+         ],
+         "sha1" : "2ef23c5b17a079e3307216db0134f26c2b138c0c",
+         "date" : "Tue Apr 14 13:51:13 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add fixtures and test for splitDataset()"
+      },
+      {
+         "parents" : [
+            "6e2aeb1b4f34f8ba7971cfa51f3c061934c5c4c6"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add fixtures and test for splitCommitMeta()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 14 13:09:42 2015 -400",
+         "sha1" : "c2c216de6646af3892fe7317cf263f4f9b37b3c8"
+      },
+      {
+         "subject" : "Add fixtures and test for splitCommit()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr 14 12:33:27 2015 -400",
+         "sha1" : "6e2aeb1b4f34f8ba7971cfa51f3c061934c5c4c6",
+         "parents" : [
+            "e88b7722218f2075c9d3981e3fe8b1d0ae7368cc"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Minor bugfixes in splitProcess",
+         "sha1" : "e88b7722218f2075c9d3981e3fe8b1d0ae7368cc",
+         "date" : "Tue Apr 14 02:43:10 2015 -400",
+         "parents" : [
+            "0a97a066ae86ab56c847ce4b178d2aab21fe563c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add fixtures and test for splitProcess()",
+         "date" : "Tue Apr 14 02:42:44 2015 -400",
+         "sha1" : "0a97a066ae86ab56c847ce4b178d2aab21fe563c",
+         "parents" : [
+            "d1600f6f5e5d6c1ccee78b786ade37ef677ce52f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "d1600f6f5e5d6c1ccee78b786ade37ef677ce52f",
+         "date" : "Tue Apr 14 01:34:26 2015 -400",
+         "subject" : "Use const for msgid and record errs in mapEq()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7006152ac5aec88abc9e6dacecf684fe8b911f6c"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "f051411f92133f8ae124469efd56cac2b8114dad"
+         ],
+         "sha1" : "7006152ac5aec88abc9e6dacecf684fe8b911f6c",
+         "date" : "Tue Apr 14 01:20:04 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Optimize layout for quickly swapping edge order"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "a3a6534af3be9e2bddb2daefd35e4e8438747d5c"
+         ],
+         "sha1" : "f051411f92133f8ae124469efd56cac2b8114dad",
+         "date" : "Mon Apr 13 20:18:39 2015 -400",
+         "subject" : "Add envlinks to all logicstates fixtures",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "aebe3733a915b2578649fa69bf1a9ee6a05121bc"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Actually check EdgeSpecs equality from SplitData",
+         "date" : "Mon Apr 13 20:10:31 2015 -400",
+         "sha1" : "a3a6534af3be9e2bddb2daefd35e4e8438747d5c"
+      },
+      {
+         "parents" : [
+            "f3389dd4d277c6fd26e42cf80ea350990b8231b8"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Reuse connUnix for the third form of conn-data",
+         "date" : "Mon Apr 13 05:47:03 2015 -400",
+         "sha1" : "aebe3733a915b2578649fa69bf1a9ee6a05121bc"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "745373bbc96efe3f1d926c10eca97235da9a885a"
+         ],
+         "sha1" : "f3389dd4d277c6fd26e42cf80ea350990b8231b8",
+         "date" : "Mon Apr 13 05:46:22 2015 -400",
+         "subject" : "Make compareSplitData a bit smarter",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "745373bbc96efe3f1d926c10eca97235da9a885a",
+         "date" : "Mon Apr 13 05:45:29 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add LogicState fixtures and test",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "870447cf7b095bd80d8f48e7260b2ff78c8e7228"
+         ]
+      },
+      {
+         "date" : "Mon Apr 13 05:44:48 2015 -400",
+         "sha1" : "870447cf7b095bd80d8f48e7260b2ff78c8e7228",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Couple small test touchups",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7ef51d9e36b123724fb902e123bd8eccef5e7678"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c4137710bf7a15e48d29684b7dc3be6574e20b46"
+         ],
+         "date" : "Mon Apr 13 03:13:48 2015 -400",
+         "sha1" : "7ef51d9e36b123724fb902e123bd8eccef5e7678",
+         "subject" : "Forgot one bit in the name change",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "c4137710bf7a15e48d29684b7dc3be6574e20b46",
+         "date" : "Mon Apr 13 02:50:23 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make repository a commit property, not logic-state",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7aaafc3ab140721a5aa77a039991d1479b499bca"
+         ]
+      },
+      {
+         "subject" : "Remove Key from Property (forgot to long ago)",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sun Apr 12 18:44:31 2015 -400",
+         "sha1" : "7aaafc3ab140721a5aa77a039991d1479b499bca",
+         "parents" : [
+            "473ac24d47367dd0e0f3002568353006d1493083"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "473ac24d47367dd0e0f3002568353006d1493083",
+         "date" : "Sun Apr 12 18:41:28 2015 -400",
+         "subject" : "First step towards split tests: envs (& utilities)",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3139eac770136893b94e3ae68791433cbd8f2a8a"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c5ad94da7118a7cac72476f6df098d3eb0a5cb08"
+         ],
+         "sha1" : "3139eac770136893b94e3ae68791433cbd8f2a8a",
+         "date" : "Sun Apr 12 18:39:20 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Err whoops SplitData shouldn't use field embedding"
+      },
+      {
+         "parents" : [
+            "618e7a57e0b9c8f78528cee4ad7dd9f664b1ce0e"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Consistency and brevity: s/env.Nickname/env.Nick/",
+         "date" : "Sun Apr 12 17:18:47 2015 -400",
+         "sha1" : "c5ad94da7118a7cac72476f6df098d3eb0a5cb08"
+      },
+      {
+         "date" : "Sun Apr 12 16:02:18 2015 -400",
+         "sha1" : "618e7a57e0b9c8f78528cee4ad7dd9f664b1ce0e",
+         "subject" : "Just make tests stop erroring",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "30f2c50fe15a1151ed20ec03eaa91f5c11d21b1a"
+         ]
+      },
+      {
+         "parents" : [
+            "626020134b9fb72a553643007177e221567b9152"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Weird compile error...shadowing issue? dun see it",
+         "sha1" : "30f2c50fe15a1151ed20ec03eaa91f5c11d21b1a",
+         "date" : "Sun Apr 12 06:50:16 2015 -400"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge pull request #32 from sdboyer/edge-resolve",
+         "sha1" : "626020134b9fb72a553643007177e221567b9152",
+         "date" : "Sun Apr 12 06:43:09 2015 -400",
+         "parents" : [
+            "36a114aace88e4ba52ed34b8bd1785e7da2b644b",
+            "d26f1269881413ed38822e11f90a53747ae32ad3"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c3a85a8bd231338ceb6bd3d509c8f1485c316bba"
+         ],
+         "date" : "Sun Apr 12 06:39:13 2015 -400",
+         "sha1" : "d26f1269881413ed38822e11f90a53747ae32ad3",
+         "subject" : "Add resolveDataProvenance()",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "date" : "Sun Apr 12 05:55:43 2015 -400",
+         "sha1" : "c3a85a8bd231338ceb6bd3d509c8f1485c316bba",
+         "subject" : "Add EnvLink/Address assignment helpers, too",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c476cef81b892d45eddba19c679c9dc97d504d04"
+         ]
+      },
+      {
+         "parents" : [
+            "5f9c01a339aad71e3ba8493557bdbb2ee258ad61"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Let mapValEq() take N keys; add mapValEqAnd()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "c476cef81b892d45eddba19c679c9dc97d504d04",
+         "date" : "Sun Apr 12 05:36:12 2015 -400"
+      },
+      {
+         "parents" : [
+            "a8f58787e1311ae85daa3d898f6f165b376a85df"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add compare.go for assorted comparison-ish funcs",
+         "sha1" : "5f9c01a339aad71e3ba8493557bdbb2ee258ad61",
+         "date" : "Sun Apr 12 05:15:39 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5a9d1c4f9c979f3a71d1bf5054d2f57475866ec4"
+         ],
+         "sha1" : "a8f58787e1311ae85daa3d898f6f165b376a85df",
+         "date" : "Sun Apr 12 04:42:05 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add resolveDataAlpha()"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5f23cbb6c95308c587fcac441678f57186404c75"
+         ],
+         "date" : "Sun Apr 12 04:19:10 2015 -400",
+         "sha1" : "5a9d1c4f9c979f3a71d1bf5054d2f57475866ec4",
+         "subject" : "Add splitDataset()",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3f389258ccc9ca8baae844e2f955cf8cc3542eeb"
+         ],
+         "date" : "Sun Apr 12 03:50:27 2015 -400",
+         "sha1" : "5f23cbb6c95308c587fcac441678f57186404c75",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add splitParentDataset, and associated vertex"
+      },
+      {
+         "date" : "Sun Apr 12 03:47:20 2015 -400",
+         "sha1" : "3f389258ccc9ca8baae844e2f955cf8cc3542eeb",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix a couple props being set w/out a Property wrap",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "265b7d6e6cbca08a91ee0d96b491b9c07ae75e6c"
+         ]
+      },
+      {
+         "parents" : [
+            "603206e8eb6618840f215dc309d12b27dbff65d8"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Clarity, consistency: s/MetaDataSet/ParentDataset/",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sun Apr 12 03:31:55 2015 -400",
+         "sha1" : "265b7d6e6cbca08a91ee0d96b491b9c07ae75e6c"
+      },
+      {
+         "subject" : "Merge master to catch up with Dataset refactor.",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sun Apr 12 02:56:55 2015 -400",
+         "sha1" : "603206e8eb6618840f215dc309d12b27dbff65d8",
+         "parents" : [
+            "607420e03b17b3802b25d1bac1b3a0c67132d55a",
+            "36a114aace88e4ba52ed34b8bd1785e7da2b644b"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "36a114aace88e4ba52ed34b8bd1785e7da2b644b",
+         "date" : "Sun Apr 12 02:54:46 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge pull request #41 from sdboyer/fix-datasets",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8455d281104304b3795056021d717f5bdaaaa113",
+            "e97fd6949d0c51eb2f5054bee1b4b79c36b90dea"
+         ]
+      },
+      {
+         "subject" : "Fix up dataset path re: envlink",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Sun Apr 12 02:49:02 2015 -400",
+         "sha1" : "e97fd6949d0c51eb2f5054bee1b4b79c36b90dea",
+         "parents" : [
+            "b1f6b12c7fa291970796628bf9615203e4505ff9"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "82fd6cb7b651ae24c44af837bc1048fbe1e36d44"
+         ],
+         "date" : "Sun Apr 12 02:29:54 2015 -400",
+         "sha1" : "b1f6b12c7fa291970796628bf9615203e4505ff9",
+         "subject" : "Get variably-structured Dataset genesis working",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "bad7258c135985cf473bec2fd3ecc30725906719"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Cruft will out",
+         "sha1" : "82fd6cb7b651ae24c44af837bc1048fbe1e36d44",
+         "date" : "Sun Apr 12 01:40:48 2015 -400"
+      },
+      {
+         "date" : "Sun Apr 12 01:39:12 2015 -400",
+         "sha1" : "bad7258c135985cf473bec2fd3ecc30725906719",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "At least stop the infinite recursion",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8455d281104304b3795056021d717f5bdaaaa113"
+         ]
+      },
+      {
+         "sha1" : "607420e03b17b3802b25d1bac1b3a0c67132d55a",
+         "date" : "Sat Apr 11 06:41:23 2015 -400",
+         "subject" : "Hyphenate instead of camel for vtypes",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "6e53b6b60163c8dc7f7d35e0375928d34176f12e"
+         ]
+      },
+      {
+         "parents" : [
+            "50aacab2c68d3c80b6d96e5827c57de1586938e2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add splitters & vertices for commit and commitmeta",
+         "sha1" : "6e53b6b60163c8dc7f7d35e0375928d34176f12e",
+         "date" : "Sat Apr 11 06:21:49 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1b4ee4944986cb768754906dd1424a932fe11a99"
+         ],
+         "sha1" : "50aacab2c68d3c80b6d96e5827c57de1586938e2",
+         "date" : "Sat Apr 11 05:32:14 2015 -400",
+         "subject" : "Add SpecLocalLogic resolver",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "783a409bb217383797f776af79c253402a7b929b"
+         ],
+         "date" : "Sat Apr 11 05:13:10 2015 -400",
+         "sha1" : "1b4ee4944986cb768754906dd1424a932fe11a99",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Clean up a few things in resolvers"
+      },
+      {
+         "date" : "Sat Apr 11 04:43:14 2015 -400",
+         "sha1" : "783a409bb217383797f776af79c253402a7b929b",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add SpecCommit resolver",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "2fc927330911635a23a2b985e225a1eec91d6c8f"
+         ]
+      },
+      {
+         "parents" : [
+            "cef0c5c6f5910c195c1ef89aae6b6ccac59f6acb"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add equality handling for []byte props",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "2fc927330911635a23a2b985e225a1eec91d6c8f",
+         "date" : "Sat Apr 11 04:26:16 2015 -400"
+      },
+      {
+         "parents" : [
+            "074c8d178be192a7be775d0c2f4d5f314e5564a4"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Move queryish stuff into traverse.go",
+         "sha1" : "cef0c5c6f5910c195c1ef89aae6b6ccac59f6acb",
+         "date" : "Sat Apr 11 03:54:29 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "db0e035d65ab05a893233cba441c4924ddce41c5"
+         ],
+         "date" : "Sat Apr 11 03:44:59 2015 -400",
+         "sha1" : "074c8d178be192a7be775d0c2f4d5f314e5564a4",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Use interfaces for queries instead"
+      },
+      {
+         "date" : "Sat Apr 11 02:53:51 2015 -400",
+         "sha1" : "db0e035d65ab05a893233cba441c4924ddce41c5",
+         "subject" : "Add BothFilter to tamp it down a little more",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "e697650fabf7e285b369370e7de6d5f91b230f9e"
+         ]
+      },
+      {
+         "parents" : [
+            "aa5ad7f9260d550acc9be4a482f6a9f629673824"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Use VertexFilter, EdgeFilter consistently",
+         "sha1" : "e697650fabf7e285b369370e7de6d5f91b230f9e",
+         "date" : "Sat Apr 11 02:49:24 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "17d49079a99062a753f8cdc4650f8e5e48b6d2a8"
+         ],
+         "date" : "Sat Apr 11 01:53:06 2015 -400",
+         "sha1" : "aa5ad7f9260d550acc9be4a482f6a9f629673824",
+         "subject" : "Remove StandardEdge.Label - just EType for now",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "subject" : "Fix resolveEnvLink() to use VerticesWith()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "17d49079a99062a753f8cdc4650f8e5e48b6d2a8",
+         "date" : "Sat Apr 11 01:42:18 2015 -400",
+         "parents" : [
+            "018384ac48071163de65bfa0c71a24019fe16b88"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "8447f3bd38a7c6cbd9d11d4ee941032a19760c6f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Finally, done with first pass on resolveDataLink()",
+         "sha1" : "018384ac48071163de65bfa0c71a24019fe16b88",
+         "date" : "Fri Apr 10 23:30:20 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "23dc30a618ae81854339e59a0e25b615b322436e"
+         ],
+         "date" : "Fri Apr 10 20:13:32 2015 -400",
+         "sha1" : "8447f3bd38a7c6cbd9d11d4ee941032a19760c6f",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix Typ return on commVertx"
+      },
+      {
+         "parents" : [
+            "895b9ff5993a21ac1d9f066febe9e9fdfd57a7f1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add SuccessorsWith(), PredecessorsWith()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Apr 10 18:18:00 2015 -400",
+         "sha1" : "23dc30a618ae81854339e59a0e25b615b322436e"
+      },
+      {
+         "parents" : [
+            "9af4845487cb4b02784940cb2163a4ccb3f795f7",
+            "8455d281104304b3795056021d717f5bdaaaa113"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Merge branch 'master' into edge-resolve",
+         "sha1" : "895b9ff5993a21ac1d9f066febe9e9fdfd57a7f1",
+         "date" : "Fri Apr 10 17:19:06 2015 -400"
+      },
+      {
+         "parents" : [
+            "ff4139284d8e3d0678bbd8c777669520017404b5"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Steps towards allowing vertex fanout",
+         "sha1" : "9af4845487cb4b02784940cb2163a4ccb3f795f7",
+         "date" : "Fri Apr 10 15:50:47 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5897c8b6d029c452b87b70f81f0d8001053e56cc",
+            "4192ea6a7952f991316cc71acad76227c9ef11bb"
+         ],
+         "date" : "Fri Apr 10 15:14:33 2015 -400",
+         "sha1" : "8455d281104304b3795056021d717f5bdaaaa113",
+         "subject" : "Merge pull request #35 from sdboyer/util-methods",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "date" : "Fri Apr 10 14:56:34 2015 -400",
+         "sha1" : "4192ea6a7952f991316cc71acad76227c9ef11bb",
+         "subject" : "Comments and trimming, etc",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "db9e6ee8a139480fd56e818af2d86de28766df43"
+         ]
+      },
+      {
+         "subject" : "Add CoreGraph.VerticesWith()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "db9e6ee8a139480fd56e818af2d86de28766df43",
+         "date" : "Fri Apr 10 04:50:22 2015 -400",
+         "parents" : [
+            "be21c2c7934ca6591b9c01f58609ce85191513b1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "be21c2c7934ca6591b9c01f58609ce85191513b1",
+         "date" : "Fri Apr 10 02:28:32 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add CoreGraph.InWith(), too",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "54f2e119489a3b3df82a123005560aea3da3cfcb"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Have GraphCore.Get() return the vtTuple",
+         "sha1" : "54f2e119489a3b3df82a123005560aea3da3cfcb",
+         "date" : "Fri Apr 10 01:58:01 2015 -400",
+         "parents" : [
+            "bbe05dc22db3e2f686eb554ab257fc56fbc3aa78"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Thu Apr  9 18:05:14 2015 -400",
+         "sha1" : "bbe05dc22db3e2f686eb554ab257fc56fbc3aa78",
+         "subject" : "Start adding traversal utility methods: OutWith()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5897c8b6d029c452b87b70f81f0d8001053e56cc"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "6d5a0aac4dabf56e4913248fe2fa8a1d9f4a5360"
+         ],
+         "date" : "Thu Apr  9 04:14:34 2015 -400",
+         "sha1" : "ff4139284d8e3d0678bbd8c777669520017404b5",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "A bit more on resolvers, but need to step back"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Have GraphCore.Get() return the vtTuple",
+         "date" : "Wed Apr  8 23:44:13 2015 -400",
+         "sha1" : "6d5a0aac4dabf56e4913248fe2fa8a1d9f4a5360",
+         "parents" : [
+            "3641fb3ac0e4fd24087a517ce21a5b72ec913acc"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "579cb65cbbf2a87466599f2a477b3c77d6430df3"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Not using MessageArc now",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed Apr  8 19:09:38 2015 -400",
+         "sha1" : "3641fb3ac0e4fd24087a517ce21a5b72ec913acc"
+      },
+      {
+         "subject" : "Get rid of StandardEdge.Spec; one props is enough",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr  7 14:56:43 2015 -400",
+         "sha1" : "579cb65cbbf2a87466599f2a477b3c77d6430df3",
+         "parents" : [
+            "8555682076e78225ce3e85a131d8a484529486f2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7a86bcd368a868040639f431a07b107c4e43e7bf"
+         ],
+         "sha1" : "8555682076e78225ce3e85a131d8a484529486f2",
+         "date" : "Tue Apr  7 14:44:55 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add edgePartial...for now, not sure if we'll use"
+      },
+      {
+         "parents" : [
+            "d94023146385b8d76b6901fc9385f0ebd8c344f4"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Errwhoops, name is not required on datalinks",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Apr  7 14:43:15 2015 -400",
+         "sha1" : "7a86bcd368a868040639f431a07b107c4e43e7bf"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "d25af6a3d435a40e29b65468c99d08dd30ee9bbd"
+         ],
+         "date" : "Tue Apr  7 14:39:32 2015 -400",
+         "sha1" : "d94023146385b8d76b6901fc9385f0ebd8c344f4",
+         "subject" : "Implement first half of resolveDataLink()",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "d25af6a3d435a40e29b65468c99d08dd30ee9bbd",
+         "date" : "Tue Apr  7 01:59:38 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Detect existing envlink edges in resolver",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "aff630041e31564ef2615413d92e7a3eba2a62bb"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add Label string to StandardEdge",
+         "date" : "Tue Apr  7 01:57:27 2015 -400",
+         "sha1" : "aff630041e31564ef2615413d92e7a3eba2a62bb",
+         "parents" : [
+            "2afac84cb503fc78a7588e3c8446ac309ceee73d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c5a7359351b08e114b5a5ea57a514c1c78f86586"
+         ],
+         "sha1" : "2afac84cb503fc78a7588e3c8446ac309ceee73d",
+         "date" : "Mon Apr  6 23:41:11 2015 -400",
+         "subject" : "Implement the EnvLink resolver.",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "c5a7359351b08e114b5a5ea57a514c1c78f86586",
+         "date" : "Mon Apr  6 23:18:33 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Pass message id into Resolve()",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5897c8b6d029c452b87b70f81f0d8001053e56cc"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "b465705e3fa208140d16392e53cecf7d46af3ce4"
+         ],
+         "sha1" : "5897c8b6d029c452b87b70f81f0d8001053e56cc",
+         "date" : "Mon Apr  6 19:01:35 2015 -400",
+         "subject" : "Add basic edge-vertex storage logic",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Store vtTuple edges in two pmaps - one in, one out",
+         "date" : "Mon Apr  6 18:51:25 2015 -400",
+         "sha1" : "b465705e3fa208140d16392e53cecf7d46af3ce4",
+         "parents" : [
+            "036d95dac9768bfa1fce4baf437cc2e8d0940827"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Pass source vtTuple into Resolve(), too",
+         "date" : "Mon Apr  6 17:28:25 2015 -400",
+         "sha1" : "036d95dac9768bfa1fce4baf437cc2e8d0940827",
+         "parents" : [
+            "5c1814c27771bd14ed9b916d4af550f290f9f234"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "de891fa92dc4d1f705a7059dd23a27dc4aa46381"
+         ],
+         "sha1" : "9035c6a5e6321f307b71a50bb7c2ec90cb72b4e4",
+         "date" : "Sun Apr  5 13:22:52 2015 -500",
+         "subject" : "Update gitignore a bit",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "5c1814c27771bd14ed9b916d4af550f290f9f234",
+         "date" : "Sat Apr  4 05:22:24 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Buncha refactoring in main graph",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "cd53e21e830a3cc9c73e3cf330f46a91bbe2de6a"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add comment on Resolve(), tweak StandardEdge a bit",
+         "date" : "Sat Apr  4 05:21:15 2015 -400",
+         "sha1" : "cd53e21e830a3cc9c73e3cf330f46a91bbe2de6a",
+         "parents" : [
+            "9e157e17513a714b53339f5139e18e56d1ea7c17"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Simple impl of CoreGraph.Get()",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Apr  3 16:47:34 2015 -400",
+         "sha1" : "9e157e17513a714b53339f5139e18e56d1ea7c17",
+         "parents" : [
+            "378c9969f331820298d994ffba2754bc829f1bb5"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "378c9969f331820298d994ffba2754bc829f1bb5",
+         "date" : "Fri Apr  3 16:47:20 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Store vertex/edge/id tuple in an immut map, too",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "674b0e58b6e68e09b224ad64843f7a735ba20cf8"
+         ]
+      },
+      {
+         "date" : "Fri Apr  3 14:26:38 2015 -400",
+         "sha1" : "674b0e58b6e68e09b224ad64843f7a735ba20cf8",
+         "subject" : "Pass the vtx, not the v/t tuple, to identifier",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c2c07ad48297ed464710bd3346b61c5cfb9dabe8"
+         ]
+      },
+      {
+         "parents" : [
+            "47ee95ba133ff21ee46dec7dd691b2ca3503c670"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Use Vertex instead of interface{} w/identifiers",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "c2c07ad48297ed464710bd3346b61c5cfb9dabe8",
+         "date" : "Fri Apr  3 14:22:01 2015 -400"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "s/VtxI/Vertex/; changeover complete",
+         "sha1" : "47ee95ba133ff21ee46dec7dd691b2ca3503c670",
+         "date" : "Fri Apr  3 14:21:23 2015 -400",
+         "parents" : [
+            "6eb861cb1da44a6ffabfdf9b35b65f5d0995c038"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Fri Apr  3 14:03:40 2015 -400",
+         "sha1" : "6eb861cb1da44a6ffabfdf9b35b65f5d0995c038",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Refactor identifiers to use represent.Vertex",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "31878659bda6b1174c460a602a436c35a93aaa0c"
+         ]
+      },
+      {
+         "subject" : "Move identify logic from interpret to represent",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Apr  3 13:38:50 2015 -400",
+         "sha1" : "31878659bda6b1174c460a602a436c35a93aaa0c",
+         "parents" : [
+            "2034b9adbe2174a3dcc78a6f8271fc6850ceb8d3"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Change splitters to use VtxI",
+         "sha1" : "2034b9adbe2174a3dcc78a6f8271fc6850ceb8d3",
+         "date" : "Fri Apr  3 13:30:16 2015 -400",
+         "parents" : [
+            "4f0660fb473c9eb12ac96b982c532d11d005884d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "7f1d517e1f092f63e75b33a879265423bca31a16"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Introduce typed vertex implementations",
+         "sha1" : "4f0660fb473c9eb12ac96b982c532d11d005884d",
+         "date" : "Fri Apr  3 12:34:16 2015 -400"
+      },
+      {
+         "date" : "Fri Apr  3 12:19:01 2015 -400",
+         "sha1" : "7f1d517e1f092f63e75b33a879265423bca31a16",
+         "subject" : "Settle on 'vtx' as vertex var name",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7f523df05b99d36f50ac0614b9c3e048927dc960"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "998488a8f21655ce37c3e96e2846d18d64cdbe82"
+         ],
+         "date" : "Fri Apr  3 11:25:07 2015 -400",
+         "sha1" : "7f523df05b99d36f50ac0614b9c3e048927dc960",
+         "subject" : "Add VtxI interface, to replace Vertex",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "subject" : "Add *CoreGraph.Vertices() for shitty searching",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "998488a8f21655ce37c3e96e2846d18d64cdbe82",
+         "date" : "Fri Apr  3 04:25:30 2015 -400",
+         "parents" : [
+            "bdd72f7c2fc7698fa8d5d2d5d75382b8d503caf7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5bd5c0374fdb6a65195aa75814df70917c92dc1f"
+         ],
+         "sha1" : "bdd72f7c2fc7698fa8d5d2d5d75382b8d503caf7",
+         "date" : "Fri Apr  3 02:31:02 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Forgot to extend switch stmt in Split()"
+      },
+      {
+         "sha1" : "5bd5c0374fdb6a65195aa75814df70917c92dc1f",
+         "date" : "Fri Apr  3 02:15:40 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Experiment with storing edges with their vertices",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "74d5374e2fd91486ed87c47c2e21fc6b59db58ea"
+         ]
+      },
+      {
+         "date" : "Thu Apr  2 19:23:01 2015 -400",
+         "sha1" : "74d5374e2fd91486ed87c47c2e21fc6b59db58ea",
+         "subject" : "Just get rid of deltas for the moment",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3b33ff3057d38e64ea678d86ee98f0c1d1359966"
+         ]
+      },
+      {
+         "parents" : [
+            "4676cc901d96c1c37a69c4475a024ae8cc6f403e"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Pretty much finish the skeleton of the flow",
+         "date" : "Thu Apr  2 19:21:09 2015 -400",
+         "sha1" : "3b33ff3057d38e64ea678d86ee98f0c1d1359966"
+      },
+      {
+         "date" : "Wed Apr  1 21:05:22 2015 -400",
+         "sha1" : "4676cc901d96c1c37a69c4475a024ae8cc6f403e",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Start in on skeletal merge logic",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "a38bfa0787d566935a430b336125f3255471cec8"
+         ]
+      },
+      {
+         "parents" : [
+            "8f4b79bd9b13992845d1eb855fb290acd566ccfa"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Separate out a ListenAddr struct",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed Apr  1 18:02:30 2015 -400",
+         "sha1" : "a38bfa0787d566935a430b336125f3255471cec8"
+      },
+      {
+         "subject" : "Add splitProcess and commented splitDataset",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed Apr  1 17:49:04 2015 -400",
+         "sha1" : "8f4b79bd9b13992845d1eb855fb290acd566ccfa",
+         "parents" : [
+            "070f35f779ddb2e7342b9c09ba6acabf26313d57"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make EdgeSpecs to be []interface{}, for now",
+         "sha1" : "070f35f779ddb2e7342b9c09ba6acabf26313d57",
+         "date" : "Wed Apr  1 17:03:23 2015 -400",
+         "parents" : [
+            "a52db76581c54cdfbb40dd8cb9ef1fa4a882e4d7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "e29c60db90352d8d9eacc0872e9cd9e9faf2ad2d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "mv splitter.go split.go",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed Apr  1 04:23:11 2015 -400",
+         "sha1" : "a52db76581c54cdfbb40dd8cb9ef1fa4a882e4d7"
+      },
+      {
+         "subject" : "Add LogicState splitter",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed Apr  1 04:21:22 2015 -400",
+         "sha1" : "e29c60db90352d8d9eacc0872e9cd9e9faf2ad2d",
+         "parents" : [
+            "bcfaf4a53de56811cee002d189db05e581c9b190"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "9a90409909e099844798d532569e69c0dbe813af"
+         ],
+         "sha1" : "bcfaf4a53de56811cee002d189db05e581c9b190",
+         "date" : "Tue Mar 31 22:31:21 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Introduce splitters (name will change)"
+      },
+      {
+         "parents" : [
+            "6a11d86b95ecfa0286af7d265fa75f21925ed3c0"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Comment out the old find logic",
+         "date" : "Tue Mar 31 19:35:46 2015 -400",
+         "sha1" : "9a90409909e099844798d532569e69c0dbe813af"
+      },
+      {
+         "subject" : "Move things around just to keep the code for a sec",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "6a11d86b95ecfa0286af7d265fa75f21925ed3c0",
+         "date" : "Tue Mar 31 18:27:29 2015 -400",
+         "parents" : [
+            "d7683201db3b5a6f17d02d93b557666b4e2b5d1f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8f666d248ab9594f6ad23146d10a3811fec27d0a"
+         ],
+         "sha1" : "d7683201db3b5a6f17d02d93b557666b4e2b5d1f",
+         "date" : "Tue Mar 31 17:42:16 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Some more types/fields for the graph"
+      },
+      {
+         "parents" : [
+            "dfc5890debbdf5d4af8553d4519e970e013e0095"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Refactor Message",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "8f666d248ab9594f6ad23146d10a3811fec27d0a",
+         "date" : "Tue Mar 31 16:41:20 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "871df9d0400ac5fa396b15dcc8662abbea6d28fc"
+         ],
+         "date" : "Tue Mar 31 13:56:19 2015 -400",
+         "sha1" : "dfc5890debbdf5d4af8553d4519e970e013e0095",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add represent package"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "20b4542ff23cf5a2b33e55e09cd78f36ce4f8611"
+         ],
+         "date" : "Tue Mar 31 13:48:51 2015 -400",
+         "sha1" : "871df9d0400ac5fa396b15dcc8662abbea6d28fc",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Just catch up the things before reorganizing"
+      },
+      {
+         "parents" : [
+            "6fda21a7189adba2736d9c569ccf60f296835b26"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Get rid of intrusive ids (for now)",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "20b4542ff23cf5a2b33e55e09cd78f36ce4f8611",
+         "date" : "Sun Mar 29 23:36:17 2015 -400"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "28ba4d0a2a1fef439808b90bd59301720556c797"
+         ],
+         "sha1" : "6fda21a7189adba2736d9c569ccf60f296835b26",
+         "date" : "Sun Mar 29 16:51:35 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "At least avoid relooping over the identifiers"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1d8da9579cf2f941011a14c85cad74e28d45b4c9"
+         ],
+         "date" : "Sat Mar 28 18:54:48 2015 -400",
+         "sha1" : "28ba4d0a2a1fef439808b90bd59301720556c797",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Use Identifiers to find vertices"
+      },
+      {
+         "parents" : [
+            "6b3e2950f5553409dd41c4b6cea9d0e123cd0133"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add IdentifierProcess",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Mar 27 20:59:50 2015 -400",
+         "sha1" : "1d8da9579cf2f941011a14c85cad74e28d45b4c9"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "938233b6f93d556c725c02e14365ab1ace317bd3"
+         ],
+         "sha1" : "6b3e2950f5553409dd41c4b6cea9d0e123cd0133",
+         "date" : "Fri Mar 27 20:29:16 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add IdentifierDataset, IdentifierCommit"
+      },
+      {
+         "subject" : "Add matchEnvLink helper func",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Mar 27 18:33:45 2015 -400",
+         "sha1" : "938233b6f93d556c725c02e14365ab1ace317bd3",
+         "parents" : [
+            "1736519fdcdb65aa99dd6d8ce2bba7af3bdddbb7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "1736519fdcdb65aa99dd6d8ce2bba7af3bdddbb7",
+         "date" : "Fri Mar 27 18:23:51 2015 -400",
+         "subject" : "Add IdentifierLogicState",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "6a6199e3e4e6d9f45eade59517d3e4eddd6f580d"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "976c4bb9bb27127e9235a5425f650a162a26e75b"
+         ],
+         "sha1" : "6a6199e3e4e6d9f45eade59517d3e4eddd6f580d",
+         "date" : "Fri Mar 27 18:06:27 2015 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "First stab at 'identifiers'; just envs"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add totally brokeass message graph",
+         "date" : "Tue Feb 24 06:08:35 2015 -500",
+         "sha1" : "976c4bb9bb27127e9235a5425f650a162a26e75b",
+         "parents" : [
+            "4d5df8e41ee6b6a4684928ecde45c1a36616932f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Split connection into connUnix and connNet",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Feb 24 03:10:14 2015 -500",
+         "sha1" : "4d5df8e41ee6b6a4684928ecde45c1a36616932f",
+         "parents" : [
+            "32a434b59aeb8771ea1c5fd8ba50f12acf354f66"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Separate DataLink concept out into struct",
+         "sha1" : "32a434b59aeb8771ea1c5fd8ba50f12acf354f66",
+         "date" : "Mon Feb 23 16:23:16 2015 -500",
+         "parents" : [
+            "55e44f0747268e439e6e79464c2ea0b00728a8ca"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Split message & handling into separate file",
+         "sha1" : "55e44f0747268e439e6e79464c2ea0b00728a8ca",
+         "date" : "Mon Feb 23 13:57:15 2015 -500",
+         "parents" : [
+            "160650b126ac2287583115643239f9dfbe43623e"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Mon Feb 23 13:54:59 2015 -500",
+         "sha1" : "160650b126ac2287583115643239f9dfbe43623e",
+         "subject" : "Move findEnvs out as standalone func",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "b1be329e1aa057001742f7b34cd2aa9cb9971187"
+         ]
+      },
+      {
+         "date" : "Sat Feb 21 03:50:44 2015 -500",
+         "sha1" : "b1be329e1aa057001742f7b34cd2aa9cb9971187",
+         "subject" : "Func to search available envs",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "e38ee5e2ea1cdbde4069362ed17a116abdd0a496"
+         ]
+      },
+      {
+         "subject" : "Add substep to env parsing, begin integrating gogl",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "e38ee5e2ea1cdbde4069362ed17a116abdd0a496",
+         "date" : "Thu Feb 19 15:12:30 2015 -500",
+         "parents" : [
+            "b445bd804fe265674923e57c8bfa9c4a4f5d7fb2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "91ba5370664c784687d4445cf81d5fde464eea92"
+         ],
+         "sha1" : "b445bd804fe265674923e57c8bfa9c4a4f5d7fb2",
+         "date" : "Wed Feb 18 13:21:31 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Mostly fix up the message structs"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1813471fed208ccf02c79aa12e59e00425a3bceb"
+         ],
+         "sha1" : "91ba5370664c784687d4445cf81d5fde464eea92",
+         "date" : "Tue Feb 17 17:35:42 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add pseudotest for debugging JSON unmarshaling"
+      },
+      {
+         "date" : "Mon Feb 16 19:32:41 2015 -500",
+         "sha1" : "1813471fed208ccf02c79aa12e59e00425a3bceb",
+         "subject" : "Dump all entities into node list...ugh",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "bfb04428abe93e793e38e1efb986a07492831dd9"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "e4a736068db98a93da3be6d53c87cb913bb01237"
+         ],
+         "date" : "Sun Feb 15 23:21:35 2015 -500",
+         "sha1" : "bfb04428abe93e793e38e1efb986a07492831dd9",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "First pass on structures for receiving json"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1c6e31baa7b19c0c086e5968c8f5bb0ee53e17a8"
+         ],
+         "date" : "Sat Feb 14 05:06:55 2015 -500",
+         "sha1" : "e4a736068db98a93da3be6d53c87cb913bb01237",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Pass the remote address to the persistence layer, "
+      },
+      {
+         "date" : "Sat Feb 14 04:08:43 2015 -500",
+         "sha1" : "1c6e31baa7b19c0c086e5968c8f5bb0ee53e17a8",
+         "subject" : "Add json validation to daemon http handler",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "b24d8372bd025c7c67ec0136f3489d0fec188a23"
+         ]
+      },
+      {
+         "subject" : "Remove the object-based subitems on envs",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Feb 13 19:49:54 2015 -500",
+         "sha1" : "b24d8372bd025c7c67ec0136f3489d0fec188a23",
+         "parents" : [
+            "ef07e5b4ee109ed749607de779d33f88136dd473"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "goimports",
+         "sha1" : "ef07e5b4ee109ed749607de779d33f88136dd473",
+         "date" : "Fri Feb 13 17:13:46 2015 -500",
+         "parents" : [
+            "12d55951407881c099ae2d0a5713dc103f2d6b23"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "6a083f5512e78ab8567cbb0f68ea88500e9d1fad"
+         ],
+         "date" : "Fri Feb 13 17:09:54 2015 -500",
+         "sha1" : "12d55951407881c099ae2d0a5713dc103f2d6b23",
+         "subject" : "Add a little explanatory test comment",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "date" : "Fri Feb 13 17:06:44 2015 -500",
+         "sha1" : "6a083f5512e78ab8567cbb0f68ea88500e9d1fad",
+         "subject" : "Get go test to validate all fixture messages",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7b62b80d4fb1f5b83e68cbff356dad1471bf77d3"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Allow libraries key on logic states",
+         "sha1" : "7b62b80d4fb1f5b83e68cbff356dad1471bf77d3",
+         "date" : "Fri Feb 13 16:20:01 2015 -500",
+         "parents" : [
+            "ab75c5b78d7eeef9f9939a2cc7a132d634489ea1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Schematize commits and commit-meta",
+         "date" : "Fri Feb 13 16:17:41 2015 -500",
+         "sha1" : "ab75c5b78d7eeef9f9939a2cc7a132d634489ea1",
+         "parents" : [
+            "0db5ae4ac45cf4a36f742ab4a592cd3ce3409573"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Fix environment for logic states and processes",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "0db5ae4ac45cf4a36f742ab4a592cd3ce3409573",
+         "date" : "Fri Feb 13 15:55:52 2015 -500",
+         "parents" : [
+            "f4a5e85ed4a9b9800fc87a175eacbd3c3b2b05f8"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add env links, get datasets completely working",
+         "sha1" : "f4a5e85ed4a9b9800fc87a175eacbd3c3b2b05f8",
+         "date" : "Fri Feb 13 15:40:09 2015 -500",
+         "parents" : [
+            "661623e6e1c27b0f81b3547b56a047ab84473709"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Fix a few bits in the dataset schema",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "661623e6e1c27b0f81b3547b56a047ab84473709",
+         "date" : "Fri Feb 13 15:14:29 2015 -500",
+         "parents" : [
+            "1284803c14dd377c88f961f6b62914a446d400bf"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Incremental progress on datasets",
+         "date" : "Fri Feb 13 04:43:59 2015 -500",
+         "sha1" : "1284803c14dd377c88f961f6b62914a446d400bf",
+         "parents" : [
+            "67a85ae29a39f3d52acc66fadf227bf1c8dbf009"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "96da3fc04f596eeb60cf0960b04af148089cdf3c"
+         ],
+         "date" : "Thu Feb 12 22:59:28 2015 -500",
+         "sha1" : "67a85ae29a39f3d52acc66fadf227bf1c8dbf009",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fill out process schema (mostly)"
+      },
+      {
+         "parents" : [
+            "9d25ec384458a946397a6f87470c3d37d5da07b4"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add failure-inducing empties for all the things",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "96da3fc04f596eeb60cf0960b04af148089cdf3c",
+         "date" : "Thu Feb 12 21:38:07 2015 -500"
+      },
+      {
+         "parents" : [
+            "55e06e8e3eee2ea46e7329286c7952baf2ed770d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Finish up logic-state schema",
+         "sha1" : "9d25ec384458a946397a6f87470c3d37d5da07b4",
+         "date" : "Thu Feb 12 21:21:48 2015 -500"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Incremental checkin of logic-state schema bits",
+         "date" : "Thu Feb 12 06:38:12 2015 -500",
+         "sha1" : "55e06e8e3eee2ea46e7329286c7952baf2ed770d",
+         "parents" : [
+            "322f44eda01ed7abd59a5ea5502f9fb54af7460e"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Get all messages passing validation",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Thu Feb 12 02:29:45 2015 -500",
+         "sha1" : "322f44eda01ed7abd59a5ea5502f9fb54af7460e",
+         "parents" : [
+            "93bdd63698c4b7a03dea9e83e0a8122a4abf470c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "7fda12589e813156214eb43285f075d82c900919"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add basic schema validation test",
+         "sha1" : "93bdd63698c4b7a03dea9e83e0a8122a4abf470c",
+         "date" : "Thu Feb 12 00:43:35 2015 -500"
+      },
+      {
+         "date" : "Thu Feb 12 00:43:15 2015 -500",
+         "sha1" : "7fda12589e813156214eb43285f075d82c900919",
+         "subject" : "Fix up typos and minor errors",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "e50f4ac3741c0b77e2c38c3394b3d6496711c798"
+         ]
+      },
+      {
+         "subject" : "Rename/move schema json file appropriately",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "e50f4ac3741c0b77e2c38c3394b3d6496711c798",
+         "date" : "Thu Feb 12 00:16:31 2015 -500",
+         "parents" : [
+            "1f27ca72d5d4c4dcce4141034df54acfc6bf4746"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make top-level schema a message, not an env",
+         "sha1" : "1f27ca72d5d4c4dcce4141034df54acfc6bf4746",
+         "date" : "Thu Feb 12 00:15:46 2015 -500",
+         "parents" : [
+            "0abe9f70d88fa7145e30e67da6cce08438fb6ca4"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Wed Feb 11 21:07:32 2015 -500",
+         "sha1" : "0abe9f70d88fa7145e30e67da6cce08438fb6ca4",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix up addresses...I think?",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "980d54731870f1086f25d882e3142d79adfe9f14"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5c1ee3788a579941f280618ee809dff03f1721c8"
+         ],
+         "date" : "Wed Feb 11 20:23:46 2015 -500",
+         "sha1" : "980d54731870f1086f25d882e3142d79adfe9f14",
+         "subject" : "Add some defaults to envs, and a nickname prop",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "f2fa8feb4a6d465392f5568c1c72b931b267c53f"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Update fix messages to suit new 'address' pattern",
+         "sha1" : "5c1ee3788a579941f280618ee809dff03f1721c8",
+         "date" : "Wed Feb 11 20:22:56 2015 -500"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8fa5f22b8f81b991553f62d84723a34c2b54e51a"
+         ],
+         "sha1" : "f2fa8feb4a6d465392f5568c1c72b931b267c53f",
+         "date" : "Wed Feb 11 19:53:19 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "First steps on the JSON schema"
+      },
+      {
+         "parents" : [
+            "2110a1625d4e140c03f614755886a3b0fb2f26fc"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add last two message fixtures.",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Wed Feb 11 19:51:34 2015 -500",
+         "sha1" : "8fa5f22b8f81b991553f62d84723a34c2b54e51a"
+      },
+      {
+         "subject" : "Fix 1.json trailing commas, and makum arrays",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Feb  6 19:14:51 2015 -500",
+         "sha1" : "2110a1625d4e140c03f614755886a3b0fb2f26fc",
+         "parents" : [
+            "79b16e38b8721cc9d91e8e86d79981c3992b5db5"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "ea4cf95bc9f3563eb760207f8c5752aa318d8612"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Next four messages, nearly done",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "79b16e38b8721cc9d91e8e86d79981c3992b5db5",
+         "date" : "Thu Feb  5 18:09:37 2015 -500"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add first two messages as JSON",
+         "sha1" : "ea4cf95bc9f3563eb760207f8c5752aa318d8612",
+         "date" : "Thu Feb  5 04:14:37 2015 -500",
+         "parents" : [
+            "c21dccfe3df291aa357a957f2c06c8c294135a24"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Very prelim work on go daemon",
+         "sha1" : "c21dccfe3df291aa357a957f2c06c8c294135a24",
+         "date" : "Thu Feb  5 04:11:11 2015 -500",
+         "parents" : [
+            "4b938030157c10cf0fb5ed22c5cc4569edf50813"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "9309bfb87122bb2e20e3c611b4450eafb93b8aff"
+         ],
+         "date" : "Tue Feb  3 22:26:08 2015 -500",
+         "sha1" : "4b938030157c10cf0fb5ed22c5cc4569edf50813",
+         "subject" : "Remove buncha cruft files",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "date" : "Mon Feb  2 16:33:26 2015 -500",
+         "sha1" : "9309bfb87122bb2e20e3c611b4450eafb93b8aff",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add commit metadata; viz for test state",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5955b80e4ad67c7abd88582469fb70acf669407b"
+         ]
+      },
+      {
+         "parents" : [
+            "b81419f27da9f8348330296459b3fa47da7d9deb"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add providers, logos",
+         "date" : "Mon Feb  2 16:33:04 2015 -500",
+         "sha1" : "5955b80e4ad67c7abd88582469fb70acf669407b"
+      },
+      {
+         "parents" : [
+            "3757cd384f48677c7e22142dd5806ed15e0ca5e8"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Add infobar data for lgroups",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Jan 30 17:59:27 2015 -500",
+         "sha1" : "b81419f27da9f8348330296459b3fa47da7d9deb"
+      },
+      {
+         "date" : "Fri Jan 30 16:38:11 2015 -500",
+         "sha1" : "3757cd384f48677c7e22142dd5806ed15e0ca5e8",
+         "subject" : "Switch data-building segments to using lgroups",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "96843c9385741eb4b334ead9929b6d3b7c14d4f7"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1e44ac8676e9c4570495013734481416842dcf11"
+         ],
+         "sha1" : "96843c9385741eb4b334ead9929b6d3b7c14d4f7",
+         "date" : "Fri Jan 30 15:32:39 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add PVD method to find logical groups"
+      },
+      {
+         "date" : "Thu Jan 29 23:48:03 2015 -500",
+         "sha1" : "1e44ac8676e9c4570495013734481416842dcf11",
+         "subject" : "Dump commit data into infobar, too",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "f3b28876d51c2ad53ab62405c909a38ae9a0934d"
+         ]
+      },
+      {
+         "date" : "Thu Jan 29 22:56:40 2015 -500",
+         "sha1" : "f3b28876d51c2ad53ab62405c909a38ae9a0934d",
+         "subject" : "Tweak edge width and force balancing a bit",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "40df12217adbb7af5a4b87ed179894878af9d8e1"
+         ]
+      },
+      {
+         "sha1" : "40df12217adbb7af5a4b87ed179894878af9d8e1",
+         "date" : "Thu Jan 29 22:17:45 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Move fixture file and get rid of old crufty ones",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "a22a8461a28ab360afb3d4400d053058dbe07d8a"
+         ]
+      },
+      {
+         "date" : "Thu Jan 29 22:14:58 2015 -500",
+         "sha1" : "a22a8461a28ab360afb3d4400d053058dbe07d8a",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Refactor commit linker to new commit datastructure",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "d94c87da5de72d9fe5c623b234ee878e4b738dac"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7b4c751a7b3e405d0e6333daae51b48179991644"
+         ],
+         "sha1" : "d94c87da5de72d9fe5c623b234ee878e4b738dac",
+         "date" : "Thu Jan 29 22:14:10 2015 -500",
+         "subject" : "Clean up and correct commits in container.json",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "sha1" : "7b4c751a7b3e405d0e6333daae51b48179991644",
+         "date" : "Thu Jan 29 22:13:34 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Update README with git log generating command",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "76065234b847650652dc540956ff8f8eba453c2c"
+         ]
+      },
+      {
+         "subject" : "Adjust commit format a bit",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "76065234b847650652dc540956ff8f8eba453c2c",
+         "date" : "Thu Jan 29 17:06:55 2015 -500",
+         "parents" : [
+            "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "cce276d46b6ba12118d4371c77c2f6d842239fd2"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add new, more detailed commit data to fixture",
+         "date" : "Thu Jan 29 15:05:25 2015 -500",
+         "sha1" : "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
+      },
+      {
+         "date" : "Thu Jan 29 14:57:55 2015 -500",
+         "sha1" : "cce276d46b6ba12118d4371c77c2f6d842239fd2",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Put data under 'containers' key in fixture",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "5d63fa5fe5f4699138fcd00dd3d613a6a10a2420"
+         ]
+      },
+      {
+         "sha1" : "5d63fa5fe5f4699138fcd00dd3d613a6a10a2420",
+         "date" : "Fri Jan 23 18:31:43 2015 -500",
+         "subject" : "Add a pure commit 'view'",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "158071c4acfa91ee5f0797760daa24f09c3965dc"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "b566993a00c166a3e0b2a65658fb52bf41ac21da"
+         ],
+         "sha1" : "158071c4acfa91ee5f0797760daa24f09c3965dc",
+         "date" : "Mon Jan 19 17:57:20 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add missing react & queue-async to bower.json"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add README with super-prelim setup instructions",
+         "date" : "Mon Jan 19 05:17:51 2015 -500",
+         "sha1" : "b566993a00c166a3e0b2a65658fb52bf41ac21da",
+         "parents" : [
+            "099a989163b9cfb210e7e8965c5c934a1ae21658"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Mon Jan 19 05:16:00 2015 -500",
+         "sha1" : "099a989163b9cfb210e7e8965c5c934a1ae21658",
+         "subject" : "Add relevant packages to bower.json",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "96bbdaa577c5423bbf4862f7b2fc63b0b47df2c3"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "205490d7a6d06fd1109846c2a1bbb5c122086519"
+         ],
+         "sha1" : "96bbdaa577c5423bbf4862f7b2fc63b0b47df2c3",
+         "date" : "Mon Jan 19 05:15:15 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add anchor file (forgot it before)"
+      },
+      {
+         "parents" : [
+            "2711c5061241a4feb42abf060470647e00aee1d1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Actually make the commit sort work",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Mon Jan 19 04:52:10 2015 -500",
+         "sha1" : "205490d7a6d06fd1109846c2a1bbb5c122086519"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "6aa4a3ef1597e5864fd60193f6bc92068c2856c9"
+         ],
+         "sha1" : "2711c5061241a4feb42abf060470647e00aee1d1",
+         "date" : "Mon Jan 19 04:06:07 2015 -500",
+         "subject" : "Add outer logic for toposort by commit",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fill in info table for processes",
+         "sha1" : "6aa4a3ef1597e5864fd60193f6bc92068c2856c9",
+         "date" : "Fri Jan 16 16:59:29 2015 -500",
+         "parents" : [
+            "3f7bde72dd71b833378ee839cc6913d44574b793"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "date" : "Fri Jan 16 13:25:33 2015 -500",
+         "sha1" : "3f7bde72dd71b833378ee839cc6913d44574b793",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Use length-based shouldComponentUpdate trick for v",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "bd268d26a62088552732a6d563962dbbc73edb86"
+         ]
+      },
+      {
+         "parents" : [
+            "9cad2d5e0bed169fc3a071bcb644b2d1aca0dbcb",
+            "1cfcb902abbc715be9b4fee1da1f92fdd0efa4a7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Merge branch 'proto'",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Jan 16 09:48:50 2015 -500",
+         "sha1" : "bd268d26a62088552732a6d563962dbbc73edb86"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "97df43900d0db9d1d38c85b1d17d7e73e7a12632"
+         ],
+         "sha1" : "1cfcb902abbc715be9b4fee1da1f92fdd0efa4a7",
+         "date" : "Fri Jan 16 09:47:50 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Remove some old cruft"
+      },
+      {
+         "sha1" : "97df43900d0db9d1d38c85b1d17d7e73e7a12632",
+         "date" : "Fri Jan 16 09:44:43 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Reuse the node filter for link filter, HUZZAH",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "dfac77628b9be996cfa6c33fb204a669efaa4f4e"
+         ]
+      },
+      {
+         "subject" : "Add a stupid little shared id system",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Jan 16 09:33:21 2015 -500",
+         "sha1" : "dfac77628b9be996cfa6c33fb204a669efaa4f4e",
+         "parents" : [
+            "8210883dc420a0ef4ac8754a88b7e7e1a2bdfafd"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "subject" : "Add basic filtering mechanism.",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Jan 16 09:10:17 2015 -500",
+         "sha1" : "8210883dc420a0ef4ac8754a88b7e7e1a2bdfafd",
+         "parents" : [
+            "87dd42d85d5b59480554832841eff49ab50412fc"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "87dd42d85d5b59480554832841eff49ab50412fc",
+         "date" : "Fri Jan 16 06:28:36 2015 -500",
+         "subject" : "Introduce PVD (PipeVizDatastore) - main graph entr",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3d14fbb476b0169c604d6ef0055065c4103361d0"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "ebabbe014c17992f0441b013651f058d89a52db6"
+         ],
+         "sha1" : "3d14fbb476b0169c604d6ef0055065c4103361d0",
+         "date" : "Fri Jan 16 03:56:56 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "First pass at populating the info table"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8bd6f2519e3c437d3228c14be7bdcf2dc799c171"
+         ],
+         "sha1" : "ebabbe014c17992f0441b013651f058d89a52db6",
+         "date" : "Fri Jan 16 01:32:05 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Get info table populating correctly"
+      },
+      {
+         "date" : "Fri Jan 16 00:34:02 2015 -500",
+         "sha1" : "8bd6f2519e3c437d3228c14be7bdcf2dc799c171",
+         "subject" : "Basic nested components working",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "96c4694623cb7ab5a2ff83a5f261fbe74a4877e7"
+         ]
+      },
+      {
+         "date" : "Thu Jan 15 21:28:57 2015 -500",
+         "sha1" : "96c4694623cb7ab5a2ff83a5f261fbe74a4877e7",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Get rid of svg el dance in Viz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "67ebe466a30e3aa4bdef03e70c3c864e7b01d412"
+         ]
+      },
+      {
+         "date" : "Thu Jan 15 18:14:32 2015 -500",
+         "sha1" : "67ebe466a30e3aa4bdef03e70c3c864e7b01d412",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Lol set the layout size, idiot",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "85238efb54b4fd6a3907e5105a5dad32b7bb7ec5"
+         ]
+      },
+      {
+         "date" : "Thu Jan 15 17:13:49 2015 -500",
+         "sha1" : "85238efb54b4fd6a3907e5105a5dad32b7bb7ec5",
+         "subject" : "React approach almost working, just need to fix of",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1b3339611de68e56d9fb00f08f47de0deb1ab683"
+         ]
+      },
+      {
+         "date" : "Thu Jan 15 04:54:38 2015 -500",
+         "sha1" : "1b3339611de68e56d9fb00f08f47de0deb1ab683",
+         "subject" : "First refactor pass, still not working",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "530fb5f29ecfc58e94894e045cfaf5f7ee5fe169"
+         ]
+      },
+      {
+         "sha1" : "530fb5f29ecfc58e94894e045cfaf5f7ee5fe169",
+         "date" : "Thu Jan 15 03:28:13 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Initial commit of React-based approach",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "b099e1e71f0fd70b4a477cfe9a3ad1780c0b7793"
+         ]
+      },
+      {
+         "date" : "Wed Jan 14 20:43:16 2015 -500",
+         "sha1" : "b099e1e71f0fd70b4a477cfe9a3ad1780c0b7793",
+         "subject" : "More silly syntastic happy-making",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "d71a5ebc53ecd7beac4025c7f7c797b0c958152e"
+         ]
+      },
+      {
+         "date" : "Wed Jan 14 19:49:00 2015 -500",
+         "sha1" : "d71a5ebc53ecd7beac4025c7f7c797b0c958152e",
+         "subject" : "Tweaks to make syntastic happy",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "a3054a17b2a7d574ddddb7b23be781617ef045ab"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "95850cc2cd10c746cabcaeb97dc66cd17968f80d"
+         ],
+         "sha1" : "a3054a17b2a7d574ddddb7b23be781617ef045ab",
+         "date" : "Mon Jan 12 19:55:06 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add all remaining links."
+      },
+      {
+         "parents" : [
+            "504e77a434c673417bc70c3a7d3b57cad0f2bd75"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix has check in dataset linker",
+         "date" : "Fri Jan  9 23:05:42 2015 -500",
+         "sha1" : "95850cc2cd10c746cabcaeb97dc66cd17968f80d"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "082deeb4dd95d4c39d63a9fa09afe75eb8286b98"
+         ],
+         "sha1" : "504e77a434c673417bc70c3a7d3b57cad0f2bd75",
+         "date" : "Fri Jan  9 23:02:57 2015 -500",
+         "subject" : "Put names on processes",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Mess with link strength a bit",
+         "sha1" : "082deeb4dd95d4c39d63a9fa09afe75eb8286b98",
+         "date" : "Fri Jan  9 22:56:30 2015 -500",
+         "parents" : [
+            "887b16ced6e538e1e0b0aaa8b7533d36a56db134"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "sha1" : "887b16ced6e538e1e0b0aaa8b7533d36a56db134",
+         "date" : "Fri Jan  9 22:54:15 2015 -500",
+         "subject" : "Add proc->logic links",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "83800507cf26320a19f05de808ffd8056cdea91e"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Fix Container.findProcess()",
+         "date" : "Fri Jan  9 22:23:35 2015 -500",
+         "sha1" : "83800507cf26320a19f05de808ffd8056cdea91e",
+         "parents" : [
+            "06748871fec3cba4dcd0e3302242fd49ed137554"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "874e493410ea0c9471534b37719c66442fcd599e"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Another incremental checkin, getting close",
+         "date" : "Fri Jan  9 22:00:12 2015 -500",
+         "sha1" : "06748871fec3cba4dcd0e3302242fd49ed137554"
+      },
+      {
+         "parents" : [
+            "e26e7ec4823e4c0dfd145c1032b150e41a947ea6"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Incremental, reorganize, fixup, progress, blah",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "874e493410ea0c9471534b37719c66442fcd599e",
+         "date" : "Fri Jan  9 20:05:32 2015 -500"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Make JSON correct",
+         "sha1" : "e26e7ec4823e4c0dfd145c1032b150e41a947ea6",
+         "date" : "Fri Jan  9 20:00:08 2015 -500",
+         "parents" : [
+            "1854930bef6511f688afd99c1018dcb99ae966b0"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "48a65b5d0d5e838065d92cc90077e4de64f1d11c"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Incremental commit of unified approach",
+         "date" : "Fri Jan  9 17:37:46 2015 -500",
+         "sha1" : "1854930bef6511f688afd99c1018dcb99ae966b0"
+      },
+      {
+         "date" : "Fri Jan  9 03:04:50 2015 -500",
+         "sha1" : "48a65b5d0d5e838065d92cc90077e4de64f1d11c",
+         "subject" : "Flesh out - α and genesis!",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "bb8973c5cb2559c7e50730cefe0d81395e2cc8f8"
+         ]
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "23f21002148796052bcedf5429b0b1b0aad7fc32"
+         ],
+         "sha1" : "bb8973c5cb2559c7e50730cefe0d81395e2cc8f8",
+         "date" : "Thu Jan  8 16:23:17 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Move to 'data spaces' representation concept"
+      },
+      {
+         "date" : "Thu Jan  8 15:33:03 2015 -500",
+         "sha1" : "23f21002148796052bcedf5429b0b1b0aad7fc32",
+         "subject" : "Change 'data id' to 'data container namespace' for",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "22e3eb081f35973e68ef3756f64a488026a0b0e0"
+         ]
+      },
+      {
+         "parents" : [
+            "3ac263fd54f48c1fe02adbc142f0bf4b449e3421"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Cleanup and add all containers",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "22e3eb081f35973e68ef3756f64a488026a0b0e0",
+         "date" : "Thu Jan  8 05:17:04 2015 -500"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "3a0598c2a6ef410f7b6f39dd466d608076e2e2ec"
+         ],
+         "sha1" : "3ac263fd54f48c1fe02adbc142f0bf4b449e3421",
+         "date" : "Tue Jan  6 23:48:58 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Use mysql socket for stage01 app"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "9253f48a904ffa493aaed135a7ebf2ac5b2fe92f"
+         ],
+         "date" : "Tue Jan  6 23:33:50 2015 -500",
+         "sha1" : "3a0598c2a6ef410f7b6f39dd466d608076e2e2ec",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "finish up db01 and stage01"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "23db8ba7fee81ace9ba4ff8a21849b5559550ae0"
+         ],
+         "date" : "Tue Jan  6 19:20:41 2015 -500",
+         "sha1" : "9253f48a904ffa493aaed135a7ebf2ac5b2fe92f",
+         "subject" : "missing comma",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "cc896a82f0aa0d0e018f9da23ccaca672bf9e406"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Start adding mysqld",
+         "sha1" : "23db8ba7fee81ace9ba4ff8a21849b5559550ae0",
+         "date" : "Tue Jan  6 19:01:31 2015 -500"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "491034fc11aa3c3c4cb1ca6a4dbbf92aa3208cb1"
+         ],
+         "sha1" : "cc896a82f0aa0d0e018f9da23ccaca672bf9e406",
+         "date" : "Tue Jan  6 12:32:35 2015 -500",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Incremental commit of container.json"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "c5c402de2ffc42be26091b231417077046ecb411"
+         ],
+         "date" : "Tue Dec 23 01:27:26 2014 -500",
+         "sha1" : "491034fc11aa3c3c4cb1ca6a4dbbf92aa3208cb1",
+         "subject" : "Mucking around with secondary transition. not good",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "8ca8a871f6243a5256a96994a842c9685ecc865d"
+         ],
+         "date" : "Wed Oct 22 21:07:21 2014 -400",
+         "sha1" : "c5c402de2ffc42be26091b231417077046ecb411",
+         "subject" : "add swell on mouseover to nodes",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "subject" : "silly little reset for my local",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "sha1" : "8ca8a871f6243a5256a96994a842c9685ecc865d",
+         "date" : "Wed Oct 22 21:07:02 2014 -400",
+         "parents" : [
+            "e8596d1073b51f7ed42b01c8c7aeef51e03e05c5"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "7aa24b91c5514492f2e67a58764814db247d59c4"
+         ],
+         "sha1" : "e8596d1073b51f7ed42b01c8c7aeef51e03e05c5",
+         "date" : "Wed Oct 22 20:45:18 2014 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Tweak friction and charge distance a bit."
+      },
+      {
+         "sha1" : "7aa24b91c5514492f2e67a58764814db247d59c4",
+         "date" : "Wed Oct 22 01:22:07 2014 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "more cleanups and better separation",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "bbc35a6f9efc0ec598109c783a3ad01a8d646c7e"
+         ]
+      },
+      {
+         "subject" : "Add second state fixture; touchups for that",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Oct 21 19:23:45 2014 -400",
+         "sha1" : "bbc35a6f9efc0ec598109c783a3ad01a8d646c7e",
+         "parents" : [
+            "c5bd38eb24eb0dfd4ab23957dbedcab73becc4c7"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add bower.json for graphlib",
+         "date" : "Tue Oct 21 18:56:12 2014 -400",
+         "sha1" : "c5bd38eb24eb0dfd4ab23957dbedcab73becc4c7",
+         "parents" : [
+            "c03ecb9a34155452cb5ae0ac897f2746ae6bc942"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "4b27183601586ab3389a30420ecc5a1c50ce8c0f"
+         ],
+         "date" : "Tue Oct 21 18:55:33 2014 -400",
+         "sha1" : "c03ecb9a34155452cb5ae0ac897f2746ae6bc942",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Giant refactor to work from injected JSON data."
+      },
+      {
+         "subject" : "Sweet, got it working all split up.",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Oct 21 02:28:50 2014 -400",
+         "sha1" : "4b27183601586ab3389a30420ecc5a1c50ce8c0f",
+         "parents" : [
+            "3f129d9d9da92c049391a23cb90821a76c27d52d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "16aa32af1768a4850ba7e250bd5b81dcfeca69f1"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Use anchor class to hide elements",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Tue Oct 21 00:05:09 2014 -400",
+         "sha1" : "3f129d9d9da92c049391a23cb90821a76c27d52d"
+      },
+      {
+         "sha1" : "16aa32af1768a4850ba7e250bd5b81dcfeca69f1",
+         "date" : "Mon Oct 20 23:30:57 2014 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Split nodes into separate data lists",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "99aa80fac7b208c1ca371644281b66e0ab79521f"
+         ]
+      },
+      {
+         "subject" : "Tad more cleanup",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Mon Oct 20 15:13:04 2014 -400",
+         "sha1" : "99aa80fac7b208c1ca371644281b66e0ab79521f",
+         "parents" : [
+            "c22608f157682add4284ccbb957996bc044191e6"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "parents" : [
+            "599fd0bbf826bcfd82a1f5e3918af394a925340d"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "subject" : "Clean up js file, removing commented bits.",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "date" : "Fri Oct 17 23:09:50 2014 -400",
+         "sha1" : "c22608f157682add4284ccbb957996bc044191e6"
+      },
+      {
+         "sha1" : "599fd0bbf826bcfd82a1f5e3918af394a925340d",
+         "date" : "Fri Oct 17 23:08:05 2014 -400",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add d3 locally for offline dev",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "1b401a3377785d8533348b01a8cabc936fd39abc"
+         ]
+      },
+      {
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Throw in mock/proto node files",
+         "date" : "Fri Oct 17 22:47:24 2014 -400",
+         "sha1" : "1b401a3377785d8533348b01a8cabc936fd39abc",
+         "parents" : [
+            "9cad2d5e0bed169fc3a071bcb644b2d1aca0dbcb"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>"
+      },
+      {
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "cf2c61eae37ffbb4abceb268445185fae9bc13b8"
+         ],
+         "sha1" : "9cad2d5e0bed169fc3a071bcb644b2d1aca0dbcb",
+         "date" : "Wed Oct  8 02:46:40 2014 -400",
+         "subject" : "Change hash on instance message",
+         "repository" : "git@github.com:tag1consulting/pipeviz"
+      },
+      {
+         "parents" : [
+            "1076009c0200542e7a3f86a79bdc1c5db1c44824"
+         ],
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Add experimental instance.json",
+         "sha1" : "cf2c61eae37ffbb4abceb268445185fae9bc13b8",
+         "date" : "Tue Oct  7 11:58:03 2014 -400"
+      },
+      {
+         "sha1" : "1076009c0200542e7a3f86a79bdc1c5db1c44824",
+         "date" : "Wed Sep 17 05:31:33 2014 -400",
+         "subject" : "Add code-change.json with experimental payload",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "f534980c7cdfd6da061bef778dbc28f0962488f3"
+         ]
+      },
+      {
+         "date" : "Wed Sep 17 04:50:03 2014 -400",
+         "sha1" : "f534980c7cdfd6da061bef778dbc28f0962488f3",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Buncha stupid things to start with",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : [
+            "d4c85908b083fceb0d8895c36cb4b450ccb18e3c"
+         ]
+      },
+      {
+         "date" : "Wed Aug 20 02:32:27 2014 -400",
+         "sha1" : "d4c85908b083fceb0d8895c36cb4b450ccb18e3c",
+         "repository" : "git@github.com:tag1consulting/pipeviz",
+         "subject" : "Initial commit",
+         "author" : "\"Sam Boyer\" <tech@samboyer.org>",
+         "parents" : []
+      }
+   ]
+}
