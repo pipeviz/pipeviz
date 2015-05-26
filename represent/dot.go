@@ -17,7 +17,7 @@ func GenerateDot(g CoreGraph) []byte {
 	buf.WriteString("fontsize=16")
 
 	// first, write all vertices
-	for _, v := range g.VerticesWith(qbv()) {
+	for _, v := range g.VerticesWith(Qbv()) {
 		lbltype := "label"
 		var props string
 		switch v.v.(type) {
@@ -47,12 +47,12 @@ func GenerateDot(g CoreGraph) []byte {
 			prop := val.(Property)
 			var format string
 			switch prop.Value.(type) {
-			default:
-				format = "%s"
 			case []byte:
 				format = "%x"
 			case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
 				format = "%d"
+			default:
+				format = "%s"
 			}
 			buf.WriteString(fmt.Sprintf(
 				"\n%s: "+format+" (%d)",
@@ -65,7 +65,7 @@ func GenerateDot(g CoreGraph) []byte {
 	}
 
 	// pass through a second time to write all edges
-	for _, v := range g.VerticesWith(qbv()) {
+	for _, v := range g.VerticesWith(Qbv()) {
 		v.oe.ForEach(func(k string, val ps.Any) {
 			edge := val.(StandardEdge)
 			buf.WriteString(fmt.Sprintf(
@@ -76,12 +76,12 @@ func GenerateDot(g CoreGraph) []byte {
 				prop := val2.(Property)
 				var format string
 				switch prop.Value.(type) {
-				default:
-					format = "%s"
 				case []byte:
 					format = "%x"
 				case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
 					format = "%d"
+				default:
+					format = "%s"
 				}
 				buf.WriteString(fmt.Sprintf(
 					"\n%s: "+format+" (%d)",

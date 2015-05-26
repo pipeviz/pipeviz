@@ -2,7 +2,7 @@ svg {
     background-color: #2E2633;
     float: left;
     height: 100vh;
-    width: 83.3%;
+    /*width: 83.3%;*/
 }
 
 div#infobar {
@@ -41,7 +41,7 @@ image.provider-logo {
     -o-transition: opacity 0.25s ease-in-out;
 }
 
-.node.lgroup {
+.node.lgroup, .node.logic-state {
     stroke: #fff;
     stroke-width: 1.5px;
 }
@@ -50,7 +50,7 @@ image.provider-logo {
     fill: #ff7f0e;
 }
 
-.node.logic circle {
+.node.logic-state circle {
     fill: #9467bd;
 }
 
@@ -79,6 +79,18 @@ image.provider-logo {
 .link-commit {
     stroke: #17becf;
     stroke-width: 5px;
+}
+
+.vcs-label rect {
+    fill: #ff7f0e;
+}
+
+.vcs-label text {
+    /*stroke: #ff7f0e;*/
+    /*fill: #ff7f0e;*/
+    stroke: #EFFFCD;
+    fill: #EFFFCD;
+    text-anchor: middle;
 }
 
 text {

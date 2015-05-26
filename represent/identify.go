@@ -39,7 +39,7 @@ func Identify(g CoreGraph, sd SplitData) int {
 //
 // FIXME the responsibility murkiness is making this a horrible snarl, fix this shit ASAP
 func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
-	matches := g.VerticesWith(qbv(sd.Vertex.Typ()))
+	matches := g.VerticesWith(Qbv(sd.Vertex.Typ()))
 	if len(matches) == 0 {
 		// no vertices of this type, safe to bail early
 		return nil, false
@@ -79,7 +79,7 @@ func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
 	// TODO this is a temporary measure until we move identity edge resolution up into vtx identification process
 	filtered2 := filtered[:0]
 	if hasEl {
-		newvt := vtTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
+		newvt := VertexTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		edge, success := Resolve(g, 0, newvt, envlink)
 
 		if !success {
@@ -88,7 +88,7 @@ func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
 		}
 
 		for _, candidate := range filtered {
-			for _, edge2 := range g.OutWith(candidate.id, qbe(EType("envlink"))) {
+			for _, edge2 := range g.OutWith(candidate.id, Qbe(EType("envlink"))) {
 				filtered2 = append(filtered2, candidate)
 				if edge2.Target == edge.Target {
 					return []int{candidate.id}, true
@@ -114,7 +114,7 @@ func identifyByGitHashSpec(g CoreGraph, sd SplitData, matches []int) int {
 		if spec, ok := es.(SpecCommit); ok {
 			// then search otherwise-matching vertices for a corresponding sha1 edge
 			for _, matchvid := range matches {
-				if len(g.OutWith(matchvid, qbe(EType("version"), "sha1", spec.Sha1))) == 1 {
+				if len(g.OutWith(matchvid, Qbe(EType("version"), "sha1", spec.Sha1))) == 1 {
 					return matchvid
 				}
 			}
