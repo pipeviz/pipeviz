@@ -16,16 +16,22 @@ def grab_args():
 
 def jsonify(repo, destination=False):
     output = []
-    last = repo[repo.head.target]
-    for commit in repo.walk(last.id, pygit2.GIT_SORT_TIME):
-        row = {}
-        row['sha1'] = str(commit.id)
-        row['subject'] = shorten(commit.message)
-        row['author'] = '"{}" <{}>'.format(commit.author.name, commit.author.email)
-        row['date'] = datetime.datetime.fromtimestamp(commit.commit_time).strftime('%c') + " {:=02d}{:02d}".format(commit.commit_time_offset//60, commit.commit_time_offset % 60)
-        row['repository'] = repo.remotes["origin"].url
-        row['parents'] = list(map(str, commit.parent_ids))
-        output.append(row)
+    seen = set()
+    for ref_name in repo.listall_references():
+        ref = repo.lookup_reference(ref_name)
+        last = ref.get_object()
+        for commit in repo.walk(last.id, pygit2.GIT_SORT_TOPOLOGICAL):
+            if str(commit.id) in seen:
+                break
+            seen.add(str(commit.id))
+            row = {}
+            row['sha1'] = str(commit.id)
+            row['subject'] = shorten(commit.message)
+            row['author'] = '"{}" <{}>'.format(commit.author.name, commit.author.email)
+            row['date'] = datetime.datetime.fromtimestamp(commit.commit_time).strftime('%c') + " {:=02d}{:02d}".format(commit.commit_time_offset//60, commit.commit_time_offset % 60)
+            row['repository'] = repo.remotes["origin"].url
+            row['parents'] = list(map(str, commit.parent_ids))
+            output.append(row)
     if destination:
         json.dump(output, destination, indent=args.pretty)
     else:
