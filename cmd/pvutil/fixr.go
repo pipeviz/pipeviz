@@ -127,7 +127,7 @@ func runFixrBatch(cmd *cobra.Command, files []fileInfo) {
 		resp, err := client.Post(cmd.Flags().Lookup("target").Value.String(), "application/json", bytes.NewReader(src))
 		fmt.Printf("Sending %v/%v...", f.d, f.f.Name())
 		if err != nil {
-			log.Println(err)
+			log.Fatalln(err)
 		}
 
 		bod, err := ioutil.ReadAll(resp.Body)

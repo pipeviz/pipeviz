@@ -104,6 +104,7 @@ func RunHttpIngestor(addr string, schema *gjs.Schema, ich chan<- message) {
 			// Too long, or otherwise malformed request body
 			// TODO add a body
 			w.WriteHeader(400)
+			w.Write([]byte(err.Error()))
 			return
 		}
 
@@ -112,6 +113,7 @@ func RunHttpIngestor(addr string, schema *gjs.Schema, ich chan<- message) {
 			// Malformed JSON, likely
 			// TODO add a body
 			w.WriteHeader(400)
+			w.Write([]byte(err.Error()))
 			return
 		}
 
