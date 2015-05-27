@@ -1,5 +1,4 @@
 {
-    "client": "pvc-manual",
     "environments": [
         {
             "type": "physical",

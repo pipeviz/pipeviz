@@ -1,5 +1,4 @@
 {
-    "client": "gitscan",
     "commits" : [
         {
             "repository" : "git@github.com:tag1consulting/pipeviz",
