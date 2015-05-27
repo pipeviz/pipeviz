@@ -9,6 +9,10 @@
             "branches": ["websockets"]
         },
         {
+            "sha1": "e2380c9819bc45a79c5ad37980139cee98d5c7fd",
+            "tags": ["v0.0.1"]
+        }
+        {
             "sha1": "33be849cd1785fd25a3a058526c2a11629f0e91b",
             "branches": ["proto"]
         },
