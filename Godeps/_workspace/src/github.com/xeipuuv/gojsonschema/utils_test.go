@@ -26,7 +26,7 @@
 package gojsonschema
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 	"math"
 	"testing"
 )

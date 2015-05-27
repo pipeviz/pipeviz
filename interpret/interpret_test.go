@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/fixtures"
 	"github.com/tag1consulting/pipeviz/interpret"
-	gjs "github.com/xeipuuv/gojsonschema"
 )
 
 var schema *gjs.Schema

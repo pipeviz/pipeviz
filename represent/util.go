@@ -1,6 +1,6 @@
 package represent
 
-import "github.com/mndrix/ps"
+import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 // Just reuse PropQ
 type p PropQ

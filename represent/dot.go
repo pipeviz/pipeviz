@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 )
 
 // Generates a .dot-format representation of the given CoreGraph, suitable for

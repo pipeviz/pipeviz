@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/mndrix/ps"
-	"github.com/stretchr/testify/assert"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 )
 
 // just convenient shorthand

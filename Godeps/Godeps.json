@@ -1,14 +1,33 @@
 {
 	"ImportPath": "github.com/tag1consulting/pipeviz",
 	"GoVersion": "go1.4.1",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/gorilla/websocket",
 			"Rev": "ecff5aabe41f13b4cdf897e3c0c9bbccbe552a29"
 		},
 		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
 			"ImportPath": "github.com/mndrix/ps",
 			"Rev": "33ddf69629c1bcea76b04f4a4e9e00e4cce82eb6"
+		},
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Rev": "ebb2d55f56cfec37ad899ad410b823805cc38e3c"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "beb8d730f2afc6c3fe75312ad6f61a3dc47a64aa"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Rev": "e4ec8152c15fc46bd5056ce65997a07c7d415325"
 		},
 		{
 			"ImportPath": "github.com/xeipuuv/gojsonpointer",
