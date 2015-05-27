@@ -209,8 +209,14 @@ func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
 	for _, tag := range d.Tags {
-		v := vertexVcsLabel{ps.NewMap()}
+		v := vertexGitTag{ps.NewMap()}
 		v.props = v.props.Set("name", Property{MsgSrc: id, Value: tag})
+		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+	}
+
+	for _, branch := range d.Branches {
+		v := vertexGitBranch{ps.NewMap()}
+		v.props = v.props.Set("name", Property{MsgSrc: id, Value: branch})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 

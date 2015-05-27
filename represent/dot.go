@@ -33,7 +33,7 @@ func GenerateDot(g CoreGraph) []byte {
 			props = "\tshape=doubleoctagon,style=filled,fillcolor=cyan,\n"
 		case vertexCommit:
 			props = "\tshape=box,style=filled,fillcolor=grey\n"
-		case vertexVcsLabel:
+		case vertexGitTag:
 			props = "\tshape=cds,margin=\"0.22,0.22\",\n"
 		case vertexTestResult:
 			props = "\tshape=note\n"

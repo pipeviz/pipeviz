@@ -284,16 +284,16 @@ func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 type IdentifierVcsLabel struct{}
 
 func (i IdentifierVcsLabel) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexVcsLabel)
+	_, ok := data.(vertexGitTag)
 	return ok
 }
 
 func (i IdentifierVcsLabel) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexVcsLabel)
+	l, ok := a.(vertexGitTag)
 	if !ok {
 		return false
 	}
-	r, ok := b.(vertexVcsLabel)
+	r, ok := b.(vertexGitTag)
 	if !ok {
 		return false
 	}

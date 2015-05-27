@@ -88,6 +88,7 @@ type CommitMeta struct {
 	Sha1      Sha1
 	Sha1Str   string   `json:"sha1"`
 	Tags      []string `json:"tags"`
+	Branches  []string `json:"branches"`
 	TestState string   `json:"testState"`
 }
 
