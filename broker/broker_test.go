@@ -63,7 +63,7 @@ func TestBroker(t *testing.T) {
 	l2 := br.Subscribe()
 	go lstn(l2)
 	if len(br.subs) != 2 {
-		t.Fatal("Should be two channels in the subs list after second subscription, but got %v", len(br.subs))
+		t.Fatalf("Should be two channels in the subs list after second subscription, but got %v", len(br.subs))
 	}
 
 	// Kick off second fanout goroutine
@@ -81,7 +81,7 @@ func TestBroker(t *testing.T) {
 	// Now unsubscribe the second listener
 	br.Unsubscribe(l2)
 	if len(br.subs) != 1 {
-		t.Fatal("Should be just one channel in the subs list after unsubscription, but got %v", len(br.subs))
+		t.Fatalf("Should be just one channel in the subs list after unsubscription, but got %v", len(br.subs))
 	}
 
 	input <- g
