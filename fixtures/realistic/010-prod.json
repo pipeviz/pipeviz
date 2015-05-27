@@ -1,0 +1,23 @@
+{
+    "client": "pvc-manual",
+    "environments": [
+        {
+            "type": "physical",
+            "os": "unix",
+            "address": {
+                "hostname": "prod-web01",
+                "ipv4": "10.1.1.1"
+            },
+            "provider": "rackspace"
+        },
+        {
+            "type": "physical",
+            "os": "unix",
+            "address": {
+                "hostname": "prod-db01",
+                "ipv4": "10.1.1.3"
+            },
+            "provider": "rackspace"
+        }
+    ]
+}
