@@ -2,35 +2,35 @@
     "commit-meta": [
         {
             "sha1": "34fb01335d0e6341ff92a5753c36b6c9376cf29b",
-            "branches": ["master"],
+            "testState": "passed"
         },
         {
             "sha1": "9b40850723142cf888be2b3e5b601c55f7eda8c8",
-            "branches": ["websockets"],
+            "testState": "passed"
         },
         {
             "sha1": "33be849cd1785fd25a3a058526c2a11629f0e91b",
-            "branches": ["proto"],
+            "testState": "passed"
         },
         {
             "sha1": "7b701b8b385887e5760502509b82ee2a760c3468",
-            "branches": ["edge-resolve-2"],
+            "testState": "passed"
         },
         {
             "sha1": "afd972ec96efb7ea63390658f727f5bae8bc1371",
-            "branches": ["broker"],
+            "testState": "passed"
         },
         {
-            "sha1": "158071c4acfa91ee5f0797760daa24f09c3965dc",
-            "branches": ["ks"],
+            "sha1": "ba896abe9b3b3d146816920a204729eb55ab1608",
+            "testState": "failed"
         },
         {
             "sha1": "fe07ee25998b9f19cb4aa07cb416be3ffbb4c4be",
-            "branches": ["frontend-fp"],
+            "testState": "pending"
         },
         {
             "sha1": "4b938030157c10cf0fb5ed22c5cc4569edf50813",
-            "tags": ["old-proto"]
+            "testState": "failed"
         }
     ]
 }
