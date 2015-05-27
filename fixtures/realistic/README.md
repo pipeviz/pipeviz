@@ -14,3 +14,5 @@ In particular, the list also indicates the imagined client/source that would log
 * **007-test-stats** (scan-github) - scanner that slurps data from github to reports test pass/failure status as recorded by, say, travis-ci.
 * **010-prod** (pvc) - manual reporting about the existence of all three of the servers involved in constituting “prod” - `prod-web01`, `prod-web02`, and `prod-db01.`
 * **015-prod1-pkg-ls** (scan-yum) - a yum-based scanner, reports apache httpd binary and libphp5.so library on prod-web01.
+* **020-prod1-app** (scan-drush) - imagining that the app is a Drupal instance, this would probably be a drush-based scanner, or at least something complemented by drush (it reports db connection details that would otherwise be prohibitively difficult to obtain). But this is more like other logic-state reporting messages than not.
+* **025-prod1-procs** (scan-procs) - a scanner that inspects the process table and reports “useful” info; tells us about the running httpd proc. Particularly tricky but crucial here is getting the ‘logic-state’ associations right; getting the port listeners right is also essential.
