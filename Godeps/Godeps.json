@@ -1,0 +1,36 @@
+{
+	"ImportPath": "github.com/tag1consulting/pipeviz",
+	"GoVersion": "go1.4.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "ecff5aabe41f13b4cdf897e3c0c9bbccbe552a29"
+		},
+		{
+			"ImportPath": "github.com/mndrix/ps",
+			"Rev": "33ddf69629c1bcea76b04f4a4e9e00e4cce82eb6"
+		},
+		{
+			"ImportPath": "github.com/xeipuuv/gojsonpointer",
+			"Rev": "636edb2500d21f2ed09ea96a00deb36bbd07cf70"
+		},
+		{
+			"ImportPath": "github.com/xeipuuv/gojsonreference",
+			"Rev": "2df3c0c802434c5cb984dbc21425f5960bda4d16"
+		},
+		{
+			"ImportPath": "github.com/xeipuuv/gojsonschema",
+			"Rev": "71b85f61a135e79143f3d3238d5175a4f29b6689"
+		},
+		{
+			"ImportPath": "github.com/zenazn/goji/graceful",
+			"Comment": "v0.9.0",
+			"Rev": "845982030542a0fd9c8e8cbf76a84c7482cb3755"
+		},
+		{
+			"ImportPath": "github.com/zenazn/goji/web",
+			"Comment": "v0.9.0",
+			"Rev": "845982030542a0fd9c8e8cbf76a84c7482cb3755"
+		}
+	]
+}
