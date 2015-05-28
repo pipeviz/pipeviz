@@ -1,0 +1,31 @@
+{
+    "logic-states": [
+        {
+            "type": "binary",
+            "id": {
+                "version": "2.2.4"
+            },
+            "path": "/usr/sbin/httpd",
+            "environment": {
+                "address": {
+                    "hostname": "prod-web02"
+                }
+            },
+            "libraries": [
+                "/etc/httpd/modules/libphp.so"
+            ]
+        },
+        {
+            "type": "library",
+            "id": {
+                "version": "5.5.13"
+            },
+            "path": "/etc/httpd/modules/libphp.so",
+            "environment": {
+                "address": {
+                    "hostname": "prod-web02"
+                }
+            }
+        }
+    ]
+}
