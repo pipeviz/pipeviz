@@ -3,6 +3,8 @@ package represent
 import (
 	"bytes"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 )
@@ -46,11 +48,14 @@ func GenerateDot(g CoreGraph) []byte {
 		v.v.Props().ForEach(func(k string, val ps.Any) {
 			prop := val.(Property)
 			var format string
-			switch prop.Value.(type) {
+			switch pv := prop.Value.(type) {
 			case []byte:
 				format = "%x"
 			case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
 				format = "%d"
+			case string:
+				prop.Value = strings.Trim(strconv.QuoteToASCII(pv), `"`)
+				format = "%s"
 			default:
 				format = "%s"
 			}
@@ -75,11 +80,14 @@ func GenerateDot(g CoreGraph) []byte {
 			edge.Props.ForEach(func(k2 string, val2 ps.Any) {
 				prop := val2.(Property)
 				var format string
-				switch prop.Value.(type) {
+				switch pv := prop.Value.(type) {
 				case []byte:
 					format = "%x"
 				case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
 					format = "%d"
+				case string:
+					prop.Value = strings.Trim(strconv.QuoteToASCII(pv), `"`)
+					format = "%s"
 				default:
 					format = "%s"
 				}
