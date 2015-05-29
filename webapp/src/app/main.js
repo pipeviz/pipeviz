@@ -201,7 +201,7 @@ var VizPrep = React.createClass({
             return false;
         });
 
-        _.each(this.props.graph.verticesWithType("vcs-label"), function(l) {
+        _.each(this.props.graph.vertices(isType("git-tag", "git-branch")), function(l) {
             var vedges = _.filter(_.map(l.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
 
             if (cmp.props.graph.get(vedges[0].target).prop("repository").value === repo) {
@@ -305,9 +305,8 @@ var VizPrep = React.createClass({
                 if (_.has(members, v)) {
                     // different behavior depending on whether we're finding commit or (app and/or label)
                     // app handling is identical to commit handling, so we reuse
-                    var ls = _.union(_.filter(members[v], isType("logic-state")),
-                                     _.filter(members[v], isType("commit")));
-                    var lbls = _.filter(members[v], isType("vcs-label"));
+                    var ls = _.filter(members[v], isType("logic-state", "commit"));
+                    var lbls = _.filter(members[v], isType("git-tag", "git-branch"));
                     if (ls.length !== 0) {
                         // has at least one app, or is a commit joint. create link from last thing to this
                         _.each(ls, function(tgt) {

@@ -63,13 +63,13 @@ var pvGraphProto = {
     // is passed, it is taken to be a filtering function, and each vertex will
     // be passed as a candidate for elimination.
     vertices: function() {
-        if (arguments.length === 1) {
+        if (arguments.length === 0) {
             return _.filter(this._objects, function(d) {
                 return d.isVertex();
             });
         }
 
-        var cf = arguments[1];
+        var cf = arguments[0];
         return _.filter(this._objects, function(d) {
             return d.isVertex() && cf(d);
         });
@@ -115,6 +115,33 @@ pvGraph = function(obj) {
     );
 };
 
+var pq = {
+    and: function() {
+        var funcs = arguments;
+        return function(d) {
+            for (var i = 0; i < funcs.length; i++) {
+                if (!funcs[i](d)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    },
+    or: function() {
+        var funcs = arguments;
+        return function(d) {
+            for (var i = 0; i < funcs.length; i++) {
+                if (funcs[i](d)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+}
+
 var filters = {
     vertices: function(d) {
         return d.isVertex();
@@ -125,7 +152,21 @@ var filters = {
 };
 
 var isType = function(typ) {
+    if (arguments.length === 1) {
+        return function(d) {
+            return typ === d.Typ();
+        };
+    }
+
+    var typs = arguments;
     return function(d) {
-        return typ === d.Typ();
-    };
+        var typ = d.Typ();
+        for (var i = 0; i < typs.length; i++) {
+            if (typs[i] === typ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 };
