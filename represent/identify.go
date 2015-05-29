@@ -138,7 +138,8 @@ func init() {
 		IdentifierDataset{},
 		IdentifierProcess{},
 		IdentifierCommit{},
-		IdentifierVcsLabel{},
+		IdentifierGitTag{},
+		IdentifierGitBranch{},
 		IdentifierTestResult{},
 		IdentifierParentDataset{},
 		IdentifierComm{},
@@ -281,19 +282,39 @@ func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 	return mapValEq(l.Props(), r.Props(), "pid")
 }
 
-type IdentifierVcsLabel struct{}
+type IdentifierGitTag struct{}
 
-func (i IdentifierVcsLabel) CanIdentify(data Vertex) bool {
+func (i IdentifierGitTag) CanIdentify(data Vertex) bool {
 	_, ok := data.(vertexGitTag)
 	return ok
 }
 
-func (i IdentifierVcsLabel) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierGitTag) Matches(a Vertex, b Vertex) bool {
 	l, ok := a.(vertexGitTag)
 	if !ok {
 		return false
 	}
 	r, ok := b.(vertexGitTag)
+	if !ok {
+		return false
+	}
+
+	return mapValEq(l.Props(), r.Props(), "name")
+}
+
+type IdentifierGitBranch struct{}
+
+func (i IdentifierGitBranch) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexGitBranch)
+	return ok
+}
+
+func (i IdentifierGitBranch) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexGitBranch)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexGitBranch)
 	if !ok {
 		return false
 	}
