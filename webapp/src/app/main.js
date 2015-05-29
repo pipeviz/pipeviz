@@ -425,12 +425,21 @@ var VizPrep = React.createClass({
 
         return [nodes, links, labels];
     },
+    getDefaultProps: function() {
+        return {
+            width: 0,
+            height: 0,
+            graph: new pvGraph({id: 0, vertices: []}),
+            focalRepo: "",
+        };
+    },
     shouldComponentUpdate: function(nextProps, nextState) {
         // In the graph object, state is invariant with respect to the message id.
         return nextProps.graph.mid !== this.props.graph.mid;
     },
     render: function() {
-        var vizdata = this.extractVizGraph("https://github.com/sdboyer/pipeviz");
+        var vizdata = this.extractVizGraph(this.props.focalRepo);
+
         return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
     },
 });
@@ -444,9 +453,19 @@ var App = React.createClass({
             graph: new pvGraph({id: 0, vertices: []}),
         };
     },
+    mostCommonRepo: function(g) {
+        return _.reduce(_.countBy(_.filter(g.verticesWithType("logic-state"), function(v) {
+            var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
+            return vedges.length !== 0;
+        }), function(v) {
+            return g.get(_.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"))[0].target).prop("repository").value;
+        }), function(accum, count, repo) {
+            return count < accum[1] ? accum : [repo, count];
+        }, ["", 0])[0];
+    },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-                   React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph})
+                   React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: this.mostCommonRepo(this.props.graph)})
               );
     },
 });
