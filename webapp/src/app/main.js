@@ -298,7 +298,7 @@ var VizPrep = React.createClass({
                 // process all label nodes we have waiting around
                 _.forOwn(lpnodes, function(llen, id) {
                     // need to push the actual objects on so the viz can cheat and track x/y props
-                    labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
+                    labels.push({id: id, l: from[0], r: members[v][0], pos: llen / (path.length+1)});
                 });
 
                 // zero out lpnodes set
