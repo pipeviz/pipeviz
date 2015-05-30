@@ -41,11 +41,18 @@ var Viz = React.createClass({
             viewBox: "0 0 " + this.props.width + " " + this.props.height
         });
     },
-    componentDidUpdate: function() {
-        this.state.force.nodes(this.props.nodes);
-        this.state.force.links(this.props.links);
-
-        return this.graphRender(this.getDOMNode(), this.state, this.props);
+    componentWillMount: function() {
+        this.state.force.stop();
+    },
+    componentWillReceiveProps: function(nextProps) {
+        this.state.force.nodes(nextProps.nodes);
+        this.state.force.links(nextProps.links);
+    },
+    componentDidUpdate: function(prevProps) {
+        this.graphRender(this.getDOMNode(), this.state, this.props);
+        if (this.props.nodes.length !== 0) {
+            (prevProps.nodes.length === 0) ? this.state.force.alpha(0.5) : this.state.force.alpha(0.1);
+        }
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
@@ -432,7 +439,7 @@ var VizPrep = React.createClass({
             focalRepo: "",
         };
     },
-    shouldComponentUpdate: function(nextProps, nextState) {
+    shouldComponentUpdate: function(nextProps) {
         // In the graph object, state is invariant with respect to the message id.
         return nextProps.graph.mid !== this.props.graph.mid;
     },
