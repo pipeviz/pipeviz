@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"regexp"
 
@@ -442,7 +442,7 @@ func runValidate(cmd *cobra.Command, args []string) {
 	for _, dir := range args {
 		fl, err := ioutil.ReadDir(dir)
 		if err != nil {
-			log.Printf("Failed to read directory '%v' with error %v\n", dir, err)
+			fmt.Printf("Failed to read directory '%v' with error %v\n", dir, err)
 		}
 
 		for _, f := range fl {
@@ -450,26 +450,27 @@ func runValidate(cmd *cobra.Command, args []string) {
 				src, err := ioutil.ReadFile(dir + "/" + f.Name())
 				if err != nil {
 					errors |= FileReadFail
-					log.Printf("Failed to read fixture file %v/%v\n", dir, f.Name())
+					fmt.Printf("Failed to read fixture file %v/%v\n", dir, f.Name())
 					continue
 				}
 
 				result, err := schema.Validate(gjs.NewStringLoader(string(src)))
 				if err != nil {
 					errors |= ValidationError
-					log.Printf("Validation process terminated with errors for %v/%v. Error: \n%v\n", dir, f.Name(), err.Error())
+					fmt.Printf("Validation process terminated with errors for %v/%v. Error: \n%v\n", dir, f.Name(), err.Error())
 					continue
 				}
 
 				if !result.Valid() {
 					errors |= ValidationFail
 					for _, desc := range result.Errors() {
-						log.Printf("\t%s\n", desc)
+						fmt.Printf("\t%s\n", desc)
 					}
+				} else {
+					fmt.Printf("%v/%v successfully validated\n", dir, f.Name())
 				}
 			}
 		}
 	}
-
 	os.Exit(errors)
 }
