@@ -1,7 +1,7 @@
 {
     "processes": [
         {
-            "logic states": [ "/usr/libexec/mysqld" ],
+            "logic-states": [ "/usr/libexec/mysqld" ],
             "user": "mysql",
             "group": "mysql",
             "dataset": "/var/lib/mysql",
