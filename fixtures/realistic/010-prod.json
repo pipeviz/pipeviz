@@ -13,6 +13,15 @@
             "type": "physical",
             "os": "unix",
             "address": {
+                "hostname": "prod-web02",
+                "ipv4": "10.1.1.2"
+            },
+            "provider": "rackspace"
+        },
+        {
+            "type": "physical",
+            "os": "unix",
+            "address": {
                 "hostname": "prod-db01",
                 "ipv4": "10.1.1.3"
             },
