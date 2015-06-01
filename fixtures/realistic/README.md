@@ -16,8 +16,11 @@ In particular, the list also indicates the imagined client/source that would log
 * **015-prod1-pkg-ls** (scan-yum) - a yum-based scanner, reports apache httpd binary and libphp5.so library on prod-web01.
 * **020-prod1-app** (scan-drush) - imagining that the app is a Drupal instance, this would probably be a drush-based scanner, or at least something complemented by drush (it reports db connection details that would otherwise be prohibitively difficult to obtain). But this is more like other logic-state reporting messages than not.
 * **025-prod1-procs** (scan-procs) - a scanner that inspects the process table and reports “useful” info; tells us about the running httpd proc. Particularly tricky but crucial here is getting the ‘logic-state’ associations right; getting the port listeners right is also essential.
-* **030-prod2-pkg-ls** (scan-yum) - a yum-based scanner, reports apache httpd binary and libphp5.so library on prod-web02. Identical to the prod1 message except for env.
+* **030-prod2-pkg-ls** (scan-yum) - reports apache httpd binary and libphp5.so library on prod-web02. Identical to the prod1 message except for env.
 * **035-prod1-app** (scan-drush) - imagining that the app is a Drupal instance, this would probably be a drush-based scanner, or at least something complemented by drush (it reports db connection details that would otherwise be prohibitively difficult to obtain). But this is more like other logic-state reporting messages than not. Identical to the prod1 message except for env.
-* **040-prod1-procs** (scan-procs) - a scanner that inspects the process table and reports “useful” info; tells us about the running httpd proc. Particularly tricky but crucial here is getting the ‘logic-state’ associations right; getting the port listeners right is also essential. Identical to the prod1 message except for env.
+* **040-prod1-procs** (scan-procs) - proc scanner reports the running httpd proc. Particularly tricky but crucial here is getting the ‘logic-state’ associations right; getting the port listeners right is also essential. Identical to the prod1 message except for env.
 * **045-proddb1-pkg-ls** (scan-yum) - yum-based scanner reports mysql pkg.
 * **050-proddb1-mysql** (scan-mysql) - a multifaceted scanner that both looks at the proc table, inspects a mysql config, and issues some queries to report on both the mysql process and the datasets contained therein.
+* **055-stage** (pvc) - manually reports the stage box, on Digital Ocean.
+* **060-stage-pkg-ls** (scan-yum) - reports httpd, libphp5.so, and mysql pkgs from yum scanner.
+* **065-stage-procs** (scan-procs/mysql) - reports procs AND datasets. this is probably a plausible message? it’s sorta a merge of the general procs & mysql procs from before.
