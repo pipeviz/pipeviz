@@ -25,3 +25,7 @@ In particular, the list also indicates the imagined client/source that would log
 * **060-stage-app** (scan-drush) - same drush-based scanner as above, doing the same thing.
 * **065-stage-pkg-ls** (scan-yum) - reports httpd, libphp5.so, and mysql pkgs from yum scanner.
 * **070-stage-procs** (scan-procs/mysql) - reports procs AND datasets. this is probably a plausible message? it’s sorta a merge of the general procs & mysql procs from before.
+* **075-qa** (pvc) - manually reports the qa box, on Digital Ocean.
+* **080-qa-app** (scan-drush) - same drush-based scanner as above, doing the same thing. Different commit is deployed, though.
+* **085-qa-pkg-ls** (scan-yum) - reports httpd, libphp5.so, and mysql pkgs from yum scanner.
+* **090-qa-procs** (scan-procs/mysql) - reports procs AND datasets. same as corresponding stage message.

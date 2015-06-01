@@ -1,0 +1,13 @@
+{
+    "environments": [
+        {
+            "type": "virtual",
+            "os": "unix",
+            "address": {
+                "hostname": "qa",
+                "ipv4": "10.1.1.8"
+            },
+            "provider": "digitalocean"
+        }
+    ]
+}
