@@ -1,0 +1,45 @@
+{
+    "processes": [
+        {
+            "logic states": [ "/usr/libexec/mysqld" ],
+            "user": "mysql",
+            "group": "mysql",
+            "dataset": "/var/lib/mysql",
+            "cwd": "/var/lib/mysql",
+            "pid": 2345,
+            "environment": {
+                "address": {
+                    "hostname": "prod-db01"
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "port": 3306
+                },
+                {
+                    "type": "unix",
+                    "path": "/var/lib/mysql/mysql.sock"
+                }
+            ]
+        }
+    ],
+    "datasets": [
+        {
+            "name": "/var/lib/mysql",
+            "environment": {
+                "address": {
+                    "hostname": "prod-db01"
+                }
+            },
+            "path": "/var/lib/mysql",
+            "subsets": [
+                {
+                    "name": "app_db",
+                    "genesis": "α"
+                }
+            ]
+        }
+    ]
+}
