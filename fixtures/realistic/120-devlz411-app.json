@@ -6,7 +6,7 @@
                 "commit": "fa4aba6d130a0dafc01274386a04110a740eef36"
             },
             "nick": "ourapp",
-            "lgroup": "qa",
+            "lgroup": "dev-lz411",
             "path": "/var/www/app",
             "environment": {
                 "address": {
