@@ -32,6 +32,11 @@ var vertexProto = {
         if (_.has(this.vertex.properties, path)) {
             return this.vertex.properties[path];
         }
+    },
+    propv: function(path) {
+        if (_.has(this.vertex.properties, path)) {
+            return this.vertex.properties[path].value;
+        }
     }
 };
 

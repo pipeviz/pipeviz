@@ -122,7 +122,7 @@ var Viz = React.createClass({
                 return '';
             }
 
-            return getCommit(props.graph, d).prop("sha1").value.slice(0, 7);
+            return getCommit(props.graph, d).propv("sha1").slice(0, 7);
         })
         .attr('dy', "1.4em")
         .attr('x', 0)
@@ -151,7 +151,7 @@ var Viz = React.createClass({
         labelg.append("rect").attr("width", 50).attr("height", 20).attr("x", -25).attr("y", -15);
         labelg.append("text")
             .text(function(d) {
-                return props.graph.get(d.id).prop("name").value;
+                return props.graph.get(d.id).propv("name");
             });
 
         state.force.on('tick', function() {
@@ -198,7 +198,7 @@ var VizPrep = React.createClass({
                 return false;
             }
 
-            if (cmp.props.graph.get(vedges[0].target).prop("repository").value === repo) {
+            if (cmp.props.graph.get(vedges[0].target).propv("repository") === repo) {
                 if (!_.has(members, vedges[0].target)) {
                     members[vedges[0].target] = [];
                 }
@@ -212,7 +212,7 @@ var VizPrep = React.createClass({
         _.each(this.props.graph.vertices(isType("git-tag", "git-branch")), function(l) {
             var vedges = _.filter(_.map(l.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
 
-            if (cmp.props.graph.get(vedges[0].target).prop("repository").value === repo) {
+            if (cmp.props.graph.get(vedges[0].target).propv("repository") === repo) {
                 if (!_.has(clabels, vedges[0].target)) {
                     clabels[vedges[0].target] = [];
                 }
@@ -424,7 +424,7 @@ var VizPrep = React.createClass({
         };
 
         var stack = _.filter(g.sources(), function(d) {
-            return cmp.props.graph.get(d).prop("repository").value === repo;
+            return cmp.props.graph.get(d).propv("repository") === repo;
         });
         // DF walk, working from source commit members
         while (stack.length !== 0) {
@@ -492,7 +492,7 @@ var App = React.createClass({
             var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
             return vedges.length !== 0;
         }), function(v) {
-            return g.get(_.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"))[0].target).prop("repository").value;
+            return g.get(_.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"))[0].target).propv("repository");
         }), function(accum, count, repo) {
             return count < accum[1] ? accum : [repo, count];
         }, ["", 0])[0];
