@@ -463,6 +463,7 @@ func runValidate(cmd *cobra.Command, args []string) {
 
 				if !result.Valid() {
 					errors |= ValidationFail
+					fmt.Printf("Errors in %v/%v:\n", dir, f.Name())
 					for _, desc := range result.Errors() {
 						fmt.Printf("\t%s\n", desc)
 					}
