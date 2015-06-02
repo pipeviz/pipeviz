@@ -463,7 +463,7 @@ var VizPrep = React.createClass({
         return {
             width: 0,
             height: 0,
-            graph: new pvGraph({id: 0, vertices: []}),
+            graph: pvGraph({id: 0, vertices: []}),
             focalRepo: "",
         };
     },
@@ -484,7 +484,7 @@ var App = React.createClass({
         return {
             vizWidth: window.innerWidth,
             vizHeight: window.innerHeight,
-            graph: new pvGraph({id: 0, vertices: []}),
+            graph: pvGraph({id: 0, vertices: []}),
         };
     },
     mostCommonRepo: function(g) {
@@ -508,5 +508,5 @@ var e = React.render(React.createElement(App), document.body);
 var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
 genesis.onmessage = function(m) {
     //console.log(m);
-    e.setProps({graph: new pvGraph(JSON.parse(m.data))});
+    e.setProps({graph: pvGraph(JSON.parse(m.data))});
 };
