@@ -70,7 +70,7 @@ FileLoop:
 	for k, f := range files {
 		src, err := ioutil.ReadFile(f.d + "/" + f.f.Name())
 		if err != nil {
-			log.Printf("Failed to read file '%v/%v' with error %v\n", f.d, f.f.Name(), err)
+			erro.Printf("Failed to read file '%v/%v' with error %v\n", f.d, f.f.Name(), err)
 			continue
 		}
 		fmt.Printf("Contents of %v/%v:\n%s\n\n", f.d, f.f.Name(), src)
@@ -81,12 +81,12 @@ FileLoop:
 
 			raw, err := reader.ReadString('\n')
 			if err != nil {
-				log.Fatalf("Quitting...\n")
+				log.Fatalf("Bad input, terminating fixr\n")
 			}
 
 			input := strings.Split(strings.Trim(raw, " \n"), " ")
 			if len(input) < 1 {
-				log.Fatalf("TODO huh how would this happen")
+				log.Fatalf("TODO huh how would this happen\n")
 			}
 			switch input[0] {
 			case "k", "skip":
@@ -100,7 +100,7 @@ FileLoop:
 
 				bod, err := ioutil.ReadAll(resp.Body)
 				if err != nil {
-					log.Println(err)
+					erro.Println(err)
 				}
 				resp.Body.Close()
 
@@ -120,7 +120,7 @@ func runFixrBatch(cmd *cobra.Command, files []fileInfo) {
 	for _, f := range files {
 		src, err := ioutil.ReadFile(f.d + "/" + f.f.Name())
 		if err != nil {
-			log.Printf("Failed to read file '%v/%v' with error %v\n", f.d, f.f.Name(), err)
+			erro.Printf("Failed to read file '%v/%v' with error %v\n", f.d, f.f.Name(), err)
 			continue
 		}
 
@@ -132,7 +132,7 @@ func runFixrBatch(cmd *cobra.Command, files []fileInfo) {
 
 		bod, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Println(err)
+			erro.Println(err)
 		}
 		resp.Body.Close()
 

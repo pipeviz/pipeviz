@@ -42,26 +42,26 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 	for _, dir := range args {
 		fl, err := ioutil.ReadDir(dir)
 		if err != nil {
-			log.Printf("Failed to read directory '%v' with error %v\n", dir, err)
+			erro.Printf("Failed to read directory '%v' with error %v\n", dir, err)
 		}
 
 		for _, f := range fl {
 			if match, _ := regexp.MatchString("\\.json$", f.Name()); match && !f.IsDir() {
 				src, err := ioutil.ReadFile(dir + "/" + f.Name())
 				if err != nil {
-					log.Printf("Failed to read fixture file %v/%v\n", dir, f.Name())
+					erro.Printf("Failed to read fixture file %v/%v\n", dir, f.Name())
 					continue
 				}
 
 				result, err := schema.Validate(gjs.NewStringLoader(string(src)))
 				if err != nil {
-					log.Printf("Validation process terminated with errors for %v/%v. Error: \n%v\n", dir, f.Name(), err.Error())
+					erro.Printf("Validation process terminated with errors for %v/%v. Error: \n%v\n", dir, f.Name(), err.Error())
 					continue
 				}
 
 				if !result.Valid() {
 					for _, desc := range result.Errors() {
-						log.Printf("\t%s\n", desc)
+						erro.Printf("\t%s\n", desc)
 					}
 				} else {
 					k++
@@ -69,7 +69,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 					json.Unmarshal(src, &m)
 
 					g = g.Merge(m)
-					log.Printf("Merged message %v/%v into graph\n", dir, f.Name())
+					fmt.Printf("Merged message %v/%v into graph\n", dir, f.Name())
 				}
 			}
 		}
