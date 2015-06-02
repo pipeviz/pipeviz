@@ -52,3 +52,4 @@ With basic setup done, we move on to messages intended to describe typical event
 
 * **200-devlz411-checkout** (githook) - another githook, but this switches the current branch on the other dev instance.
 * **205-devsdb-commit** (githook) - from a githook notifier (that the dev presumably chose to install in their local environment), this agent reports a new commit, and that that’s what the local instance now has deployed. Once pipeviz has semantics for namespacing refs by repo, we’ll also report a branch change here.
+* **210-update-branch** (github-recv) - update a branch we already know about in response to a push notification from github.

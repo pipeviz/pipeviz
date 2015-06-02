@@ -10,6 +10,7 @@
         },
         {
             "sha1": "e2380c9819bc45a79c5ad37980139cee98d5c7fd",
+            "branches": ["devel"],
             "tags": ["v0.0.1"]
         },
         {
