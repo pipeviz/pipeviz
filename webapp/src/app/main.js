@@ -200,11 +200,12 @@ var VizPrep = React.createClass({
 
             if (cmp.props.graph.get(vedges[0].target).propv("repository") === repo) {
                 if (!_.has(members, vedges[0].target)) {
-                    members[vedges[0].target] = [];
+                    members[vedges[0].target] = [v];
+                    return true;
                 }
-                // have to copy objects for d3's prop intrusion
-                members[vedges[0].target].push(v);
-                return true;
+                // TODO temporary, until commit multitenancy is worked out
+                //members[vedges[0].target].push(v);
+                //return true;
             }
             return false;
         });
@@ -446,7 +447,7 @@ var VizPrep = React.createClass({
         }
 
         // traversal pattern almost guarantees duplicate sinks
-        isinks = _.uniq(isinks)
+        isinks = _.uniq(isinks);
 
         // put the source anchor links in
         _.each(isources, function(commit) {
