@@ -1,0 +1,26 @@
+{
+    "logic-states": [
+        {
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "prod-web01"
+                }
+            },
+            "id": {
+                "commit": "01fea5edf05cb37f28b4f269ef1c1a4ac839df04"
+            }
+        },
+        {
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "prod-web02"
+                }
+            },
+            "id": {
+                "commit": "01fea5edf05cb37f28b4f269ef1c1a4ac839df04"
+            }
+        }
+    ]
+}
