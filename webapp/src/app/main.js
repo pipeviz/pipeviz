@@ -239,7 +239,7 @@ var VizPrep = React.createClass({
             // recheck this every time through.
             if (_.has(members, v) && _.filter(members[v], isType("logic-state").length !== 0)) {
                 if (npath.length === 0) {
-                    // nothing in the npath, this is a source
+                    // nothing in the npath, this *could* be a source.
                     isources.push(v);
                 }
                 // so we know to pop npath stack and check if source later
@@ -259,9 +259,23 @@ var VizPrep = React.createClass({
             }
 
             path.push(v);
-            g.successors(v).map(function(s) {
-                prepwalk(s);
-            });
+            // If v is a merge commit, it will have multiple successors, and we must implement
+            // first-parent-like handling: only include the n>1 parents if there is an
+            // interesting commit along that path.
+            // TODO this logic will probably backfire on some reasonable graph structures
+            var succ = g.successors(v);
+            if (succ.length > 0) {
+                //prepwalk(succ[0]);
+                _.each(succ, function(s) {
+                    prepwalk(s);
+                });
+                // TODO experiment with a method where we only walk first parent, but use as
+                // starting point all the interesting vertices. this should guarantee we get
+                // only the necessary joints, but may require an optional extra pass to discover
+                // necessary connections between interesting vtx. This approach means what we're
+                // *really* doing here is forming an induced subgraph using only paths we know
+                // will be interesting.
+            }
             visited.push(v);
             path.pop();
 
