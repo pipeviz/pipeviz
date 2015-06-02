@@ -9,11 +9,10 @@
             ],
             "date": "Wed May 29 07:22:51 2015 -400",
             "subject": "An imaginary local commit"
-        },
+        }
     ],
     "logic-states": [
         {
-            "type": "code",
             "path": "/var/www/app",
             "environment": {
                 "address": {

@@ -1,7 +1,6 @@
 {
     "logic-states": [
         {
-            "type": "code",
             "path": "/var/www/app",
             "environment": {
                 "address": {
