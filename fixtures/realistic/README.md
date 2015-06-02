@@ -9,6 +9,14 @@ Being that JSON is rather averse to inline documentation, this file serves as a 
 
 In particular, the list also indicates the imagined client/source that would logically have access to all the data contained in the message. This client-speculation, along with the logical ordering of the messages themselves, are the two ways in which this set of fixtures aims to be “realistic.”
 
+### Initial setup
+
+The first set of messages, detailed below, are intended to realistically describe the sequence of messages that someone might send when setting up a pipeviz instance for the first time with information from an existing Drupal pipeline.
+
+It starts by sending in commit data and metadata (including some test results), then moves on to describing all of the environments and what we know about them, one at a time. There is a prod cluster (two webheads and a db), a stage environment, qa, and two development environments. Each app works with an apache httpd, libphp5.so, and a mysqld; processes, datasets are all described.
+
+Each message names, in parentheses after the name of the file, the sort of tool that could be reasonably expected to produce the message.
+
 * **000-commits** (scan-repo) - since we’re imagining an existing git repository for the app that is our focal point, this is the most logical place to begin: a dump of all commits in the repository. (pipeviz’ own commit history is used here)
 * **004-labels** (scan-repo) - follows pretty directly on the heels of 000-commits; this identifies the labels (branches and tags) that are present in the repository (at least, in the origin repo - branches still need to be namespaced). These are extracted just by scanning a repo.
 * **007-test-stats** (scan-github) - scanner that slurps data from github to reports test pass/failure status as recorded by, say, travis-ci.
