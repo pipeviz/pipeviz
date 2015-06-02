@@ -45,3 +45,10 @@ Each message names, in parentheses after the name of the file, the sort of tool 
 * **120-devlz411-app** (scan-drush) - same drush-based scanner, same data, different commit, on different path from qa vs dev-sdb.
 * **125-devlz411-pkg-ls** (scan-yum) - reports httpd, libphp5.so, and mysql pkgs from yum scanner.
 * **130-devlz411-procs** (scan-procs/mysql) - reports procs AND datasets. same as corresponding stage message.
+
+### Operational messages
+
+With basic setup done, we move on to messages intended to describe typical events that might occur if this were a real pipeline.
+
+* **200-devlz411-checkout** (githook) - another githook, but this switches the current branch on the other dev instance.
+* **205-devsdb-commit** (githook) - from a githook notifier (that the dev presumably chose to install in their local environment), this agent reports a new commit, and that that’s what the local instance now has deployed. Once pipeviz has semantics for namespacing refs by repo, we’ll also report a branch change here.

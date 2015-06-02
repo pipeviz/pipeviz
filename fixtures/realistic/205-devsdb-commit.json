@@ -1,0 +1,28 @@
+{
+    "commits": [
+        {
+            "author": "\"Sam Boyer\" <tech@samboyer.org>",
+            "repository": "git@github.com:tag1consulting/pipeviz",
+            "sha1": "19a62541b41af1252e81a5ed0b5064b2041d4a6d",
+            "parents": [
+                "34fb01335d0e6341ff92a5753c36b6c9376cf29b"
+            ],
+            "date": "Wed May 29 07:22:51 2015 -400",
+            "subject": "An imaginary local commit"
+        },
+    ],
+    "logic-states": [
+        {
+            "type": "code",
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "dev-sdb"
+                }
+            },
+            "id": {
+                "commit": "19a62541b41af1252e81a5ed0b5064b2041d4a6d"
+            }
+        }
+    ]
+}

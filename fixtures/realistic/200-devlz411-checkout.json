@@ -1,0 +1,16 @@
+{
+    "logic-states": [
+        {
+            "type": "code",
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "dev-lz411"
+                }
+            },
+            "id": {
+                "commit": "3c2f3d124e6a010d3227a05bf6c597c445cf4589"
+            }
+        }
+    ]
+}
