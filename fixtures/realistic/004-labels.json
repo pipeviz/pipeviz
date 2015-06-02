@@ -1,0 +1,41 @@
+{
+    "commit-meta": [
+        {
+            "sha1": "28bf2ece16f94bc7f5096e5ab61380d9d04a85a9",
+            "branches": ["master"]
+        },
+        {
+            "sha1": "9b40850723142cf888be2b3e5b601c55f7eda8c8",
+            "branches": ["websockets"]
+        },
+        {
+            "sha1": "e2380c9819bc45a79c5ad37980139cee98d5c7fd",
+            "branches": ["devel"],
+            "tags": ["v0.0.1"]
+        },
+        {
+            "sha1": "33be849cd1785fd25a3a058526c2a11629f0e91b",
+            "branches": ["proto"]
+        },
+        {
+            "sha1": "7b701b8b385887e5760502509b82ee2a760c3468",
+            "branches": ["edge-resolve-2"]
+        },
+        {
+            "sha1": "afd972ec96efb7ea63390658f727f5bae8bc1371",
+            "branches": ["broker"]
+        },
+        {
+            "sha1": "158071c4acfa91ee5f0797760daa24f09c3965dc",
+            "branches": ["ks"]
+        },
+        {
+            "sha1": "fe07ee25998b9f19cb4aa07cb416be3ffbb4c4be",
+            "branches": ["frontend-fp"]
+        },
+        {
+            "sha1": "4b938030157c10cf0fb5ed22c5cc4569edf50813",
+            "tags": ["old-proto"]
+        }
+    ]
+}

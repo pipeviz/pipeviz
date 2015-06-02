@@ -1,0 +1,31 @@
+{
+    "logic-states": [
+        {
+            "type": "code",
+            "id": {
+                "commit": "4b938030157c10cf0fb5ed22c5cc4569edf50813"
+            },
+            "nick": "ourapp",
+            "lgroup": "prod",
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "prod-web02"
+                }
+            },
+            "datasets": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "connNet": {
+                        "hostname": "prod-db01",
+                        "port": 3306,
+                        "proto": "tcp"
+                    },
+                    "interaction": "rw",
+                    "subset": "app_db"
+                }
+            ]
+        }
+    ]
+}

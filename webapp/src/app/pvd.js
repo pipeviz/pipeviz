@@ -55,31 +55,92 @@ var edgeProto = {
 // edge factory
 var Edge = function(obj) { return _.assign(Object.create(edgeProto), obj); };
 
+var pvGraphProto = {
+    get: function(id) {
+        return this._objects[id];
+    },
+    // With no arguments, returns all vertices in the graph. If one argument
+    // is passed, it is taken to be a filtering function, and each vertex will
+    // be passed as a candidate for elimination.
+    vertices: function() {
+        if (arguments.length === 0) {
+            return _.filter(this._objects, function(d) {
+                return d.isVertex();
+            });
+        }
+
+        var cf = arguments[0];
+        return _.filter(this._objects, function(d) {
+            return d.isVertex() && cf(d);
+        });
+    },
+    verticesWithType:  function(typ) {
+        return _.filter(this._objects, function(d) {
+            return  d.isVertex() && d.vertex.type === typ;
+        });
+    },
+    // Returns a graphlib.Graph object representing the graph(s) of all known
+    // commit objects.
+    commitGraph: function() {
+        var g = new graphlib.Graph();
+        var that = this;
+
+        //_.each(_.filter(this._objects, filters.vertices), function(vertex) {
+        _.each(_.filter(this._objects, function(d) { return filters.vertices(d) && isType("commit")(d); }), function(commit) {
+            g.setNode(commit.id);
+            _.each(_.filter(_.map(commit.outEdges, function(edgeId) { return that.get(edgeId); }), isType("version")), function (edge) {
+                g.setEdge(commit.id, edge.target);
+            });
+        });
+
+        return g;
+    }
+},
 // TODO this pretty much mirrors what we have serverside...for now. ugh.
-// pipeviz datastore
-function pvGraph(gdata) {
-    // contains all objects, vertices and edges, keyed by objid
-    this._objects = {};
-    this.mid = gdata.id;
+// pipeviz graph datastore factory
+pvGraph = function(obj) {
+    return _.assign(Object.create(pvGraphProto), (function() {
+        var o = {
+            _objects: {},
+            mid: obj.id
+        };
 
-    var that = this;
-    _.each(gdata.vertices, function(d) {
-        // capture vertex
-        that._objects[d.id] = Vertex(d);
-        // and its out-edges
-        _.each(d.outEdges, function(d2) { that._objects[d2.id] = Edge(d2); });
-    });
+        _.each(obj.vertices, function(d) {
+            o._objects[d.id] = Vertex(d);
+            _.each(d.outEdges, function(d2) { o._objects[d2.id] = Edge(d2); });
+        });
+
+        return o;
+    }())
+    );
+};
+
+var pq = {
+    and: function() {
+        var funcs = arguments;
+        return function(d) {
+            for (var i = 0; i < funcs.length; i++) {
+                if (!funcs[i](d)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    },
+    or: function() {
+        var funcs = arguments;
+        return function(d) {
+            for (var i = 0; i < funcs.length; i++) {
+                if (funcs[i](d)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
 }
-
-pvGraph.prototype.get = function(id) {
-    return this._objects[id];
-};
-
-pvGraph.prototype.verticesWithType = function(typ) {
-    return _.filter(this._objects, function(d) {
-        return  d.isVertex() && d.vertex.type === typ;
-    });
-};
 
 var filters = {
     vertices: function(d) {
@@ -91,24 +152,21 @@ var filters = {
 };
 
 var isType = function(typ) {
+    if (arguments.length === 1) {
+        return function(d) {
+            return typ === d.Typ();
+        };
+    }
+
+    var typs = arguments;
     return function(d) {
-        return typ === d.Typ();
-    };
-};
+        var typ = d.Typ();
+        for (var i = 0; i < typs.length; i++) {
+            if (typs[i] === typ) {
+                return true;
+            }
+        }
 
-// Returns a graphlib.Graph object representing the graph(s) of all known
-// commit objects.
-pvGraph.prototype.commitGraph = function() {
-    var g = new graphlib.Graph();
-    var that = this;
-
-    //_.each(_.filter(this._objects, filters.vertices), function(vertex) {
-    _.each(_.filter(this._objects, function(d) { return filters.vertices(d) && isType("commit")(d); }), function(commit) {
-        g.setNode(commit.id);
-        _.each(_.filter(_.map(commit.outEdges, function(edgeId) { return that.get(edgeId); }), isType("version")), function (edge) {
-            g.setEdge(commit.id, edge.target);
-        });
-    });
-
-    return g;
+        return false;
+    }
 };

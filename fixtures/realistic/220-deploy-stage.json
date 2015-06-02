@@ -1,0 +1,15 @@
+{
+    "logic-states": [
+        {
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "stage"
+                }
+            },
+            "id": {
+                "commit": "01fea5edf05cb37f28b4f269ef1c1a4ac839df04"
+            }
+        }
+    ]
+}

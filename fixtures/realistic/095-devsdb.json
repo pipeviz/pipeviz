@@ -1,0 +1,12 @@
+{
+    "environments": [
+        {
+            "type": "virtual",
+            "os": "unix",
+            "address": {
+                "hostname": "dev-sdb"
+            },
+            "provider": "vagrant"
+        }
+    ]
+}

@@ -41,11 +41,18 @@ var Viz = React.createClass({
             viewBox: "0 0 " + this.props.width + " " + this.props.height
         });
     },
-    componentDidUpdate: function() {
-        this.state.force.nodes(this.props.nodes);
-        this.state.force.links(this.props.links);
-
-        return this.graphRender(this.getDOMNode(), this.state, this.props);
+    componentWillMount: function() {
+        this.state.force.stop();
+    },
+    componentWillReceiveProps: function(nextProps) {
+        this.state.force.nodes(nextProps.nodes);
+        this.state.force.links(nextProps.links);
+    },
+    componentDidUpdate: function(prevProps) {
+        this.graphRender(this.getDOMNode(), this.state, this.props);
+        if (this.props.nodes.length !== 0) {
+            (prevProps.nodes.length === 0) ? this.state.force.alpha(0.5) : this.state.force.alpha(0.1);
+        }
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
@@ -201,7 +208,7 @@ var VizPrep = React.createClass({
             return false;
         });
 
-        _.each(this.props.graph.verticesWithType("vcs-label"), function(l) {
+        _.each(this.props.graph.vertices(isType("git-tag", "git-branch")), function(l) {
             var vedges = _.filter(_.map(l.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
 
             if (cmp.props.graph.get(vedges[0].target).prop("repository").value === repo) {
@@ -291,7 +298,7 @@ var VizPrep = React.createClass({
                 // process all label nodes we have waiting around
                 _.forOwn(lpnodes, function(llen, id) {
                     // need to push the actual objects on so the viz can cheat and track x/y props
-                    labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
+                    labels.push({id: id, l: from[0], r: members[v][0], pos: llen / (path.length+1)});
                 });
 
                 // zero out lpnodes set
@@ -305,9 +312,8 @@ var VizPrep = React.createClass({
                 if (_.has(members, v)) {
                     // different behavior depending on whether we're finding commit or (app and/or label)
                     // app handling is identical to commit handling, so we reuse
-                    var ls = _.union(_.filter(members[v], isType("logic-state")),
-                                     _.filter(members[v], isType("commit")));
-                    var lbls = _.filter(members[v], isType("vcs-label"));
+                    var ls = _.filter(members[v], isType("logic-state", "commit"));
+                    var lbls = _.filter(members[v], isType("git-tag", "git-branch"));
                     if (ls.length !== 0) {
                         // has at least one app, or is a commit joint. create link from last thing to this
                         _.each(ls, function(tgt) {
@@ -425,12 +431,21 @@ var VizPrep = React.createClass({
 
         return [nodes, links, labels];
     },
-    shouldComponentUpdate: function(nextProps, nextState) {
+    getDefaultProps: function() {
+        return {
+            width: 0,
+            height: 0,
+            graph: new pvGraph({id: 0, vertices: []}),
+            focalRepo: "",
+        };
+    },
+    shouldComponentUpdate: function(nextProps) {
         // In the graph object, state is invariant with respect to the message id.
         return nextProps.graph.mid !== this.props.graph.mid;
     },
     render: function() {
-        var vizdata = this.extractVizGraph("https://github.com/sdboyer/pipeviz");
+        var vizdata = this.extractVizGraph(this.props.focalRepo);
+
         return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
     },
 });
@@ -444,9 +459,19 @@ var App = React.createClass({
             graph: new pvGraph({id: 0, vertices: []}),
         };
     },
+    mostCommonRepo: function(g) {
+        return _.reduce(_.countBy(_.filter(g.verticesWithType("logic-state"), function(v) {
+            var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
+            return vedges.length !== 0;
+        }), function(v) {
+            return g.get(_.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"))[0].target).prop("repository").value;
+        }), function(accum, count, repo) {
+            return count < accum[1] ? accum : [repo, count];
+        }, ["", 0])[0];
+    },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-                   React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph})
+                   React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: this.mostCommonRepo(this.props.graph)})
               );
     },
 });

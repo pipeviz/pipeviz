@@ -1,0 +1,23 @@
+{
+    "processes": [
+        {
+            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
+            "user": "www",
+            "group": "www",
+            "cwd": "/var/run/app",
+            "pid": 6212,
+            "environment": {
+                "address": {
+                    "hostname": "prod-web01"
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "port": 80
+                }
+            ]
+        }
+    ]
+}

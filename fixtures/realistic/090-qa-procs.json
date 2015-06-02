@@ -1,0 +1,70 @@
+{
+    "processes": [
+        {
+            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
+            "user": "www",
+            "group": "www",
+            "cwd": "/var/run/app",
+            "pid": 2713,
+            "environment": {
+                "address": {
+                    "hostname": "qa"
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "port": 80
+                }
+            ]
+        },
+        {
+            "logic-states": [ "/usr/libexec/mysqld" ],
+            "user": "mysql",
+            "group": "mysql",
+            "dataset": "/var/lib/mysql",
+            "cwd": "/var/lib/mysql",
+            "pid": 8248,
+            "environment": {
+                "address": {
+                    "hostname": "qa"
+                }
+            },
+            "listen": [
+                {
+                    "type": "port",
+                    "proto": [ "tcp" ],
+                    "port": 3306
+                },
+                {
+                    "type": "unix",
+                    "path": "/var/lib/mysql/mysql.sock"
+                }
+            ]
+        }
+    ],
+    "datasets": [
+        {
+            "name": "/var/lib/mysql",
+            "environment": {
+                "address": {
+                    "hostname": "qa"
+                }
+            },
+            "path": "/var/lib/mysql",
+            "subsets": [
+                {
+                    "name": "app_db",
+                    "genesis": {
+                        "address": {
+                            "hostname": "prod-db01"
+                        },
+                        "dataset": [ "/var/lib/mysql", "app_db" ],
+                        "snap-time": "2015-01-08T23:43:42.000Z"
+                    }
+                }
+            ]
+        }
+    ]
+}

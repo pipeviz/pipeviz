@@ -1,0 +1,29 @@
+{
+    "logic-states": [
+        {
+            "type": "code",
+            "id": {
+                "commit": "9ab8abe1e2890f53de84122ff37468142614274c"
+            },
+            "nick": "ourapp",
+            "lgroup": "stage",
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "stage"
+                }
+            },
+            "datasets": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "connUnix": {
+                        "path": "/var/lib/mysql/mysql.sock"
+                    },
+                    "interaction": "rw",
+                    "subset": "app_db"
+                }
+            ]
+        }
+    ]
+}

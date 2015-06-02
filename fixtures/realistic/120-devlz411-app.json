@@ -1,0 +1,29 @@
+{
+    "logic-states": [
+        {
+            "type": "code",
+            "id": {
+                "commit": "fa4aba6d130a0dafc01274386a04110a740eef36"
+            },
+            "nick": "ourapp",
+            "lgroup": "dev-lz411",
+            "path": "/var/www/app",
+            "environment": {
+                "address": {
+                    "hostname": "dev-lz411"
+                }
+            },
+            "datasets": [
+                {
+                    "name": "default db",
+                    "type": "mediated",
+                    "connUnix": {
+                        "path": "/var/lib/mysql/mysql.sock"
+                    },
+                    "interaction": "rw",
+                    "subset": "app_db"
+                }
+            ]
+        }
+    ]
+}

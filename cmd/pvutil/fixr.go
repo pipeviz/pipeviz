@@ -136,6 +136,6 @@ func runFixrBatch(cmd *cobra.Command, files []fileInfo) {
 		}
 		resp.Body.Close()
 
-		fmt.Printf("%v, msgid %v", resp.StatusCode, string(bod))
+		fmt.Printf("%v, msgid %v\n", resp.StatusCode, string(bod))
 	}
 }

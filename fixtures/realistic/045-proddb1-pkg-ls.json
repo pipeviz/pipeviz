@@ -1,0 +1,16 @@
+{
+    "logic-states": [
+        {
+            "type": "binary",
+            "id": {
+                "version": "5.5.37"
+            },
+            "path": "/usr/libexec/mysqld",
+            "environment": {
+                "address": {
+                    "hostname": "prod-db01"
+                }
+            }
+        }
+    ]
+}
