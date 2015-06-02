@@ -1,0 +1,43 @@
+{
+    "logic-states": [
+        {
+            "type": "binary",
+            "id": {
+                "version": "2.2.3"
+            },
+            "path": "/usr/sbin/httpd",
+            "environment": {
+                "address": {
+                    "hostname": "dev-sdb"
+                }
+            },
+            "libraries": [
+                "/etc/httpd/modules/libphp.so"
+            ]
+        },
+        {
+            "type": "library",
+            "id": {
+                "version": "5.5.13"
+            },
+            "path": "/etc/httpd/modules/libphp.so",
+            "environment": {
+                "address": {
+                    "hostname": "dev-sdb"
+                }
+            }
+        },
+        {
+            "type": "binary",
+            "id": {
+                "version": "5.5.42"
+            },
+            "path": "/usr/libexec/mysqld",
+            "environment": {
+                "address": {
+                    "hostname": "dev-sdb"
+                }
+            }
+        }
+    ]
+}

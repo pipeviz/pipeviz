@@ -29,3 +29,11 @@ In particular, the list also indicates the imagined client/source that would log
 * **080-qa-app** (scan-drush) - same drush-based scanner as above, doing the same thing. Different commit is deployed, though.
 * **085-qa-pkg-ls** (scan-yum) - reports httpd, libphp5.so, and mysql pkgs from yum scanner.
 * **090-qa-procs** (scan-procs/mysql) - reports procs AND datasets. same as corresponding stage message.
+* **095-devsdb** (pvc) - manually reports the dev-sdb local vagrant vm.
+* **100-devsdb-app** (scan-drush) - same drush-based scanner, same data, different commit.
+* **105-devsdb-pkg-ls** (scan-yum) - reports httpd, libphp5.so, and mysql pkgs from yum scanner.
+* **110-devsdb-procs** (scan-procs/mysql) - reports procs AND datasets. same as corresponding stage message.
+* **115-devlz411** (pvc) - manually reports the dev-lz411 local vagrant vm.
+* **120-devlz411-app** (scan-drush) - same drush-based scanner, same data, different commit, on different path from qa vs dev-sdb.
+* **125-devlz411-pkg-ls** (scan-yum) - reports httpd, libphp5.so, and mysql pkgs from yum scanner.
+* **130-devlz411-procs** (scan-procs/mysql) - reports procs AND datasets. same as corresponding stage message.
