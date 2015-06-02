@@ -191,6 +191,7 @@ var VizPrep = React.createClass({
         links = [],
         cmp = this,
         members = {},
+        clabels = {},
         nodes = _.filter(_.map(this.props.graph.verticesWithType("logic-state"), function(d) { return _.create(vertexProto, d); }), function(v) {
             var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
             if (vedges.length === 0) {
@@ -212,10 +213,10 @@ var VizPrep = React.createClass({
             var vedges = _.filter(_.map(l.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
 
             if (cmp.props.graph.get(vedges[0].target).prop("repository").value === repo) {
-                if (!_.has(members, vedges[0].target)) {
-                    members[vedges[0].target] = [];
+                if (!_.has(clabels, vedges[0].target)) {
+                    clabels[vedges[0].target] = [];
                 }
-                members[vedges[0].target].push(_.create(vertexProto, l));
+                clabels[vedges[0].target].push(_.create(vertexProto, l));
             }
         });
 
@@ -280,16 +281,34 @@ var VizPrep = React.createClass({
         var labels = [], // the set of non-app-coinciding labels and their relative positions
         lpnodes = {}, // the set of non-app-coinciding labels that have found their origin, but not their target
         walk = function(v) { // main depth-first walker
-            // git guarantees commit graph is acyclic, thus safe to skip grey/back-edge
+            // Each top-level entry into this DF search is from a virtual source found
+            // by the first walker
 
+            // The npath is a subset of the current visit path, and contains *only*
+            // commits that have something interesting there (a logic-state instance, or a joint).
+            // Thus, we have to keep a locally-scoped variable to indicate whether, on returning
+            // from this level the search, the npath should be popped off (aka, the current level
+            // is one of these interesting commits).
             var pop_npath = false;
-            // grab head of node path from stack
+
+            // For easy reference, we keep the head of the npath in, again, a locally-scoped var
+            // called 'from'. Thus, for this level of descent, the contents of from are the last
+            // array of "interesting" things we visited in our search. If the npath is empty -
+            // which will occur iff v is a source vertex/we're at the top of a descent path,
+            // then we initialize it to an empty array.
             var from = npath.length === 0 ? [] : npath[npath.length - 1];
 
+            // Ordinarily a depth-first search would check here for a back-edge, or "grey" vertex;
+            // however, git guarantees commit graph is acyclic. A back-edge, by definition, identifies
+            // a cycle, which we know we don't have, so we can skip straight ahead to the "black"
+            // check - see if we've already completed a visit to this vertex. We bend the definition
+            // a little, though - we only ever mark interesting nodes as black, as we need to always
+            // walk the uninteresting commit path for other algorithimic purposes.
             if (visited.indexOf(v) !== -1) {
-                // Commit vertex is black/visited; create links, update lpnodes, and return.
+                // Vertex is black/visited, so we need to create links between instances in
+                // our 'from' and instances in the visited vertex.
                 _.each(members[v], function(tgt) {
-                    from.map(function(src) {
+                    _.each(from, function(src) {
                         // slice guarantees path array is copied
                         links.push({ source: src, target: tgt, path: path.slice(0) });
                     });
@@ -298,26 +317,34 @@ var VizPrep = React.createClass({
                 // process all label nodes we have waiting around
                 _.forOwn(lpnodes, function(llen, id) {
                     // need to push the actual objects on so the viz can cheat and track x/y props
-                    labels.push({id: id, l: from[0], r: members[v][0], pos: llen / (path.length+1)});
+                    labels.push({id: id, l: from[0], r: clabels[v][0], pos: llen / (path.length+1)});
                 });
 
                 // zero out lpnodes set
                 lpnodes = {};
-                // zero out interstitial commit path tracker
-                path = [];
+
+                // Don't need to pop path or npath b/c we haven't pushed the black vertex onto either.
                 return;
             }
 
             // see if this is a commit that's interesting (has an app instance or label)
-            if (_.has(members, v)) {
-                // different behavior depending on whether we're finding commit or (app and/or label)
-                // app handling is identical to commit handling, so we reuse
-                var ls = _.filter(members[v], isType("logic-state", "commit"));
-                var lbls = _.filter(members[v], isType("git-tag", "git-branch"));
-                if (ls.length !== 0) {
-                    // has at least one app, or is a commit joint. create link from last thing to this
-                    _.each(ls, function(tgt) {
-                        from.map(function(src) {
+            if (_.has(members, v) || _.has(clabels, v)) {
+                // At this point, it's possible that we've found any of the following possible combinations:
+                // 1. An instance
+                // 2. A branch/tag
+                // 3. A joint
+                // 4. An instance and a branch/tag
+                // 5. A joint and a branch/tag
+                //
+                // As well as any N>1 of any type in any of those possibilities. Labels are the subordinate
+                // case; we handle them one way if a commit/joint is present, and a different way if not.
+                // And so, we have the following if/then structure:
+                if (_.has(members, v)) {
+                    // has at least one app, or is a commit joint. create link from each last thing to
+                    // each interesting target.
+                    // TODO this is the first spot where where we need to collapse multiple things on the same commit down into one
+                    _.each(members[v], function(tgt) {
+                        _.each(from, function(src) {
                             links.push({ source: src, target: tgt, path: path.slice(0) });
                             if (tgt.Typ() === "commit") {
                                 // push the joint onto the node list
@@ -326,37 +353,37 @@ var VizPrep = React.createClass({
                         });
                     });
 
-                    // process all label nodes we have waiting around
+                    // Since we've reached a properly interesting point, we need to process all the labels we discovered
+                    // between here and the last interesting point, as they need to appear on that edge.
                     _.forOwn(lpnodes, function(llen, id) {
                         // need to push the actual objects on so the viz can cheat and track x/y props
-                        labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
+                        labels.push({id: id, l: from[0], r: members[v][0], pos: llen / (path.length+1)});
                     });
 
-                    // zero out lpnodes set
+                    // We've processed all the interstitial labels, so we empty the lpnodes set
                     lpnodes = {};
 
-                    if (ls.length !== members[v].length) {
-                        // there are also some labels directly on the app commit, add them
-                        _.each(lbls, function(lbl) {
-                            labels.push({id: lbl.id, l: ls[0], r: ls[0], pos: 0});
-                        });
-                    }
+                    // There also could be some labels directly on this commit. This will add them.
+                    _.each(clabels[v], function(lbl) {
+                        labels.push({id: lbl.id, l: members[v][0], r: members[v][0], pos: 0});
+                    });
 
-                    // zero out the interstitial commit path tracker
+                    // We've found a new point of interest, so the commit path tracker, which is
+                    // only responsible for tracking the path BETWEEN interesting points, not the
+                    // entire path, is emptied.
                     path = [];
-                    // push newly-found app(s) onto our npath, it's the new 'from'
-                    npath.push(ls);
+                    // Push newly-found instances or joints onto the npath; it will become the new 'from' on the next level.
+                    npath.push(members[v]);
                     // correspondingly, indicate to pop the npath when exiting
                     pop_npath = true;
                 } else {
-                    // for each label found, record the length of the path walked so far,
-                    // plus one for the commit we're currently on
-                    _.each(lbls, function(lbl) {
-                        lpnodes[lbl.id] = path.length+1;
-                    });
-
-                    // still not a real node point though, so need to push the commit onto the path
+                    // Not a real node point, just a label, so need to push the commit onto the path
                     path.push(v);
+
+                    // For each label found, record the length of the path walked so far.
+                    _.each(clabels[v], function(lbl) {
+                        lpnodes[lbl.id] = path.length;
+                    });
                 }
             }
             else {
@@ -371,10 +398,11 @@ var VizPrep = React.createClass({
                     walk(s);
                 });
             }
+            // Recursion is done for this vertex; now it's cleanup time.
 
-            // Mark commit black/visited...but only if it's a member-associated
-            // commit. This is OK to do because we already traversed once and
-            // found all the joints, and those are guaranteed to be members
+            // Mark commit black/visited...but only if it's an interesting one.
+            // This is OK to do because we already traversed once and found all
+            // the joints, and those are guaranteed to be members.
             if (_.has(members, v)) {
                 visited.push(v);
             }
