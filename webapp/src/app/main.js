@@ -1,8 +1,3 @@
-// just so my syntastic complains less
-var React = React || {},
-    _ = _ || {},
-    d3 = d3 || {};
-
 var Viz = React.createClass({
     displayName: "pipeviz-graph",
     getInitialState: function() {

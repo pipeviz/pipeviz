@@ -1,5 +1,3 @@
-var _ = _ || {};
-
 // Searches the graph for all apps that derive from the given repo address.
 var appsFromRepo = function(graph, repo) {
     return _.filter(graph.verticesWithType("logic-state"), function(v) {

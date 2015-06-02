@@ -1,6 +1,3 @@
-// just so my syntastic complains less
-var _ = _ || {};
-
 // TODO get rid of this anchor shit, replace with well-formed tree rendering
 function Anchor(id, x, y) {
     this.fixed = true; // tells d3 not to move it
