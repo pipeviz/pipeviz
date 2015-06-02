@@ -238,7 +238,7 @@ var VizPrep = React.createClass({
             var has_app = false;
             // check if this commit has an app. don't check if white b/c sink calc necessitates we
             // recheck this every time through.
-            if (_.has(members, v) && _.filter(members[v], isType("logic-state").length !== 0)) {
+            if (_.has(members, v) && _.filter(members[v], isType("logic-state")).length !== 0) {
                 if (npath.length === 0) {
                     // nothing in the npath, this *could* be a source.
                     isources.push(v);
