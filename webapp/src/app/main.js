@@ -308,61 +308,61 @@ var VizPrep = React.createClass({
                 return;
             }
 
-                // see if this is a commit that's interesting (has an app instance or label)
-                if (_.has(members, v)) {
-                    // different behavior depending on whether we're finding commit or (app and/or label)
-                    // app handling is identical to commit handling, so we reuse
-                    var ls = _.filter(members[v], isType("logic-state", "commit"));
-                    var lbls = _.filter(members[v], isType("git-tag", "git-branch"));
-                    if (ls.length !== 0) {
-                        // has at least one app, or is a commit joint. create link from last thing to this
-                        _.each(ls, function(tgt) {
-                            from.map(function(src) {
-                                links.push({ source: src, target: tgt, path: path.slice(0) });
-                                if (tgt.Typ() === "commit") {
-                                    // push the joint onto the node list
-                                    nodes.push(tgt);
-                                }
-                            });
+            // see if this is a commit that's interesting (has an app instance or label)
+            if (_.has(members, v)) {
+                // different behavior depending on whether we're finding commit or (app and/or label)
+                // app handling is identical to commit handling, so we reuse
+                var ls = _.filter(members[v], isType("logic-state", "commit"));
+                var lbls = _.filter(members[v], isType("git-tag", "git-branch"));
+                if (ls.length !== 0) {
+                    // has at least one app, or is a commit joint. create link from last thing to this
+                    _.each(ls, function(tgt) {
+                        from.map(function(src) {
+                            links.push({ source: src, target: tgt, path: path.slice(0) });
+                            if (tgt.Typ() === "commit") {
+                                // push the joint onto the node list
+                                nodes.push(tgt);
+                            }
                         });
+                    });
 
-                        // process all label nodes we have waiting around
-                        _.forOwn(lpnodes, function(llen, id) {
-                            // need to push the actual objects on so the viz can cheat and track x/y props
-                            labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
-                        });
+                    // process all label nodes we have waiting around
+                    _.forOwn(lpnodes, function(llen, id) {
+                        // need to push the actual objects on so the viz can cheat and track x/y props
+                        labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
+                    });
 
-                        // zero out lpnodes set
-                        lpnodes = {};
+                    // zero out lpnodes set
+                    lpnodes = {};
 
-                        if (ls.length !== members[v].length) {
-                            // there are also some labels directly on the app commit, add them
-                            _.each(lbls, function(lbl) {
-                                labels.push({id: lbl.id, l: ls[0], r: ls[0], pos: 0});
-                            });
-                        }
-
-                        // zero out the interstitial commit path tracker
-                        path = [];
-                        // push newly-found app(s) onto our npath, it's the new 'from'
-                        npath.push(ls);
-                        // correspondingly, indicate to pop the npath when exiting
-                        pop_npath = true;
-                    } else {
-                        // for each label found, record the length of the path walked so far,
-                        // plus one for the commit we're currently on
+                    if (ls.length !== members[v].length) {
+                        // there are also some labels directly on the app commit, add them
                         _.each(lbls, function(lbl) {
-                            lpnodes[lbl.id] = path.length+1;
+                            labels.push({id: lbl.id, l: ls[0], r: ls[0], pos: 0});
                         });
-
-                        // still not a real node point though, so need to push the commit onto the path
-                        path.push(v);
                     }
-                }
-                else {
-                    // not a node point and not self - push commit onto path
+
+                    // zero out the interstitial commit path tracker
+                    path = [];
+                    // push newly-found app(s) onto our npath, it's the new 'from'
+                    npath.push(ls);
+                    // correspondingly, indicate to pop the npath when exiting
+                    pop_npath = true;
+                } else {
+                    // for each label found, record the length of the path walked so far,
+                    // plus one for the commit we're currently on
+                    _.each(lbls, function(lbl) {
+                        lpnodes[lbl.id] = path.length+1;
+                    });
+
+                    // still not a real node point though, so need to push the commit onto the path
                     path.push(v);
                 }
+            }
+            else {
+                // not a node point and not self - push commit onto path
+                path.push(v);
+            }
 
             // recursive call, the crux of this depth-first traversal. but we
             // skip it if the first search proved this to be a sink
