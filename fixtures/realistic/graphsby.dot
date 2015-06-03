@@ -80,12 +80,12 @@ strict digraph graphsbyjr {
     // finally, include our three bits of data for each node:
     // <distance from root via main/support paths>:<focal ancestors (w/self)>:<focal successors (w/self)>
     0 [xlabel="22:7:1"];
-    1 [xlabel="21:5:1",fontsize=10];
-    2 [xlabel="20:5:1",fontsize=10];
+    1 [xlabel="21:6:1",fontsize=10];
+    2 [xlabel="20:6:1",fontsize=10];
     3 [xlabel="19:6:4"];
     4 [xlabel="22:7:1"];
-    5 [xlabel="21:5:1",fontsize=10];
-    6 [xlabel="20:5:1",fontsize=10];
+    5 [xlabel="21:6:1",fontsize=10];
+    6 [xlabel="20:6:1",fontsize=10];
     7 [xlabel="20:7:1"];
     8 [xlabel="18:4:4",fontsize=10];
     9 [xlabel="17:4:6",fontsize=10];
