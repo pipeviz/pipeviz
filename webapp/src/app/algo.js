@@ -74,3 +74,14 @@ function extractVizGraph(g, repo) {
         fgwalk(d, []);
     });
 }
+
+// TODO memoize this
+var reachCount = function(g, v) {
+    var succ = g.successors(v),
+    r = function(accum, value) {
+        accum.push(_.foldl(g.successors(value), r, []));
+        return accum;
+    };
+
+    return succ === undefined ? 0 : _.flatten(_.foldl(succ, r, [])).length + 1;
+};
