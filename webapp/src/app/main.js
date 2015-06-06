@@ -148,7 +148,7 @@ var Viz = React.createClass({
             .attr("class", "vcs-label");
 
         // ...ugh scaling around text
-        labelg.append("rect").attr("width", 50).attr("height", 20).attr("x", -25).attr("y", -15);
+        labelg.append("rect").attr("width", 80).attr("height", 20).attr("x", -40).attr("y", -15);
         labelg.append("text")
             .text(function(d) {
                 return props.graph.get(d.id).propv("name");
