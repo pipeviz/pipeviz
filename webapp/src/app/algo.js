@@ -22,15 +22,16 @@ function extractVizGraph(g, repo) {
 
     var cg = g.commitGraph(), // TODO narrow to only commits in repo
     fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
-    visited = {};
+    isg = new graphlib.Graph(), // the induced subgraph; actually a tree, for now
+    visited = {},
+    candidates = [];
 
-
-    // Depth-first walk to build the focal graph
+    // Depth-first walk to build the focal graph and find root candidates
     var fgwalk = function(v, fpath) {
         var last = fpath.length === 0 ? [] : fpath[fpath.length - 1],
         pop_fpath = false;
 
-        // If vertex is already visited, return early. We only record focal vertices
+        // If vertex is already focal-visited, return early. We only record focal vertices
         // in this list, so there will be some double-traversal, but that's acceptable.
         if (_.has(visited, v)) {
             // Create edges from every focal on current vertex to every focal
@@ -73,6 +74,30 @@ function extractVizGraph(g, repo) {
     _.each(focalCommits, function(d) {
         fgwalk(d, []);
     });
+
+    // TODO exception handling for case where there's multiple roots...should that be impossible?
+
+    // Nearly the same walk, but only follow first parent
+    var isgwalk = function(v, last) {
+        // We always want to record the (reversed) edge, unless last does not exist
+        if (last !== undefined) {
+            isg.setEdge(v, last);
+        }
+
+        // If vertex is already visited, it's a candidate for being the root
+        if (_.has(visited, v)) {
+            candidates.push(v);
+            return;
+        }
+
+        // Only visit first parent; that's the path that matters to our subgraph
+        var succ = cg.successors(v);
+        if (succ.length > 0) {
+            isgwalk(succ[0], v);
+        }
+
+        visited[v] = true;
+    };
 }
 
 // TODO memoize this
