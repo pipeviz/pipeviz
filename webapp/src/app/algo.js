@@ -1,12 +1,18 @@
 // TODO memoize this
-var reachCount = function(g, v) {
+var reachCount = function(g, v, filter) {
     var succ = g.successors(v),
     r = function(accum, value) {
         accum.push(_.foldl(g.successors(value), r, []));
         return accum;
     };
 
-    return succ === undefined ? 0 : _.flatten(_.foldl(succ, r, [])).length + 1;
+    if (succ === undefined) {
+        return 0;
+    } else if (filter === undefined) {
+        return _.uniq(_.flatten(_.foldl(succ, r, []))).length + 1;
+    } else {
+        return _.intersection(_.uniq(_.flatten(_.foldl(succ, r, [])), filter)).length + 1;
+    }
 };
 
 /*
@@ -142,7 +148,7 @@ function extractVizGraph(g, repo) {
                 reach: lreach
             };
         } else {
-            lreach = reach;
+            lreach = reachCount(g, v, _.keys(focalCommits));
             vmeta[v] = {
                 depth: path.length,
                 interesting: succ.length > 1, // interesting only if has multiple successors
