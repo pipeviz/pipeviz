@@ -136,33 +136,52 @@ function extractVizGraph(g, repo) {
     };
 
     var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
-    mainwalk = function(v, path, reach) {
+    branches = 1, // overall counter for all the branches. starts at 1, increases as needed
+    mainwalk = function(v, path, branch) {
         // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
-        var succ = isg.successors(v),
-        lreach;
+        var succ = isg.successors(v);
         if (_.has(focalCommits, v)) {
-            lreach = reachCount(fg, v);
             vmeta[v] = {
                 depth: path.length, // distance from root
                 interesting: true, // all focal commits are interesting
-                reach: lreach
+                reach: reachCount(fg, v),
+                treach: reachCount(isg, v, _.keys(focalCommits)),
+                branch: branch
             };
         } else {
-            lreach = reachCount(g, v, _.keys(focalCommits));
             vmeta[v] = {
                 depth: path.length,
                 interesting: succ.length > 1, // interesting only if has multiple successors
-                reach: lreach
+                reach: reachCount(g, v, _.keys(focalCommits)),
+                treach: reachCount(isg, v, _.keys(focalCommits)),
+                branch: branch
             };
         }
 
         path.push(v);
+        var i = 0;
         _.each(succ, function(d) {
-            mainwalk(d, path, lreach);
+            // only increase branch count if there are multiple successors
+            mainwalk(d, path, branch + i++);
         });
         path.pop();
     };
 
-    // we only need to enter at root
-    mainwalk(root, []);
+    // we only need to enter at root to get everything
+    mainwalk(root, [], branchcount);
+
+    // now we have all the meta; construct x info and branch rankings
+    var xinfo = _.groupBy(vmeta, function(d) { return d.depth; }),
+    branchinfo = _(vmeta)
+        .mapValues(vmeta, function(v) { return v.branch; })
+        .invert(true)
+        .mapValues(function(v) { return { ids: v, rank: 0 }; })
+        .value(); // object keyed by branch number w/branch info
+
+    _.each(xinfo, function(metas, x) {
+        // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
+        _(metas).sortByOrder(metas, ["reach", "treach"]).reverse().each(function(meta, rank) {
+            branchinfo[meta.branch].rank = Math.min(branchinfo[meta.branch].rank, rank);
+        });
+    });
 }
