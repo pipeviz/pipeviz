@@ -1,3 +1,14 @@
+// TODO memoize this
+var reachCount = function(g, v) {
+    var succ = g.successors(v),
+    r = function(accum, value) {
+        accum.push(_.foldl(g.successors(value), r, []));
+        return accum;
+    };
+
+    return succ === undefined ? 0 : _.flatten(_.foldl(succ, r, [])).length + 1;
+};
+
 /*
  * The main magic function for processing a pv graph into the base state usable
  * for the app/commit viz.
@@ -75,9 +86,8 @@ function extractVizGraph(g, repo) {
         fgwalk(d, []);
     });
 
-    // TODO exception handling for case where there's multiple roots...should that be impossible?
-
-    // Nearly the same walk, but only follow first parent
+    // Nearly the same walk, but only follow first parent. Builds root candidate list
+    // AND build the first-parent tree at the same time.
     var isgwalk = function(v, last) {
         // We always want to record the (reversed) edge, unless last does not exist
         if (last !== undefined) {
@@ -90,7 +100,7 @@ function extractVizGraph(g, repo) {
             return;
         }
 
-        // Only visit first parent; that's the path that matters to our subgraph
+        // Only visit first parent; that's the path that matters to our subgraph/tree
         var succ = cg.successors(v);
         if (succ.length > 0) {
             isgwalk(succ[0], v);
@@ -98,15 +108,55 @@ function extractVizGraph(g, repo) {
 
         visited[v] = true;
     };
-}
 
-// TODO memoize this
-var reachCount = function(g, v) {
-    var succ = g.successors(v),
-    r = function(accum, value) {
-        accum.push(_.foldl(g.successors(value), r, []));
-        return accum;
+    // reset visited list
+    visited = {};
+
+    _.each(focalCommits, function(d) {
+        isgwalk(d);
+    });
+
+    // This identifies the shared root (in git terms, the merge base) from all
+    // candidates by walking down the reversed subgraph/tree until we find a
+    // vertex in the candidate list. The first one we find is guaranteed to
+    // be the root.
+    var root,
+    rootfind = function(v) {
+        if (candidates.indexOf(v) !== -1) {
+            root = v;
+            return;
+        }
+        rootfind(isg.successors(v)[0]);
     };
 
-    return succ === undefined ? 0 : _.flatten(_.foldl(succ, r, [])).length + 1;
-};
+    var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
+    mainwalk = function(v, path, reach) {
+        // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
+        var succ = isg.successors(v),
+        lreach;
+        if (_.has(focalCommits, v)) {
+            lreach = reachCount(fg, v);
+            vmeta[v] = {
+                depth: path.length, // distance from root
+                interesting: true, // all focal commits are interesting
+                reach: lreach
+            };
+        } else {
+            lreach = reach;
+            vmeta[v] = {
+                depth: path.length,
+                interesting: succ.length > 1, // interesting only if has multiple successors
+                reach: lreach
+            };
+        }
+
+        path.push(v);
+        _.each(succ, function(d) {
+            mainwalk(d, path, lreach);
+        });
+        path.pop();
+    };
+
+    // we only need to enter at root
+    mainwalk(root, []);
+}
