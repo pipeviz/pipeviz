@@ -151,7 +151,7 @@ function extractVizGraph(g, repo) {
         } else {
             vmeta[v] = {
                 depth: path.length,
-                interesting: succ.length > 1, // interesting only if has multiple successors
+                interesting: succ.length > 1 || isg.successors(path[path.length -1]).length > 1, // interesting only if has multiple successors, or parent did
                 reach: reachCount(g, v, _.keys(focalCommits)),
                 treach: reachCount(isg, v, _.keys(focalCommits)),
                 branch: branch
@@ -205,6 +205,23 @@ function extractVizGraph(g, repo) {
     // FINALLY, assign x and y coords to all visible vertices
     var vertices = _(vmeta).filter(function(v, k) { return elidable.indexOf(k) !== -1; })
         .map(function(v, k) {
-            return _.assign({id: k, x: v.depth, y: branchinfo[v.branch].rank}, v);
-        }).value();
+            return _.assign({
+                id: k,
+                x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
+                y: branchinfo[v.branch].rank // y is just the branch rank TODO alternate up/down projection
+            }, v);
+        }).value(),
+    diameter = _.max(_.map(focalCommits, function(v, k) { return vmeta[k].depth; })),
+    ediam = diameter - elidable.length;
+
+    // TODO branches/tags
+
+    return {
+        vertices: vertices,
+        elidable: elidable,
+        elsets: elsets,
+        g: isg,
+        diameter: diameter,
+        ediam: ediam,
+    };
 }
