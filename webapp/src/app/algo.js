@@ -170,14 +170,8 @@ function extractVizGraph(g, repo) {
     // we only need to enter at root to get everything
     mainwalk(root, [], branchcount);
 
-    // now we have all the meta; construct x info and branch rankings
-    var xinfo = _.groupBy(vmeta, function(d) { return d.depth; }), // TODO this is ephemeral, don't need separate var
-    branchinfo = _(vmeta)
-        .mapValues(function(v) { return v.branch; })
-        .invert(true) // same as a groupBy in this context
-        .mapValues(function(v) { return { ids: v, rank: 0 }; })
-        .value(), // object keyed by branch number w/branch info
-    elidable = _(vmeta)
+    // now we have all the base meta; construct elidables lists and branch rankings
+    var elidable = _(vmeta)
         .filter(function(v) { return v.interesting === false; })
         .map(function(v) { return v.depth; })
         .uniq()
@@ -193,14 +187,20 @@ function extractVizGraph(g, repo) {
         }
 
         return accum;
-    }, []);
+    }, []),
+    branchinfo = _(vmeta)
+        .mapValues(function(v) { return v.branch; })
+        .invert(true) // same as a groupBy in this context
+        .mapValues(function(v) { return { ids: v, rank: 0 }; })
+        .value(); // object keyed by branch number w/branch info
 
-    _.each(xinfo, function(metas, x) {
-        // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
-        _(metas).sortByOrder(metas, ["reach", "treach"], [false, false]).each(function(meta, rank) {
-            branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
+    _(vmeta).groupBy(function(v) { return v.depth; })
+        .each(function(metas, x) {
+            // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
+            _(metas).sortByOrder(metas, ["reach", "treach"], [false, false]).each(function(meta, rank) {
+                branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
+            });
         });
-    });
 
     // FINALLY, assign x and y coords to all visible vertices
     var vertices = _(vmeta).filter(function(v, k) { return elidable.indexOf(k) !== -1; })
