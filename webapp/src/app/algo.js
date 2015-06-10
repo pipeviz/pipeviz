@@ -203,10 +203,9 @@ function extractVizGraph(g, repo) {
         });
 
     // FINALLY, assign x and y coords to all visible vertices
-    var vertices = _(vmeta).filter(function(v, k) { return elidable.indexOf(k) !== -1; })
-        .map(function(v, k) {
+    var vertices = _(vmeta).pick(function(v, k) { return elidable.indexOf(k) !== -1; })
+        .mapValues(function(v) {
             return _.assign({
-                id: k,
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: branchinfo[v.branch].rank // y is just the branch rank TODO alternate up/down projection
             }, v);
