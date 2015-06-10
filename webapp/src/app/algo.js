@@ -201,4 +201,10 @@ function extractVizGraph(g, repo) {
             branchinfo[meta.branch].rank = Math.min(branchinfo[meta.branch].rank, rank);
         });
     });
+
+    // FINALLY, assign x and y coords to all visible vertices
+    var vertices = _(vmeta).filter(function(v, k) { return elidable.indexOf(k) !== -1; })
+        .map(function(v, k) {
+            return _.assign({id: k, x: v.depth, y: branchinfo[v.branch].rank}, v);
+        }).value();
 }
