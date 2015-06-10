@@ -198,7 +198,7 @@ function extractVizGraph(g, repo) {
     _.each(xinfo, function(metas, x) {
         // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
         _(metas).sortByOrder(metas, ["reach", "treach"], [false, false]).each(function(meta, rank) {
-            branchinfo[meta.branch].rank = Math.min(branchinfo[meta.branch].rank, rank);
+            branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
         });
     });
 
