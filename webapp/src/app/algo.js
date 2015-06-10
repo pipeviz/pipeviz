@@ -171,28 +171,29 @@ function extractVizGraph(g, repo) {
     mainwalk(root, [], branchcount);
 
     // now we have all the meta; construct x info and branch rankings
-    var xinfo = _.groupBy(vmeta, function(d) { return d.depth; }),
+    var xinfo = _.groupBy(vmeta, function(d) { return d.depth; }), // TODO this is ephemeral, don't need separate var
     branchinfo = _(vmeta)
         .mapValues(function(v) { return v.branch; })
         .invert(true) // same as a groupBy in this context
         .mapValues(function(v) { return { ids: v, rank: 0 }; })
         .value(), // object keyed by branch number w/branch info
-    elidable = _.reduce(_(vmeta)
+    elidable = _(vmeta)
         .filter(function(v) { return v.interesting === false; })
         .map(function(v) { return v.depth; })
         .uniq()
         .value()
-        .sort(), function(accum, v, k, coll) {
-            if (coll[k-1] === v-1) {
-                // contiguous section, push onto last series
-                accum[accum.length - 1].push(v);
-            } else {
-                // non-contiguous, start a new series
-                accum.push([v]);
-            }
+        .sort(),
+    elsets = _.reduce(elidable, function(accum, v, k, coll) {
+        if (coll[k-1] === v-1) {
+            // contiguous section, push onto last series
+            accum[accum.length - 1].push(v);
+        } else {
+            // non-contiguous, start a new series
+            accum.push([v]);
+        }
 
-            return accum;
-        }, []);
+        return accum;
+    }, []);
 
     _.each(xinfo, function(metas, x) {
         // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
