@@ -173,14 +173,30 @@ function extractVizGraph(g, repo) {
     // now we have all the meta; construct x info and branch rankings
     var xinfo = _.groupBy(vmeta, function(d) { return d.depth; }),
     branchinfo = _(vmeta)
-        .mapValues(vmeta, function(v) { return v.branch; })
-        .invert(true)
+        .mapValues(function(v) { return v.branch; })
+        .invert(true) // same as a groupBy in this context
         .mapValues(function(v) { return { ids: v, rank: 0 }; })
-        .value(); // object keyed by branch number w/branch info
+        .value(), // object keyed by branch number w/branch info
+    elidable = _.reduce(_(vmeta)
+        .filter(function(v) { return v.interesting === false; })
+        .map(function(v) { return v.depth; })
+        .uniq()
+        .value()
+        .sort(), function(accum, v, k, coll) {
+            if (coll[k-1] === v-1) {
+                // contiguous section, push onto last series
+                accum[accum.length - 1].push(v);
+            } else {
+                // non-contiguous, start a new series
+                accum.push([v]);
+            }
+
+            return accum;
+        }, []);
 
     _.each(xinfo, function(metas, x) {
         // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
-        _(metas).sortByOrder(metas, ["reach", "treach"]).reverse().each(function(meta, rank) {
+        _(metas).sortByOrder(metas, ["reach", "treach"], [false, false]).each(function(meta, rank) {
             branchinfo[meta.branch].rank = Math.min(branchinfo[meta.branch].rank, rank);
         });
     });
