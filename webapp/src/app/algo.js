@@ -1,5 +1,5 @@
 // TODO memoize this
-var reachCount = function(g, v, filter) {
+var reachCounts = function(g, v, filter) {
     var succ = g.successors(v),
     r = function(accum, value) {
         accum.push(_.foldl(g.successors(value), r, []));
@@ -12,6 +12,22 @@ var reachCount = function(g, v, filter) {
         return _.uniq(_.flatten(_.foldl(succ, r, []))).length + 1;
     } else {
         return _.intersection(_.uniq(_.flatten(_.foldl(succ, r, [])), filter)).length + 1;
+    }
+};
+
+var reachCountp = function(g, v, filter) {
+    var pred = g.predecessors(v),
+    r = function(accum, value) {
+        accum.push(_.foldl(g.predecessors(value), r, []));
+        return accum;
+    };
+
+    if (pred === undefined) {
+        return 0;
+    } else if (filter === undefined) {
+        return _.uniq(_.flatten(_.foldl(succ, r, []))).length + 1;
+    } else {
+        return _.intersection(_.uniq(_.flatten(_.foldl(pred, r, [])), filter)).length + 1;
     }
 };
 
@@ -36,6 +52,10 @@ function extractVizGraph(g, repo) {
             return true;
         }
     });
+
+    if (focal.length === 0) {
+        return;
+    }
 
     var cg = g.commitGraph(), // TODO narrow to only commits in repo
     fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
@@ -88,8 +108,8 @@ function extractVizGraph(g, repo) {
         }
     };
 
-    _.each(focalCommits, function(d) {
-        fgwalk(d, []);
+    _.each(focalCommits, function(d, k) {
+        fgwalk(k, []);
     });
 
     // Nearly the same walk, but only follow first parent. Builds root candidate list
@@ -108,7 +128,7 @@ function extractVizGraph(g, repo) {
 
         // Only visit first parent; that's the path that matters to our subgraph/tree
         var succ = cg.successors(v);
-        if (succ.length > 0) {
+        if (succ !== undefined && succ.length > 0) {
             isgwalk(succ[0], v);
         }
 
@@ -118,8 +138,8 @@ function extractVizGraph(g, repo) {
     // reset visited list
     visited = {};
 
-    _.each(focalCommits, function(d) {
-        isgwalk(d);
+    _.each(focalCommits, function(d, k) {
+        isgwalk(k);
     });
 
     // This identifies the shared root (in git terms, the merge base) from all
@@ -132,28 +152,34 @@ function extractVizGraph(g, repo) {
             root = v;
             return;
         }
-        rootfind(isg.successors(v)[0]);
+
+        var succ = isg.successors(v) || [];
+        if (succ.length > 0) {
+            rootfind(succ[0]);
+        }
     };
+    rootfind(isg.sources()[0]);
 
     var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
     branches = 1, // overall counter for all the branches. starts at 1, increases as needed
     mainwalk = function(v, path, branch) {
         // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
-        var succ = isg.successors(v);
+        var succ = isg.successors(v) || [];
         if (_.has(focalCommits, v)) {
             vmeta[v] = {
                 depth: path.length, // distance from root
                 interesting: true, // all focal commits are interesting
-                reach: reachCount(fg, v),
-                treach: reachCount(isg, v, _.keys(focalCommits)),
+                reach: reachCounts(fg, v),
+                treach: reachCounts(isg, v, _.keys(focalCommits)),
                 branch: branch
             };
         } else {
+            var psucc = path === [] ? [] : isg.successors(path[path.length -1]);
             vmeta[v] = {
                 depth: path.length,
-                interesting: succ.length > 1 || isg.successors(path[path.length -1]).length > 1, // interesting only if has multiple successors, or parent did
-                reach: reachCount(g, v, _.keys(focalCommits)),
-                treach: reachCount(isg, v, _.keys(focalCommits)),
+                interesting: succ.length > 1 || psucc.length > 1, // interesting only if has multiple successors, or parent did
+                reach: reachCountp(cg, v, _.keys(focalCommits)),
+                treach: reachCounts(isg, v, _.keys(focalCommits)),
                 branch: branch
             };
         }
@@ -168,7 +194,7 @@ function extractVizGraph(g, repo) {
     };
 
     // we only need to enter at root to get everything
-    mainwalk(root, [], branchcount);
+    mainwalk(root, [], branches);
 
     // now we have all the base meta; construct elidables lists and branch rankings
     var elidable = _(vmeta)
@@ -196,6 +222,7 @@ function extractVizGraph(g, repo) {
 
     _(vmeta).groupBy(function(v) { return v.depth; })
         .each(function(metas, x) {
+            // TODO this needs to get much, much smarter in order to weave smartly as unsigned y
             // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
             _(metas).sortByOrder(metas, ["reach", "treach"], [false, false]).each(function(meta, rank) {
                 branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
@@ -204,8 +231,9 @@ function extractVizGraph(g, repo) {
 
     // FINALLY, assign x and y coords to all visible vertices
     var vertices = _(vmeta).pick(function(v, k) { return elidable.indexOf(k) !== -1; })
-        .mapValues(function(v) {
+        .mapValues(function(v, k) {
             return _.assign({
+                id: k,
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: branchinfo[v.branch].rank // y is just the branch rank TODO alternate up/down projection
             }, v);
@@ -222,5 +250,6 @@ function extractVizGraph(g, repo) {
         g: isg,
         diameter: diameter,
         ediam: ediam,
+        root: root,
     };
 }
