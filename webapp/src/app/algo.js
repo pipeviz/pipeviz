@@ -202,7 +202,7 @@ function extractVizGraph(g, repo) {
         .map(function(v) { return v.depth; })
         .uniq()
         .value()
-        .sort(),
+        .sort(function(a, b) { return a - b; }),
     elsets = _.reduce(elidable, function(accum, v, k, coll) {
         if (coll[k-1] === v-1) {
             // contiguous section, push onto last series
