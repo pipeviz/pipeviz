@@ -224,14 +224,17 @@ function extractVizGraph(g, repo) {
         .each(function(metas, x) {
             // TODO this needs to get much, much smarter in order to weave smartly as unsigned y
             // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
-            _(metas).sortByOrder(metas, ["reach", "treach"], [false, false]).each(function(meta, rank) {
-                branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
-            });
+            _(metas).sortBy(["reach", "treach"])
+                .reverse()
+                .each(function(meta, rank) {
+                    branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
+                });
         });
 
     // FINALLY, assign x and y coords to all visible vertices
-    var vertices = _(vmeta).pick(function(v, k) { return elidable.indexOf(k) !== -1; })
-        .mapValues(function(v, k) {
+    var vertices = _(vmeta)
+        .pick(function(v, k) { return _.indexOf(elidable, parseInt(k), true) === -1; })
+        .map(function(v, k) {
             return _.assign({
                 id: k,
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
