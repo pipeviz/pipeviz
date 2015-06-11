@@ -41,18 +41,28 @@ var Viz = React.createClass({
             viewBox: "0 0 " + this.props.width + " " + this.props.height
         });
     },
-    componentWillMount: function() {
-        this.state.force.stop();
+    shouldComponentUpdate: function(nextProps, prevProps) {
+        return nextProps.vizdata !== undefined;
     },
-    componentWillReceiveProps: function(nextProps) {
-        this.state.force.nodes(nextProps.nodes);
-        this.state.force.links(nextProps.links);
-    },
-    componentDidUpdate: function(prevProps) {
-        this.graphRender(this.getDOMNode(), this.state, this.props);
-        if (this.props.nodes.length !== 0) {
-            (prevProps.nodes.length === 0) ? this.state.force.alpha(0.5) : this.state.force.alpha(0.1);
-        }
+    componentDidUpdate: function() {
+        // x-coordinate space is the elided diameter as a factor of viewport width
+        var xf = this.props.width / (this.props.vizdata.ediam),
+            xt = function(x) { return x * xf; },
+            selections = {};
+
+        selections.outerg = d3.select(this.getDOMNode()).append('g');
+        //selections.links = d3.select(el).selectAll('.edge')
+            //.data(function() {
+
+            //});
+        selections.vertices = selections.outerg.selectAll('.vertex')
+            .data(this.props.vizdata.vertices, function(d) { return d.id; });
+
+        selections.vertices.enter().append('circle')
+            .attr('cx', function(d) { return d.x * xf; })
+            .attr('cy', function(d) { return d.y; })
+            .attr('r', xf/3);
+
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
@@ -487,9 +497,9 @@ var VizPrep = React.createClass({
         return nextProps.graph.mid !== this.props.graph.mid;
     },
     render: function() {
-        var vizdata = this.extractVizGraph(this.props.focalRepo);
-
-        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
+        //var vizdata = this.extractVizGraph(this.props.focalRepo);
+        //return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
+        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, vizdata: extractVizGraph(this.props.graph, this.props.focalRepo)});
     },
 });
 
