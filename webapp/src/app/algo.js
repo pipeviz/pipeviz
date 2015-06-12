@@ -236,7 +236,7 @@ function extractVizGraph(g, repo) {
         .pick(function(v, k) { return _.indexOf(elidable, parseInt(k), true) === -1; })
         .map(function(v, k) {
             return _.assign({
-                id: k,
+                ref: _.has(focalCommits, k) ? focalCommits[k][0] : g.get(k), // TODO handle multiple on same commit
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: branchinfo[v.branch].rank // y is just the branch rank TODO alternate up/down projection
             }, v);
