@@ -73,9 +73,9 @@ function extractVizGraph(g, repo) {
         if (_.has(visited, v)) {
             // Create edges from every focal on current vertex to every focal
             // from last. No op if last is empty.
-            _.each(last, function(fvs) {
-                _.each(fvs, function(fv) {
-                    fg.setEdge(v, fv);
+            _.each(last, function(lvtx) {
+                _.each(focalCommits[v], function(vtx) {
+                    fg.setEdge(vtx.id, lvtx.id);
                 });
             });
             return;
@@ -89,9 +89,9 @@ function extractVizGraph(g, repo) {
 
             // Create edges from every focal on current vertex to every focal
             // from last. No op if last is empty.
-            _.each(last, function(fvs) {
-                _.each(fvs, function(fv) {
-                    fg.setEdge(v, fv);
+            _.each(last, function(lvtx) {
+                _.each(focalCommits[v], function(vtx) {
+                    fg.setEdge(vtx.id, lvtx.id);
                 });
             });
 
