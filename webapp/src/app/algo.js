@@ -1,33 +1,34 @@
 // TODO memoize this
 var reachCounts = function(g, v, filter) {
     var succ = g.successors(v),
+    // Recursive folder to create a flattened array with all successors.
     r = function(accum, value) {
-        accum.push(_.foldl(g.successors(value), r, []));
-        return accum;
+        return accum.concat([value].concat(_.foldl(g.successors(value), r, [])));
     };
 
-    if (succ === undefined) {
+
+    if (succ === undefined || succ.length === 0) {
         return 0;
     } else if (filter === undefined) {
-        return _.uniq(_.flatten(_.foldl(succ, r, []))).length + 1;
+        return _.uniq(_.foldl(succ, r, [])).length + 1;
     } else {
-        return _.intersection(_.uniq(_.flatten(_.foldl(succ, r, [])), filter)).length + 1;
+        return _.uniq(_.intersection(_.foldl(succ, r, []), filter)).length + 1;
     }
 };
 
 var reachCountp = function(g, v, filter) {
     var pred = g.predecessors(v),
+    // Recursive folder to create a flattened array with all predecessors.
     r = function(accum, value) {
-        accum.push(_.foldl(g.predecessors(value), r, []));
-        return accum;
+        return accum.concat([value].concat(_.foldl(g.predecessors(value), r, [])));
     };
 
-    if (pred === undefined) {
+    if (pred === undefined || pred.length === 0) {
         return 0;
     } else if (filter === undefined) {
-        return _.uniq(_.flatten(_.foldl(succ, r, []))).length + 1;
+        return _.uniq(_.foldl(pred, r, [])).length + 1;
     } else {
-        return _.intersection(_.uniq(_.flatten(_.foldl(pred, r, [])), filter)).length + 1;
+        return _.uniq(_.intersection(_.foldl(pred, r, []), filter)).length + 1;
     }
 };
 
