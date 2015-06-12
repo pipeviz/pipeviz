@@ -53,18 +53,26 @@ var Viz = React.createClass({
             xt = function(x) { return x * xf; },
             selections = {};
 
-        selections.outerg = d3.select(this.getDOMNode()).append('g');
         //selections.links = d3.select(el).selectAll('.edge')
             //.data(function() {
 
             //});
-        selections.vertices = selections.outerg.selectAll('.vertex')
-            .data(this.props.vizdata.vertices, function(d) { return d.id; });
 
-        selections.vertices.enter().append('circle')
-            .attr('cx', function(d) { return d.x * xf; })
-            .attr('cy', function(d) { return d.y; })
-            .attr('r', xf/3);
+        selections.outerg = d3.select(this.getDOMNode()).append('g');
+        selections.outerg
+            .attr('id', 'commit-pipeline');
+            //.attr('transform', 'translate(0.5, 0.5)');
+            //.attr('width', '100%').attr('viewBox', '0 0 ' + (this.props.vizdata.ediam + 2) + ' ' + _.size(this.props.vizdata.branches));
+        selections.vertices = selections.outerg.selectAll('.node')
+        //selections.vertices = d3.select(this.getDOMNode()).selectAll('.node')
+            .data(this.props.vizdata.vertices, function(d) { return d.ref.id; });
+
+        selections.vertices.enter().append('g')
+            .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
+            .append('circle')
+                .attr('cx', function(d) { return d.x + 0.5; })
+                .attr('cy', function(d) { return d.y + 0.5; })
+                .attr('r', function(d) { return d.ref.Typ() === "commit" ? 0.03 : 0.3; });
 
     },
     graphRender: function(el, state, props) {
