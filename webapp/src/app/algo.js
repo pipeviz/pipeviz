@@ -161,7 +161,7 @@ function extractVizGraph(g, repo) {
     rootfind(isg.sources()[0]);
 
     var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
-    branches = 1, // overall counter for all the branches. starts at 1, increases as needed
+    branches = 0, // overall counter for all the branches. starts at 0, increases as needed
     mainwalk = function(v, path, branch) {
         // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
         var succ = isg.successors(v) || [];
@@ -185,16 +185,20 @@ function extractVizGraph(g, repo) {
         }
 
         path.push(v);
-        var i = 0;
-        _.each(succ, function(d) {
-            // only increase branch count if there are multiple successors
-            mainwalk(d, path, branch + i++);
+        _.each(succ, function(d, i) {
+            if (i === 0) {
+                // if first, consider it the same branch
+                mainwalk(d, path, branch);
+            } else {
+                // otherwise, increment then pass branches counter
+                mainwalk(d, path, ++branches);
+            }
         });
         path.pop();
     };
 
     // we only need to enter at root to get everything
-    mainwalk(root, [], branches);
+    mainwalk(root, [], 0);
 
     // now we have all the base meta; construct elidables lists and branch rankings
     var elidable = _(vmeta)
