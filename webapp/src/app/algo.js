@@ -221,7 +221,7 @@ function extractVizGraph(g, repo) {
     }, []),
     branchinfo = _(vmeta)
         .mapValues(function(v) { return v.branch; })
-        .invert(true) // same as a groupBy in this context
+        .groupBy() // collects vertices on same branch into a single array
         .mapValues(function(v) { return { ids: v, rank: 0 }; })
         .value(); // object keyed by branch number w/branch info
 
