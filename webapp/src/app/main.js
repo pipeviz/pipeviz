@@ -36,9 +36,12 @@ var Viz = React.createClass({
         };
     },
     render: function() {
+        // TODO terrible hack this way
+        var vd = this.props.vizdata || { ediam: 0, branches: []};
         return React.DOM.svg({
             className: "pipeviz",
-            viewBox: "0 0 " + this.props.width + " " + this.props.height
+            width: "100%",
+            viewBox: '0 0 ' + (vd.ediam + 1) + ' ' + (this.props.height / this.props.width * (vd.ediam + 1))
         });
     },
     shouldComponentUpdate: function(nextProps, prevProps) {
