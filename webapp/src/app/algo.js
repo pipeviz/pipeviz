@@ -254,5 +254,27 @@ function extractVizGraph(g, repo) {
         diameter: diameter,
         ediam: ediam,
         root: root,
+        branches: branchinfo,
+    };
+}
+
+/*
+ * Given a viewport width and height, a diameter (number of x positions)
+ * and a deviation (max y-deviation from the middle), returns
+ * a set of functions for transforming x and y coordinates into the
+ * numbers appropriate for the target user coordinate space.
+ */
+function createTransforms(vpwidth, vpheight, diameter, deviation) {
+    var ar = vpwidth / vpheight,
+        unit = vpwidth / (diameter + 1); // the base grid unit size, presumably in px
+    // TODO different paths depending on whether x or y exceeds ratio
+    return {
+        unit: function() { return unit; },
+        x: function(x) {
+            return 0.5*unit + x*unit;
+        },
+        y: function(y) {
+            return 0.5*vpheight + y*unit;
+        },
     };
 }

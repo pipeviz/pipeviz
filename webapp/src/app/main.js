@@ -41,7 +41,7 @@ var Viz = React.createClass({
         return React.DOM.svg({
             className: "pipeviz",
             width: "100%",
-            viewBox: '0 0 ' + (vd.ediam + 1) + ' ' + (this.props.height / this.props.width * (vd.ediam + 1))
+            //viewBox: '0 0 ' + (vd.ediam + 1) + ' ' + (this.props.height / this.props.width * (vd.ediam + 1))
         });
     },
     shouldComponentUpdate: function(nextProps, prevProps) {
@@ -49,9 +49,9 @@ var Viz = React.createClass({
     },
     componentDidUpdate: function() {
         // x-coordinate space is the elided diameter as a factor of viewport width
-        var xf = this.props.width / (this.props.vizdata.ediam),
-            xt = function(x) { return x * xf; },
-            selections = {};
+        var selections = {},
+            props = this.props,
+            tf = createTransforms(props.width, props.height, props.vizdata.ediam, props.vizdata.branches.length);
 
         //selections.links = d3.select(el).selectAll('.edge')
             //.data(function() {
@@ -65,15 +65,33 @@ var Viz = React.createClass({
             //.attr('width', '100%').attr('viewBox', '0 0 ' + (this.props.vizdata.ediam + 2) + ' ' + _.size(this.props.vizdata.branches));
         selections.vertices = selections.outerg.selectAll('.node')
         //selections.vertices = d3.select(this.getDOMNode()).selectAll('.node')
-            .data(this.props.vizdata.vertices, function(d) { return d.ref.id; });
+            .data(props.vizdata.vertices, function(d) { return d.ref.id; });
 
-        selections.vertices.enter().append('g')
+        selections.nodes = selections.vertices.enter().append('g')
             .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
-            .append('circle')
-                .attr('cx', function(d) { return d.x + 0.5; })
-                .attr('cy', function(d) { return d.y + 0.5; })
-                .attr('r', function(d) { return d.ref.Typ() === "commit" ? 0.03 : 0.3; });
+            .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; });
+        selections.nodes.append('circle')
+            //.attr('cx', function(d) { return tf.x(d.x); })
+            //.attr('cy', function(d) { return tf.y(d.y); })
+            .attr('r', function(d) { return d.ref.Typ() === "commit" ? tf.unit()*0.03 : tf.unit()*0.3; });
 
+        selections.nodetext = selections.nodes.append('text');
+        selections.nodetext.append('tspan').text(function(d) { return d.ref.propv("lgroup"); });
+        selections.nodetext.append('tspan').text(function(d) {
+            return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7);
+        })
+        .attr('dy', "1.4em")
+        .attr('x', 0)
+        .attr('class', function(d) {
+            var output = 'commit-subtext',
+                commit = getCommit(props.graph, d.ref),
+                testState = getTestState(props.graph, commit);
+            if (testState !== undefined) {
+                output += ' commit-' + testState;
+            }
+
+            return output;
+        });
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
