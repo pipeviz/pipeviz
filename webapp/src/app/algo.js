@@ -114,7 +114,8 @@ function extractVizGraph(g, repo) {
     });
 
     // Nearly the same walk, but only follow first parent. Builds root candidate list
-    // AND build the first-parent tree at the same time.
+    // AND build the first-parent tree (almost an induced subgraph, but not quite) at
+    // the same time.
     var isgwalk = function(v, last) {
         // We always want to record the (reversed) edge, unless last does not exist
         if (last !== undefined) {
@@ -238,7 +239,7 @@ function extractVizGraph(g, repo) {
 
     // FINALLY, assign x and y coords to all visible vertices
     var vertices = _(vmeta)
-        .pick(function(v, k) { return _.indexOf(elidable, parseInt(k), true) === -1; })
+        .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
         .map(function(v, k) {
             return _.assign({
                 ref: _.has(focalCommits, k) ? focalCommits[k][0] : g.get(k), // TODO handle multiple on same commit
