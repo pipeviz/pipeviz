@@ -269,22 +269,22 @@ function extractVizGraph(g, repo) {
     // links, now that the vertices list is assembled and ready.
     _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
-    // fill in the links that need to hop across elided ranges
-    _.each(vertices, function(v) {
-        // find the first elided range where the vertex's depth is one greater than
-        // the largest depth in the range (so, the last element). this indicates a
-        // vertex that must form a link across an elided range.
-        var succrange = _.findIndex(elranges, function(crange) {
-            return v.depth === crange[crange.length-1] + 1;
+    // collect the vertices together by branch in a way that it's easy to see
+    // where connections are needed to cross elision ranges, then walk through
+    // the vertices in order and make the links (elision or no)
+    _.each(_.groupBy(vertices, function(v) { return v.branch; }), function(vtxs) {
+        _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+            if (k === 0) {
+                // nothing to look back to on the first item
+                return;
+            }
+
+            // whether or not there's elision, adjacent vertices in this list need a link
+            links.push([coll[k-1], v]);
+
+            // TODO for later, when edges get more logic, this checks if there's elision:
+            //if (v.depth !== coll[k-1].depth + 1) {
         });
-
-        if (succrange === -1) {
-            // no matches, so this vertex doesn't need any elision links. bail out
-            return;
-        }
-
-        var offset = branchinfo[v.branch].ids.indexOf(v.ref.id) - elranges[succrange].length;
-        links.push([vertices[branchinfo[v.branch].ids[offset]], v]);
     });
 
     // TODO branches/tags
