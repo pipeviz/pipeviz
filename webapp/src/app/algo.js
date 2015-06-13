@@ -60,7 +60,7 @@ function extractVizGraph(g, repo) {
 
     var cg = g.commitGraph(), // TODO narrow to only commits in repo
     fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
-    isg = new graphlib.Graph(), // the induced subgraph; actually a tree, for now
+    isg = new graphlib.Graph(), // A tree, almost an induced subgraph, representing first-parent commit graph paths
     visited = {},
     candidates = [];
 
@@ -214,8 +214,9 @@ function extractVizGraph(g, repo) {
         .map(function(v) { return v.depth; })
         .uniq()
         .value()
-        .sort(function(a, b) { return a - b; }),
-    elsets = _.reduce(elidable, function(accum, v, k, coll) {
+        .sort(function(a, b) { return a - b; }), // TODO bubble sort, meh
+    // also compute the minimum set of contiguous elidable depths
+    elranges = _.reduce(elidable, function(accum, v, k, coll) {
         if (coll[k-1] === v-1) {
             // contiguous section, push onto last series
             accum[accum.length - 1].push(v);
@@ -262,20 +263,27 @@ function extractVizGraph(g, repo) {
     ediam = diameter - elidable.length;
 
     // Build up the list of links
-    var links = [];
+    var links = []; // all the links we'll ultimately return
+
+    // transform the list of protolinks compiled during mainwalk into real
+    // links, now that the vertices list is assembled and ready.
     _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
+
+    // fill in the links that need to hop across elided ranges
     _.each(vertices, function(v) {
-        var succset = _.findIndex(elsets, function(set) {
-            return v.depth > set[0];
+        // find the first elided range where the vertex's depth is one greater than
+        // the largest depth in the range (so, the last element). this indicates a
+        // vertex that must form a link across an elided range.
+        var succrange = _.findIndex(elranges, function(crange) {
+            return v.depth === crange[crange.length-1] + 1;
         });
 
-        if (succset === -1) {
-            // if the vertex precedes the first elided set, there
-            // are no compensatory links to make
+        if (succrange === -1) {
+            // no matches, so this vertex doesn't need any elision links. bail out
             return;
         }
 
-        var offset = branchinfo[v.branch].ids.indexOf(v.ref.id) - elsets[succset].length;
+        var offset = branchinfo[v.branch].ids.indexOf(v.ref.id) - elranges[succrange].length;
         links.push([vertices[branchinfo[v.branch].ids[offset]], v]);
     });
 
@@ -285,7 +293,7 @@ function extractVizGraph(g, repo) {
         vertices: _.values(vertices),
         links: links,
         elidable: elidable,
-        elsets: elsets,
+        elranges: elranges,
         g: isg,
         diameter: diameter,
         ediam: ediam,
