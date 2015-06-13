@@ -276,7 +276,7 @@ function createTransforms(vpwidth, vpheight, diameter, deviation) {
     return {
         unit: function() { return unit; },
         x: function(x) {
-            return 0.5*unit + x*unit;
+            return Math.abs((diameter+1)*unit - (0.5*unit + x*unit));
         },
         y: function(y) {
             return 0.5*vpheight + y*unit;
