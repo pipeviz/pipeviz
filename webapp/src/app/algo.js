@@ -283,3 +283,28 @@ function createTransforms(vpwidth, vpheight, diameter, deviation) {
         },
     };
 }
+
+function dumpGraph(g, rg, mapper) {
+    console.log({
+        nodes: _.map(g.nodes(), function(n) {
+            return mapper(rg.get(n));
+        }),
+        edges: _.map(g.edges(), function(e) {
+            return [mapper(rg.get(e.v)), mapper(rg.get(e.w))];
+        }),
+    });
+}
+
+function clMapper(v) {
+    _.assign(v, v.vertex);
+    switch (v.vertex.type) {
+        case 'logic-state':
+            v.lgroup = v.propv('lgroup');
+            break;
+        case 'commit':
+            v.sha1 = v.propv('sha1');
+            break;
+    }
+
+    return v;
+}
