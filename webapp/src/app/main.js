@@ -53,10 +53,16 @@ var Viz = React.createClass({
             props = this.props,
             tf = createTransforms(props.width, props.height, props.vizdata.ediam, props.vizdata.branches.length);
 
-        //selections.links = d3.select(el).selectAll('.edge')
-            //.data(function() {
-
-            //});
+        selections.links = d3.select(this.getDOMNode()).selectAll('.link')
+            .data(props.vizdata.links, function(d) {
+                return d[0].ref.id + '-' +  d[1].ref.id;
+            });
+        selections.links.enter().append('line')
+            .attr('class', 'link')
+            .attr('x1', function(d) { return tf.x(d[0].x); })
+            .attr('y1', function(d) { return tf.y(d[0].y); })
+            .attr('x2', function(d) { return tf.x(d[1].x); })
+            .attr('y2', function(d) { return tf.y(d[1].y); });
 
         selections.outerg = d3.select(this.getDOMNode()).append('g');
         selections.outerg

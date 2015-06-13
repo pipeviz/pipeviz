@@ -163,6 +163,7 @@ function extractVizGraph(g, repo) {
     rootfind(isg.sources()[0]);
 
     var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
+    protolinks = [], // we can start figuring out some links in the next walk
     branches = 0, // overall counter for all the branches. starts at 0, increases as needed
     mainwalk = function(v, path, branch) {
         // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
@@ -188,6 +189,11 @@ function extractVizGraph(g, repo) {
 
         path.push(v);
         _.each(succ, function(d, i) {
+            if (succ.length > 1) {
+                // we know this'll be included, so add to protolinks right now
+                protolinks.push([v, d]);
+            }
+
             if (i === 0) {
                 // if first, consider it the same branch
                 mainwalk(d, path, branch);
@@ -221,9 +227,14 @@ function extractVizGraph(g, repo) {
         return accum;
     }, []),
     branchinfo = _(vmeta)
-        .mapValues(function(v) { return v.branch; })
-        .groupBy() // collects vertices on same branch into a single array
-        .mapValues(function(v) { return { ids: v, rank: 0 }; })
+        .mapValues(function(v, k) { return { branch: v.branch, id: parseInt(k) }; })
+        .groupBy(function(v) { return v.branch; }) // collects vertices on same branch into a single array
+        .mapValues(function(v) {
+            return {
+                ids: _.map(v, function(v2) { return v2.id; }),
+                rank: 0,
+            };
+        })
         .value(); // object keyed by branch number w/branch info
 
     _(vmeta).groupBy(function(v) { return v.depth; })
@@ -240,7 +251,7 @@ function extractVizGraph(g, repo) {
     // FINALLY, assign x and y coords to all visible vertices
     var vertices = _(vmeta)
         .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
-        .map(function(v, k) {
+        .mapValues(function(v, k) {
             return _.assign({
                 ref: _.has(focalCommits, k) ? focalCommits[k][0] : g.get(k), // TODO handle multiple on same commit
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
@@ -250,10 +261,29 @@ function extractVizGraph(g, repo) {
     diameter = _.max(_.map(focalCommits, function(v, k) { return vmeta[k].depth; })),
     ediam = diameter - elidable.length;
 
+    // Build up the list of links
+    var links = [];
+    _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
+    _.each(vertices, function(v) {
+        var succset = _.findIndex(elsets, function(set) {
+            return v.depth > set[0];
+        });
+
+        if (succset === -1) {
+            // if the vertex precedes the first elided set, there
+            // are no compensatory links to make
+            return;
+        }
+
+        var offset = branchinfo[v.branch].ids.indexOf(v.ref.id) - elsets[succset].length;
+        links.push([vertices[branchinfo[v.branch].ids[offset]], v]);
+    });
+
     // TODO branches/tags
 
     return {
-        vertices: vertices,
+        vertices: _.values(vertices),
+        links: links,
         elidable: elidable,
         elsets: elsets,
         g: isg,
