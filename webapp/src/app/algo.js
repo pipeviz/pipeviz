@@ -144,6 +144,14 @@ function extractVizGraph(g, repo) {
         isgwalk(k);
     });
 
+    // If there's only one focal vertex then things are a little weird - for
+    // one, the isgwalk won't find any candidates. In that case, set the
+    // candidates list to the single vertex itself.
+    if (_.size(focalCommits) === 1) {
+    //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
+        candidates = _.keys(focalCommits); // will be just the one
+    }
+
     // This identifies the shared root (in git terms, the merge base) from all
     // candidates by walking down the reversed subgraph/tree until we find a
     // vertex in the candidate list. The first one we find is guaranteed to
