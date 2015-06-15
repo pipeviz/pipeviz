@@ -185,7 +185,7 @@ function extractVizGraph(g, repo) {
                 branch: branch
             };
         } else {
-            var psucc = path === [] ? [] : isg.successors(path[path.length -1]);
+            var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]);
             vmeta[v] = {
                 depth: path.length,
                 interesting: succ.length > 1 || psucc.length > 1, // interesting only if has multiple successors, or parent did
