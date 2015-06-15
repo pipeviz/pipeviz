@@ -31,23 +31,68 @@ var Viz = React.createClass({
         };
     },
     render: function() {
+        // TODO terrible hack this way
+        var vd = this.props.vizdata || { ediam: 0, branches: []};
         return React.DOM.svg({
             className: "pipeviz",
-            viewBox: "0 0 " + this.props.width + " " + this.props.height
+            width: "100%",
+            //viewBox: '0 0 ' + (vd.ediam + 1) + ' ' + (this.props.height / this.props.width * (vd.ediam + 1))
         });
     },
-    componentWillMount: function() {
-        this.state.force.stop();
+    shouldComponentUpdate: function(nextProps, prevProps) {
+        return nextProps.vizdata !== undefined;
     },
-    componentWillReceiveProps: function(nextProps) {
-        this.state.force.nodes(nextProps.nodes);
-        this.state.force.links(nextProps.links);
-    },
-    componentDidUpdate: function(prevProps) {
-        this.graphRender(this.getDOMNode(), this.state, this.props);
-        if (this.props.nodes.length !== 0) {
-            (prevProps.nodes.length === 0) ? this.state.force.alpha(0.5) : this.state.force.alpha(0.1);
-        }
+    componentDidUpdate: function() {
+        // x-coordinate space is the elided diameter as a factor of viewport width
+        var selections = {},
+            props = this.props,
+            tf = createTransforms(props.width, props.height, props.vizdata.ediam, props.vizdata.branches.length);
+
+        selections.links = d3.select(this.getDOMNode()).selectAll('.link')
+            .data(props.vizdata.links, function(d) {
+                return d[0].ref.id + '-' +  d[1].ref.id;
+            });
+        selections.links.enter().append('line')
+            .attr('class', 'link')
+            .attr('x1', function(d) { return tf.x(d[0].x); })
+            .attr('y1', function(d) { return tf.y(d[0].y); })
+            .attr('x2', function(d) { return tf.x(d[1].x); })
+            .attr('y2', function(d) { return tf.y(d[1].y); });
+
+        selections.outerg = d3.select(this.getDOMNode()).append('g');
+        selections.outerg
+            .attr('id', 'commit-pipeline');
+            //.attr('transform', 'translate(0.5, 0.5)');
+            //.attr('width', '100%').attr('viewBox', '0 0 ' + (this.props.vizdata.ediam + 2) + ' ' + _.size(this.props.vizdata.branches));
+        selections.vertices = selections.outerg.selectAll('.node')
+        //selections.vertices = d3.select(this.getDOMNode()).selectAll('.node')
+            .data(props.vizdata.vertices, function(d) { return d.ref.id; });
+
+        selections.nodes = selections.vertices.enter().append('g')
+            .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
+            .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; });
+        selections.nodes.append('circle')
+            //.attr('cx', function(d) { return tf.x(d.x); })
+            //.attr('cy', function(d) { return tf.y(d.y); })
+            .attr('r', function(d) { return d.ref.Typ() === "commit" ? tf.unit()*0.03 : tf.unit()*0.3; });
+
+        selections.nodetext = selections.nodes.append('text');
+        selections.nodetext.append('tspan').text(function(d) { return d.ref.propv("lgroup"); });
+        selections.nodetext.append('tspan').text(function(d) {
+            return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7);
+        })
+        .attr('dy', "1.4em")
+        .attr('x', 0)
+        .attr('class', function(d) {
+            var output = 'commit-subtext',
+                commit = getCommit(props.graph, d.ref),
+                testState = getTestState(props.graph, commit);
+            if (testState !== undefined) {
+                output += ' commit-' + testState;
+            }
+
+            return output;
+        });
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
@@ -117,7 +162,7 @@ var Viz = React.createClass({
                 return '';
             }
 
-            return getCommit(props.graph, d).prop("sha1").value.slice(0, 7);
+            return getCommit(props.graph, d).propv("sha1").slice(0, 7);
         })
         .attr('dy', "1.4em")
         .attr('x', 0)
@@ -143,10 +188,10 @@ var Viz = React.createClass({
             .attr("class", "vcs-label");
 
         // ...ugh scaling around text
-        labelg.append("rect").attr("width", 50).attr("height", 20).attr("x", -25).attr("y", -15);
+        labelg.append("rect").attr("width", 80).attr("height", 20).attr("x", -40).attr("y", -15);
         labelg.append("text")
             .text(function(d) {
-                return props.graph.get(d.id).prop("name").value;
+                return props.graph.get(d.id).propv("name");
             });
 
         state.force.on('tick', function() {
@@ -186,19 +231,21 @@ var VizPrep = React.createClass({
         links = [],
         cmp = this,
         members = {},
+        clabels = {},
         nodes = _.filter(_.map(this.props.graph.verticesWithType("logic-state"), function(d) { return _.create(vertexProto, d); }), function(v) {
             var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
             if (vedges.length === 0) {
                 return false;
             }
 
-            if (cmp.props.graph.get(vedges[0].target).prop("repository").value === repo) {
+            if (cmp.props.graph.get(vedges[0].target).propv("repository") === repo) {
                 if (!_.has(members, vedges[0].target)) {
-                    members[vedges[0].target] = [];
+                    members[vedges[0].target] = [v];
+                    return true;
                 }
-                // have to copy objects for d3's prop intrusion
-                members[vedges[0].target].push(v);
-                return true;
+                // TODO temporary, until commit multitenancy is worked out
+                //members[vedges[0].target].push(v);
+                //return true;
             }
             return false;
         });
@@ -206,11 +253,11 @@ var VizPrep = React.createClass({
         _.each(this.props.graph.vertices(isType("git-tag", "git-branch")), function(l) {
             var vedges = _.filter(_.map(l.outEdges, function(edgeId) { return cmp.props.graph.get(edgeId); }), isType("version"));
 
-            if (cmp.props.graph.get(vedges[0].target).prop("repository").value === repo) {
-                if (!_.has(members, vedges[0].target)) {
-                    members[vedges[0].target] = [];
+            if (cmp.props.graph.get(vedges[0].target).propv("repository") === repo) {
+                if (!_.has(clabels, vedges[0].target)) {
+                    clabels[vedges[0].target] = [];
                 }
-                members[vedges[0].target].push(_.create(vertexProto, l));
+                clabels[vedges[0].target].push(_.create(vertexProto, l));
             }
         });
 
@@ -231,9 +278,9 @@ var VizPrep = React.createClass({
             var has_app = false;
             // check if this commit has an app. don't check if white b/c sink calc necessitates we
             // recheck this every time through.
-            if (_.has(members, v) && _.filter(members[v], isType("logic-state").length !== 0)) {
+            if (_.has(members, v) && _.filter(members[v], isType("logic-state")).length !== 0) {
                 if (npath.length === 0) {
-                    // nothing in the npath, this is a source
+                    // nothing in the npath, this *could* be a source.
                     isources.push(v);
                 }
                 // so we know to pop npath stack and check if source later
@@ -253,9 +300,23 @@ var VizPrep = React.createClass({
             }
 
             path.push(v);
-            g.successors(v).map(function(s) {
-                prepwalk(s);
-            });
+            // If v is a merge commit, it will have multiple successors, and we must implement
+            // first-parent-like handling: only include the n>1 parents if there is an
+            // interesting commit along that path.
+            // TODO this logic will probably backfire on some reasonable graph structures
+            var succ = g.successors(v);
+            if (succ.length > 0) {
+                //prepwalk(succ[0]);
+                _.each(succ, function(s) {
+                    prepwalk(s);
+                });
+                // TODO experiment with a method where we only walk first parent, but use as
+                // starting point all the interesting vertices. this should guarantee we get
+                // only the necessary joints, but may require an optional extra pass to discover
+                // necessary connections between interesting vtx. This approach means what we're
+                // *really* doing here is forming an induced subgraph using only paths we know
+                // will be interesting.
+            }
             visited.push(v);
             path.pop();
 
@@ -275,16 +336,34 @@ var VizPrep = React.createClass({
         var labels = [], // the set of non-app-coinciding labels and their relative positions
         lpnodes = {}, // the set of non-app-coinciding labels that have found their origin, but not their target
         walk = function(v) { // main depth-first walker
-            // git guarantees commit graph is acyclic, thus safe to skip grey/back-edge
+            // Each top-level entry into this DF search is from a virtual source found
+            // by the first walker
 
+            // The npath is a subset of the current visit path, and contains *only*
+            // commits that have something interesting there (a logic-state instance, or a joint).
+            // Thus, we have to keep a locally-scoped variable to indicate whether, on returning
+            // from this level the search, the npath should be popped off (aka, the current level
+            // is one of these interesting commits).
             var pop_npath = false;
-            // grab head of node path from stack
+
+            // For easy reference, we keep the head of the npath in, again, a locally-scoped var
+            // called 'from'. Thus, for this level of descent, the contents of from are the last
+            // array of "interesting" things we visited in our search. If the npath is empty -
+            // which will occur iff v is a source vertex/we're at the top of a descent path,
+            // then we initialize it to an empty array.
             var from = npath.length === 0 ? [] : npath[npath.length - 1];
 
+            // Ordinarily a depth-first search would check here for a back-edge, or "grey" vertex;
+            // however, git guarantees commit graph is acyclic. A back-edge, by definition, identifies
+            // a cycle, which we know we don't have, so we can skip straight ahead to the "black"
+            // check - see if we've already completed a visit to this vertex. We bend the definition
+            // a little, though - we only ever mark interesting nodes as black, as we need to always
+            // walk the uninteresting commit path for other algorithimic purposes.
             if (visited.indexOf(v) !== -1) {
-                // Commit vertex is black/visited; create links, update lpnodes, and return.
+                // Vertex is black/visited, so we need to create links between instances in
+                // our 'from' and instances in the visited vertex.
                 _.each(members[v], function(tgt) {
-                    from.map(function(src) {
+                    _.each(from, function(src) {
                         // slice guarantees path array is copied
                         links.push({ source: src, target: tgt, path: path.slice(0) });
                     });
@@ -293,71 +372,79 @@ var VizPrep = React.createClass({
                 // process all label nodes we have waiting around
                 _.forOwn(lpnodes, function(llen, id) {
                     // need to push the actual objects on so the viz can cheat and track x/y props
-                    labels.push({id: id, l: from[0], r: members[v][0], pos: llen / (path.length+1)});
+                    labels.push({id: id, l: from[0], r: clabels[v][0], pos: llen / (path.length+1)});
                 });
 
                 // zero out lpnodes set
                 lpnodes = {};
-                // zero out interstitial commit path tracker
-                path = [];
+
+                // Don't need to pop path or npath b/c we haven't pushed the black vertex onto either.
                 return;
             }
 
-                // see if this is a commit that's interesting (has an app instance or label)
+            // see if this is a commit that's interesting (has an app instance or label)
+            if (_.has(members, v) || _.has(clabels, v)) {
+                // At this point, it's possible that we've found any of the following possible combinations:
+                // 1. An instance
+                // 2. A branch/tag
+                // 3. A joint
+                // 4. An instance and a branch/tag
+                // 5. A joint and a branch/tag
+                //
+                // As well as any N>1 of any type in any of those possibilities. Labels are the subordinate
+                // case; we handle them one way if a commit/joint is present, and a different way if not.
+                // And so, we have the following if/then structure:
                 if (_.has(members, v)) {
-                    // different behavior depending on whether we're finding commit or (app and/or label)
-                    // app handling is identical to commit handling, so we reuse
-                    var ls = _.filter(members[v], isType("logic-state", "commit"));
-                    var lbls = _.filter(members[v], isType("git-tag", "git-branch"));
-                    if (ls.length !== 0) {
-                        // has at least one app, or is a commit joint. create link from last thing to this
-                        _.each(ls, function(tgt) {
-                            from.map(function(src) {
-                                links.push({ source: src, target: tgt, path: path.slice(0) });
-                                if (tgt.Typ() === "commit") {
-                                    // push the joint onto the node list
-                                    nodes.push(tgt);
-                                }
-                            });
+                    // has at least one app, or is a commit joint. create link from each last thing to
+                    // each interesting target.
+                    // TODO this is the first spot where where we need to collapse multiple things on the same commit down into one
+                    _.each(members[v], function(tgt) {
+                        _.each(from, function(src) {
+                            links.push({ source: src, target: tgt, path: path.slice(0) });
+                            if (tgt.Typ() === "commit") {
+                                // push the joint onto the node list
+                                nodes.push(tgt);
+                            }
                         });
+                    });
 
-                        // process all label nodes we have waiting around
-                        _.forOwn(lpnodes, function(llen, id) {
-                            // need to push the actual objects on so the viz can cheat and track x/y props
-                            labels.push({id: id, l: from[0], r: ls[0], pos: llen / (path.length+1)});
-                        });
+                    // Since we've reached a properly interesting point, we need to process all the labels we discovered
+                    // between here and the last interesting point, as they need to appear on that edge.
+                    _.forOwn(lpnodes, function(llen, id) {
+                        // need to push the actual objects on so the viz can cheat and track x/y props
+                        labels.push({id: id, l: from[0], r: members[v][0], pos: llen / (path.length+1)});
+                    });
 
-                        // zero out lpnodes set
-                        lpnodes = {};
+                    // We've processed all the interstitial labels, so we empty the lpnodes set
+                    lpnodes = {};
 
-                        if (ls.length !== members[v].length) {
-                            // there are also some labels directly on the app commit, add them
-                            _.each(lbls, function(lbl) {
-                                labels.push({id: lbl.id, l: ls[0], r: ls[0], pos: 0});
-                            });
-                        }
+                    // There also could be some labels directly on this commit. This will add them.
+                    _.each(clabels[v], function(lbl) {
+                        labels.push({id: lbl.id, l: members[v][0], r: members[v][0], pos: 0});
+                    });
 
-                        // zero out the interstitial commit path tracker
-                        path = [];
-                        // push newly-found app(s) onto our npath, it's the new 'from'
-                        npath.push(ls);
-                        // correspondingly, indicate to pop the npath when exiting
-                        pop_npath = true;
-                    } else {
-                        // for each label found, record the length of the path walked so far,
-                        // plus one for the commit we're currently on
-                        _.each(lbls, function(lbl) {
-                            lpnodes[lbl.id] = path.length+1;
-                        });
-
-                        // still not a real node point though, so need to push the commit onto the path
-                        path.push(v);
-                    }
-                }
-                else {
-                    // not a node point and not self - push commit onto path
+                    // We've found a new point of interest, so the commit path tracker, which is
+                    // only responsible for tracking the path BETWEEN interesting points, not the
+                    // entire path, is emptied.
+                    path = [];
+                    // Push newly-found instances or joints onto the npath; it will become the new 'from' on the next level.
+                    npath.push(members[v]);
+                    // correspondingly, indicate to pop the npath when exiting
+                    pop_npath = true;
+                } else {
+                    // Not a real node point, just a label, so need to push the commit onto the path
                     path.push(v);
+
+                    // For each label found, record the length of the path walked so far.
+                    _.each(clabels[v], function(lbl) {
+                        lpnodes[lbl.id] = path.length;
+                    });
                 }
+            }
+            else {
+                // not a node point and not self - push commit onto path
+                path.push(v);
+            }
 
             // recursive call, the crux of this depth-first traversal. but we
             // skip it if the first search proved this to be a sink
@@ -366,10 +453,11 @@ var VizPrep = React.createClass({
                     walk(s);
                 });
             }
+            // Recursion is done for this vertex; now it's cleanup time.
 
-            // Mark commit black/visited...but only if it's a member-associated
-            // commit. This is OK to do because we already traversed once and
-            // found all the joints, and those are guaranteed to be members
+            // Mark commit black/visited...but only if it's an interesting one.
+            // This is OK to do because we already traversed once and found all
+            // the joints, and those are guaranteed to be members.
             if (_.has(members, v)) {
                 visited.push(v);
             }
@@ -391,7 +479,7 @@ var VizPrep = React.createClass({
         };
 
         var stack = _.filter(g.sources(), function(d) {
-            return cmp.props.graph.get(d).prop("repository").value === repo;
+            return cmp.props.graph.get(d).propv("repository") === repo;
         });
         // DF walk, working from source commit members
         while (stack.length !== 0) {
@@ -399,7 +487,7 @@ var VizPrep = React.createClass({
         }
 
         // traversal pattern almost guarantees duplicate sinks
-        isinks = _.uniq(isinks)
+        isinks = _.uniq(isinks);
 
         // put the source anchor links in
         _.each(isources, function(commit) {
@@ -430,7 +518,7 @@ var VizPrep = React.createClass({
         return {
             width: 0,
             height: 0,
-            graph: new pvGraph({id: 0, vertices: []}),
+            graph: pvGraph({id: 0, vertices: []}),
             focalRepo: "",
         };
     },
@@ -439,9 +527,9 @@ var VizPrep = React.createClass({
         return nextProps.graph.mid !== this.props.graph.mid;
     },
     render: function() {
-        var vizdata = this.extractVizGraph(this.props.focalRepo);
-
-        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
+        //var vizdata = this.extractVizGraph(this.props.focalRepo);
+        //return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
+        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, vizdata: extractVizGraph(this.props.graph, this.props.focalRepo)});
     },
 });
 
@@ -451,7 +539,7 @@ var App = React.createClass({
         return {
             vizWidth: window.innerWidth,
             vizHeight: window.innerHeight,
-            graph: new pvGraph({id: 0, vertices: []}),
+            graph: pvGraph({id: 0, vertices: []}),
         };
     },
     mostCommonRepo: function(g) {
@@ -459,7 +547,7 @@ var App = React.createClass({
             var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
             return vedges.length !== 0;
         }), function(v) {
-            return g.get(_.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"))[0].target).prop("repository").value;
+            return g.get(_.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"))[0].target).propv("repository");
         }), function(accum, count, repo) {
             return count < accum[1] ? accum : [repo, count];
         }, ["", 0])[0];
@@ -475,5 +563,5 @@ var e = React.render(React.createElement(App), document.body);
 var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
 genesis.onmessage = function(m) {
     //console.log(m);
-    e.setProps({graph: new pvGraph(JSON.parse(m.data))});
+    e.setProps({graph: pvGraph(JSON.parse(m.data))});
 };
