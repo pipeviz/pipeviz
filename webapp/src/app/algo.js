@@ -294,6 +294,7 @@ function extractVizGraph(g, repo) {
         links: links,
         elidable: elidable,
         elranges: elranges,
+        rangepos: _.map(elranges, function(range) { return range[0] - _.sortedIndex(elidable, range[0]-1); }),
         g: isg,
         diameter: diameter,
         ediam: ediam,
