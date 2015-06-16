@@ -36,7 +36,6 @@ var Viz = React.createClass({
         return React.DOM.svg({
             className: "pipeviz",
             width: "100%",
-            //viewBox: '0 0 ' + (vd.ediam + 1) + ' ' + (this.props.height / this.props.width * (vd.ediam + 1))
         });
     },
     shouldComponentUpdate: function(nextProps, prevProps) {
@@ -46,9 +45,16 @@ var Viz = React.createClass({
         // x-coordinate space is the elided diameter as a factor of viewport width
         var selections = {},
             props = this.props,
-            tf = createTransforms(props.width, props.height, props.vizdata.ediam, props.vizdata.branches.length);
+            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.branches.length);
 
-        selections.links = d3.select(this.getDOMNode()).selectAll('.link')
+        // Outer g first
+        selections.outerg = d3.select(this.getDOMNode()).append('g');
+        selections.outerg
+            .attr('id', 'commit-pipeline');
+            //.attr('transform', 'translate(0, 30)');
+
+        // Now links
+        selections.links = selections.outerg.selectAll('.link')
             .data(props.vizdata.links, function(d) {
                 return d[0].ref.id + '-' +  d[1].ref.id;
             });
@@ -58,11 +64,7 @@ var Viz = React.createClass({
             .attr('y1', function(d) { return tf.y(d[0].y); })
             .attr('x2', function(d) { return tf.x(d[1].x); })
             .attr('y2', function(d) { return tf.y(d[1].y); });
-
-        selections.outerg = d3.select(this.getDOMNode()).append('g');
-        selections.outerg
-            .attr('id', 'commit-pipeline');
-            //.attr('transform', 'translate(0.5, 0.5)');
+        //selections.links.update().remove();
             //.attr('width', '100%').attr('viewBox', '0 0 ' + (this.props.vizdata.ediam + 2) + ' ' + _.size(this.props.vizdata.branches));
         selections.vertices = selections.outerg.selectAll('.node')
         //selections.vertices = d3.select(this.getDOMNode()).selectAll('.node')
@@ -78,9 +80,7 @@ var Viz = React.createClass({
 
         selections.nodetext = selections.nodes.append('text');
         selections.nodetext.append('tspan').text(function(d) { return d.ref.propv("lgroup"); });
-        selections.nodetext.append('tspan').text(function(d) {
-            return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7);
-        })
+        selections.nodetext.append('tspan').text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); })
         .attr('dy', "1.4em")
         .attr('x', 0)
         .attr('class', function(d) {
@@ -93,6 +93,35 @@ var Viz = React.createClass({
 
             return output;
         });
+
+
+        // Axes last, always on top
+        var xposmap = _.uniq( // TODO not sure why the label isn't showing up
+                _.map(props.vizdata.vertices, function(d) { return d.depth; })
+                .sort(function(a, b) { return a - b; }));
+            xscale = d3.scale.ordinal()
+                .domain(xposmap)
+                .range(_.map(xposmap, function(orig, x) { return tf.x(x); }));
+
+        var xaxis = d3.svg.axis()
+                .scale(xscale)
+                .orient('bottom')
+                .ticks(props.vizdata.ediam);
+
+        selections.axes = d3.select(this.getDOMNode()).append('g')
+            .attr('class', 'commit-axis')
+            .attr('width', props.width)
+            .attr('height', 30)
+            .append('g')
+                .attr('transform', 'translate(0,' + (props.height - 30) + ')')
+                .call(xaxis)
+                .append('text')
+                    .attr('transform', 'translate(' + tf.x(0) + ',-5)')
+                    .attr('text-anchor', 'start')
+                    .text('distance to root');
+
+        //selections.vertices.exit().remove();
+        //selections.links.exit().remove();
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
