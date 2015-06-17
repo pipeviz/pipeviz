@@ -36,6 +36,12 @@ var Viz = React.createClass({
         return React.DOM.svg({
             className: "pipeviz",
             width: "100%",
+            children: [React.DOM.g({
+                id: 'commit-pipeline',
+                children: [React.DOM.g({
+                    id: 'commitview-edges'
+                })]
+            })]
         });
     },
     shouldComponentUpdate: function(nextProps, prevProps) {
@@ -48,55 +54,66 @@ var Viz = React.createClass({
             tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.branches.length);
 
         // Outer g first
-        selections.outerg = d3.select(this.getDOMNode()).append('g');
-        selections.outerg
-            .attr('id', 'commit-pipeline');
-            //.attr('transform', 'translate(0, 30)');
+        selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
 
         // Now links
-        selections.links = selections.outerg.selectAll('.link')
+        selections.links = selections.outerg.select('#commitview-edges').selectAll('.link')
             .data(props.vizdata.links, function(d) {
                 return d[0].ref.id + '-' +  d[1].ref.id;
             });
+
+        selections.links.exit().remove(); // exit removes line
         selections.links.enter().append('line')
-            .attr('class', 'link')
+            .attr('class', 'link'); // enter appends a line
+        selections.links // update sets the line's x and y positions
             .attr('x1', function(d) { return tf.x(d[0].x); })
             .attr('y1', function(d) { return tf.y(d[0].y); })
             .attr('x2', function(d) { return tf.x(d[1].x); })
             .attr('y2', function(d) { return tf.y(d[1].y); });
-        //selections.links.update().remove();
-            //.attr('width', '100%').attr('viewBox', '0 0 ' + (this.props.vizdata.ediam + 2) + ' ' + _.size(this.props.vizdata.branches));
+
         selections.vertices = selections.outerg.selectAll('.node')
-        //selections.vertices = d3.select(this.getDOMNode()).selectAll('.node')
             .data(props.vizdata.vertices, function(d) { return d.ref.id; });
 
-        selections.nodes = selections.vertices.enter().append('g')
-            .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
+        selections.vertices.exit().remove(); // exit removes vertex
+        selections.veg = selections.vertices.enter().append('g') // store the enter group and build it up
+            .attr('class', function(d) { return 'node ' + d.ref.Typ(); });
+        selections.veg.append('circle');
+        selections.nte = selections.veg.append('text');
+        selections.nte.append('tspan') // add vertex label tspan on enter
+            .attr('class', 'vtx-label');
+        selections.nte.append('tspan') // add commit info tspan on enter and position it
+            .attr('dy', "1.4em")
+            .attr('x', 0)
+            .attr('class', function(d) {
+                var output = 'commit-subtext',
+                    commit = getCommit(props.graph, d.ref),
+                    testState = getTestState(props.graph, commit);
+                if (testState !== undefined) {
+                    output += ' commit-' + testState;
+                }
+
+                return output;
+            });
+
+
+        selections.vertices // update assigns the position via transform
             .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; });
-        selections.nodes.append('circle')
+
+        // now work within the g for each vtx
+        selections.vertices.select('circle')
+            .attr('r', function(d) { return d.ref.Typ() === "commit" ? tf.unit()*0.03 : tf.unit()*0.3; });
             //.attr('cx', function(d) { return tf.x(d.x); })
             //.attr('cy', function(d) { return tf.y(d.y); })
-            .attr('r', function(d) { return d.ref.Typ() === "commit" ? tf.unit()*0.03 : tf.unit()*0.3; });
 
-        selections.nodetext = selections.nodes.append('text');
-        selections.nodetext.append('tspan').text(function(d) { return d.ref.propv("lgroup"); });
-        selections.nodetext.append('tspan').text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); })
-        .attr('dy', "1.4em")
-        .attr('x', 0)
-        .attr('class', function(d) {
-            var output = 'commit-subtext',
-                commit = getCommit(props.graph, d.ref),
-                testState = getTestState(props.graph, commit);
-            if (testState !== undefined) {
-                output += ' commit-' + testState;
-            }
-
-            return output;
-        });
-
+        // and the info text
+        selections.nodetext = selections.vertices.select('text');
+        selections.nodetext.select('.vtx-label')
+            .text(function(d) { return d.ref.propv("lgroup"); }); // set text value to data from lgroup
+        selections.nodetext.select('.commit-subtext') // set the commit text on update
+            .text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); });
 
         // Axes last, always on top
-        var xposmap = _.uniq( // TODO not sure why the label isn't showing up
+        var xposmap = _.uniq(
                 _.map(props.vizdata.vertices, function(d) { return d.depth; })
                 .sort(function(a, b) { return a - b; }));
             xscale = d3.scale.ordinal()
@@ -108,6 +125,8 @@ var Viz = React.createClass({
                 .orient('bottom')
                 .ticks(props.vizdata.ediam);
 
+        // TODO just remove and rerender each time, for now
+        d3.select(this.getDOMNode()).select('g.commit-axis').remove();
         selections.axes = d3.select(this.getDOMNode()).append('g')
             .attr('class', 'commit-axis')
             .attr('width', props.width)
@@ -119,9 +138,6 @@ var Viz = React.createClass({
                     .attr('transform', 'translate(' + tf.x(0) + ',-5)')
                     .attr('text-anchor', 'start')
                     .text('distance to root');
-
-        //selections.vertices.exit().remove();
-        //selections.links.exit().remove();
     },
     graphRender: function(el, state, props) {
         var link = d3.select(el).selectAll('.link')
