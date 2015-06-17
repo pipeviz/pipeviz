@@ -1,38 +1,6 @@
 var Viz = React.createClass({
     displayName: "pipeviz-graph",
-    getInitialState: function() {
-        return {
-            force: d3.layout.force()
-            .charge(-4000)
-            .chargeDistance(250)
-            .size([this.props.width, this.props.height])
-            .linkStrength(function(link) {
-                if (link.source.Typ() == "logic-state") {
-                    return 0.5;
-                }
-                if (link.source.Typ() === "anchor" || link.target.Typ() === "anchor") {
-                    return 1;
-                }
-                return 0.1;
-            })
-            .linkDistance(function(link) {
-                if (link.source.Typ() === "anchor" || link.target.Typ() === "anchor") {
-                    return 25;
-                }
-                return 250;
-            })
-        };
-    },
-    getDefaultProps: function() {
-        return {
-            nodes: [],
-            links: [],
-            labels: [],
-        };
-    },
     render: function() {
-        // TODO terrible hack this way
-        var vd = this.props.vizdata || { ediam: 0, branches: []};
         return React.DOM.svg({
             className: "pipeviz",
             width: "100%",
