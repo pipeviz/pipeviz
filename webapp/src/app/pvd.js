@@ -38,7 +38,7 @@ var vertexProto = {
 };
 
 // vertex factory
-var Vertex = function(obj) {
+var pvVertex = function(obj) {
     return _.assign(Object.create(vertexProto),
         obj, { outEdges: _.map(obj.outEdges, function(d) { return d.id; })}
     );
@@ -55,7 +55,7 @@ var edgeProto = {
 };
 
 // edge factory
-var Edge = function(obj) { return _.assign(Object.create(edgeProto), obj); };
+var pvEdge = function(obj) { return _.assign(Object.create(edgeProto), obj); };
 
 var pvGraphProto = {
     get: function(id) {
@@ -108,8 +108,8 @@ pvGraph = function(obj) {
         };
 
         _.each(obj.vertices, function(d) {
-            o._objects[d.id] = Vertex(d);
-            _.each(d.outEdges, function(d2) { o._objects[d2.id] = Edge(d2); });
+            o._objects[d.id] = pvVertex(d);
+            _.each(d.outEdges, function(d2) { o._objects[d2.id] = pvEdge(d2); });
         });
 
         return o;
@@ -128,7 +128,7 @@ var pq = {
             }
 
             return true;
-        }
+        };
     },
     or: function() {
         var funcs = arguments;
@@ -140,9 +140,9 @@ var pq = {
             }
 
             return false;
-        }
+        };
     }
-}
+};
 
 var filters = {
     vertices: function(d) {
@@ -170,5 +170,5 @@ var isType = function(typ) {
         }
 
         return false;
-    }
+    };
 };
