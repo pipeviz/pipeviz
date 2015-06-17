@@ -1,27 +1,3 @@
-// TODO get rid of this anchor shit, replace with well-formed tree rendering
-function Anchor(id, x, y) {
-    this.fixed = true; // tells d3 not to move it
-    this.x = x || 0;
-    this.y = y || 0;
-    this.id = id;
-}
-
-Anchor.prototype.name = function() {
-    return '';
-};
-
-Anchor.prototype.Typ = function() {
-    return 'anchor';
-};
-
-Anchor.prototype.isVertex = function() {
-    return true;
-};
-
-Anchor.prototype.prop = function() {
-    return;
-};
-
 var vertexProto = {
     isVertex: function() { return true; },
     Typ: function() { return this.vertex.type; },
