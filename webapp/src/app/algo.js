@@ -58,7 +58,7 @@ function extractVizGraph(g, repo) {
         return;
     }
 
-    var cg = g.commitGraph(), // TODO narrow to only commits in repo
+    var cg = g.commitGraph(), // the git commit graph TODO narrow to only commits in repo
     fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
     isg = new graphlib.Graph(), // A tree, almost an induced subgraph, representing first-parent commit graph paths
     visited = {},
@@ -109,6 +109,7 @@ function extractVizGraph(g, repo) {
         }
     };
 
+    // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
     //_.each(focalCommits, function(d, k) {
         //fgwalk(k, []);
     //});
@@ -144,35 +145,37 @@ function extractVizGraph(g, repo) {
         isgwalk(k);
     });
 
+    // Now we have to find the topologically largest common root among all candidates.
+    var root;
+
     // If there's only one focal vertex then things are a little weird - for
     // one, the isgwalk won't find any candidates. In that case, set the
     // candidates list to the single vertex itself.
     if (_.size(focalCommits) === 1) {
     //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
-        candidates = _.keys(focalCommits); // will be just the one
+        root = _.keys(focalCommits)[0];
+    } else {
+        // This identifies the shared root (in git terms, the merge base) from all
+        // candidates by walking down the reversed subgraph/tree until we find a
+        // vertex in the candidate list. The first one we find is guaranteed to
+        // be the root.
+        var rootfind = function(v) {
+            if (candidates.indexOf(v) !== -1) {
+                root = v;
+                return;
+            }
+
+            var succ = isg.successors(v) || [];
+            if (succ.length > 0) {
+                rootfind(succ[0]);
+            }
+        };
+        rootfind(isg.sources()[0]);
     }
-
-    // This identifies the shared root (in git terms, the merge base) from all
-    // candidates by walking down the reversed subgraph/tree until we find a
-    // vertex in the candidate list. The first one we find is guaranteed to
-    // be the root.
-    var root,
-    rootfind = function(v) {
-        if (candidates.indexOf(v) !== -1) {
-            root = v;
-            return;
-        }
-
-        var succ = isg.successors(v) || [];
-        if (succ.length > 0) {
-            rootfind(succ[0]);
-        }
-    };
-    rootfind(isg.sources()[0]);
 
     var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
     protolinks = [], // we can start figuring out some links in the next walk
-    branches = 0, // overall counter for all the branches. starts at 0, increases as needed
+    branches = 0, // total number of divergent branch paths. starts at 0, increases as needed
     mainwalk = function(v, path, branch) {
         // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
         var succ = isg.successors(v) || [];
