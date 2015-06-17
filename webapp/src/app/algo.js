@@ -109,9 +109,9 @@ function extractVizGraph(g, repo) {
         }
     };
 
-    _.each(focalCommits, function(d, k) {
-        fgwalk(k, []);
-    });
+    //_.each(focalCommits, function(d, k) {
+        //fgwalk(k, []);
+    //});
 
     // Nearly the same walk, but only follow first parent. Builds root candidate list
     // AND build the first-parent tree (almost an induced subgraph, but not quite) at
@@ -180,7 +180,7 @@ function extractVizGraph(g, repo) {
             vmeta[v] = {
                 depth: path.length, // distance from root
                 interesting: true, // all focal commits are interesting
-                reach: reachCounts(fg, v),
+                reach: reachCountp(cg, v, _.keys(focalCommits)),
                 treach: reachCounts(isg, v, _.keys(focalCommits)),
                 branch: branch
             };
