@@ -142,12 +142,6 @@ var Viz = React.createClass({
 });
 
 var VizPrep = React.createClass({
-    getInitialState: function() {
-        return {
-            anchorL: new Anchor("L", 0, this.props.height/2),
-            anchorR: new Anchor("R", this.props.width, this.props.height/2),
-        };
-    },
     getDefaultProps: function() {
         return {
             width: 0,
