@@ -127,13 +127,13 @@ text .commit-subtext.commit-pending {
     fill: #47bbb3;
 }
 
-.commit-axis path, .commit-axis line {
+#commit-axis path, #commit-axis line {
     stroke: #EFFFCD;
     fill: none;
     shape-rendering: crispEdges;
 }
 
-.commit-axis text {
+#commit-axis text {
     stroke: #EFFFCD;
     fill: #EFFFCD;
     font-family: sans-serif;

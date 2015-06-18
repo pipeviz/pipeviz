@@ -8,6 +8,11 @@ var Viz = React.createClass({
                 id: 'commit-pipeline',
                 children: [React.DOM.g({
                     id: 'commitview-edges'
+                }), React.DOM.g({
+                    id: 'commit-axis',
+                    width: this.props.width,
+                    height: 30,
+                    transform: 'translate(0,' + (this.props.height - 30) + ')'
                 })]
             })]
         });
@@ -80,7 +85,7 @@ var Viz = React.createClass({
         selections.nodetext.select('.commit-subtext') // set the commit text on update
             .text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); });
 
-        // Axes last, always on top
+        // Axis last, always on top
         var xposmap = _.uniq(
                 _.map(props.vizdata.vertices, function(d) { return d.depth; })
                 .sort(function(a, b) { return a - b; }));
@@ -93,19 +98,12 @@ var Viz = React.createClass({
                 .orient('bottom')
                 .ticks(props.vizdata.ediam);
 
-        // TODO just remove and rerender each time, for now
-        d3.select(this.getDOMNode()).select('g.commit-axis').remove();
-        selections.axes = d3.select(this.getDOMNode()).append('g')
-            .attr('class', 'commit-axis')
-            .attr('width', props.width)
-            .attr('height', 30)
-            .append('g')
-                .attr('transform', 'translate(0,' + (props.height - 30) + ')')
-                .call(xaxis)
-                .append('text')
-                    .attr('transform', 'translate(' + tf.x(0) + ',-5)')
-                    .attr('text-anchor', 'start')
-                    .text('distance to root');
+        d3.select('#commit-axis').transition()
+            .call(xaxis);
+            //.append('text')
+                //.attr('transform', 'translate(' + tf.x(0) + ',-5)')
+                //.attr('text-anchor', 'start')
+                //.text('distance to root');
     },
 });
 
