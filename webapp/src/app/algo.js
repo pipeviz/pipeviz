@@ -56,6 +56,88 @@ var vizExtractor = {
                 return count < accum[1] ? accum : [repo, count];
             }, ["", 0])[0];
     },
+    focalLogicStateByRepo: function(pvg, repo) {
+        var focalCommits = {},
+        focal = _.filter(_.map(pvg.verticesWithType("logic-state"), function(d) { return _.create(vertexProto, d); }), function(v) {
+            var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"));
+            if (vedges.length === 0) {
+                return false;
+            }
+
+            if (pvg.get(vedges[0].target).propv("repository") === repo) {
+                if (!_.has(focalCommits, vedges[0].target)) {
+                    focalCommits[vedges[0].target] = [];
+                }
+                focalCommits[vedges[0].target].push(v);
+                return true;
+            }
+        });
+
+        return [focal, focalCommits];
+    },
+    treeAndRoot: function(cg, focalCommits) {
+        var isg = new graphlib.Graph(), // A tree, almost an induced subgraph, representing first-parent commit graph paths
+        visited = {},
+        candidates = [];
+
+        // Nearly the same walk as for the focal graph, but only follow first
+        // parent. Builds root candidate list AND build the first-parent tree
+        // (almost an induced subgraph, but not quite) at the same time.
+        var isgwalk = function(v, last) {
+            // We always want to record the (reversed) edge, unless last does not exist
+            if (last !== undefined) {
+                isg.setEdge(v, last);
+            }
+
+            // If vertex is already visited, it's a candidate for being the root
+            if (_.has(visited, v)) {
+                candidates.push(v);
+                return;
+            }
+
+            // Only visit first parent; that's the path that matters to our subgraph/tree
+            var succ = cg.successors(v);
+            if (succ !== undefined && succ.length > 0) {
+                isgwalk(succ[0], v);
+            }
+
+            visited[v] = true;
+        };
+
+        _.each(focalCommits, function(d, k) {
+            isgwalk(k);
+        });
+
+        // Now we have to find the topologically greatest common root among all candidates.
+        var root;
+
+        // If there's only one focal vertex then things are a little weird - for
+        // one, the isgwalk won't find any candidates. In that case, set the
+        // candidates list to the single vertex itself.
+        if (_.size(focalCommits) === 1) {
+            //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
+            root = _.keys(focalCommits)[0];
+        } else {
+            // This identifies the shared root (in git terms, the merge base) from all
+            // candidates by walking down the reversed subgraph/tree until we find a
+            // vertex in the candidate list. The first one we find is guaranteed to
+            // be the root.
+            var rootfind = function(v) {
+                if (candidates.indexOf(v) !== -1) {
+                    root = v;
+                    return;
+                }
+
+                var succ = isg.successors(v) || [];
+                if (succ.length > 0) {
+                    rootfind(succ[0]);
+                }
+            };
+            rootfind(isg.sources()[0]);
+        }
+
+        return [isg, root];
+    }
 };
 
 /*
@@ -64,21 +146,9 @@ var vizExtractor = {
  *
  */
 function extractVizGraph(g, repo) {
-    var focalCommits = {},
-    focal = _.filter(_.map(g.verticesWithType("logic-state"), function(d) { return _.create(vertexProto, d); }), function(v) {
-        var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
-        if (vedges.length === 0) {
-            return false;
-        }
-
-        if (g.get(vedges[0].target).propv("repository") === repo) {
-            if (!_.has(focalCommits, vedges[0].target)) {
-                focalCommits[vedges[0].target] = [];
-            }
-            focalCommits[vedges[0].target].push(v);
-            return true;
-        }
-    });
+    var focals = vizExtractor.focalLogicStateByRepo(g, repo),
+        focal = focals[0],
+        focalCommits = focals[1];
 
     if (focal.length === 0) {
         return;
@@ -86,9 +156,7 @@ function extractVizGraph(g, repo) {
 
     var cg = g.commitGraph(), // the git commit graph TODO narrow to only commits in repo
     fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
-    isg = new graphlib.Graph(), // A tree, almost an induced subgraph, representing first-parent commit graph paths
-    visited = {},
-    candidates = [];
+    visited = {};
 
     // Depth-first walk to build the focal graph and find root candidates
     var fgwalk = function(v, fpath) {
@@ -140,64 +208,9 @@ function extractVizGraph(g, repo) {
         //fgwalk(k, []);
     //});
 
-    // Nearly the same walk, but only follow first parent. Builds root candidate list
-    // AND build the first-parent tree (almost an induced subgraph, but not quite) at
-    // the same time.
-    var isgwalk = function(v, last) {
-        // We always want to record the (reversed) edge, unless last does not exist
-        if (last !== undefined) {
-            isg.setEdge(v, last);
-        }
-
-        // If vertex is already visited, it's a candidate for being the root
-        if (_.has(visited, v)) {
-            candidates.push(v);
-            return;
-        }
-
-        // Only visit first parent; that's the path that matters to our subgraph/tree
-        var succ = cg.successors(v);
-        if (succ !== undefined && succ.length > 0) {
-            isgwalk(succ[0], v);
-        }
-
-        visited[v] = true;
-    };
-
-    // reset visited list
-    visited = {};
-
-    _.each(focalCommits, function(d, k) {
-        isgwalk(k);
-    });
-
-    // Now we have to find the topologically largest common root among all candidates.
-    var root;
-
-    // If there's only one focal vertex then things are a little weird - for
-    // one, the isgwalk won't find any candidates. In that case, set the
-    // candidates list to the single vertex itself.
-    if (_.size(focalCommits) === 1) {
-    //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
-        root = _.keys(focalCommits)[0];
-    } else {
-        // This identifies the shared root (in git terms, the merge base) from all
-        // candidates by walking down the reversed subgraph/tree until we find a
-        // vertex in the candidate list. The first one we find is guaranteed to
-        // be the root.
-        var rootfind = function(v) {
-            if (candidates.indexOf(v) !== -1) {
-                root = v;
-                return;
-            }
-
-            var succ = isg.successors(v) || [];
-            if (succ.length > 0) {
-                rootfind(succ[0]);
-            }
-        };
-        rootfind(isg.sources()[0]);
-    }
+    var tr = vizExtractor.treeAndRoot(cg, focalCommits),
+        isg = tr[0],
+        root = tr[1];
 
     var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
     protolinks = [], // we can start figuring out some links in the next walk
