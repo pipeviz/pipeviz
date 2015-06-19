@@ -29,34 +29,12 @@ var Viz = React.createClass({
         // Outer g first
         selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
 
-        // Now links
-        selections.links = selections.outerg.select('#commitview-edges').selectAll('.link')
-            .data(props.vizdata.links, function(d) {
-                return d[0].ref.id + '-' +  d[1].ref.id;
-            });
-
-        selections.links.exit().transition().remove(); // exit removes line
-        selections.links.enter().append('line') // enter appends a line
-            .attr('class', 'link')
-            .style('opacity', 0)
-            // set all these initially so that we don't transition from 0,0,0,0
-            .attr('x1', function(d) { return tf.x(d[0].x); })
-            .attr('y1', function(d) { return tf.y(d[0].y); })
-            .attr('x2', function(d) { return tf.x(d[1].x); })
-            .attr('y2', function(d) { return tf.y(d[1].y); });
-
-        selections.links.transition() // update sets the line's x and y positions
-            .attr('x1', function(d) { return tf.x(d[0].x); })
-            .attr('y1', function(d) { return tf.y(d[0].y); })
-            .attr('x2', function(d) { return tf.x(d[1].x); })
-            .attr('y2', function(d) { return tf.y(d[1].y); })
-            .style('opacity', 1);
-
-        // Vertices next
+        // Vertices
         selections.vertices = selections.outerg.selectAll('.node')
             .data(props.vizdata.vertices, function(d) { return d.ref.id; });
 
         selections.vertices.exit().transition().remove(); // exit removes vertex
+        // tons of stuff to do on enter
         selections.veg = selections.vertices.enter().append('g') // store the enter group and build it up
             .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
             // so we don't transition from 0,0
@@ -81,7 +59,7 @@ var Viz = React.createClass({
                 return output;
             });
 
-
+        // now, update
         selections.vertices.transition() // update assigns the position via transform
             .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; })
             .style('opacity', 1);
@@ -96,6 +74,29 @@ var Viz = React.createClass({
             .text(function(d) { return d.ref.propv("lgroup"); }); // set text value to data from lgroup
         selections.nodetext.select('.commit-subtext') // set the commit text on update
             .text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); });
+
+        // Links
+        selections.links = selections.outerg.select('#commitview-edges').selectAll('.link')
+            .data(props.vizdata.links, function(d) {
+                return d[0].ref.id + '-' +  d[1].ref.id;
+            });
+
+        selections.links.exit().transition().remove(); // exit removes line
+        selections.links.enter().append('line') // enter appends a line
+            .attr('class', 'link')
+            .style('opacity', 0)
+            // set all these initially so that we don't transition from 0,0,0,0
+            .attr('x1', function(d) { return tf.x(d[0].x); })
+            .attr('y1', function(d) { return tf.y(d[0].y); })
+            .attr('x2', function(d) { return tf.x(d[1].x); })
+            .attr('y2', function(d) { return tf.y(d[1].y); });
+
+        selections.links.transition() // update sets the line's x and y positions
+            .attr('x1', function(d) { return tf.x(d[0].x); })
+            .attr('y1', function(d) { return tf.y(d[0].y); })
+            .attr('x2', function(d) { return tf.x(d[1].x); })
+            .attr('y2', function(d) { return tf.y(d[1].y); })
+            .style('opacity', 1);
 
         // Commit distance axis
         var xposmap = _.uniq(
