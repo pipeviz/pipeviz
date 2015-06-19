@@ -198,8 +198,8 @@ var vizExtractor = {
  * for the app/commit viz.
  *
  */
-function extractVizGraph(g, repo) {
-    var focals = vizExtractor.focalLogicStateByRepo(g, repo),
+function extractVizGraph(pvg, repo) {
+    var focals = vizExtractor.focalLogicStateByRepo(pvg, repo),
         focal = focals[0],
         focalCommits = focals[1];
 
@@ -207,7 +207,7 @@ function extractVizGraph(g, repo) {
         return;
     }
 
-    var cg = g.commitGraph(), // the git commit graph TODO narrow to only commits in repo
+    var cg = pvg.commitGraph(), // the git commit graph TODO narrow to only commits in repo
         // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
         tr = vizExtractor.treeAndRoot(cg, focalCommits),
@@ -306,7 +306,7 @@ function extractVizGraph(g, repo) {
         .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
         .mapValues(function(v, k) {
             return _.assign({
-                ref: _.has(focalCommits, k) ? focalCommits[k][0] : g.get(k), // TODO handle multiple on same commit
+                ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: branchinfo[v.branch].rank // y is just the branch rank TODO alternate up/down projection
             }, v);
