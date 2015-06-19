@@ -35,21 +35,34 @@ var Viz = React.createClass({
                 return d[0].ref.id + '-' +  d[1].ref.id;
             });
 
-        selections.links.exit().remove(); // exit removes line
-        selections.links.enter().append('line')
-            .attr('class', 'link'); // enter appends a line
-        selections.links // update sets the line's x and y positions
+        selections.links.exit().transition().remove(); // exit removes line
+        selections.links.enter().append('line') // enter appends a line
+            .attr('class', 'link')
+            .style('opacity', 0)
+            // set all these initially so that we don't transition from 0,0,0,0
             .attr('x1', function(d) { return tf.x(d[0].x); })
             .attr('y1', function(d) { return tf.y(d[0].y); })
             .attr('x2', function(d) { return tf.x(d[1].x); })
             .attr('y2', function(d) { return tf.y(d[1].y); });
 
+        selections.links.transition() // update sets the line's x and y positions
+            .attr('x1', function(d) { return tf.x(d[0].x); })
+            .attr('y1', function(d) { return tf.y(d[0].y); })
+            .attr('x2', function(d) { return tf.x(d[1].x); })
+            .attr('y2', function(d) { return tf.y(d[1].y); })
+            .style('opacity', 1);
+
+        // Vertices next
         selections.vertices = selections.outerg.selectAll('.node')
             .data(props.vizdata.vertices, function(d) { return d.ref.id; });
 
-        selections.vertices.exit().remove(); // exit removes vertex
+        selections.vertices.exit().transition().remove(); // exit removes vertex
         selections.veg = selections.vertices.enter().append('g') // store the enter group and build it up
-            .attr('class', function(d) { return 'node ' + d.ref.Typ(); });
+            .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
+            // so we don't transition from 0,0
+            .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; })
+            // and start from invisible
+            .style('opacity', 0);
         selections.veg.append('circle');
         selections.nte = selections.veg.append('text');
         selections.nte.append('tspan') // add vertex label tspan on enter
@@ -69,23 +82,22 @@ var Viz = React.createClass({
             });
 
 
-        selections.vertices // update assigns the position via transform
-            .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; });
+        selections.vertices.transition() // update assigns the position via transform
+            .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; })
+            .style('opacity', 1);
 
         // now work within the g for each vtx
-        selections.vertices.select('circle')
+        selections.vertices.select('circle').transition()
             .attr('r', function(d) { return d.ref.Typ() === "commit" ? tf.unit()*0.03 : tf.unit()*0.3; });
-            //.attr('cx', function(d) { return tf.x(d.x); })
-            //.attr('cy', function(d) { return tf.y(d.y); })
 
         // and the info text
-        selections.nodetext = selections.vertices.select('text');
+        selections.nodetext = selections.vertices.select('text').transition();
         selections.nodetext.select('.vtx-label')
             .text(function(d) { return d.ref.propv("lgroup"); }); // set text value to data from lgroup
         selections.nodetext.select('.commit-subtext') // set the commit text on update
             .text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); });
 
-        // Axis last, always on top
+        // Commit distance axis
         var xposmap = _.uniq(
                 _.map(props.vizdata.vertices, function(d) { return d.depth; })
                 .sort(function(a, b) { return a - b; }));
