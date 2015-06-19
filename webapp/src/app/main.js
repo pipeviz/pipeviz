@@ -99,12 +99,12 @@ var Viz = React.createClass({
             .style('opacity', 1);
 
         // Commit distance axis
-        var xposmap = _.uniq(
-                _.map(props.vizdata.vertices, function(d) { return d.depth; })
-                .sort(function(a, b) { return a - b; }));
+        var xlbls = _.map(_.pairs(props.vizdata.xmap).sort(function(a, b) { return a[1] - b[1]; }), _.head);
             xscale = d3.scale.ordinal()
-                .domain(xposmap)
-                .range(_.map(xposmap, function(orig, x) { return tf.x(x); }));
+                .domain(xlbls)
+                .range(_.map(xlbls, function(label) {
+                    return tf.x(props.vizdata.xmap[label]);
+                }));
 
         var xaxis = d3.svg.axis()
                 .scale(xscale)

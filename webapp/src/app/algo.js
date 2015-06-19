@@ -274,7 +274,8 @@ function extractVizGraph(g, repo) {
     ediam = diameter - elidable.length;
 
     // Build up the list of links
-    var links = []; // all the links we'll ultimately return
+    var links = [], // all the links we'll ultimately return
+        xmap = {}; // a map of x-positions to labels, for use on a commit axis
 
     // transform the list of protolinks compiled during mainwalk into real
     // links, now that the vertices list is assembled and ready.
@@ -285,16 +286,27 @@ function extractVizGraph(g, repo) {
     // the vertices in order and make the links (elision or no)
     _.each(_.groupBy(vertices, function(v) { return v.branch; }), function(vtxs) {
         _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+            if (v.branch === 0) {
+                // the k-count is only correct for the xmap on the first branch,
+                // because other branches are guaranteed not to have their first
+                // member be at the 0 x-position
+                xmap[v.depth] = k;
+            }
             if (k === 0) {
-                // nothing to look back to on the first item
+                // all other ops require looking back at previous item, but if
+                // k === 0 then there is no previous item. so, bail out
                 return;
+            }
+
+            // if this is true, it means there's an elided range between these two elements
+            if (v.depth !== coll[k-1].depth + 1) {
+                if (v.branch === 0) { // same reasoning as above
+                    xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = k-0.5;
+                }
             }
 
             // whether or not there's elision, adjacent vertices in this list need a link
             links.push([coll[k-1], v]);
-
-            // TODO for later, when edges get more logic, this checks if there's elision:
-            //if (v.depth !== coll[k-1].depth + 1) {
         });
     });
 
@@ -305,6 +317,7 @@ function extractVizGraph(g, repo) {
         links: links,
         elidable: elidable,
         elranges: elranges,
+        xmap: xmap,
         rangepos: _.map(elranges, function(range) { return range[0] - _.sortedIndex(elidable, range[0]-1); }),
         g: isg,
         diameter: diameter,
