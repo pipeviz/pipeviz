@@ -32,6 +32,29 @@ var reachCountp = function(g, v, filter) {
     }
 };
 
+//var vizExtractorProto = {
+    //apply: function(pvg) {
+        //this._pvg = pvg;
+    //}
+//},
+//vizExtractor = function(pvg) {
+    //var ve = Object.create(vizExtractorProto);
+    //ve.apply(pvg);
+    //return ve;
+//}
+var vizExtractor = {
+    mostCommonRepo: function(pvg) {
+        return _.reduce(_.countBy(_.filter(pvg.verticesWithType("logic-state"), function(v) {
+            var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"));
+            return vedges.length !== 0;
+        }), function(v) {
+            return pvg.get(_.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"))[0].target).propv("repository");
+        }), function(accum, count, repo) {
+            return count < accum[1] ? accum : [repo, count];
+        }, ["", 0])[0];
+    },
+};
+
 /*
  * The main magic function for processing a pv graph into the base state usable
  * for the app/commit viz.
