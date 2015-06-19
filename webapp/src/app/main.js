@@ -81,7 +81,9 @@ var Viz = React.createClass({
                 return d[0].ref.id + '-' +  d[1].ref.id;
             });
 
-        selections.links.exit().transition().remove(); // exit removes line
+        selections.links.exit().transition()
+            .style('opacity', 0)
+            .remove(); // exit removes line
         selections.links.enter().append('line') // enter appends a line
             .attr('class', 'link')
             .style('opacity', 0)
@@ -97,6 +99,31 @@ var Viz = React.createClass({
             .attr('x2', function(d) { return tf.x(d[1].x); })
             .attr('y2', function(d) { return tf.y(d[1].y); })
             .style('opacity', 1);
+
+        // commit elision markers
+        selections.elisions = selections.outerg.selectAll('.elision-bar')
+            .data(_.map(props.vizdata.elranges, function(range) {
+                // creates the same string as what's used in vizdata.xmap
+                return range[0] + ' - ' + range[range.length - 1];
+            }), _.identity);
+
+        selections.elisions.exit().transition().remove(); // remove on exit
+        selections.elisions.enter().append('line')
+            .attr('class', 'elision-bar')
+            .style('opacity', 0)
+            // set all these initially so that we don't transition from 0,0,0,0
+            .attr('x1', function(d) { return tf.x(props.vizdata.xmap[d]); })
+            .attr('y1', 0)
+            .attr('x2', function(d) { return tf.x(props.vizdata.xmap[d]); })
+            .attr('y2', props.height - 30);
+
+        selections.elisions.transition() // update sets x position
+            .style('opacity', 1)
+            .attr('x1', function(d) { return tf.x(props.vizdata.xmap[d]); })
+            .attr('y1', 0)
+            .attr('x2', function(d) { return tf.x(props.vizdata.xmap[d]); })
+            .attr('y2', props.height - 30)
+            .attr('stroke-width', tf.unit() * 0.007);
 
         // Commit distance axis
         var xlbls = _.map(_.pairs(props.vizdata.xmap).sort(function(a, b) { return a[1] - b[1]; }), _.head),
