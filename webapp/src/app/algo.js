@@ -191,6 +191,55 @@ var vizExtractor = {
         }
 
         return [isg, root];
+    },
+    extractTree: function(cg, isg, root, focalCommits) {
+        var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
+        protolinks = [], // we can start figuring out some links in the next walk
+        branches = 0, // total number of divergent branch paths. starts at 0, increases as needed
+        mainwalk = function(v, path, branch) {
+            // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
+            var succ = isg.successors(v) || [];
+            if (_.has(focalCommits, v)) {
+                vmeta[v] = {
+                    depth: path.length, // distance from root
+                    interesting: true, // all focal commits are interesting
+                    reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
+                    treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
+                    branch: branch
+                };
+            } else {
+                var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]);
+                vmeta[v] = {
+                    depth: path.length,
+                    interesting: succ.length > 1 || psucc.length > 1, // interesting only if has multiple successors, or parent did
+                    reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
+                    treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
+                    branch: branch
+                };
+            }
+
+            path.push(v);
+            _.each(succ, function(d, i) {
+                if (succ.length > 1) {
+                    // we know this'll be included, so add to protolinks right now
+                    protolinks.push([v, d]);
+                }
+
+                if (i === 0) {
+                    // if first, consider it the same branch
+                    mainwalk(d, path, branch);
+                } else {
+                    // otherwise, increment then pass branches counter
+                    mainwalk(d, path, ++branches);
+                }
+            });
+            path.pop();
+        };
+
+        // we only need to enter at root to get everything
+        mainwalk(root, [], 0);
+
+        return [vmeta, protolinks];
     }
 };
 
@@ -215,51 +264,9 @@ function extractVizGraph(pvg, repo) {
         isg = tr[0],
         root = tr[1];
 
-    var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
-    protolinks = [], // we can start figuring out some links in the next walk
-    branches = 0, // total number of divergent branch paths. starts at 0, increases as needed
-    mainwalk = function(v, path, branch) {
-        // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
-        var succ = isg.successors(v) || [];
-        if (_.has(focalCommits, v)) {
-            vmeta[v] = {
-                depth: path.length, // distance from root
-                interesting: true, // all focal commits are interesting
-                reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
-                treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
-                branch: branch
-            };
-        } else {
-            var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]);
-            vmeta[v] = {
-                depth: path.length,
-                interesting: succ.length > 1 || psucc.length > 1, // interesting only if has multiple successors, or parent did
-                reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
-                treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
-                branch: branch
-            };
-        }
-
-        path.push(v);
-        _.each(succ, function(d, i) {
-            if (succ.length > 1) {
-                // we know this'll be included, so add to protolinks right now
-                protolinks.push([v, d]);
-            }
-
-            if (i === 0) {
-                // if first, consider it the same branch
-                mainwalk(d, path, branch);
-            } else {
-                // otherwise, increment then pass branches counter
-                mainwalk(d, path, ++branches);
-            }
-        });
-        path.pop();
-    };
-
-    // we only need to enter at root to get everything
-    mainwalk(root, [], 0);
+    var main = vizExtractor.extractTree(cg, isg, root, focalCommits),
+        vmeta = main[0],
+        protolinks = main[1];
 
     // now we have all the base meta; construct elidables lists and branch rankings
     var elidable = _(vmeta)
