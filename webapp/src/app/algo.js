@@ -44,14 +44,17 @@ var reachCountp = function(g, v, filter) {
 //}
 var vizExtractor = {
     mostCommonRepo: function(pvg) {
-        return _.reduce(_.countBy(_.filter(pvg.verticesWithType("logic-state"), function(v) {
-            var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"));
-            return vedges.length !== 0;
-        }), function(v) {
-            return pvg.get(_.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"))[0].target).propv("repository");
-        }), function(accum, count, repo) {
-            return count < accum[1] ? accum : [repo, count];
-        }, ["", 0])[0];
+        return _(pvg.verticesWithType("logic-state"))
+            .filter(function(v) {
+                var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"));
+                return vedges.length !== 0;
+            })
+            .countBy(function(v) {
+                return pvg.get(_.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"))[0].target).propv("repository");
+            })
+            .reduce(function(accum, count, repo) {
+                return count < accum[1] ? accum : [repo, count];
+            }, ["", 0])[0];
     },
 };
 
