@@ -1,34 +1,35 @@
-// TODO memoize this
-var reachCounts = function(g, v, filter) {
-    var succ = g.successors(v),
-    // Recursive folder to create a flattened array with all successors.
-    r = function(accum, value) {
-        return accum.concat(_.foldl(g.successors(value), r, [value]));
-    };
+// TODO memoize within these
+var reachCount = {
+    throughPredecessors: function(g, v, filter) {
+        var pred = g.predecessors(v),
+        // Recursive folder to create a flattened array with all predecessors.
+        r = function(accum, value) {
+            return accum.concat(_.foldl(g.predecessors(value), r, [value]));
+        };
+
+        if (pred === undefined || pred.length === 0) {
+            return 0;
+        } else if (filter === undefined) {
+            return _.uniq(_.foldl(pred, r, [v])).length;
+        } else {
+            return _.uniq(_.intersection(_.foldl(pred, r, [v]), filter)).length;
+        }
+    },
+    throughSuccessors: function(g, v, filter) {
+        var succ = g.successors(v),
+        // Recursive folder to create a flattened array with all successors.
+        r = function(accum, value) {
+            return accum.concat(_.foldl(g.successors(value), r, [value]));
+        };
 
 
-    if (succ === undefined) {
-        return 0;
-    } else if (filter === undefined) {
-        return _.uniq(_.foldl(succ, r, [v])).length;
-    } else {
-        return _.uniq(_.intersection(_.foldl(succ, r, [v]), filter)).length;
-    }
-};
-
-var reachCountp = function(g, v, filter) {
-    var pred = g.predecessors(v),
-    // Recursive folder to create a flattened array with all predecessors.
-    r = function(accum, value) {
-        return accum.concat(_.foldl(g.predecessors(value), r, [value]));
-    };
-
-    if (pred === undefined || pred.length === 0) {
-        return 0;
-    } else if (filter === undefined) {
-        return _.uniq(_.foldl(pred, r, [v])).length;
-    } else {
-        return _.uniq(_.intersection(_.foldl(pred, r, [v]), filter)).length;
+        if (succ === undefined) {
+            return 0;
+        } else if (filter === undefined) {
+            return _.uniq(_.foldl(succ, r, [v])).length;
+        } else {
+            return _.uniq(_.intersection(_.foldl(succ, r, [v]), filter)).length;
+        }
     }
 };
 
@@ -224,8 +225,8 @@ function extractVizGraph(pvg, repo) {
             vmeta[v] = {
                 depth: path.length, // distance from root
                 interesting: true, // all focal commits are interesting
-                reach: reachCountp(cg, v, _.keys(focalCommits)),
-                treach: reachCounts(isg, v, _.keys(focalCommits)),
+                reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
+                treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
                 branch: branch
             };
         } else {
@@ -233,8 +234,8 @@ function extractVizGraph(pvg, repo) {
             vmeta[v] = {
                 depth: path.length,
                 interesting: succ.length > 1 || psucc.length > 1, // interesting only if has multiple successors, or parent did
-                reach: reachCountp(cg, v, _.keys(focalCommits)),
-                treach: reachCounts(isg, v, _.keys(focalCommits)),
+                reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
+                treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
                 branch: branch
             };
         }
