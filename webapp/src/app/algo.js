@@ -75,6 +75,59 @@ var vizExtractor = {
 
         return [focal, focalCommits];
     },
+    focalTransposedGraph: function(cg, focalCommits) {
+        var fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
+        visited = {},
+        fgwalk = function(v, fpath) { // Depth-first walker, builds the focal graph
+            var last = fpath.length === 0 ? [] : fpath[fpath.length - 1],
+            pop_fpath = false;
+
+            // If vertex is already focal-visited, return early. We only record focal vertices
+            // in this list, so there will be some double-traversal, but that's acceptable.
+            if (_.has(visited, v)) {
+                // Create edges from every focal on current vertex to every focal
+                // from last. No op if last is empty.
+                _.each(last, function(lvtx) {
+                    _.each(focalCommits[v], function(vtx) {
+                        fg.setEdge(vtx.id, lvtx.id);
+                    });
+                });
+                return;
+            }
+
+            if (_.has(focalCommits, v)) {
+                // This commit has one or more of our focal vertices. Create an
+                // edge if fpath is non-empty, push focals onto fpath, and set
+                // var to pop fpath later.
+                pop_fpath = true;
+
+                // Create edges from every focal on current vertex to every focal
+                // from last. No op if last is empty.
+                _.each(last, function(lvtx) {
+                    _.each(focalCommits[v], function(vtx) {
+                        fg.setEdge(vtx.id, lvtx.id);
+                    });
+                });
+
+                fpath.push(focalCommits[v]);
+            }
+
+            _.each(cg.successors(v), function(s) {
+                fgwalk(s, fpath);
+            });
+
+            if (pop_fpath) {
+                visited[v] = true;
+                fpath.pop();
+            }
+        };
+
+        _.each(focalCommits, function(d, k) {
+            fgwalk(k, []);
+        });
+
+        return fg;
+    },
     treeAndRoot: function(cg, focalCommits) {
         var isg = new graphlib.Graph(), // A tree, almost an induced subgraph, representing first-parent commit graph paths
         visited = {},
@@ -155,60 +208,9 @@ function extractVizGraph(g, repo) {
     }
 
     var cg = g.commitGraph(), // the git commit graph TODO narrow to only commits in repo
-    fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
-    visited = {};
-
-    // Depth-first walk to build the focal graph and find root candidates
-    var fgwalk = function(v, fpath) {
-        var last = fpath.length === 0 ? [] : fpath[fpath.length - 1],
-        pop_fpath = false;
-
-        // If vertex is already focal-visited, return early. We only record focal vertices
-        // in this list, so there will be some double-traversal, but that's acceptable.
-        if (_.has(visited, v)) {
-            // Create edges from every focal on current vertex to every focal
-            // from last. No op if last is empty.
-            _.each(last, function(lvtx) {
-                _.each(focalCommits[v], function(vtx) {
-                    fg.setEdge(vtx.id, lvtx.id);
-                });
-            });
-            return;
-        }
-
-        if (_.has(focalCommits, v)) {
-            // This commit has one or more of our focal vertices. Create an
-            // edge if fpath is non-empty, push focals onto fpath, and set
-            // var to pop fpath later.
-            pop_fpath = true;
-
-            // Create edges from every focal on current vertex to every focal
-            // from last. No op if last is empty.
-            _.each(last, function(lvtx) {
-                _.each(focalCommits[v], function(vtx) {
-                    fg.setEdge(vtx.id, lvtx.id);
-                });
-            });
-
-            fpath.push(focalCommits[v]);
-        }
-
-        _.each(cg.successors(v), function(s) {
-            fgwalk(s, fpath);
-        });
-
-        if (pop_fpath) {
-            visited[v] = true;
-            fpath.pop();
-        }
-    };
-
-    // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
-    //_.each(focalCommits, function(d, k) {
-        //fgwalk(k, []);
-    //});
-
-    var tr = vizExtractor.treeAndRoot(cg, focalCommits),
+        // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
+        //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
+        tr = vizExtractor.treeAndRoot(cg, focalCommits),
         isg = tr[0],
         root = tr[1];
 
