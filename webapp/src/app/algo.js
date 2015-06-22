@@ -385,9 +385,20 @@ function extractVizGraph(pvg, repo) {
                     }))
                 );
             };
-            console.log(_.defaults({mid: pvg.mid, vertices: _.map(this.vertices, function(v) {
-                return _.defaults({ref: flattenVertex(v.ref)}, v);
-            })}, this));
+            console.log(_.defaults({
+                mid: pvg.mid,
+                vertices: _.map(this.vertices, function(v) {
+                    return _.defaults({ref: flattenVertex(v.ref)}, v);
+                }),
+                branches: _.mapValues(this.branches, function(b) {
+                    return {
+                        ids: _.map(b.ids, function(c) {
+                            return pvg.get(c).propv('sha1');
+                        }),
+                        rank: b.rank
+                    };
+                })
+            }, this));
         }
     };
 }
