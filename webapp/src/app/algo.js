@@ -373,6 +373,22 @@ function extractVizGraph(pvg, repo) {
         ediam: ediam,
         root: root,
         branches: branchinfo,
+        dump: function() {
+            var flattenVertex = function(v) {
+                return _.assign({id: v.id, vtype: v.vertex.type},
+                    {outEdges: _.map(v.outEdges, function(eid) {
+                        var e = pvg.get(eid);
+                        return _.defaults({target: pvg.get(e.target)}, e);
+                    })},
+                    _.zipObject(_.map(v.vertex.properties, function(p, k) {
+                        return [k, p.value];
+                    }))
+                );
+            };
+            console.log(_.defaults({mid: pvg.mid, vertices: _.map(this.vertices, function(v) {
+                return _.defaults({ref: flattenVertex(v.ref)}, v);
+            })}, this));
+        }
     };
 }
 
