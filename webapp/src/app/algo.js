@@ -196,7 +196,7 @@ var vizExtractor = {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
         branches = 0, // total number of divergent branch paths. starts at 0, increases as needed
-        maxdepth = 0, // maximum depth reached. Useful info later that we can avoid recalculating
+        diameter = 0, // maximum depth reached. Useful info later that we can avoid recalculating
         idepths = [], // list of interesting depths, to avoid another walk later
         mainwalk = function(v, path, branch) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
@@ -232,7 +232,6 @@ var vizExtractor = {
             }
 
             path.push(v);
-            maxdepth = Math.max(maxdepth, path.length);
             _.each(succ, function(d, i) {
                 if (succ.length > 1) {
                     // we know this'll be included, so add to protolinks right now
@@ -248,12 +247,21 @@ var vizExtractor = {
                 }
             });
             path.pop();
+            // diameter is calculated AFTER path is popped because it is the
+            // number of hops back to root. A hop goes from one vertex to
+            // another, which means the number of hops is always one less than
+            // the number of vertices (it is non-inclusive of self).
+            diameter = Math.max(diameter, path.length);
         };
 
         // we only need to enter at root to get everything
         mainwalk(root, [], 0);
 
-        return [vmeta, protolinks, maxdepth, _.uniq(idepths)];
+        return [vmeta,
+            protolinks,
+            diameter,
+            // sort idepths so binary search works later
+            _.uniq(idepths).sort(function(a, b) { return a - b; })];
     }
 };
 
@@ -280,15 +288,12 @@ function extractVizGraph(pvg, repo) {
 
     var main = vizExtractor.extractTree(cg, isg, root, focalCommits),
         vmeta = main[0],
-        protolinks = main[1];
+        protolinks = main[1],
+        diameter = main[2],
+        idepths = main[3];
 
     // now we have all the base meta; construct elidables lists and branch rankings
-    var elidable = _(vmeta)
-        .filter(function(v) { return v.interesting === false; })
-        .map(function(v) { return v.depth; })
-        .uniq()
-        .value()
-        .sort(function(a, b) { return a - b; }), // TODO bubble sort, meh
+    var elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; }),
     // also compute the minimum set of contiguous elidable depths
     elranges = _.reduce(elidable, function(accum, v, k, coll) {
         if (coll[k-1] === v-1) {
@@ -301,6 +306,8 @@ function extractVizGraph(pvg, repo) {
 
         return accum;
     }, []),
+    // we also need the elided diameter
+    ediam = diameter - elidable.length,
     branchinfo = _(vmeta)
         .mapValues(function(v, k) { return { branch: v.branch, id: parseInt(k) }; })
         .groupBy(function(v) { return v.branch; }) // collects vertices on same branch into a single array
@@ -332,9 +339,7 @@ function extractVizGraph(pvg, repo) {
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: branchinfo[v.branch].rank // y is just the branch rank TODO alternate up/down projection
             }, v);
-        }).value(),
-    diameter = _.max(_.map(focalCommits, function(v, k) { return vmeta[k].depth; })),
-    ediam = diameter - elidable.length;
+        }).value();
 
     // Build up the list of links
     var links = [], // all the links we'll ultimately return
