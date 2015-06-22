@@ -22,7 +22,7 @@ def jsonify(repo, destination=False):
         last = ref.get_object()
         for commit in repo.walk(last.id, pygit2.GIT_SORT_TOPOLOGICAL):
             if str(commit.id) in seen:
-                break
+                continue
             seen.add(str(commit.id))
             row = {}
             row['sha1'] = str(commit.id)
