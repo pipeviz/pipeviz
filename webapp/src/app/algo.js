@@ -196,29 +196,43 @@ var vizExtractor = {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
         branches = 0, // total number of divergent branch paths. starts at 0, increases as needed
+        maxdepth = 0, // maximum depth reached. Useful info later that we can avoid recalculating
+        idepths = [], // list of interesting depths, to avoid another walk later
         mainwalk = function(v, path, branch) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
             var succ = isg.successors(v) || [];
             if (_.has(focalCommits, v)) {
+                idepths.push(path.length);
                 vmeta[v] = {
                     depth: path.length, // distance from root
                     interesting: true, // all focal commits are interesting
+                    // count of reachable focal commits in original commit graph
                     reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
+                    // count of reachable focal commits in the tree/almost-induced subgraph
                     treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
                     branch: branch
                 };
             } else {
-                var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]);
+                var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]),
+                // interesting only if has multiple successors, or parent did
+                interesting = succ.length > 1 || psucc.length > 1;
+
                 vmeta[v] = {
                     depth: path.length,
-                    interesting: succ.length > 1 || psucc.length > 1, // interesting only if has multiple successors, or parent did
+                    interesting: interesting,
                     reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
                     treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
                     branch: branch
                 };
+
+                if (interesting) {
+                    // if this one's interesting, push it onto the idepths list
+                    idepths.push(path.length);
+                }
             }
 
             path.push(v);
+            maxdepth = Math.max(maxdepth, path.length);
             _.each(succ, function(d, i) {
                 if (succ.length > 1) {
                     // we know this'll be included, so add to protolinks right now
@@ -239,7 +253,7 @@ var vizExtractor = {
         // we only need to enter at root to get everything
         mainwalk(root, [], 0);
 
-        return [vmeta, protolinks];
+        return [vmeta, protolinks, maxdepth, _.uniq(idepths)];
     }
 };
 
