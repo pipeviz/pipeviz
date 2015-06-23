@@ -150,8 +150,13 @@ var vizExtractor = {
             }
 
             // Only visit first parent; that's the path that matters to our subgraph/tree
-            var succ = cg.successors(v);
-            if (succ !== undefined && succ.length > 0) {
+            // We also discount successors where the current commit is not the first parent,
+            // as otherwise we'd still form a graph, not a tree.
+            // TODO this may not be great - https://github.com/tag1consulting/pipeviz/issues/108
+            var succ = _.filter(cg.successors(v) || [], function(s) {
+                return cg.edge(v, s) === 1;
+            });
+            if (succ.length > 0) {
                 isgwalk(succ[0], v);
             }
 

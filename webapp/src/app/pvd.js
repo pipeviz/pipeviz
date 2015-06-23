@@ -67,7 +67,7 @@ var pvGraphProto = {
         _.each(_.filter(this._objects, function(d) { return filters.vertices(d) && isType("commit")(d); }), function(commit) {
             g.setNode(commit.id);
             _.each(_.filter(_.map(commit.outEdges, function(edgeId) { return that.get(edgeId); }), isType("parent-commit")), function (edge) {
-                g.setEdge(commit.id, edge.target);
+                g.setEdge(commit.id, edge.target, edge.prop("pnum").value);
             });
         });
 
