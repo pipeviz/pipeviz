@@ -200,10 +200,10 @@ var vizExtractor = {
     extractTree: function(cg, isg, root, focalCommits) {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
-        branches = 0, // total number of divergent branch paths. starts at 0, increases as needed
+        segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
         diameter = 0, // maximum depth reached. Useful info later that we can avoid recalculating
         idepths = [], // list of interesting depths, to avoid another walk later
-        mainwalk = function(v, path, branch) {
+        mainwalk = function(v, path, segment, pseg) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
             var succ = isg.successors(v) || [];
             if (_.has(focalCommits, v)) {
@@ -215,7 +215,8 @@ var vizExtractor = {
                     reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
                     // count of reachable focal commits in the tree/almost-induced subgraph
                     treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
-                    branch: branch
+                    segment: segment,
+                    pseg: pseg
                 };
             } else {
                 var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]),
@@ -227,7 +228,8 @@ var vizExtractor = {
                     interesting: interesting,
                     reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
                     treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
-                    branch: branch
+                    segment: segment,
+                    pseg: pseg
                 };
 
                 if (interesting) {
@@ -237,18 +239,14 @@ var vizExtractor = {
             }
 
             path.push(v);
-            _.each(succ, function(d, i) {
-                if (succ.length > 1) {
+            _.each(succ, function(d) {
+                if (succ.length === 1) {
+                    mainwalk(d, path, segment, pseg);
+                } else {
+                    // if more than one succ, always increment to delineate segments
+                    mainwalk(d, path, ++segments, segment);
                     // we know this'll be included, so add to protolinks right now
                     protolinks.push([v, d]);
-                }
-
-                if (i === 0) {
-                    // if first, consider it the same branch
-                    mainwalk(d, path, branch);
-                } else {
-                    // otherwise, increment then pass branches counter
-                    mainwalk(d, path, ++branches);
                 }
             });
             path.pop();
@@ -260,7 +258,7 @@ var vizExtractor = {
         };
 
         // we only need to enter at root to get everything
-        mainwalk(root, [], 0);
+        mainwalk(root, [], 0, 0);
 
         return [vmeta,
             protolinks,
@@ -297,7 +295,7 @@ function extractVizGraph(pvg, repo) {
         diameter = main[2],
         idepths = main[3];
 
-    // now we have all the base meta; construct elidables lists and branch rankings
+    // now we have all the base meta; construct elidables lists and segment rankings
     var elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; }),
     // also compute the minimum set of contiguous elidable depths
     elranges = _.reduce(elidable, function(accum, v, k, coll) {
@@ -313,26 +311,66 @@ function extractVizGraph(pvg, repo) {
     }, []),
     // we also need the elided diameter
     ediam = diameter - elidable.length,
-    branchinfo = _(vmeta)
-        .mapValues(function(v, k) { return { branch: v.branch, id: parseInt(k) }; })
-        .groupBy(function(v) { return v.branch; }) // collects vertices on same branch into a single array
+    segmentinfo = _(vmeta)
+        .mapValues(function(v, k) {
+            return {
+                segment: v.segment,
+                pseg: v.pseg,
+                reach: v.reach,
+                treach: v.treach,
+                id: parseInt(k)
+            };
+        })
+        .groupBy(function(v) { return v.segment; }) // collects vertices on same segment into a single array
         .mapValues(function(v) {
             return {
                 ids: _.map(v, function(v2) { return v2.id; }),
+                pseg: v[0].pseg, // all psegs in seg inherently must be the same
+                maxreach: _.max(v, 'reach'),
+                maxtreach: _.max(v, 'treach'),
                 rank: 0,
             };
         })
-        .value(); // object keyed by branch number w/branch info
+        .value(); // object keyed by segment number w/segment info
 
     _(vmeta).groupBy(function(v) { return v.depth; })
         .each(function(metas, x) {
-            // TODO this needs to get much, much smarter in order to weave smartly as unsigned y
-            // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
-            _(metas).sortBy(["treach", "reach"])
-                .reverse()
-                .each(function(meta, rank) {
-                    branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
-                });
+            _.each(metas.sort(function(a, b) {
+                // for shorthand
+                var ab = segmentinfo[a.segment],
+                    bb = segmentinfo[b.segment];
+
+                // Multi-layer sort. First layer is treach
+                if (ab.maxtreach === bb.maxtreach) {
+                    // Second layer is reach.
+                    if (ab.maxreach === bb.maxreach) {
+                        // Next, we go by the length of the segment.
+                        if (ab.ids.length === bb.ids.length) {
+                            // If all of these are equal, we have to make an arbitrary decision,
+                            // which we persist as rank. So we check rank first to see if that's
+                            // already happened
+                            if (ab.rank === bb.rank) {
+                                // TODO do we need a flag to indicate it's set this way?
+                                bb.rank += 1;
+                                return -1;
+                            } else { // Cascade back down through elses
+                                return ab.rank - bb.rank;
+                            }
+                        } else {
+                            // We want the longer one
+                            return ab.ids.length - bb.ids.length;
+                        }
+                    } else {
+                        // more reach is better
+                        return ab.maxreach - bb.maxreach;
+                    }
+                } else {
+                    // more treach is better
+                    return ab.maxtreach - bb.maxtreach;
+                }
+            }), function(meta, rank) {
+                segmentinfo[meta.segment].rank = Math.max(segmentinfo[meta.segment].rank, rank);
+            });
         });
 
     // FINALLY, assign x and y coords to all visible vertices
@@ -342,7 +380,7 @@ function extractVizGraph(pvg, repo) {
             return _.assign({
                 ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
-                y: branchinfo[v.branch].rank // y is just the branch rank TODO alternate up/down projection
+                y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
             }, v);
         }).value();
 
@@ -354,17 +392,30 @@ function extractVizGraph(pvg, repo) {
     // links, now that the vertices list is assembled and ready.
     _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
-    // collect the vertices together by branch in a way that it's easy to see
-    // where connections are needed to cross elision ranges, then walk through
-    // the vertices in order and make the links (elision or no)
-    _.each(_.groupBy(vertices, function(v) { return v.branch; }), function(vtxs) {
+    // collect the vertices together by segment in a way that it's easy to see
+    // where connections are needed to cross elision ranges
+    var vtxbyseg = _.merge(
+        // make sure we get all segments, even empties
+        _.mapValues(segmentinfo, function() { return []; }),
+        _.groupBy(vertices, function(v) { return v.segment; })
+    ),
+    // build an offset map telling us how much a segment's internal offset should
+    // be increased by to give the real x-position
+    segoffset = _.mapValues(segmentinfo, function(seg, k) {
+        // Recursive function to count length of parent segments
+        var r = _.memoize(function(id, rseg) {
+            // pseg === id IFF we're on segment 0, which is the base
+            return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
+        });
+
+        // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
+        return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
+    });
+
+    // then walk through the vertices in order and make the links (elision or no)
+    _.each(vtxbyseg, function(vtxs) {
         _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
-            if (v.branch === 0) {
-                // the k-count is only correct for the xmap on the first branch,
-                // because other branches are guaranteed not to have their first
-                // member be at the 0 x-position
-                xmap[v.depth] = k;
-            }
+            xmap[v.depth] = segoffset[v.segment] + k;
             if (k === 0) {
                 // all other ops require looking back at previous item, but if
                 // k === 0 then there is no previous item. so, bail out
@@ -373,9 +424,7 @@ function extractVizGraph(pvg, repo) {
 
             // if this is true, it means there's an elided range between these two elements
             if (v.depth !== coll[k-1].depth + 1) {
-                if (v.branch === 0) { // same reasoning as above
-                    xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = k-0.5;
-                }
+                xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
             }
 
             // whether or not there's elision, adjacent vertices in this list need a link
@@ -396,7 +445,7 @@ function extractVizGraph(pvg, repo) {
         diameter: diameter,
         ediam: ediam,
         root: root,
-        branches: branchinfo,
+        segments: segmentinfo,
         dump: function() {
             var flattenVertex = function(v) {
                 return _.assign({id: v.id, vtype: v.vertex.type},
@@ -414,7 +463,7 @@ function extractVizGraph(pvg, repo) {
                 vertices: _.map(this.vertices, function(v) {
                     return _.defaults({ref: flattenVertex(v.ref)}, v);
                 }),
-                branches: _.mapValues(this.branches, function(b) {
+                segments: _.mapValues(this.segments, function(b) {
                     return {
                         ids: _.map(b.ids, function(c) {
                             return pvg.get(c).propv('sha1');

@@ -24,7 +24,7 @@ var Viz = React.createClass({
         // x-coordinate space is the elided diameter as a factor of viewport width
         var selections = {},
             props = this.props,
-            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.branches.length);
+            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length);
 
         props.vizdata.dump();
 
