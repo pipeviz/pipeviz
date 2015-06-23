@@ -225,13 +225,22 @@ func resolveSpecCommit(g CoreGraph, mid int, src VertexTuple, es SpecCommit) (e 
 		Props:  ps.NewMap(),
 		EType:  "version",
 	}
+	e.Props = e.Props.Set("sha1", Property{MsgSrc: mid, Value: es.Sha1})
 
 	re := g.OutWith(src.id, Qbe(EType("version")))
-	// TODO could there ever be >1?
-	if len(re) == 1 {
-		success = true
-		e.Target = re[0].Target
-		e.id = re[0].id
+	if len(re) > 0 {
+		sha1, _ := re[0].Props.Lookup("sha1")
+		e.id = re[0].id // FIXME setting the id to non-0 AND failing is currently unhandled
+		if sha1.(Property).Value == es.Sha1 {
+			success = true
+			e.Target = re[0].Target
+		} else {
+			rv := g.VerticesWith(Qbv(VType("commit"), "sha1", es.Sha1))
+			if len(rv) == 1 {
+				success = true
+				e.Target = rv[0].id
+			}
+		}
 	} else {
 		rv := g.VerticesWith(Qbv(VType("commit"), "sha1", es.Sha1))
 		if len(rv) == 1 {
@@ -251,7 +260,7 @@ func resolveSpecGitCommitParent(g CoreGraph, mid int, src VertexTuple, es SpecGi
 	}
 
 	re := g.OutWith(src.id, Qbe(EType("parent-commit"), "pnum", es.ParentNum))
-	if len(re) == 1 {
+	if len(re) > 0 {
 		success = true
 		e.Target = re[0].Target
 		e.id = re[0].id
@@ -261,6 +270,7 @@ func resolveSpecGitCommitParent(g CoreGraph, mid int, src VertexTuple, es SpecGi
 			success = true
 			e.Target = rv[0].id
 			e.Props = e.Props.Set("pnum", Property{MsgSrc: mid, Value: es.ParentNum})
+			e.Props = e.Props.Set("sha1", Property{MsgSrc: mid, Value: es.Sha1})
 		}
 	}
 
