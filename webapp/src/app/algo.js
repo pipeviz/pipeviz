@@ -203,7 +203,7 @@ var vizExtractor = {
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
         diameter = 0, // maximum depth reached. Useful info later that we can avoid recalculating
         idepths = [], // list of interesting depths, to avoid another walk later
-        mainwalk = function(v, path, segment) {
+        mainwalk = function(v, path, segment, pseg) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
             var succ = isg.successors(v) || [];
             if (_.has(focalCommits, v)) {
@@ -215,7 +215,8 @@ var vizExtractor = {
                     reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
                     // count of reachable focal commits in the tree/almost-induced subgraph
                     treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
-                    segment: segment
+                    segment: segment,
+                    pseg: pseg
                 };
             } else {
                 var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]),
@@ -227,7 +228,8 @@ var vizExtractor = {
                     interesting: interesting,
                     reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
                     treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
-                    segment: segment
+                    segment: segment,
+                    pseg: pseg
                 };
 
                 if (interesting) {
@@ -237,12 +239,12 @@ var vizExtractor = {
             }
 
             path.push(v);
-            _.each(succ, function(d, i) {
+            _.each(succ, function(d) {
                 if (succ.length === 1) {
-                    mainwalk(d, path, segment);
+                    mainwalk(d, path, segment, pseg);
                 } else {
-                    // if more than one succ, always increment segment counter to delineate segments
-                    mainwalk(d, path, ++segments);
+                    // if more than one succ, always increment to delineate segments
+                    mainwalk(d, path, ++segments, segment);
                     // we know this'll be included, so add to protolinks right now
                     protolinks.push([v, d]);
                 }
@@ -256,7 +258,7 @@ var vizExtractor = {
         };
 
         // we only need to enter at root to get everything
-        mainwalk(root, [], 0);
+        mainwalk(root, [], 0, 0);
 
         return [vmeta,
             protolinks,
@@ -313,6 +315,7 @@ function extractVizGraph(pvg, repo) {
         .mapValues(function(v, k) {
             return {
                 segment: v.segment,
+                pseg: v.pseg,
                 reach: v.reach,
                 treach: v.treach,
                 id: parseInt(k)
@@ -322,6 +325,7 @@ function extractVizGraph(pvg, repo) {
         .mapValues(function(v) {
             return {
                 ids: _.map(v, function(v2) { return v2.id; }),
+                pseg: v[0].pseg, // all psegs in seg inherently must be the same
                 maxreach: _.max(v, 'reach'),
                 maxtreach: _.max(v, 'treach'),
                 rank: 0,
@@ -388,17 +392,23 @@ function extractVizGraph(pvg, repo) {
     // links, now that the vertices list is assembled and ready.
     _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
+    var segoffset = _.mapValues(segmentinfo, function(seg, k) {
+        // Recursive function to count length of parent segments
+        var r = _.memoize(function(id, rseg) {
+            // pseg === id IFF we're on segment 0, which is the base
+            return rseg.pseg === id ? rseg.ids.length : rseg.ids.length + r(id, segmentinfo[id]);
+        });
+
+        // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
+        return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
+    });
+
     // collect the vertices together by segment in a way that it's easy to see
     // where connections are needed to cross elision ranges, then walk through
     // the vertices in order and make the links (elision or no)
     _.each(_.groupBy(vertices, function(v) { return v.segment; }), function(vtxs) {
         _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
-            if (v.segment === 0) {
-                // the k-count is only correct for the xmap on the first segment,
-                // because other segments are guaranteed not to have their first
-                // member be at the 0 x-position
-                xmap[v.depth] = k;
-            }
+            xmap[v.depth] = segoffset[v.segment] + k;
             if (k === 0) {
                 // all other ops require looking back at previous item, but if
                 // k === 0 then there is no previous item. so, bail out
@@ -407,9 +417,7 @@ function extractVizGraph(pvg, repo) {
 
             // if this is true, it means there's an elided range between these two elements
             if (v.depth !== coll[k-1].depth + 1) {
-                if (v.segment === 0) { // same reasoning as above
-                    xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = k-0.5;
-                }
+                xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
             }
 
             // whether or not there's elision, adjacent vertices in this list need a link
