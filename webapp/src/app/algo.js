@@ -392,21 +392,28 @@ function extractVizGraph(pvg, repo) {
     // links, now that the vertices list is assembled and ready.
     _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
-    var segoffset = _.mapValues(segmentinfo, function(seg, k) {
+    // collect the vertices together by segment in a way that it's easy to see
+    // where connections are needed to cross elision ranges
+    var vtxbyseg = _.merge(
+        // make sure we get all segments, even empties
+        _.mapValues(segmentinfo, function() { return []; }),
+        _.groupBy(vertices, function(v) { return v.segment; })
+    ),
+    // build an offset map telling us how much a segment's internal offset should
+    // be increased by to give the real x-position
+    segoffset = _.mapValues(segmentinfo, function(seg, k) {
         // Recursive function to count length of parent segments
         var r = _.memoize(function(id, rseg) {
             // pseg === id IFF we're on segment 0, which is the base
-            return rseg.pseg === id ? rseg.ids.length : rseg.ids.length + r(id, segmentinfo[id]);
+            return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
         });
 
         // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
         return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
     });
 
-    // collect the vertices together by segment in a way that it's easy to see
-    // where connections are needed to cross elision ranges, then walk through
-    // the vertices in order and make the links (elision or no)
-    _.each(_.groupBy(vertices, function(v) { return v.segment; }), function(vtxs) {
+    // then walk through the vertices in order and make the links (elision or no)
+    _.each(vtxbyseg, function(vtxs) {
         _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
             xmap[v.depth] = segoffset[v.segment] + k;
             if (k === 0) {
