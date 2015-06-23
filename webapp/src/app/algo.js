@@ -328,7 +328,7 @@ function extractVizGraph(pvg, repo) {
         .each(function(metas, x) {
             // TODO this needs to get much, much smarter in order to weave smartly as unsigned y
             // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
-            _(metas).sortBy(["reach", "treach"])
+            _(metas).sortBy(["treach", "reach"])
                 .reverse()
                 .each(function(meta, rank) {
                     branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
