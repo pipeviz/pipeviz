@@ -22,6 +22,8 @@ func Resolve(g CoreGraph, mid int, src VertexTuple, d EdgeSpec) (StandardEdge, b
 		return resolveDataLink(g, mid, src, es)
 	case SpecCommit:
 		return resolveSpecCommit(g, mid, src, es)
+	case SpecGitCommitParent:
+		return resolveSpecGitCommitParent(g, mid, src, es)
 	case SpecLocalLogic:
 		return resolveSpecLocalLogic(g, mid, src, es)
 	case SpecNetListener:
@@ -224,7 +226,7 @@ func resolveSpecCommit(g CoreGraph, mid int, src VertexTuple, es SpecCommit) (e 
 		EType:  "version",
 	}
 
-	re := g.OutWith(src.id, Qbe(EType("version"), "sha1", es.Sha1))
+	re := g.OutWith(src.id, Qbe(EType("version")))
 	// TODO could there ever be >1?
 	if len(re) == 1 {
 		success = true
@@ -235,6 +237,30 @@ func resolveSpecCommit(g CoreGraph, mid int, src VertexTuple, es SpecCommit) (e 
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].id
+		}
+	}
+
+	return
+}
+
+func resolveSpecGitCommitParent(g CoreGraph, mid int, src VertexTuple, es SpecGitCommitParent) (e StandardEdge, success bool) {
+	e = StandardEdge{
+		Source: src.id,
+		Props:  ps.NewMap(),
+		EType:  "parent-commit",
+	}
+
+	re := g.OutWith(src.id, Qbe(EType("parent-commit"), "pnum", es.ParentNum))
+	if len(re) == 1 {
+		success = true
+		e.Target = re[0].Target
+		e.id = re[0].id
+	} else {
+		rv := g.VerticesWith(Qbv(VType("commit"), "sha1", es.Sha1))
+		if len(rv) == 1 {
+			success = true
+			e.Target = rv[0].id
+			e.Props = e.Props.Set("pnum", Property{MsgSrc: mid, Value: es.ParentNum})
 		}
 	}
 

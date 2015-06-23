@@ -29,6 +29,11 @@ type SpecCommit struct {
 	Sha1 interpret.Sha1
 }
 
+type SpecGitCommitParent struct {
+	Sha1      interpret.Sha1
+	ParentNum int
+}
+
 type SpecLocalLogic struct {
 	Path string
 }
@@ -198,8 +203,8 @@ func splitCommit(d interpret.Commit, id int) ([]SplitData, error) {
 	v.props = v.props.Set("repository", Property{MsgSrc: id, Value: d.Repository})
 
 	var edges EdgeSpecs
-	for _, parent := range d.Parents {
-		edges = append(edges, SpecCommit{parent})
+	for k, parent := range d.Parents {
+		edges = append(edges, SpecGitCommitParent{parent, k + 1})
 	}
 
 	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
