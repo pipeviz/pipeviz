@@ -310,11 +310,20 @@ function extractVizGraph(pvg, repo) {
     // we also need the elided diameter
     ediam = diameter - elidable.length,
     branchinfo = _(vmeta)
-        .mapValues(function(v, k) { return { branch: v.branch, id: parseInt(k) }; })
+        .mapValues(function(v, k) {
+            return {
+                branch: v.branch,
+                reach: v.reach,
+                treach: v.treach,
+                id: parseInt(k)
+            };
+        })
         .groupBy(function(v) { return v.branch; }) // collects vertices on same branch into a single array
         .mapValues(function(v) {
             return {
                 ids: _.map(v, function(v2) { return v2.id; }),
+                maxreach: _.max(v, 'reach'),
+                maxtreach: _.max(v, 'treach'),
                 rank: 0,
             };
         })
@@ -324,11 +333,43 @@ function extractVizGraph(pvg, repo) {
         .each(function(metas, x) {
             // TODO this needs to get much, much smarter in order to weave smartly as unsigned y
             // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
-            _(metas).sortBy(["treach", "reach"])
-                .reverse()
-                .each(function(meta, rank) {
-                    branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
-                });
+            //_(metas).sortBy(["treach", "reach"])
+            _.each(metas.sort(function(a, b) {
+                // for shorthand
+                var ab = branchinfo[a.branch],
+                    bb = branchinfo[b.branch];
+
+                // Multi-layer sort. First layer is treach
+                if (ab.maxtreach === bb.maxtreach) {
+                    // Second layer is reach.
+                    if (ab.maxreach === bb.maxreach) {
+                        // Next, we go by the length of the segment.
+                        if (ab.ids.length === bb.ids.length) {
+                            // If all of these are equal, we have to make an arbitrary decision,
+                            // which we persist as rank. So we check rank first to see if that's
+                            // already happened
+                            if (ab.rank === bb.rank) {
+                                // TODO do we need a flag to indicate it's set this way?
+                                bb.rank += 1;
+                                return -1;
+                            } else { // Cascade back down through elses
+                                return ab.rank - bb.rank;
+                            }
+                        } else {
+                            // We want the longer one
+                            return ab.ids.length - bb.ids.length;
+                        }
+                    } else {
+                        // more reach is better
+                        return ab.maxreach - bb.maxreach;
+                    }
+                } else {
+                    // more treach is better
+                    return ab.maxtreach - bb.maxtreach;
+                }
+            }), function(meta, rank) {
+                branchinfo[meta.branch].rank = Math.max(branchinfo[meta.branch].rank, rank);
+            });
         });
 
     // FINALLY, assign x and y coords to all visible vertices
