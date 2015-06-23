@@ -331,9 +331,6 @@ function extractVizGraph(pvg, repo) {
 
     _(vmeta).groupBy(function(v) { return v.depth; })
         .each(function(metas, x) {
-            // TODO this needs to get much, much smarter in order to weave smartly as unsigned y
-            // sort first by reach, then by tree-reach. if those end up equal, fuck it, good nuf
-            //_(metas).sortBy(["treach", "reach"])
             _.each(metas.sort(function(a, b) {
                 // for shorthand
                 var ab = branchinfo[a.branch],
