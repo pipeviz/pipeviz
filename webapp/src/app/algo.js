@@ -238,17 +238,13 @@ var vizExtractor = {
 
             path.push(v);
             _.each(succ, function(d, i) {
-                if (succ.length > 1) {
-                    // we know this'll be included, so add to protolinks right now
-                    protolinks.push([v, d]);
-                }
-
-                if (i === 0) {
-                    // if first, consider it the same branch
+                if (succ.length === 1) {
                     mainwalk(d, path, branch);
                 } else {
-                    // otherwise, increment then pass branches counter
+                    // if more than one succ, always increment branch counter to delineate segments
                     mainwalk(d, path, ++branches);
+                    // we know this'll be included, so add to protolinks right now
+                    protolinks.push([v, d]);
                 }
             });
             path.pop();
