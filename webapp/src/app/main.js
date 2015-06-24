@@ -283,7 +283,8 @@ var App = React.createClass({
 
 var e = React.render(React.createElement(App), document.body);
 var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
+var lastg;
 genesis.onmessage = function(m) {
-    //console.log(m);
-    e.setProps({graph: pvGraph(JSON.parse(m.data))});
+    lastg = pvGraph(JSON.parse(m.data));
+    e.setProps({graph: lastg});
 };
