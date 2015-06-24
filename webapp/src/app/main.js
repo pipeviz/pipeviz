@@ -241,6 +241,7 @@ var ControlBar = React.createClass({
         var oc = this.props.changeOpts;
             var boxes = _.map(this.props.opts, function(v, opt) {
             return (React.createElement("input", {
+                key: opt,
                 type: "checkbox",
                 checked: v.selected,
                 onChange: oc.bind(this, opt, v)
