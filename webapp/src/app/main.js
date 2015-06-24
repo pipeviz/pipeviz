@@ -40,7 +40,9 @@ var Viz = React.createClass({
             // so we don't transition from 0,0
             .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; })
             // and start from invisible
-            .style('opacity', 0);
+            .style('opacity', 0)
+            // attach click handler for infobar
+            .on('click', props.selected);
         selections.veg.append('circle');
         selections.nte = selections.veg.append('text');
         selections.nte.append('tspan') // add vertex label tspan on enter
@@ -167,7 +169,8 @@ var VizPrep = React.createClass({
             height: this.props.height,
             graph: this.props.graph,
             vizdata: extractVizGraph(this.props.graph, this.props.focalRepo),
-            opts: this.props.opts
+            opts: this.props.opts,
+            selected: this.props.selected,
         });
     },
 });
@@ -175,7 +178,7 @@ var VizPrep = React.createClass({
 var InfoBar = React.createClass({
     displayName: 'pipeviz-info',
     render: function() {
-        var t = this.props.target,
+        var t = this.props.selected,
             cmp = this;
 
         var outer = {
@@ -183,7 +186,7 @@ var InfoBar = React.createClass({
             children: []
         };
 
-        if (typeof t !== 'object') {
+        if (_.isUndefined(t)) {
             outer.children = [React.DOM.p({}, "nothing selected")];
             // drop out early for the empty case
             return React.DOM.div(outer);
@@ -266,16 +269,19 @@ var App = React.createClass({
     dispayName: "pipeviz",
     getInitialState: function() {
         return {
-            target: undefined,
+            selected: undefined,
             opts: {
                 revx: {label: "Reverse x positions", selected: false},
                 noelide: {label: "No commit elision", selected: false},
             },
-        }
+        };
     },
     changeOpts: function(opt, v) {
         v.selected = !v.selected;
         this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
+    },
+    setSelected: function(tgt) {
+        this.setState({selected: tgt});
     },
     getDefaultProps: function() {
         return {
