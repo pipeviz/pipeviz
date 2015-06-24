@@ -239,14 +239,18 @@ var ControlBar = React.createClass({
     displayName: 'pipeviz-control',
     render: function() {
         var oc = this.props.changeOpts;
-        var boxes = _.map(this.props.opts, function(v, opt) {
-            return (<input type="checkbox" checked={v.selected} onChange={oc.bind(this, opt, v)}>{v.label}</input>);
+            var boxes = _.map(this.props.opts, function(v, opt) {
+            return (React.createElement("input", {
+                type: "checkbox",
+                checked: v.selected,
+                onChange: oc.bind(this, opt, v)
+            }, v.label));
         });
 
         return (
-            <div id="controlbar">
-                Options: {boxes}
-            </div>
+            React.createElement("div", {id: "controlbar"},
+                "Options: ", boxes
+            )
         );
     },
 });
