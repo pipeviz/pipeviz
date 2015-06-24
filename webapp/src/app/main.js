@@ -160,8 +160,6 @@ var VizPrep = React.createClass({
         return nextProps.graph.mid !== this.props.graph.mid;
     },
     render: function() {
-        //var vizdata = this.extractVizGraph(this.props.focalRepo);
-        //return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
         return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, vizdata: extractVizGraph(this.props.graph, this.props.focalRepo)});
     },
 });
@@ -238,16 +236,14 @@ var InfoBar = React.createClass({
 var ControlBar = React.createClass({
     displayName: 'pipeviz-control',
     render: function() {
-        var fc = this.props.filterChange;
-        var boxes = this.props.filters.map(function(d) {
-            return (<input type="checkbox" checked={d.selected} onChange={fc.bind(this, d.id)}>{d.id}</input>);
+        var oc = this.props.changeOpts;
+        var boxes = _.map(this.props.opts, function(v, opt) {
+            return (<input type="checkbox" checked={v.selected} onChange={oc.bind(this, opt, v)}>{v.label}</input>);
         });
 
         return (
             <div id="controlbar">
-                Filters: {boxes}
-                Sort by: <input type="checkbox" checked={this.props.commitsort}
-                onChange={this.props.csChange}>commits</input>
+                Options: {boxes}
             </div>
         );
     },
@@ -259,11 +255,14 @@ var App = React.createClass({
         return {
             target: undefined,
             opts: {
-                revx: false,
-                noelide: false,
+                revx: {label: "Reverse x positions", selected: false},
+                noelide: {label: "No commit elision", selected: false},
             },
         }
-    }
+    },
+    changeOpts: function(opt, v) {
+        this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
+    },
     getDefaultProps: function() {
         return {
             // TODO uggghhh lol hardcoding
@@ -274,9 +273,9 @@ var App = React.createClass({
     },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-                    React.createElement(ControlBar, {this.state.opts}),
-                    React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph)})
-                    React.createElement(InfoBar, target={this.state.target})
+                    React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts}),
+                    React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph)}),
+                    React.createElement(InfoBar, {target: this.state.target})
               );
     },
 });
