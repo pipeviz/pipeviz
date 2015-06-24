@@ -26,8 +26,6 @@ var Viz = React.createClass({
             props = this.props,
             tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length);
 
-        props.vizdata.dump();
-
         // Outer g first
         selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
 
