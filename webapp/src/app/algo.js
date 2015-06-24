@@ -1,36 +1,51 @@
-// TODO memoize within these
-var reachCount = {
-    throughPredecessors: function(g, v, filter) {
-        var pred = g.predecessors(v),
-        // Recursive folder to create a flattened array with all predecessors.
-        r = function(accum, value) {
-            return accum.concat(_.foldl(g.predecessors(value), r, [value]));
-        };
+// Instantiates a new ReachCount object with fresh memoization caches.
+// The memoization is not robust - it *assumes* that you use the same graph
+// for all calls to each reach func, but does not verify this (the overhead
+// would reduce the benefit of memoization). So make sure you do, or the
+// results will be wildly incorrect.
+var reachCounter = function() {
+    // set up caches out here, then attach them to each recursive folder
+    // within the funs.
 
-        if (pred === undefined || pred.length === 0) {
-            return 0;
-        } else if (filter === undefined) {
-            return _.uniq(_.foldl(pred, r, [v])).length;
-        } else {
-            return _.uniq(_.intersection(_.foldl(pred, r, [v]), filter)).length;
+    // mpff - memoized predecessor foldl cache
+    var mpfc = _.memoize(function(accum, value) {}),
+    // msfc - memoized successor foldl cache
+    msfc = _.memoize(function(accum, value) {});
+
+    return {
+        throughPredecessors: function(g, v, filter) {
+            var pred = g.predecessors(v),
+            r = _.memoize(function(accum, value) {
+                return accum.concat(_.foldl(g.predecessors(value), r, [value]));
+            }, function(accum, value) { return value; });
+            r.cache = mpfc;
+
+            if (pred === undefined || pred.length === 0) {
+                return 0;
+            } else if (filter === undefined) {
+                return _.uniq(_.foldl(pred, r, [v])).length;
+            } else {
+                // TODO this intersection is still quite expensive; moar memoization
+                return _.uniq(_.intersection(_.foldl(pred, r, [v]), filter)).length;
+            }
+        },
+        throughSuccessors: function(g, v, filter) {
+            var succ = g.successors(v);
+            r = _.memoize(function(accum, value) {
+                return accum.concat(_.foldl(g.successors(value), r, [value]));
+            }, function(accum, value) { return value; });
+            r.cache = msfc;
+
+            if (succ === undefined) {
+                return 0;
+            } else if (filter === undefined) {
+                return _.uniq(_.foldl(succ, r, [v])).length;
+            } else {
+                // TODO this intersection is still quite expensive; moar memoization
+                return _.uniq(_.intersection(_.foldl(succ, r, [v]), filter)).length;
+            }
         }
-    },
-    throughSuccessors: function(g, v, filter) {
-        var succ = g.successors(v),
-        // Recursive folder to create a flattened array with all successors.
-        r = function(accum, value) {
-            return accum.concat(_.foldl(g.successors(value), r, [value]));
-        };
-
-
-        if (succ === undefined) {
-            return 0;
-        } else if (filter === undefined) {
-            return _.uniq(_.foldl(succ, r, [v])).length;
-        } else {
-            return _.uniq(_.intersection(_.foldl(succ, r, [v]), filter)).length;
-        }
-    }
+    };
 };
 
 //var vizExtractorProto = {
@@ -203,6 +218,7 @@ var vizExtractor = {
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
         diameter = 0, // maximum depth reached. Useful info later that we can avoid recalculating
         idepths = [], // list of interesting depths, to avoid another walk later
+        rc = reachCounter(), // create a new memoizing reach counter
         mainwalk = function(v, path, segment, pseg) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
             var succ = isg.successors(v) || [];
@@ -212,9 +228,9 @@ var vizExtractor = {
                     depth: path.length, // distance from root
                     interesting: true, // all focal commits are interesting
                     // count of reachable focal commits in original commit graph
-                    reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
+                    reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
                     // count of reachable focal commits in the tree/almost-induced subgraph
-                    treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
+                    treach: rc.throughSuccessors(isg, v, _.keys(focalCommits)),
                     segment: segment,
                     pseg: pseg
                 };
@@ -226,8 +242,8 @@ var vizExtractor = {
                 vmeta[v] = {
                     depth: path.length,
                     interesting: interesting,
-                    reach: reachCount.throughPredecessors(cg, v, _.keys(focalCommits)),
-                    treach: reachCount.throughSuccessors(isg, v, _.keys(focalCommits)),
+                    reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
+                    treach: rc.throughSuccessors(isg, v, _.keys(focalCommits)),
                     segment: segment,
                     pseg: pseg
                 };
