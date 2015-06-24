@@ -24,7 +24,7 @@ var Viz = React.createClass({
         // x-coordinate space is the elided diameter as a factor of viewport width
         var selections = {},
             props = this.props,
-            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length);
+            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.selected);
 
         // Outer g first
         selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
@@ -153,14 +153,16 @@ var VizPrep = React.createClass({
             height: 0,
             graph: pvGraph({id: 0, vertices: []}),
             focalRepo: "",
+            opts: {},
         };
     },
     shouldComponentUpdate: function(nextProps) {
         // In the graph object, state is invariant with respect to the message id.
-        return nextProps.graph.mid !== this.props.graph.mid;
+        return nextProps.graph.mid !== this.props.graph.mid ||
+            JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts);
     },
     render: function() {
-        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, vizdata: extractVizGraph(this.props.graph, this.props.focalRepo)});
+        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, vizdata: extractVizGraph(this.props.graph, this.props.focalRepo), opts: this.props.opts});
     },
 });
 
@@ -261,6 +263,7 @@ var App = React.createClass({
         }
     },
     changeOpts: function(opt, v) {
+        v.selected = !v.selected;
         this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
     },
     getDefaultProps: function() {
@@ -273,10 +276,10 @@ var App = React.createClass({
     },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-                    React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts}),
-                    React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph)}),
-                    React.createElement(InfoBar, {target: this.state.target})
-              );
+            React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts}),
+            React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph), opts: JSON.parse(JSON.stringify(this.state.opts))}),
+            React.createElement(InfoBar, {target: this.state.target})
+        );
     },
 });
 

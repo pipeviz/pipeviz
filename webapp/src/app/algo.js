@@ -498,15 +498,16 @@ function extractVizGraph(pvg, repo) {
  * a set of functions for transforming x and y coordinates into the
  * numbers appropriate for the target user coordinate space.
  */
-function createTransforms(vpwidth, vpheight, diameter, deviation) {
+function createTransforms(vpwidth, vpheight, diameter, deviation, revx) {
     var ar = vpwidth / vpheight,
         unit = vpwidth / (diameter + 1); // the base grid unit size, presumably in px
     // TODO different paths depending on whether x or y exceeds ratio
     return {
         unit: function() { return unit; },
         x: function(x) {
-            return 0.5*unit + x*unit;
-            //return Math.abs((diameter+1)*unit - (0.5*unit + x*unit));
+            return revx ?
+                Math.abs((diameter+1)*unit - (0.5*unit + x*unit))
+                : 0.5*unit + x*unit;
         },
         y: function(y) {
             return 0.5*vpheight + y*unit;
