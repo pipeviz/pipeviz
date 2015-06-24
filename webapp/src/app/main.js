@@ -3,7 +3,7 @@ var Viz = React.createClass({
     render: function() {
         return React.DOM.svg({
             className: "pipeviz",
-            width: "100%",
+            width: "83%",
             children: [React.DOM.g({
                 id: 'commit-pipeline',
                 children: [React.DOM.g({
@@ -162,7 +162,13 @@ var VizPrep = React.createClass({
             JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts);
     },
     render: function() {
-        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, vizdata: extractVizGraph(this.props.graph, this.props.focalRepo), opts: this.props.opts});
+        return React.createElement(Viz, {
+            width: this.props.width,
+            height: this.props.height,
+            graph: this.props.graph,
+            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo),
+            opts: this.props.opts
+        });
     },
 });
 
@@ -282,8 +288,18 @@ var App = React.createClass({
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
             React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts}),
-            React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph), opts: JSON.parse(JSON.stringify(this.state.opts))}),
-            React.createElement(InfoBar, {target: this.state.target})
+            React.createElement(VizPrep, {
+                width: this.props.vizWidth,
+                height: this.props.vizHeight,
+                graph: this.props.graph,
+                focalRepo: vizExtractor.mostCommonRepo(this.props.graph),
+                opts: JSON.parse(JSON.stringify(this.state.opts)),
+                selected: this.setSelected,
+            }),
+            React.createElement(InfoBar, {
+                selected: this.state.selected,
+                pvg: this.props.graph,
+            })
         );
     },
 });
