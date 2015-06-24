@@ -166,18 +166,117 @@ var VizPrep = React.createClass({
     },
 });
 
+var InfoBar = React.createClass({
+    displayName: 'pipeviz-info',
+    render: function() {
+        var t = this.props.target,
+            cmp = this;
+
+        var outer = {
+            id: "infobar",
+            children: []
+        };
+
+        if (typeof t !== 'object') {
+            outer.children = [React.DOM.p({}, "nothing selected")];
+            // drop out early for the empty case
+            return React.DOM.div(outer);
+        }
+
+        // find all linked envs for the logic state
+        var linkedContainers = [t.ref()._container]; // parent env
+        // env linked through dataset
+        if (_.has(t.ref(), 'datasets')) {
+            _.forOwn(t.ref().datasets, function(ds) {
+                if (_.has(ds.loc, 'hostname')) {
+                    linkedContainers.push(cmp.props.pvd.byHostname(ds.loc.hostname));
+                }
+            });
+        }
+
+        linkedContainers = _.uniq(linkedContainers);
+
+        // title for containers
+        outer.children.push(React.DOM.h3({}, t.name()));
+        // list of containers
+        outer.children.push(React.DOM.ul({children: [
+            React.DOM.li({children: [
+                'Comprises ' + linkedContainers.length + ' env(s), with hostnames:',
+                React.DOM.ul({}, _.map(linkedContainers, function(d) {
+                    return React.DOM.li({}, d.name());
+                }))
+            ]}),
+            React.DOM.li({}, 'App path: ' + t.ref()._path)
+        ]}));
+
+        outer.children.push(React.DOM.h3({}, 'Active commit'));
+
+        var commit = this.props.commits[t.ref().id.commit];
+        var sha1line =  'sha1: ' + t.ref().id.commit.slice(0, 7);
+
+        if (_.has(this.props.commitMeta, t.ref().id.commit) &&
+            _.has(this.props.commitMeta[t.ref().id.commit], 'testState')) {
+            sha1line += ' (' + this.props.commitMeta[t.ref().id.commit].testState + ')';
+        }
+
+        var items = [
+            sha1line,
+            commit.date,
+            commit.author,
+            '"' + commit.message + '"'
+        ];
+
+        outer.children.push(React.DOM.ul({
+            children: items.map(function(d) {
+                return React.DOM.li({}, d);
+            })
+        }));
+        return React.DOM.div(outer);
+    }
+});
+
+var ControlBar = React.createClass({
+    displayName: 'pipeviz-control',
+    render: function() {
+        var fc = this.props.filterChange;
+        var boxes = this.props.filters.map(function(d) {
+            return (<input type="checkbox" checked={d.selected} onChange={fc.bind(this, d.id)}>{d.id}</input>);
+        });
+
+        return (
+            <div id="controlbar">
+                Filters: {boxes}
+                Sort by: <input type="checkbox" checked={this.props.commitsort}
+                onChange={this.props.csChange}>commits</input>
+            </div>
+        );
+    },
+});
+
 var App = React.createClass({
     dispayName: "pipeviz",
+    getInitialState: function() {
+        return {
+            target: undefined,
+            opts: {
+                revx: false,
+                noelide: false,
+            },
+        }
+    }
     getDefaultProps: function() {
         return {
-            vizWidth: window.innerWidth,
-            vizHeight: window.innerHeight,
+            // TODO uggghhh lol hardcoding
+            vizWidth: window.innerWidth * 0.83,
+            vizHeight: window.innerHeight - 30,
             graph: pvGraph({id: 0, vertices: []}),
         };
     },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-                   React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph)})
+                    React.createElement(ControlBar, {this.state.opts}),
+                    React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph)})
+                    React.createElement(InfoBar, target={this.state.target})
               );
     },
 });
