@@ -22,6 +22,21 @@ var getCommit = function(g, d) {
     return;
 };
 
+/**
+ * Given a commit, or logic state (and a linked commit through its version identifier),
+ * return the name of the repository associated with the commit.
+ */
+var getRepositoryName = function(g, d) {
+    if (d.Typ() === "logic-state") {
+        d = getCommit(d);
+        if (_.isUndefined(d)) {
+            return;
+        }
+    }
+    // TODO for now this is a prop on the commit, but it'll soon be its own vtx
+    return d.propv("repository");
+};
+
 var getTestState = function(g, c) {
     var testState;
     _.each(g.verticesWithType("test-result"), function(d) {

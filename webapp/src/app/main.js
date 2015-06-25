@@ -179,7 +179,8 @@ var InfoBar = React.createClass({
     displayName: 'pipeviz-info',
     render: function() {
         var t = this.props.selected,
-            cmp = this;
+            cmp = this,
+            pvg = this.props.pvg;
 
         var outer = {
             id: "infobar",
@@ -191,6 +192,26 @@ var InfoBar = React.createClass({
             // drop out early for the empty case
             return React.DOM.div(outer);
         }
+
+        // TODO right now we only have two possibilities - commit or logic-state - but this will need to become its WHOLE own subsystem
+        if (t.vertex.type === "logic-state") {
+            // First, pick a title. Start with the nick
+            var infotitle = "Instance of ";
+            if (!_.isUndefined(t.propv('nick'))) {
+                // TODO nick is not great since it's actually set per logic-state
+                infotitle += "'" + t.propv('nick') + "'";
+
+            } else {
+                // No nick, so grab the repo addr
+                infotitle += "'" + getRepositoryName(pvg, t) + "'";
+            }
+
+            outer.children.push(React.DOM.h3({}, infotitle));
+        } else { // can only be a commit, for now
+
+        }
+
+        return React.DOM.div(outer);
 
         // find all linked envs for the logic state
         var linkedContainers = [t.ref()._container]; // parent env
@@ -281,7 +302,7 @@ var App = React.createClass({
         this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
     },
     setSelected: function(tgt) {
-        this.setState({selected: tgt});
+        this.setState({selected: tgt.ref});
     },
     getDefaultProps: function() {
         return {
