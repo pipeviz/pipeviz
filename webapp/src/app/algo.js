@@ -206,9 +206,9 @@ var vizExtractor = {
         });
         // But if we're not doing elision, then ALSO walk from sources.
         if (noelide) {
-            _.each(cg.sources(), function(d) {
-                isgwalk(d);
-            });
+            //_.each(cg.sources(), function(d) {
+                //isgwalk(d);
+            //});
         }
 
         // Now we have to find the topologically greatest common root among all candidates.
