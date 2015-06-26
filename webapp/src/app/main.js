@@ -209,13 +209,27 @@ var InfoBar = React.createClass({
             }
             outer.children.push(React.DOM.h3({}, infotitle));
 
-            var env = getEnvironment(pvg, t);
+            var env = getEnvironment(pvg, t),
+                commit = getCommit(pvg, t);
 
             listitems.push(React.DOM.li({}, "Located on " + getEnvName(env) + " at " + t.propv("path")));
+            listitems.push(React.DOM.li({}, "Commit info:"));
+            listitems.push(React.DOM.ul({children: [
+                React.DOM.li({}, "Sha1: " + commit.propv("sha1")),
+                React.DOM.li({}, "Author: " + commit.propv("author")),
+                React.DOM.li({}, "Date: " + commit.propv("date")),
+                React.DOM.li({}, "Subject: " + commit.propv("subject")),
+            ]}));
 
             outer.children.push(React.DOM.ul({children: listitems}));
         } else { // can only be a commit, for now
-
+            outer.children.push(React.DOM.h3({}, "Commit from " + getRepositoryName(pvg, t)));
+            outer.children.push(React.DOM.ul({children: [
+                React.DOM.li({}, "Sha1: " + t.propv("sha1")),
+                React.DOM.li({}, "Author: " + t.propv("author")),
+                React.DOM.li({}, "Date: " + t.propv("date")),
+                React.DOM.li({}, "Subject: " + t.propv("subject")),
+            ]}));
         }
 
         return React.DOM.div(outer);
