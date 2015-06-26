@@ -233,56 +233,6 @@ var InfoBar = React.createClass({
         }
 
         return React.DOM.div(outer);
-
-        // find all linked envs for the logic state
-        var linkedContainers = [t.ref()._container]; // parent env
-        // env linked through dataset
-        if (_.has(t.ref(), 'datasets')) {
-            _.forOwn(t.ref().datasets, function(ds) {
-                if (_.has(ds.loc, 'hostname')) {
-                    linkedContainers.push(cmp.props.pvd.byHostname(ds.loc.hostname));
-                }
-            });
-        }
-
-        linkedContainers = _.uniq(linkedContainers);
-
-        // title for containers
-        outer.children.push(React.DOM.h3({}, t.name()));
-        // list of containers
-        outer.children.push(React.DOM.ul({children: [
-            React.DOM.li({children: [
-                'Comprises ' + linkedContainers.length + ' env(s), with hostnames:',
-                React.DOM.ul({}, _.map(linkedContainers, function(d) {
-                    return React.DOM.li({}, d.name());
-                }))
-            ]}),
-            React.DOM.li({}, 'App path: ' + t.ref()._path)
-        ]}));
-
-        outer.children.push(React.DOM.h3({}, 'Active commit'));
-
-        var commit = this.props.commits[t.ref().id.commit];
-        var sha1line =  'sha1: ' + t.ref().id.commit.slice(0, 7);
-
-        if (_.has(this.props.commitMeta, t.ref().id.commit) &&
-            _.has(this.props.commitMeta[t.ref().id.commit], 'testState')) {
-            sha1line += ' (' + this.props.commitMeta[t.ref().id.commit].testState + ')';
-        }
-
-        var items = [
-            sha1line,
-            commit.date,
-            commit.author,
-            '"' + commit.message + '"'
-        ];
-
-        outer.children.push(React.DOM.ul({
-            children: items.map(function(d) {
-                return React.DOM.li({}, d);
-            })
-        }));
-        return React.DOM.div(outer);
     }
 });
 
