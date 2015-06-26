@@ -320,7 +320,7 @@ var vizExtractor = {
  * for the app/commit viz.
  *
  */
-function extractVizGraph(pvg, repo) {
+function extractVizGraph(pvg, repo, noelide) {
     var focals = vizExtractor.focalLogicStateByRepo(pvg, repo),
         focal = focals[0],
         focalCommits = focals[1];
@@ -332,7 +332,7 @@ function extractVizGraph(pvg, repo) {
     var cg = pvg.commitGraph(), // the git commit graph TODO narrow to only commits in repo
         // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
-        tr = vizExtractor.treeAndRoot(cg, focalCommits),
+        tr = vizExtractor.treeAndRoot(cg, focalCommits, noelide),
         isg = tr[0],
         root = tr[1];
 
@@ -357,7 +357,7 @@ function extractVizGraph(pvg, repo) {
         return accum;
     }, []),
     // we also need the elided diameter
-    ediam = diameter - elidable.length,
+    ediam = noelide ? diameter : diameter - elidable.length,
     segmentinfo = _(vmeta)
         .mapValues(function(v, k) {
             return {
@@ -421,23 +421,31 @@ function extractVizGraph(pvg, repo) {
         });
 
     // FINALLY, assign x and y coords to all visible vertices
-    var vertices = _(vmeta)
-        .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
-        .mapValues(function(v, k) {
-            return _.assign({
-                ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
-                x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
-                y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
-            }, v);
-        }).value();
+    var vertices;
+    if (!noelide) {
+        vertices = _(vmeta)
+            .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
+            .mapValues(function(v, k) {
+                return _.assign({
+                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
+                    x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
+                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+                }, v);
+            }).value();
+    } else {
+        vertices = _(vmeta)
+            .mapValues(function(v, k) {
+                return _.assign({
+                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
+                    x: v.depth, // without elision, depth is x
+                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+                }, v);
+            }).value();
+    }
 
     // Build up the list of links
     var links = [], // all the links we'll ultimately return
         xmap = {}; // a map of x-positions to labels, for use on a commit axis
-
-    // transform the list of protolinks compiled during mainwalk into real
-    // links, now that the vertices list is assembled and ready.
-    _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
     // collect the vertices together by segment in a way that it's easy to see
     // where connections are needed to cross elision ranges
@@ -445,39 +453,53 @@ function extractVizGraph(pvg, repo) {
         // make sure we get all segments, even empties
         _.mapValues(segmentinfo, function() { return []; }),
         _.groupBy(vertices, function(v) { return v.segment; })
-    ),
-    // build an offset map telling us how much a segment's internal offset should
-    // be increased by to give the real x-position
-    segoffset = _.mapValues(segmentinfo, function(seg, k) {
-        // Recursive function to count length of parent segments
-        var r = _.memoize(function(id, rseg) {
-            // pseg === id IFF we're on segment 0, which is the base
-            return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
+    );
+    if (!noelide) {
+        // transform the list of protolinks compiled during mainwalk into real
+        // links, now that the vertices list is assembled and ready.
+        _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
+
+        // build an offset map telling us how much a segment's internal offset should
+        // be increased by to give the real x-position
+        var segoffset = _.mapValues(segmentinfo, function(seg, k) {
+            // Recursive function to count length of parent segments
+            var r = _.memoize(function(id, rseg) {
+                // pseg === id IFF we're on segment 0, which is the base
+                return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
+            });
+
+            // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
+            return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
         });
 
-        // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
-        return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
-    });
+        // then walk through the vertices in order and make the links (elision or no)
+        _.each(vtxbyseg, function(vtxs) {
+            _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+                xmap[v.depth] = segoffset[v.segment] + k;
+                if (k === 0) {
+                    // all other ops require looking back at previous item, but if
+                    // k === 0 then there is no previous item. so, bail out
+                    return;
+                }
 
-    // then walk through the vertices in order and make the links (elision or no)
-    _.each(vtxbyseg, function(vtxs) {
-        _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
-            xmap[v.depth] = segoffset[v.segment] + k;
-            if (k === 0) {
-                // all other ops require looking back at previous item, but if
-                // k === 0 then there is no previous item. so, bail out
-                return;
-            }
+                // if this is true, it means there's an elided range between these two elements
+                if (v.depth !== coll[k-1].depth + 1) {
+                    xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
+                }
 
-            // if this is true, it means there's an elided range between these two elements
-            if (v.depth !== coll[k-1].depth + 1) {
-                xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
-            }
-
-            // whether or not there's elision, adjacent vertices in this list need a link
-            links.push([coll[k-1], v]);
+                // whether or not there's elision, adjacent vertices in this list need a link
+                links.push([coll[k-1], v]);
+            });
         });
-    });
+    } else {
+        // If we're not doing elision, things are a whole lot simpler
+        _.each(vtxbyseg, function(vtxs) {
+            _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+                links.push([coll[k-1], v]);
+            });
+        });
+        xmap = _.zipObject(_.unzip([_.range(diameter+1), _.range(diameter+1)]));
+    }
 
     // TODO branches/tags
 
