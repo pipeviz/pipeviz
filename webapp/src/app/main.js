@@ -51,6 +51,9 @@ var Viz = React.createClass({
             .attr('dy', "1.4em")
             .attr('x', 0)
             .attr('class', function(d) {
+                if (d.ref.Typ() !== "logic-state") {
+                    return "";
+                }
                 var output = 'commit-subtext',
                     commit = getCommit(props.graph, d.ref),
                     testState = getTestState(props.graph, commit);
