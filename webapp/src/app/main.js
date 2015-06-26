@@ -24,7 +24,7 @@ var Viz = React.createClass({
         // x-coordinate space is the elided diameter as a factor of viewport width
         var selections = {},
             props = this.props,
-            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.selected);
+            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.flag);
 
         // Outer g first
         selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
@@ -168,7 +168,7 @@ var VizPrep = React.createClass({
             width: this.props.width,
             height: this.props.height,
             graph: this.props.graph,
-            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo),
+            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo, this.props.opts.noelide.flag),
             opts: this.props.opts,
             selected: this.props.selected,
         });
@@ -244,7 +244,7 @@ var ControlBar = React.createClass({
             return (React.createElement("input", {
                 key: opt,
                 type: "checkbox",
-                checked: v.selected,
+                checked: v.flag,
                 onChange: oc.bind(this, opt, v)
             }, v.label));
         });
@@ -263,13 +263,13 @@ var App = React.createClass({
         return {
             selected: undefined,
             opts: {
-                revx: {label: "Reverse x positions", selected: false},
-                noelide: {label: "No commit elision", selected: false},
+                revx: {label: "Reverse x positions", flag: false},
+                noelide: {label: "No commit elision", flag: false},
             },
         };
     },
     changeOpts: function(opt, v) {
-        v.selected = !v.selected;
+        v.flag = !v.flag;
         this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
     },
     setSelected: function(tgt) {
