@@ -3,7 +3,7 @@ var Viz = React.createClass({
     render: function() {
         return React.DOM.svg({
             className: "pipeviz",
-            width: "100%",
+            width: "83%",
             children: [React.DOM.g({
                 id: 'commit-pipeline',
                 children: [React.DOM.g({
@@ -24,7 +24,7 @@ var Viz = React.createClass({
         // x-coordinate space is the elided diameter as a factor of viewport width
         var selections = {},
             props = this.props,
-            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length);
+            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.selected);
 
         // Outer g first
         selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
@@ -40,7 +40,9 @@ var Viz = React.createClass({
             // so we don't transition from 0,0
             .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; })
             // and start from invisible
-            .style('opacity', 0);
+            .style('opacity', 0)
+            // attach click handler for infobar
+            .on('click', props.selected);
         selections.veg.append('circle');
         selections.nte = selections.veg.append('text');
         selections.nte.append('tspan') // add vertex label tspan on enter
@@ -153,38 +155,157 @@ var VizPrep = React.createClass({
             height: 0,
             graph: pvGraph({id: 0, vertices: []}),
             focalRepo: "",
+            opts: {},
         };
     },
     shouldComponentUpdate: function(nextProps) {
         // In the graph object, state is invariant with respect to the message id.
-        return nextProps.graph.mid !== this.props.graph.mid;
+        return nextProps.graph.mid !== this.props.graph.mid ||
+            JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts);
     },
     render: function() {
-        //var vizdata = this.extractVizGraph(this.props.focalRepo);
-        //return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, nodes: vizdata[0].concat(this.state.anchorL, this.state.anchorR), links: vizdata[1], labels: vizdata[2]});
-        return React.createElement(Viz, {width: this.props.width, height: this.props.height, graph: this.props.graph, vizdata: extractVizGraph(this.props.graph, this.props.focalRepo)});
+        return React.createElement(Viz, {
+            width: this.props.width,
+            height: this.props.height,
+            graph: this.props.graph,
+            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo),
+            opts: this.props.opts,
+            selected: this.props.selected,
+        });
+    },
+});
+
+var InfoBar = React.createClass({
+    displayName: 'pipeviz-info',
+    render: function() {
+        var t = this.props.selected,
+            cmp = this,
+            pvg = this.props.pvg;
+
+        var outer = {
+            id: "infobar",
+            children: []
+        };
+
+        if (_.isUndefined(t)) {
+            outer.children = [React.DOM.p({}, "nothing selected")];
+            // drop out early for the empty case
+            return React.DOM.div(outer);
+        }
+
+        // TODO right now we only have two possibilities - commit or logic-state - but this will need to become its WHOLE own subsystem
+        if (t.vertex.type === "logic-state") {
+            // First, pick a title. Start with the nick
+            var infotitle = "Instance of ",
+                listitems = [];
+            if (!_.isUndefined(t.propv('nick'))) {
+                // TODO nick is not great since it's actually set per logic-state
+                infotitle += "'" + t.propv('nick') + "'";
+                // since we're not showing the repo addr in the title, put it in here
+                listitems.push(React.DOM.li({}, "From repository " + getRepositoryName(pvg, t)));
+            } else {
+                // No nick, so grab the repo addr
+                infotitle += "'" + getRepositoryName(pvg, t) + "'";
+            }
+            outer.children.push(React.DOM.h3({}, infotitle));
+
+            var env = getEnvironment(pvg, t),
+                commit = getCommit(pvg, t);
+
+            listitems.push(React.DOM.li({}, "Located on " + getEnvName(env) + " at " + t.propv("path")));
+            listitems.push(React.DOM.li({}, "Commit info:"));
+            listitems.push(React.DOM.ul({children: [
+                React.DOM.li({}, "Sha1: " + commit.propv("sha1")),
+                React.DOM.li({}, "Author: " + commit.propv("author")),
+                React.DOM.li({}, "Date: " + commit.propv("date")),
+                React.DOM.li({}, "Subject: " + commit.propv("subject")),
+            ]}));
+
+            outer.children.push(React.DOM.ul({children: listitems}));
+        } else { // can only be a commit, for now
+            outer.children.push(React.DOM.h3({}, "Commit from " + getRepositoryName(pvg, t)));
+            outer.children.push(React.DOM.ul({children: [
+                React.DOM.li({}, "Sha1: " + t.propv("sha1")),
+                React.DOM.li({}, "Author: " + t.propv("author")),
+                React.DOM.li({}, "Date: " + t.propv("date")),
+                React.DOM.li({}, "Subject: " + t.propv("subject")),
+            ]}));
+        }
+
+        return React.DOM.div(outer);
+    }
+});
+
+var ControlBar = React.createClass({
+    displayName: 'pipeviz-control',
+    render: function() {
+        var oc = this.props.changeOpts;
+            var boxes = _.map(this.props.opts, function(v, opt) {
+            return (React.createElement("input", {
+                key: opt,
+                type: "checkbox",
+                checked: v.selected,
+                onChange: oc.bind(this, opt, v)
+            }, v.label));
+        });
+
+        return (
+            React.createElement("div", {id: "controlbar"},
+                "Options: ", boxes
+            )
+        );
     },
 });
 
 var App = React.createClass({
     dispayName: "pipeviz",
+    getInitialState: function() {
+        return {
+            selected: undefined,
+            opts: {
+                revx: {label: "Reverse x positions", selected: false},
+                noelide: {label: "No commit elision", selected: false},
+            },
+        };
+    },
+    changeOpts: function(opt, v) {
+        v.selected = !v.selected;
+        this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
+    },
+    setSelected: function(tgt) {
+        this.setState({selected: tgt.ref});
+    },
     getDefaultProps: function() {
         return {
-            vizWidth: window.innerWidth,
-            vizHeight: window.innerHeight,
+            // TODO uggghhh lol hardcoding
+            vizWidth: window.innerWidth * 0.83,
+            vizHeight: window.innerHeight - 30,
             graph: pvGraph({id: 0, vertices: []}),
         };
     },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-                   React.createElement(VizPrep, {width: this.props.vizWidth, height: this.props.vizHeight, graph: this.props.graph, focalRepo: vizExtractor.mostCommonRepo(this.props.graph)})
-              );
+            React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts}),
+            React.createElement(VizPrep, {
+                width: this.props.vizWidth,
+                height: this.props.vizHeight,
+                graph: this.props.graph,
+                focalRepo: vizExtractor.mostCommonRepo(this.props.graph),
+                opts: JSON.parse(JSON.stringify(this.state.opts)),
+                selected: this.setSelected,
+            }),
+            React.createElement(InfoBar, {
+                selected: this.state.selected,
+                pvg: this.props.graph,
+            })
+        );
     },
 });
 
 var e = React.render(React.createElement(App), document.body);
 var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
+var lastg;
 genesis.onmessage = function(m) {
-    //console.log(m);
-    e.setProps({graph: pvGraph(JSON.parse(m.data))});
+    lastg = pvGraph(JSON.parse(m.data));
+    e.setProps({graph: lastg});
 };
