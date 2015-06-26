@@ -164,7 +164,7 @@ var vizExtractor = {
 
         return fg;
     },
-    treeAndRoot: function(cg, focalCommits) {
+    treeAndRoot: function(cg, focalCommits, noelide) {
         var isg = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
@@ -198,9 +198,18 @@ var vizExtractor = {
             visited[v] = true;
         };
 
+        // Always walk the focal commit, b/c just walking sources can miss them
+        // if they're on a path that is only reachable from a sink along a n>1
+        // parent of a merge.
         _.each(focalCommits, function(d, k) {
             isgwalk(k);
         });
+        // But if we're not doing elision, then ALSO walk from sources.
+        if (noelide) {
+            _.each(cg.sources(), function(d) {
+                isgwalk(d);
+            });
+        }
 
         // Now we have to find the topologically greatest common root among all candidates.
         var root;
