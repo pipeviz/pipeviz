@@ -342,23 +342,31 @@ function extractVizGraph(pvg, repo, noelide) {
         diameter = main[2],
         idepths = main[3];
 
-    // now we have all the base meta; construct elidables lists and segment rankings
-    var elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; }),
-    // also compute the minimum set of contiguous elidable depths
-    elranges = _.reduce(elidable, function(accum, v, k, coll) {
-        if (coll[k-1] === v-1) {
-            // contiguous section, push onto last series
-            accum[accum.length - 1].push(v);
-        } else {
-            // non-contiguous, start a new series
-            accum.push([v]);
-        }
+    var elidable, elranges, ediam;
+    if (!noelide) {
+        // now we have all the base meta; construct elidables lists and segment rankings
+        elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; });
+        // also compute the minimum set of contiguous elidable depths
+        elranges = _.reduce(elidable, function(accum, v, k, coll) {
+            if (coll[k-1] === v-1) {
+                // contiguous section, push onto last series
+                accum[accum.length - 1].push(v);
+            } else {
+                // non-contiguous, start a new series
+                accum.push([v]);
+            }
 
-        return accum;
-    }, []),
-    // we also need the elided diameter
-    ediam = noelide ? diameter : diameter - elidable.length,
-    segmentinfo = _(vmeta)
+            return accum;
+        }, []);
+        // we also need the elided diameter
+        ediam = diameter - elidable.length;
+    } else {
+        elidable = [];
+        elranges = [];
+        ediam = diameter;
+    }
+
+    var segmentinfo = _(vmeta)
         .mapValues(function(v, k) {
             return {
                 segment: v.segment,
@@ -447,6 +455,10 @@ function extractVizGraph(pvg, repo, noelide) {
     var links = [], // all the links we'll ultimately return
         xmap = {}; // a map of x-positions to labels, for use on a commit axis
 
+    // transform the list of protolinks compiled during mainwalk into real
+    // links, now that the vertices list is assembled and ready.
+    _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
+
     // collect the vertices together by segment in a way that it's easy to see
     // where connections are needed to cross elision ranges
     var vtxbyseg = _.merge(
@@ -455,9 +467,6 @@ function extractVizGraph(pvg, repo, noelide) {
         _.groupBy(vertices, function(v) { return v.segment; })
     );
     if (!noelide) {
-        // transform the list of protolinks compiled during mainwalk into real
-        // links, now that the vertices list is assembled and ready.
-        _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
         // build an offset map telling us how much a segment's internal offset should
         // be increased by to give the real x-position
@@ -495,6 +504,9 @@ function extractVizGraph(pvg, repo, noelide) {
         // If we're not doing elision, things are a whole lot simpler
         _.each(vtxbyseg, function(vtxs) {
             _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+                if (k === 0) {
+                    return;
+                }
                 links.push([coll[k-1], v]);
             });
         });
