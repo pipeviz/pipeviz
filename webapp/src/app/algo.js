@@ -1,8 +1,10 @@
-// Instantiates a new ReachCount object with fresh memoization caches.
-// The memoization is not robust - it *assumes* that you use the same graph
-// for all calls to each reach func, but does not verify this (the overhead
-// would reduce the benefit of memoization). So make sure you do, or the
-// results will be wildly incorrect.
+/**
+ * Instantiates a new ReachCount object with fresh memoization caches.
+ * The memoization is not robust - it *assumes* that you use the same graph
+ * for all calls to each reach func, but does not verify this (the overhead
+ * would reduce the benefit of memoization). So make sure you do, or the
+ * results will be wildly incorrect.
+ */
 var reachCounter = function() {
     // set up caches out here, then attach them to each recursive folder
     // within the funs.
@@ -13,6 +15,13 @@ var reachCounter = function() {
     msfc = _.memoize(function(accum, value) {});
 
     return {
+        /**
+         * Counts the number of vertices reachable from the given vertex in the
+         * given graph by traversing through predecessors. If a set of vertices
+         * is provided by which to filter as the third parameter, only vertices
+         * in that set will be used to create the final reach count, though all
+         * predecessors the graph makes available will still be traversed.
+         */
         throughPredecessors: function(g, v, filter) {
             var pred = g.predecessors(v),
             r = _.memoize(function(accum, value) {
@@ -29,6 +38,13 @@ var reachCounter = function() {
                 return _.uniq(_.intersection(_.foldl(pred, r, [v]), filter)).length;
             }
         },
+        /**
+         * Counts the number of vertices reachable from the given vertex in the
+         * given graph by traversing through successors. If a set of vertices
+         * is provided by which to filter as the third parameter, only vertices
+         * in that set will be used to create the final reach count, though all
+         * successors the graph makes available will still be traversed.
+         */
         throughSuccessors: function(g, v, filter) {
             var succ = g.successors(v);
             r = _.memoize(function(accum, value) {
@@ -145,7 +161,7 @@ var vizExtractor = {
         return fg;
     },
     treeAndRoot: function(cg, focalCommits) {
-        var isg = new graphlib.Graph(), // A tree, almost an induced subgraph, representing first-parent commit graph paths
+        var isg = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
 
@@ -276,11 +292,13 @@ var vizExtractor = {
         // we only need to enter at root to get everything
         mainwalk(root, [], 0, 0);
 
-        return [vmeta,
+        return [
+            vmeta,
             protolinks,
             diameter,
             // sort idepths so binary search works later
-            _.uniq(idepths).sort(function(a, b) { return a - b; })];
+            _.uniq(idepths).sort(function(a, b) { return a - b; })
+        ];
     }
 };
 
@@ -341,7 +359,7 @@ function extractVizGraph(pvg, repo) {
         .mapValues(function(v) {
             return {
                 ids: _.map(v, function(v2) { return v2.id; }),
-                pseg: v[0].pseg, // all psegs in seg inherently must be the same
+                pseg: v[0].pseg, // parent seg (pseg) must be the same for all vertices in a seg
                 maxreach: _.max(v, 'reach'),
                 maxtreach: _.max(v, 'treach'),
                 rank: 0,
