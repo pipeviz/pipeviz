@@ -24,8 +24,10 @@ var reachCounter = function() {
          */
         throughPredecessors: function(g, v, filter) {
             var pred = g.predecessors(v),
+            visited = {},
             r = _.memoize(function(accum, value) {
-                return accum.concat(_.foldl(g.predecessors(value), r, [value]));
+                visited[value] = true;
+                return accum.concat(_.foldl(_.filter(g.predecessors(value), function(v) { return !_.has(visited,v); }), r, [value]));
             }, function(accum, value) { return value; });
             r.cache = mpfc;
 
@@ -46,9 +48,11 @@ var reachCounter = function() {
          * successors the graph makes available will still be traversed.
          */
         throughSuccessors: function(g, v, filter) {
-            var succ = g.successors(v);
+            var succ = g.successors(v),
+            visited = {},
             r = _.memoize(function(accum, value) {
-                return accum.concat(_.foldl(g.successors(value), r, [value]));
+                visited[value] = true;
+                return accum.concat(_.foldl(_.filter(g.successors(value), function(v) { return !_.has(visited,v); }), r, [value]));
             }, function(accum, value) { return value; });
             r.cache = msfc;
 
@@ -160,7 +164,7 @@ var vizExtractor = {
 
         return fg;
     },
-    treeAndRoot: function(cg, focalCommits) {
+    treeAndRoot: function(cg, focalCommits, noelide) {
         var isg = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
@@ -194,9 +198,18 @@ var vizExtractor = {
             visited[v] = true;
         };
 
+        // Always walk the focal commit, b/c just walking sources can miss them
+        // if they're on a path that is only reachable from a sink along a n>1
+        // parent of a merge.
         _.each(focalCommits, function(d, k) {
             isgwalk(k);
         });
+        // But if we're not doing elision, then ALSO walk from sources.
+        if (noelide) {
+            //_.each(cg.sources(), function(d) {
+                //isgwalk(d);
+            //});
+        }
 
         // Now we have to find the topologically greatest common root among all candidates.
         var root;
@@ -307,7 +320,7 @@ var vizExtractor = {
  * for the app/commit viz.
  *
  */
-function extractVizGraph(pvg, repo) {
+function extractVizGraph(pvg, repo, noelide) {
     var focals = vizExtractor.focalLogicStateByRepo(pvg, repo),
         focal = focals[0],
         focalCommits = focals[1];
@@ -319,7 +332,7 @@ function extractVizGraph(pvg, repo) {
     var cg = pvg.commitGraph(), // the git commit graph TODO narrow to only commits in repo
         // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
-        tr = vizExtractor.treeAndRoot(cg, focalCommits),
+        tr = vizExtractor.treeAndRoot(cg, focalCommits, noelide),
         isg = tr[0],
         root = tr[1];
 
@@ -329,23 +342,31 @@ function extractVizGraph(pvg, repo) {
         diameter = main[2],
         idepths = main[3];
 
-    // now we have all the base meta; construct elidables lists and segment rankings
-    var elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; }),
-    // also compute the minimum set of contiguous elidable depths
-    elranges = _.reduce(elidable, function(accum, v, k, coll) {
-        if (coll[k-1] === v-1) {
-            // contiguous section, push onto last series
-            accum[accum.length - 1].push(v);
-        } else {
-            // non-contiguous, start a new series
-            accum.push([v]);
-        }
+    var elidable, elranges, ediam;
+    if (!noelide) {
+        // now we have all the base meta; construct elidables lists and segment rankings
+        elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; });
+        // also compute the minimum set of contiguous elidable depths
+        elranges = _.reduce(elidable, function(accum, v, k, coll) {
+            if (coll[k-1] === v-1) {
+                // contiguous section, push onto last series
+                accum[accum.length - 1].push(v);
+            } else {
+                // non-contiguous, start a new series
+                accum.push([v]);
+            }
 
-        return accum;
-    }, []),
-    // we also need the elided diameter
-    ediam = diameter - elidable.length,
-    segmentinfo = _(vmeta)
+            return accum;
+        }, []);
+        // we also need the elided diameter
+        ediam = diameter - elidable.length;
+    } else {
+        elidable = [];
+        elranges = [];
+        ediam = diameter;
+    }
+
+    var segmentinfo = _(vmeta)
         .mapValues(function(v, k) {
             return {
                 segment: v.segment,
@@ -408,15 +429,27 @@ function extractVizGraph(pvg, repo) {
         });
 
     // FINALLY, assign x and y coords to all visible vertices
-    var vertices = _(vmeta)
-        .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
-        .mapValues(function(v, k) {
-            return _.assign({
-                ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
-                x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
-                y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
-            }, v);
-        }).value();
+    var vertices;
+    if (!noelide) {
+        vertices = _(vmeta)
+            .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
+            .mapValues(function(v, k) {
+                return _.assign({
+                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
+                    x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
+                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+                }, v);
+            }).value();
+    } else {
+        vertices = _(vmeta)
+            .mapValues(function(v, k) {
+                return _.assign({
+                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
+                    x: v.depth, // without elision, depth is x
+                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+                }, v);
+            }).value();
+    }
 
     // Build up the list of links
     var links = [], // all the links we'll ultimately return
@@ -432,39 +465,53 @@ function extractVizGraph(pvg, repo) {
         // make sure we get all segments, even empties
         _.mapValues(segmentinfo, function() { return []; }),
         _.groupBy(vertices, function(v) { return v.segment; })
-    ),
-    // build an offset map telling us how much a segment's internal offset should
-    // be increased by to give the real x-position
-    segoffset = _.mapValues(segmentinfo, function(seg, k) {
-        // Recursive function to count length of parent segments
-        var r = _.memoize(function(id, rseg) {
-            // pseg === id IFF we're on segment 0, which is the base
-            return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
+    );
+    if (!noelide) {
+
+        // build an offset map telling us how much a segment's internal offset should
+        // be increased by to give the real x-position
+        var segoffset = _.mapValues(segmentinfo, function(seg, k) {
+            // Recursive function to count length of parent segments
+            var r = _.memoize(function(id, rseg) {
+                // pseg === id IFF we're on segment 0, which is the base
+                return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
+            });
+
+            // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
+            return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
         });
 
-        // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
-        return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
-    });
+        // then walk through the vertices in order and make the links (elision or no)
+        _.each(vtxbyseg, function(vtxs) {
+            _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+                xmap[v.depth] = segoffset[v.segment] + k;
+                if (k === 0) {
+                    // all other ops require looking back at previous item, but if
+                    // k === 0 then there is no previous item. so, bail out
+                    return;
+                }
 
-    // then walk through the vertices in order and make the links (elision or no)
-    _.each(vtxbyseg, function(vtxs) {
-        _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
-            xmap[v.depth] = segoffset[v.segment] + k;
-            if (k === 0) {
-                // all other ops require looking back at previous item, but if
-                // k === 0 then there is no previous item. so, bail out
-                return;
-            }
+                // if this is true, it means there's an elided range between these two elements
+                if (v.depth !== coll[k-1].depth + 1) {
+                    xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
+                }
 
-            // if this is true, it means there's an elided range between these two elements
-            if (v.depth !== coll[k-1].depth + 1) {
-                xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
-            }
-
-            // whether or not there's elision, adjacent vertices in this list need a link
-            links.push([coll[k-1], v]);
+                // whether or not there's elision, adjacent vertices in this list need a link
+                links.push([coll[k-1], v]);
+            });
         });
-    });
+    } else {
+        // If we're not doing elision, things are a whole lot simpler
+        _.each(vtxbyseg, function(vtxs) {
+            _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+                if (k === 0) {
+                    return;
+                }
+                links.push([coll[k-1], v]);
+            });
+        });
+        xmap = _.zipObject(_.unzip([_.range(diameter+1), _.range(diameter+1)]));
+    }
 
     // TODO branches/tags
 
