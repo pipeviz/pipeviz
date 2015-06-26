@@ -24,8 +24,10 @@ var reachCounter = function() {
          */
         throughPredecessors: function(g, v, filter) {
             var pred = g.predecessors(v),
+            visited = {},
             r = _.memoize(function(accum, value) {
-                return accum.concat(_.foldl(g.predecessors(value), r, [value]));
+                visited[value] = true;
+                return accum.concat(_.foldl(_.filter(g.predecessors(value), function(v) { return !_.has(visited,v); }), r, [value]));
             }, function(accum, value) { return value; });
             r.cache = mpfc;
 
@@ -47,8 +49,10 @@ var reachCounter = function() {
          */
         throughSuccessors: function(g, v, filter) {
             var succ = g.successors(v);
+            visited = {},
             r = _.memoize(function(accum, value) {
-                return accum.concat(_.foldl(g.successors(value), r, [value]));
+                visited[value] = true;
+                return accum.concat(_.foldl(_.filter(g.successors(value), function(v) { return !_.has(visited,v); }), r, [value]));
             }, function(accum, value) { return value; });
             r.cache = msfc;
 
