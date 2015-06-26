@@ -48,7 +48,7 @@ var reachCounter = function() {
          * successors the graph makes available will still be traversed.
          */
         throughSuccessors: function(g, v, filter) {
-            var succ = g.successors(v);
+            var succ = g.successors(v),
             visited = {},
             r = _.memoize(function(accum, value) {
                 visited[value] = true;
