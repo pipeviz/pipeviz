@@ -196,17 +196,24 @@ var InfoBar = React.createClass({
         // TODO right now we only have two possibilities - commit or logic-state - but this will need to become its WHOLE own subsystem
         if (t.vertex.type === "logic-state") {
             // First, pick a title. Start with the nick
-            var infotitle = "Instance of ";
+            var infotitle = "Instance of ",
+                listitems = [];
             if (!_.isUndefined(t.propv('nick'))) {
                 // TODO nick is not great since it's actually set per logic-state
                 infotitle += "'" + t.propv('nick') + "'";
-
+                // since we're not showing the repo addr in the title, put it in here
+                listitems.push(React.DOM.li({}, "From repository " + getRepositoryName(pvg, t)));
             } else {
                 // No nick, so grab the repo addr
                 infotitle += "'" + getRepositoryName(pvg, t) + "'";
             }
-
             outer.children.push(React.DOM.h3({}, infotitle));
+
+            var env = getEnvironment(pvg, t);
+
+            listitems.push(React.DOM.li({}, "Located on " + getEnvName(env) + " at " + t.propv("path")));
+
+            outer.children.push(React.DOM.ul({children: listitems}));
         } else { // can only be a commit, for now
 
         }
