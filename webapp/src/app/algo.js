@@ -165,17 +165,17 @@ var vizExtractor = {
         return fg;
     },
     treeAndRoot: function(cg, focalCommits, noelide) {
-        var isg = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
+        var tree = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
 
         // Nearly the same walk as for the focal graph, but only follow first
         // parent. Builds root candidate list AND build the first-parent tree
         // (almost an induced subgraph, but not quite) at the same time.
-        var isgwalk = function(v, last) {
+        var treewalk = function(v, last) {
             // We always want to record the (reversed) edge, unless last does not exist
             if (last !== undefined) {
-                isg.setEdge(v, last);
+                tree.setEdge(v, last);
             }
 
             // If vertex is already visited, it's a candidate for being the root
@@ -192,7 +192,7 @@ var vizExtractor = {
                 return cg.edge(v, s) === 1;
             });
             if (succ.length > 0) {
-                isgwalk(succ[0], v);
+                treewalk(succ[0], v);
             }
 
             visited[v] = true;
@@ -202,12 +202,12 @@ var vizExtractor = {
         // if they're on a path that is only reachable from a sink along a n>1
         // parent of a merge.
         _.each(focalCommits, function(d, k) {
-            isgwalk(k);
+            treewalk(k);
         });
         // But if we're not doing elision, then ALSO walk from sources.
         if (noelide) {
             //_.each(cg.sources(), function(d) {
-                //isgwalk(d);
+                //treewalk(d);
             //});
         }
 
@@ -215,7 +215,7 @@ var vizExtractor = {
         var root;
 
         // If there's only one focal vertex then things are a little weird - for
-        // one, the isgwalk won't find any candidates. In that case, set the
+        // one, the treewalk won't find any candidates. In that case, set the
         // candidates list to the single vertex itself.
         if (_.size(focalCommits) === 1) {
             //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
@@ -231,17 +231,17 @@ var vizExtractor = {
                     return;
                 }
 
-                var succ = isg.successors(v) || [];
+                var succ = tree.successors(v) || [];
                 if (succ.length > 0) {
                     rootfind(succ[0]);
                 }
             };
-            rootfind(isg.sources()[0]);
+            rootfind(tree.sources()[0]);
         }
 
-        return [isg, root];
+        return [tree, root];
     },
-    extractTree: function(cg, isg, root, focalCommits) {
+    extractTree: function(cg, tree, root, focalCommits) {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
@@ -250,7 +250,7 @@ var vizExtractor = {
         rc = reachCounter(), // create a new memoizing reach counter
         mainwalk = function(v, path, segment, pseg) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
-            var succ = isg.successors(v) || [];
+            var succ = tree.successors(v) || [];
             if (_.has(focalCommits, v)) {
                 idepths.push(path.length);
                 vmeta[v] = {
@@ -259,12 +259,12 @@ var vizExtractor = {
                     // count of reachable focal commits in original commit graph
                     reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
                     // count of reachable focal commits in the tree/almost-induced subgraph
-                    treach: rc.throughSuccessors(isg, v, _.keys(focalCommits)),
+                    treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
                     segment: segment,
                     pseg: pseg
                 };
             } else {
-                var psucc = path.length === 0 ? [] : isg.successors(path[path.length -1]),
+                var psucc = path.length === 0 ? [] : tree.successors(path[path.length -1]),
                 // interesting only if has multiple successors, or parent did
                 interesting = succ.length > 1 || psucc.length > 1;
 
@@ -272,7 +272,7 @@ var vizExtractor = {
                     depth: path.length,
                     interesting: interesting,
                     reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
-                    treach: rc.throughSuccessors(isg, v, _.keys(focalCommits)),
+                    treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
                     segment: segment,
                     pseg: pseg
                 };
@@ -333,10 +333,10 @@ function extractVizGraph(pvg, repo, noelide) {
         // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
         tr = vizExtractor.treeAndRoot(cg, focalCommits, noelide),
-        isg = tr[0],
+        tree = tr[0],
         root = tr[1];
 
-    var main = vizExtractor.extractTree(cg, isg, root, focalCommits),
+    var main = vizExtractor.extractTree(cg, tree, root, focalCommits),
         vmeta = main[0],
         protolinks = main[1],
         diameter = main[2],
@@ -522,7 +522,7 @@ function extractVizGraph(pvg, repo, noelide) {
         elranges: elranges,
         xmap: xmap,
         rangepos: _.map(elranges, function(range) { return range[0] - _.sortedIndex(elidable, range[0]-1); }),
-        g: isg,
+        g: tree,
         diameter: diameter,
         ediam: ediam,
         root: root,
