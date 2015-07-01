@@ -16,6 +16,7 @@ import (
 	"github.com/tag1consulting/pipeviz/persist"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/webapp"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 )
 
 type message struct {
@@ -51,9 +52,25 @@ func main() {
 	// gets behind.
 	interpretChan := make(chan message, 1000)
 
+        cmd := &cobra.Command{
+                Use:   "pipeviz [-b|--bind-all]",
+                Short: "Run the pipeviz servers.",
+                Long:  `Run the pipeviz servers.....`,
+        }
+        var bindAll bool
+        cmd.Flags().BoolVarP(&bindAll, "bind-all", "b", false, "Listen on all interfaces.")
+	cmd.Execute()
+
+	var listenAt string
+	if bindAll == false {
+		listenAt = "127.0.0.1:"
+	} else {
+		listenAt = ":"
+	}
+
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
-	go RunHttpIngestor("127.0.0.1:"+strconv.Itoa(DefaultIngestionPort), masterSchema, interpretChan)
+	go RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort), masterSchema, interpretChan)
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
@@ -67,7 +84,7 @@ func main() {
 
 	// And finally, kick off the webapp.
 	// TODO let config/params control address
-	go RunWebapp("127.0.0.1:" + strconv.Itoa(DefaultAppPort))
+	go RunWebapp(listenAt + strconv.Itoa(DefaultAppPort))
 
 	// Block on goji's graceful waiter, allowing the http connections to shut down nicely.
 	// FIXME using this should be unnecessary if we're crash-only
