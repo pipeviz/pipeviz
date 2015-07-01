@@ -73,7 +73,7 @@ FileLoop:
 			erro.Printf("Failed to read file '%v/%v' with error %v\n", f.d, f.f.Name(), err)
 			continue
 		}
-		fmt.Printf("Contents of %v/%v:\n%s\n\n", f.d, f.f.Name(), src)
+		fmt.Printf("\nMessage #%v (%v/%v) contents:\n%s", k+1, f.d, f.f.Name(), src)
 
 		for {
 			fmt.Printf("Message #%v: (S)end, s(k)ip, or (q)uit? ", k+1)
