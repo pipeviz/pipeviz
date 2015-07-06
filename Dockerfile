@@ -31,7 +31,7 @@ RUN wget -q https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.
 RUN mkdir -p $GOPATH/src/github.com/tag1consulting/pipeviz
 COPY . $GOPATH/src/github.com/tag1consulting/pipeviz
 RUN cd $GOPATH/src/github.com/tag1consulting/pipeviz/webapp && bower install --allow-root --quiet
-RUN cd $GOPATH/src/github.com/tag1consulting/pipeviz && go build . && \
+RUN cd $GOPATH/src/github.com/tag1consulting/pipeviz && \
 	make && \
 	make install
 WORKDIR $GOPATH/src/github.com/tag1consulting/pipeviz
