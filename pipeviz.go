@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
@@ -16,7 +17,6 @@ import (
 	"github.com/tag1consulting/pipeviz/persist"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/webapp"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 )
 
 type message struct {
@@ -35,6 +35,8 @@ const (
 	MaxMessageSize       = 5 << 20 // Max input message size is 5MB
 )
 
+var bindAll *bool = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
 	if err != nil {
@@ -52,17 +54,9 @@ func main() {
 	// gets behind.
 	interpretChan := make(chan message, 1000)
 
-        cmd := &cobra.Command{
-                Use:   "pipeviz [-b|--bind-all]",
-                Short: "Run the pipeviz servers.",
-                Long:  `Run the pipeviz servers.....`,
-        }
-        var bindAll bool
-        cmd.Flags().BoolVarP(&bindAll, "bind-all", "b", false, "Listen on all interfaces.")
-	cmd.Execute()
-
+	pflag.Parse()
 	var listenAt string
-	if bindAll == false {
+	if *bindAll == false {
 		listenAt = "127.0.0.1:"
 	} else {
 		listenAt = ":"
@@ -70,7 +64,7 @@ func main() {
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
-	go RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort), masterSchema, interpretChan)
+	go RunHttpIngestor(listenAt+strconv.Itoa(DefaultIngestionPort), masterSchema, interpretChan)
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
