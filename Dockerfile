@@ -1,6 +1,6 @@
-# Pipeviz Dockerfile 0.0.1
+# Pipeviz Dockerfile 0.0.2
 #
-## To use this Dockerfile, do the following:
+## To use this Dockerfile, do the following in the root of the pipeviz repo:
 
 ## Build a docker container image tagged pipeviz
 # docker build -t pipeviz .
