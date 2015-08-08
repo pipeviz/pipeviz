@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/ugorji/go/codec"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/ugorji/go/codec"
 )
 
 // Decode reverses the encode operation on a byte slice input

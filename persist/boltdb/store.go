@@ -3,7 +3,7 @@ package boltdb
 import (
 	"errors"
 
-	"github.com/boltdb/bolt"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
 	"github.com/tag1consulting/pipeviz/persist/item"
 )
 

@@ -6,6 +6,11 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.0-115-gc2745b3",
+			"Rev": "c2745b3c62985affcf08d0522135f4747e9b81f3"
+		},
+		{
 			"ImportPath": "github.com/gorilla/websocket",
 			"Rev": "ecff5aabe41f13b4cdf897e3c0c9bbccbe552a29"
 		},
@@ -28,6 +33,10 @@
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
 			"Rev": "e4ec8152c15fc46bd5056ce65997a07c7d415325"
+		},
+		{
+			"ImportPath": "github.com/ugorji/go/codec",
+			"Rev": "5abd4e96a45c386928ed2ca2a7ef63e2533e18ec"
 		},
 		{
 			"ImportPath": "github.com/xeipuuv/gojsonpointer",
