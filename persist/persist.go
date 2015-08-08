@@ -1,8 +1,8 @@
 package persist
 
 import (
-	"github.com/sdboyer/pipeviz/persist/item"
 	"github.com/tag1consulting/pipeviz/persist/boltdb"
+	"github.com/tag1consulting/pipeviz/persist/item"
 )
 
 // The persist package contains the persistence layer for pipeviz's append-only log.
