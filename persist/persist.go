@@ -19,7 +19,7 @@ type LogStore interface {
 	Count() (uint64, error)
 
 	// Gets the log item at a given index.
-	Get(index uint64) (*LogItem, error)
+	Get(index uint64) (*item.Log, error)
 
 	// Appends a log item.
 	Append(log *item.Log) error
