@@ -1,15 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/persist"
 	"github.com/tag1consulting/pipeviz/persist/item"
 	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/webapp"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 	"github.com/zenazn/goji/web/middleware"
@@ -22,7 +25,20 @@ type Server struct {
 	brokerChan    chan represent.CoreGraph
 }
 
+// RunHttpIngestor sets up and runs the http listener that receives messages, validates
+// them against the provided schema, persists those that pass validation, then sends
+// them along to the interpretation layer via the server's interpret channel.
+//
+// This blocks on the http listening loop, so it should typically be called in its own goroutine.
+//
+// Closes the provided interpretation channel if/when the http server terminates.
 func (s *Server) RunHttpIngestor(addr string) {
+	// TODO receive returned error and log if non-nil
+	graceful.ListenAndServe(addr, s.buildIngestorMux())
+	close(s.interpretChan)
+}
+
+func (s *Server) buildIngestorMux() *web.Mux {
 	mb := web.New()
 	// TODO use more appropriate logger
 	mb.Use(middleware.Logger)
@@ -65,7 +81,7 @@ func (s *Server) RunHttpIngestor(addr string) {
 
 			// super-sloppy write back to client, but does the trick
 			w.WriteHeader(202) // use 202 because it's a little more correct
-			w.Write([]byte(strconv.Itoa(id)))
+			w.Write([]byte(strconv.FormatUint(item.Index, 10)))
 
 			// FIXME passing directly from here means it's possible for messages to arrive
 			// at the interpretation layer in a different order than they went into the log
@@ -83,6 +99,34 @@ func (s *Server) RunHttpIngestor(addr string) {
 		}
 	})
 
-	graceful.ListenAndServe(addr, mb)
-	close(s.interpretChan)
+	return mb
+}
+
+// The main message interpret/merge loop. This receives messages that have been
+// validated and persisted, merges them into the graph, then sends the new
+// graph along to listeners, workers, etc.
+//
+// The provided CoreGraph operates as the initial state into which received
+// messages will be successively merged.
+//
+// When the interpret channel is closed (and emptied), this function also closes
+// the broker channel.
+func (s *Server) interpret(g represent.CoreGraph, ich <-chan message, bch chan<- represent.CoreGraph) {
+	for m := range ich {
+		// TODO msgid here should be strictly sequential; check, and add error handling if not
+		im := interpret.Message{Id: m.Id}
+		json.Unmarshal(m.Raw, &im)
+		g = g.Merge(im)
+
+		bch <- g
+	}
+	close(bch)
+}
+
+// RunWebapp runs the pipeviz http frontend webapp on the provided address.
+//
+// This blocks on the http listening loop, so it should typically be called in its own goroutine.
+func (s *Server) RunWebapp(addr string) {
+	mf := webapp.NewMux()
+	graceful.ListenAndServe(addr, mf)
 }
