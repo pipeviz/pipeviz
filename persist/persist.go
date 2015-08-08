@@ -1,6 +1,6 @@
 package persist
 
-import "github.com/boltdb/bolt"
+import "github.com/tag1consulting/pipeviz/persist/boltdb"
 
 // The persist package contains the persistence layer for pipeviz's append-only log.
 //
@@ -9,22 +9,8 @@ import "github.com/boltdb/bolt"
 
 var msgs [][]byte
 
-// Represents a single BoltDB file storage backend for the append-only log.
-// Bolt, a pure Go implementation inspired by LMDB, is a k/v store and thus
-// provides more than we actually need, but is an easy place to start from.
-type BoltLog struct {
-	conn *bolt.DB
-	path string
-}
-
-// LogItem is a single log entry in the append-only log.
-type LogItem struct {
-	Index   uint64
-	Message []byte
-}
-
 // LogStore describes a storage backend for Pipeviz's append-only log.
-// Based largely on the LogStore interface in github.com/hashicorp/raft.
+// Based largely on the LogStorage interface in github.com/hashicorp/raft.
 type LogStore interface {
 	// Returns the first index written, or 0 for no entries.
 	FirstIndex() (uint64, error)
@@ -32,12 +18,11 @@ type LogStore interface {
 	// Returns the last index written, or 0 for no entries.
 	LastIndex() (uint64, error)
 
-	// Gets the log item at a given index, writing it into the provided
-	// LogItem struct.
-	GetLog(index uint64, log *LogItem) error
+	// Gets the log item at a given index.
+	Get(index uint64, item *LogItem) error
 
-	// Stores a log item.
-	StoreLog(log *LogItem) error
+	// Appends a log item.
+	Append(log *LogItem) error
 }
 
 // Appends a new message to the log, returning the id of the message.
@@ -51,4 +36,9 @@ func Append(msg []byte, remoteAddr string) int { // TODO uint64 for ids
 func Get(id int) []byte { // TODO uint64 for ids
 	// TODO allow err
 	return msgs[id-1]
+}
+
+// NewLog take a file path and returns a LogStorage.
+func NewLog(path string) (LogStore, error) {
+	return boltdb.NewBoltStore(path)
 }
