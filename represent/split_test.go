@@ -501,7 +501,7 @@ func init() {
 						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
-						SpecCommit{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
+						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},
 					},
 				},
 			},
@@ -540,8 +540,8 @@ func init() {
 						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
-						SpecCommit{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
-						SpecCommit{hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
+						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},
+						SpecGitCommitParent{Sha1: hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824"), ParentNum: 2},
 					},
 				},
 			},
