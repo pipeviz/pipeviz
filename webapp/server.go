@@ -51,7 +51,8 @@ func init() {
 		}
 	}()
 
-	// Iniitally set the latestGraph to a new, empty one to avoid nil pointer
+	// Initially set the latestGraph to a new, empty one to avoid nil pointer
+	// TODO fix this now that we have journal persistence
 	latestGraph = represent.NewGraph()
 }
 
