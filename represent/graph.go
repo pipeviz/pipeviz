@@ -53,15 +53,16 @@ type CoreGraph interface {
 	// Returns the message id for the current version of the graph. The graph's
 	// contents are guaranteed to represent the state resulting from a correct
 	// in-order interpretation of the messages up to the id, inclusive.
-	MsgId() int
+	MsgId() uint64
 }
 
 // the main graph construct
 type coreGraph struct {
 	// TODO experiment with replacing with a hash array-mapped trie
-	msgid, vserial int
-	vtuples        ps.Map
-	orphans        edgeSpecSet // FIXME breaks immut
+	msgid   uint64
+	vserial int
+	vtuples ps.Map
+	orphans edgeSpecSet // FIXME breaks immut
 }
 
 func NewGraph() CoreGraph {
@@ -130,14 +131,14 @@ func (vt VertexTuple) OutEdges() []StandardEdge {
 }
 
 type Property struct {
-	MsgSrc int         `json:"msgsrc"`
+	MsgSrc uint64      `json:"msgsrc"`
 	Value  interface{} `json:"value"`
 }
 
 type veProcessingInfo struct {
 	vt    VertexTuple
 	es    EdgeSpecs
-	msgid int
+	msgid uint64
 }
 
 type edgeSpecSet []*veProcessingInfo
@@ -156,7 +157,7 @@ func (g *coreGraph) clone() *coreGraph {
 	return &cp
 }
 
-func (g *coreGraph) MsgId() int {
+func (g *coreGraph) MsgId() uint64 {
 	return g.msgid
 }
 
@@ -270,7 +271,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *coreGraph) ensureVertex(msgid int, sd SplitData) (final VertexTuple) {
+func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple) {
 	vid := Identify(g, sd)
 
 	if vid == 0 {

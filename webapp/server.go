@@ -76,7 +76,7 @@ func graphToJson(g represent.CoreGraph) ([]byte, error) {
 
 	// TODO use something that lets us write to a reusable byte buffer instead
 	return json.Marshal(struct {
-		Id       int           `json:"id"`
+		Id       uint64        `json:"id"`
 		Vertices []interface{} `json:"vertices"`
 	}{
 		Id:       g.MsgId(),

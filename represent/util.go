@@ -17,7 +17,7 @@ func mapPairs(pairs ...p) (m ps.Map) {
 
 // Transform a slice of kv pairs into a map, embedding the value into a Property{}
 // with the provided mid as Property.MsgSrc.
-func mapPropPairs(mid int, pairs ...p) (m ps.Map) {
+func mapPropPairs(mid uint64, pairs ...p) (m ps.Map) {
 	for k, kv := range pairs {
 		pairs[k] = p{K: kv.K, V: Property{MsgSrc: mid, Value: kv.V}}
 	}

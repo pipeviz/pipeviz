@@ -12,7 +12,7 @@ import (
 type tprops map[string]interface{}
 
 type dummyVertex struct {
-	msgid int
+	msgid uint64
 	typ   string
 	props tprops
 }
@@ -62,7 +62,7 @@ func mkTuple(vid int, vtx dummyVertex, edges ...StandardEdge) VertexTuple {
 }
 
 // utility func to create a StandardEdge.
-func mkEdge(id, source, target, msgid int, etype string, props ...interface{}) StandardEdge {
+func mkEdge(id, source, target int, msgid uint64, etype string, props ...interface{}) StandardEdge {
 	e := StandardEdge{
 		id:     id,
 		Source: source,

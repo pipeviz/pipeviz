@@ -86,7 +86,7 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 			// at the interpretation layer in a different order than they went into the log
 			// ...especially if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
 
-			s.interpretChan <- message{Id: item.Index, Raw: b}
+			s.interpretChan <- item
 		} else {
 			// Invalid results, so write back 422 for malformed entity
 			w.WriteHeader(422)
@@ -113,7 +113,7 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 func (s *Ingestor) Interpret(g represent.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
-		im := interpret.Message{Id: m.Id}
+		im := interpret.Message{Id: m.Index}
 		json.Unmarshal(m.Raw, &im)
 		g = g.Merge(im)
 

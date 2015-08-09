@@ -56,10 +56,10 @@ type SpecDatasetHierarchy struct {
 }
 
 // TODO unused until plugging/codegen
-type Splitter func(data interface{}, id int) ([]SplitData, error)
+type Splitter func(data interface{}, id uint64) ([]SplitData, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id int) ([]SplitData, error) {
+func Split(d interface{}, id uint64) ([]SplitData, error) {
 	switch v := d.(type) {
 	case interpret.Environment:
 		return splitEnvironment(v, id)
@@ -80,7 +80,7 @@ func Split(d interface{}, id int) ([]SplitData, error) {
 	return nil, errors.New("No handler for object type")
 }
 
-func splitEnvironment(d interpret.Environment, id int) ([]SplitData, error) {
+func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
 	// seven distinct props
 	v := vertexEnvironment{props: ps.NewMap()}
 	if d.Os != "" {
@@ -109,7 +109,7 @@ func splitEnvironment(d interpret.Environment, id int) ([]SplitData, error) {
 	return []SplitData{{Vertex: v}}, nil
 }
 
-func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
+func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
 	v := vertexLogicState{props: ps.NewMap()}
 	var edges EdgeSpecs
 
@@ -147,7 +147,7 @@ func splitLogicState(d interpret.LogicState, id int) ([]SplitData, error) {
 	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
-func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
+func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
 	v := vertexProcess{props: ps.NewMap()}
@@ -193,7 +193,7 @@ func splitProcess(d interpret.Process, id int) ([]SplitData, error) {
 	return append([]SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
 }
 
-func splitCommit(d interpret.Commit, id int) ([]SplitData, error) {
+func splitCommit(d interpret.Commit, id uint64) ([]SplitData, error) {
 	v := vertexCommit{props: ps.NewMap()}
 
 	v.props = v.props.Set("sha1", Property{MsgSrc: id, Value: d.Sha1})
@@ -210,7 +210,7 @@ func splitCommit(d interpret.Commit, id int) ([]SplitData, error) {
 	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
-func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
+func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
 	for _, tag := range d.Tags {
@@ -234,7 +234,7 @@ func splitCommitMeta(d interpret.CommitMeta, id int) ([]SplitData, error) {
 	return sd, nil
 }
 
-func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) {
+func splitParentDataset(d interpret.ParentDataset, id uint64) ([]SplitData, error) {
 	v := vertexParentDataset{props: ps.NewMap()}
 	var edges EdgeSpecs
 
@@ -260,7 +260,7 @@ func splitParentDataset(d interpret.ParentDataset, id int) ([]SplitData, error) 
 	return ret, nil
 }
 
-func splitDataset(d interpret.Dataset, id int) ([]SplitData, error) {
+func splitDataset(d interpret.Dataset, id uint64) ([]SplitData, error) {
 	v := vertexDataset{props: ps.NewMap()}
 	var edges EdgeSpecs
 

@@ -38,7 +38,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 		log.Fatalf("Must provide at least one directory argument to dotdumper.")
 	}
 
-	k := 0
+	var k uint64 = 0
 	for _, dir := range args {
 		fl, err := ioutil.ReadDir(dir)
 		if err != nil {

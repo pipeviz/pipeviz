@@ -18,7 +18,7 @@ var Msgs []*interpret.Message
 
 func init() {
 	for i := range make([]struct{}, 8) {
-		m := &interpret.Message{Id: i + 1}
+		m := &interpret.Message{Id: uint64(i + 1)}
 
 		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
 		f, err := ioutil.ReadFile(path)
