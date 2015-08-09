@@ -20,7 +20,7 @@ import (
 
 type Server struct {
 	journal       persist.LogStore
-	schema        gjs.Schema
+	schema        *gjs.Schema
 	interpretChan chan *item.Log
 	brokerChan    chan represent.CoreGraph
 }
@@ -111,16 +111,16 @@ func (s *Server) buildIngestorMux() *web.Mux {
 //
 // When the interpret channel is closed (and emptied), this function also closes
 // the broker channel.
-func (s *Server) interpret(g represent.CoreGraph, ich <-chan message, bch chan<- represent.CoreGraph) {
-	for m := range ich {
+func (s *Server) Interpret(g represent.CoreGraph) {
+	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
 		im := interpret.Message{Id: m.Id}
 		json.Unmarshal(m.Raw, &im)
 		g = g.Merge(im)
 
-		bch <- g
+		s.brokerChan <- g
 	}
-	close(bch)
+	close(s.brokerChan)
 }
 
 // RunWebapp runs the pipeviz http frontend webapp on the provided address.

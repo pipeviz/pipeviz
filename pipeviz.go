@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -13,8 +12,9 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/middleware"
 	"github.com/tag1consulting/pipeviz/broker"
-	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/persist"
+	"github.com/tag1consulting/pipeviz/persist/boltdb"
+	"github.com/tag1consulting/pipeviz/persist/item"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/webapp"
 )
@@ -35,7 +35,10 @@ const (
 	MaxMessageSize       = 5 << 20 // Max input message size is 5MB
 )
 
-var bindAll *bool = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+var (
+	bindAll *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath  *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+)
 
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
@@ -52,7 +55,7 @@ func main() {
 	// Channel to receive persisted messages from HTTP workers. 1000 cap to allow
 	// some wiggle room if there's a sudden burst of messages and the interpreter
 	// gets behind.
-	interpretChan := make(chan message, 1000)
+	interpretChan := make(chan *item.Log, 1000)
 
 	pflag.Parse()
 	var listenAt string
@@ -62,19 +65,31 @@ func main() {
 		listenAt = ":"
 	}
 
-	// Kick off the http message ingestor.
-	// TODO let config/params control address
-	go RunHttpIngestor(listenAt+strconv.Itoa(DefaultIngestionPort), masterSchema, interpretChan)
+	j, err := boltdb.NewBoltStore(*dbPath + "/journal.boltdb")
+	if err != nil {
+		panic(err.Error())
+	}
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
 	brokerChan := make(chan represent.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
 
+	server := &Server{
+		journal:       j,
+		schema:        masterSchema,
+		interpretChan: interpretChan,
+		brokerChan:    brokerChan,
+	}
+
+	// Kick off the http message ingestor.
+	// TODO let config/params control address
+	go server.RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
+
 	// Kick off the intermediary interpretation goroutine that receives persisted
 	// messages from the ingestor, merges them into the state graph, then passes
 	// them along to the graph broker.
-	go Interpret(represent.NewGraph(), interpretChan, brokerChan) // for now, always a new graph
+	go server.Interpret(represent.NewGraph()) // for now, always a new graph
 
 	// And finally, kick off the webapp.
 	// TODO let config/params control address
@@ -155,28 +170,7 @@ func RunHttpIngestor(addr string, schema *gjs.Schema, ich chan<- message) {
 	close(ich)
 }
 
-// The main message interpret/merge loop. This receives messages that have been
-// validated and persisted, merges them into the graph, then sends the new
-// graph along to listeners, workers, etc.
-//
-// The provided CoreGraph operates as the initial state into which received
-// messages will be successively merged.
-//
-// When the interpret channel is closed (and emptied), this function also closes
-// the broker channel.
-func Interpret(g represent.CoreGraph, ich <-chan message, bch chan<- represent.CoreGraph) {
-	for m := range ich {
-		// TODO msgid here should be strictly sequential; check, and add error handling if not
-		im := interpret.Message{Id: m.Id}
-		json.Unmarshal(m.Raw, &im)
-		g = g.Merge(im)
-
-		bch <- g
-	}
-	close(bch)
-}
-
-// RunWebapp runs the pipeviz http frontend webapp on the provided address.
+// RunWebapp runs the pipeviz http frontend webapp on the specified address.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 func RunWebapp(addr string) {
