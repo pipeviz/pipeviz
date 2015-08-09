@@ -122,11 +122,3 @@ func (s *Server) Interpret(g represent.CoreGraph) {
 	}
 	close(s.brokerChan)
 }
-
-// RunWebapp runs the pipeviz http frontend webapp on the provided address.
-//
-// This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func (s *Server) RunWebapp(addr string) {
-	mf := webapp.NewMux()
-	graceful.ListenAndServe(addr, mf)
-}
