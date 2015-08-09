@@ -12,13 +12,12 @@ import (
 	"github.com/tag1consulting/pipeviz/persist"
 	"github.com/tag1consulting/pipeviz/persist/item"
 	"github.com/tag1consulting/pipeviz/represent"
-	"github.com/tag1consulting/pipeviz/webapp"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 	"github.com/zenazn/goji/web/middleware"
 )
 
-type Server struct {
+type Ingestor struct {
 	journal       persist.LogStore
 	schema        *gjs.Schema
 	interpretChan chan *item.Log
@@ -32,13 +31,13 @@ type Server struct {
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 //
 // Closes the provided interpretation channel if/when the http server terminates.
-func (s *Server) RunHttpIngestor(addr string) {
+func (s *Ingestor) RunHttpIngestor(addr string) {
 	// TODO receive returned error and log if non-nil
 	graceful.ListenAndServe(addr, s.buildIngestorMux())
 	close(s.interpretChan)
 }
 
-func (s *Server) buildIngestorMux() *web.Mux {
+func (s *Ingestor) buildIngestorMux() *web.Mux {
 	mb := web.New()
 	// TODO use more appropriate logger
 	mb.Use(middleware.Logger)
@@ -111,7 +110,7 @@ func (s *Server) buildIngestorMux() *web.Mux {
 //
 // When the interpret channel is closed (and emptied), this function also closes
 // the broker channel.
-func (s *Server) Interpret(g represent.CoreGraph) {
+func (s *Ingestor) Interpret(g represent.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
 		im := interpret.Message{Id: m.Id}

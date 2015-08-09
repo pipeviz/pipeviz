@@ -70,7 +70,7 @@ func main() {
 	brokerChan := make(chan represent.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
 
-	server := &Server{
+	srv := &Ingestor{
 		journal:       j,
 		schema:        masterSchema,
 		interpretChan: interpretChan,
@@ -79,12 +79,12 @@ func main() {
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
-	go server.RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
+	go srv.RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
 
 	// Kick off the intermediary interpretation goroutine that receives persisted
 	// messages from the ingestor, merges them into the state graph, then passes
 	// them along to the graph broker.
-	go server.Interpret(represent.NewGraph()) // for now, always a new graph
+	go srv.Interpret(represent.NewGraph()) // for now, always a new graph
 
 	// And finally, kick off the webapp.
 	// TODO let config/params control address
