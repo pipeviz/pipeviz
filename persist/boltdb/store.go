@@ -44,6 +44,9 @@ func NewBoltStore(path string) (*BoltStore, error) {
 		return nil, err
 	}
 
+	store.next, _ = store.Count()
+	store.next += 1
+
 	return store, nil
 }
 
