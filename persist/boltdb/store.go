@@ -44,7 +44,7 @@ func NewBoltStore(path string) (*BoltStore, error) {
 		return nil, err
 	}
 
-	store.next, _ = store.Count()
+	store.next, _ = store.count()
 	store.next += 1
 
 	return store, nil
@@ -118,7 +118,14 @@ func (b *BoltStore) Append(log *item.Log) error {
 }
 
 // Count reports the total number of items in the journal.
+// Just relies on the outer state counter for convenience.
 func (b *BoltStore) Count() (uint64, error) {
+	return b.next - 1, nil
+}
+
+// Performs the actual count by having the cursor grab the last item from the
+// bucket. Because we're append-only, this is guaranteed to be the right one.
+func (b *BoltStore) count() (uint64, error) {
 	tx, err := b.conn.Begin(false)
 	if err != nil {
 		return 0, err
