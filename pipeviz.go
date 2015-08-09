@@ -17,11 +17,6 @@ import (
 	"github.com/tag1consulting/pipeviz/webapp"
 )
 
-type message struct {
-	Id  int
-	Raw []byte
-}
-
 // Pipeviz has two fully separated HTTP ports - one for input into the logic
 // machine, and one for graph data consumption. This is done primarily
 // because security/firewall concerns are completely different, and having
