@@ -77,6 +77,12 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 			item := &item.Log{RemoteAddr: []byte(r.RemoteAddr), Message: b}
 			// Index of message gets written by the LogStore
 			err := s.journal.Append(item)
+			if err != nil {
+				w.WriteHeader(500)
+				// should we tell the client this?
+				w.Write([]byte("Failed to persist message to journal"))
+				return
+			}
 
 			// super-sloppy write back to client, but does the trick
 			w.WriteHeader(202) // use 202 because it's a little more correct
@@ -114,7 +120,7 @@ func (s *Ingestor) Interpret(g represent.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
 		im := interpret.Message{Id: m.Index}
-		json.Unmarshal(m.Raw, &im)
+		json.Unmarshal(m.Message, &im)
 		g = g.Merge(im)
 
 		s.brokerChan <- g
