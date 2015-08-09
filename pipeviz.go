@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"strconv"
 
@@ -8,6 +9,8 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/broker"
+	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/persist"
 	"github.com/tag1consulting/pipeviz/persist/boltdb"
 	"github.com/tag1consulting/pipeviz/persist/item"
 	"github.com/tag1consulting/pipeviz/represent"
@@ -65,6 +68,13 @@ func main() {
 		panic(err.Error())
 	}
 
+	// Restore the graph from the journal (or start from nothing if journal is empty)
+	// TODO move this down to after ingestor is started
+	g, err := restoreGraph(j)
+	if err != nil {
+		panic(err.Error())
+	}
+
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
 	brokerChan := make(chan represent.CoreGraph, 0)
@@ -84,7 +94,7 @@ func main() {
 	// Kick off the intermediary interpretation goroutine that receives persisted
 	// messages from the ingestor, merges them into the state graph, then passes
 	// them along to the graph broker.
-	go srv.Interpret(represent.NewGraph()) // for now, always a new graph
+	go srv.Interpret(g)
 
 	// And finally, kick off the webapp.
 	// TODO let config/params control address
@@ -101,4 +111,31 @@ func main() {
 func RunWebapp(addr string) {
 	mf := webapp.NewMux()
 	graceful.ListenAndServe(addr, mf)
+}
+
+// Rebuilds the graph from the extant entries in a journal.
+func restoreGraph(j persist.LogStore) (represent.CoreGraph, error) {
+	g := represent.NewGraph()
+
+	var item *item.Log
+	tot, err := j.Count()
+	if err != nil {
+		// journal failed to report a count for some reason, bail out
+		return g, err
+	} else if tot > 0 {
+		// we manually iterate to the count because we assume that any messages
+		// that come in while we do this processing will be queued elsewhere.
+		for i := uint64(1); i-1 < tot; i++ {
+			item, err = j.Get(i)
+			if err != nil {
+				// TODO returning out here could end us up somwehere weird
+				return g, err
+			}
+			msg := interpret.Message{Id: item.Index}
+			json.Unmarshal(item.Message, &msg)
+			g = g.Merge(msg)
+		}
+	}
+
+	return g, nil
 }
