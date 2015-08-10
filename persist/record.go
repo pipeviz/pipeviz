@@ -1,5 +1,5 @@
 //go:generate msgp
-//msgp:tuple Log
+//msgp:tuple Record
 package persist
 
 import (
@@ -8,7 +8,7 @@ import (
 )
 
 // Log is a single log entry in the journal.
-type Log struct {
+type Record struct {
 	// The index of the log item in the journal.
 	Index uint64 `msg:"index"`
 
@@ -22,8 +22,8 @@ type Log struct {
 	Message []byte `msg:"message"`
 }
 
-func NewLog(message []byte, RemoteAddr string) *Log {
-	return &Log{
+func NewLog(message []byte, RemoteAddr string) *Record {
+	return &Record{
 		Index:      0,
 		Time:       time.Now(),
 		RemoteAddr: net.ParseIP(RemoteAddr),

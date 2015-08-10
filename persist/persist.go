@@ -9,8 +9,8 @@ type LogStore interface {
 	Count() (uint64, error)
 
 	// Gets the log item at a given index.
-	Get(index uint64) (*Log, error)
+	Get(index uint64) (*Record, error)
 
 	// Appends a log item. If successful, an Index is assigned to the provided Log.
-	Append(log *Log) error
+	Append(log *Record) error
 }

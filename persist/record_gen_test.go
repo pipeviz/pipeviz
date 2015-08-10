@@ -12,7 +12,7 @@ import (
 )
 
 func TestMarshalUnmarshalLog(t *testing.T) {
-	v := Log{}
+	v := Record{}
 	bts, err := v.MarshalMsg(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -35,7 +35,7 @@ func TestMarshalUnmarshalLog(t *testing.T) {
 }
 
 func BenchmarkMarshalMsgLog(b *testing.B) {
-	v := Log{}
+	v := Record{}
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -44,7 +44,7 @@ func BenchmarkMarshalMsgLog(b *testing.B) {
 }
 
 func BenchmarkAppendMsgLog(b *testing.B) {
-	v := Log{}
+	v := Record{}
 	bts := make([]byte, 0, v.Msgsize())
 	bts, _ = v.MarshalMsg(bts[0:0])
 	b.SetBytes(int64(len(bts)))
@@ -56,7 +56,7 @@ func BenchmarkAppendMsgLog(b *testing.B) {
 }
 
 func BenchmarkUnmarshalLog(b *testing.B) {
-	v := Log{}
+	v := Record{}
 	bts, _ := v.MarshalMsg(nil)
 	b.ReportAllocs()
 	b.SetBytes(int64(len(bts)))
@@ -70,7 +70,7 @@ func BenchmarkUnmarshalLog(b *testing.B) {
 }
 
 func TestEncodeDecodeLog(t *testing.T) {
-	v := Log{}
+	v := Record{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
 
@@ -79,7 +79,7 @@ func TestEncodeDecodeLog(t *testing.T) {
 		t.Logf("WARNING: Msgsize() for %v is inaccurate", v)
 	}
 
-	vn := Log{}
+	vn := Record{}
 	err := msgp.Decode(&buf, &vn)
 	if err != nil {
 		t.Error(err)
@@ -94,7 +94,7 @@ func TestEncodeDecodeLog(t *testing.T) {
 }
 
 func BenchmarkEncodeLog(b *testing.B) {
-	v := Log{}
+	v := Record{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
 	b.SetBytes(int64(buf.Len()))
@@ -108,7 +108,7 @@ func BenchmarkEncodeLog(b *testing.B) {
 }
 
 func BenchmarkDecodeLog(b *testing.B) {
-	v := Log{}
+	v := Record{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
 	b.SetBytes(int64(buf.Len()))

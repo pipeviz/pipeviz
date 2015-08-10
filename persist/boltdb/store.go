@@ -64,7 +64,7 @@ func (b *BoltStore) init() error {
 }
 
 // Get returns the item associated with the given index.
-func (b *BoltStore) Get(idx uint64) (*persist.Log, error) {
+func (b *BoltStore) Get(idx uint64) (*persist.Record, error) {
 	tx, err := b.conn.Begin(false)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (b *BoltStore) Get(idx uint64) (*persist.Log, error) {
 		return nil, errors.New("index not found")
 	}
 
-	l := &persist.Log{}
+	l := &persist.Record{}
 	if err := decodeMsgPack(val, l); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (b *BoltStore) Get(idx uint64) (*persist.Log, error) {
 }
 
 // Append pushes a log item into the boltdb storage.
-func (b *BoltStore) Append(log *persist.Log) error {
+func (b *BoltStore) Append(log *persist.Record) error {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
 		return err

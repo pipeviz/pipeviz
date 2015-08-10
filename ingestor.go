@@ -19,7 +19,7 @@ import (
 type Ingestor struct {
 	journal       persist.LogStore
 	schema        *gjs.Schema
-	interpretChan chan *persist.Log
+	interpretChan chan *persist.Record
 	brokerChan    chan represent.CoreGraph
 }
 
@@ -73,7 +73,7 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 		}
 
 		if result.Valid() {
-			item := &persist.Log{RemoteAddr: []byte(r.RemoteAddr), Message: b}
+			item := &persist.Record{RemoteAddr: []byte(r.RemoteAddr), Message: b}
 			// Index of message gets written by the LogStore
 			err := s.journal.Append(item)
 			if err != nil {

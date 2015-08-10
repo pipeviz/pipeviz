@@ -9,7 +9,7 @@ import (
 )
 
 // DecodeMsg implements msgp.Decodable
-func (z *Log) DecodeMsg(dc *msgp.Reader) (err error) {
+func (z *Record) DecodeMsg(dc *msgp.Reader) (err error) {
 	var ssz uint32
 	ssz, err = dc.ReadArrayHeader()
 	if err != nil {
@@ -39,7 +39,7 @@ func (z *Log) DecodeMsg(dc *msgp.Reader) (err error) {
 }
 
 // EncodeMsg implements msgp.Encodable
-func (z *Log) EncodeMsg(en *msgp.Writer) (err error) {
+func (z *Record) EncodeMsg(en *msgp.Writer) (err error) {
 	// array header, size 4
 	err = en.Append(0x94)
 	if err != nil {
@@ -65,7 +65,7 @@ func (z *Log) EncodeMsg(en *msgp.Writer) (err error) {
 }
 
 // MarshalMsg implements msgp.Marshaler
-func (z *Log) MarshalMsg(b []byte) (o []byte, err error) {
+func (z *Record) MarshalMsg(b []byte) (o []byte, err error) {
 	o = msgp.Require(b, z.Msgsize())
 	// array header, size 4
 	o = append(o, 0x94)
@@ -77,7 +77,7 @@ func (z *Log) MarshalMsg(b []byte) (o []byte, err error) {
 }
 
 // UnmarshalMsg implements msgp.Unmarshaler
-func (z *Log) UnmarshalMsg(bts []byte) (o []byte, err error) {
+func (z *Record) UnmarshalMsg(bts []byte) (o []byte, err error) {
 	{
 		var ssz uint32
 		ssz, bts, err = msgp.ReadArrayHeaderBytes(bts)
@@ -109,7 +109,7 @@ func (z *Log) UnmarshalMsg(bts []byte) (o []byte, err error) {
 	return
 }
 
-func (z *Log) Msgsize() (s int) {
+func (z *Record) Msgsize() (s int) {
 	s = 1 + msgp.Uint64Size + msgp.TimeSize + msgp.BytesPrefixSize + len(z.RemoteAddr) + msgp.BytesPrefixSize + len(z.Message)
 	return
 }

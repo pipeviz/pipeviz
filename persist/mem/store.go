@@ -13,14 +13,14 @@ import (
 )
 
 type memJournal struct {
-	j    []*persist.Log
+	j    []*persist.Record
 	lock sync.RWMutex
 }
 
 // NewMemStore initializes a new memory-backed journal.
 func NewMemStore() *memJournal {
 	s := &memJournal{
-		j: make([]*persist.Log, 0),
+		j: make([]*persist.Record, 0),
 	}
 
 	return s
@@ -37,7 +37,7 @@ func (s *memJournal) Count() (uint64, error) {
 }
 
 // Get returns the log entry at the provided index.
-func (s *memJournal) Get(index uint64) (*persist.Log, error) {
+func (s *memJournal) Get(index uint64) (*persist.Record, error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -50,7 +50,7 @@ func (s *memJournal) Get(index uint64) (*persist.Log, error) {
 }
 
 // Append pushes a new log entry onto the end of the journal.
-func (s *memJournal) Append(log *persist.Log) error {
+func (s *memJournal) Append(log *persist.Record) error {
 	s.lock.Lock()
 
 	log.Index = uint64(len(s.j) + 2)
