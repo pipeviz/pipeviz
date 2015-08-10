@@ -74,6 +74,7 @@ func main() {
 	// the state machine and the listeners interested in the machine's state.
 	brokerChan := make(chan represent.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
+	brokerChan <- g
 
 	srv := &Ingestor{
 		journal:       j,
