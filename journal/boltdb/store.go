@@ -1,6 +1,7 @@
 package boltdb
 
 import (
+	"encoding/binary"
 	"errors"
 	"time"
 
@@ -72,14 +73,16 @@ func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
 	defer tx.Rollback()
 
 	bucket := tx.Bucket(bucketName)
-	val := bucket.Get(uint64ToBytes(idx))
+	key := make([]byte, 8)
+	binary.BigEndian.PutUint64(key, idx)
+	val := bucket.Get(key)
 
 	if val == nil {
 		return nil, errors.New("index not found")
 	}
 
 	l := &journal.Record{}
-	if err := decodeMsgPack(val, l); err != nil {
+	if _, err := l.UnmarshalMsg(val); err != nil {
 		return nil, err
 	}
 	return l, nil
@@ -101,13 +104,14 @@ func (b *BoltStore) Append(log *journal.Record) error {
 		return err
 	}
 
-	key := uint64ToBytes(log.Index)
-	val, err := encodeMsgPack(log)
+	key := make([]byte, 8)
+	binary.BigEndian.PutUint64(key, log.Index)
+	val, err := log.MarshalMsg(nil) // nil will alloc for us
 	if err != nil {
 		return err
 	}
 
-	if err := bucket.Put(key, val.Bytes()); err != nil {
+	if err := bucket.Put(key, val); err != nil {
 		return err
 	}
 
@@ -128,6 +132,6 @@ func (b *BoltStore) Count() (uint64, error) {
 	if last, _ := curs.Last(); last == nil {
 		return 0, nil
 	} else {
-		return bytesToUint64(last), nil
+		return binary.BigEndian.Uint64(last), nil
 	}
 }
