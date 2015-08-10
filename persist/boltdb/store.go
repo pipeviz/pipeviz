@@ -2,6 +2,7 @@ package boltdb
 
 import (
 	"errors"
+	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
 	"github.com/tag1consulting/pipeviz/persist/item"
@@ -22,12 +23,13 @@ var (
 type BoltStore struct {
 	conn *bolt.DB
 	path string
-	next uint64
+	next uint64 // TODO rely on bolt's NextSequence()
 }
 
 // NewBoltStore creates a handle to a BoltDB-backed log store
 func NewBoltStore(path string) (*BoltStore, error) {
-	b, err := bolt.Open(path, fileMode, nil)
+	// Allow 1s timeout on obtaining a file lock
+	b, err := bolt.Open(path, fileMode, &bolt.Options{Timeout: time.Second})
 	if err != nil {
 		return nil, err
 	}
