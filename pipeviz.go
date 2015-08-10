@@ -12,7 +12,6 @@ import (
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/persist"
 	"github.com/tag1consulting/pipeviz/persist/boltdb"
-	"github.com/tag1consulting/pipeviz/persist/item"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/webapp"
 )
@@ -48,7 +47,7 @@ func main() {
 	// Channel to receive persisted messages from HTTP workers. 1000 cap to allow
 	// some wiggle room if there's a sudden burst of messages and the interpreter
 	// gets behind.
-	interpretChan := make(chan *item.Log, 1000)
+	interpretChan := make(chan *persist.Log, 1000)
 
 	pflag.Parse()
 	var listenAt string
@@ -113,7 +112,7 @@ func RunWebapp(addr string) {
 func restoreGraph(j persist.LogStore) (represent.CoreGraph, error) {
 	g := represent.NewGraph()
 
-	var item *item.Log
+	var item *persist.Log
 	tot, err := j.Count()
 	if err != nil {
 		// journal failed to report a count for some reason, bail out

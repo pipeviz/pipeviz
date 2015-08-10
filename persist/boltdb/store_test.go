@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/persist/item"
+	"github.com/tag1consulting/pipeviz/persist"
 )
 
 // Ensure initializing the bolt journal works as expected
@@ -44,8 +44,8 @@ func TestAppendGet(t *testing.T) {
 		t.Errorf("Failed to create bolt store with err %s", err)
 	}
 
-	item1 := &item.Log{RemoteAddr: []byte("127.0.0.1"), Message: []byte("msg1")}
-	item2 := &item.Log{RemoteAddr: []byte("127.0.0.1"), Message: []byte("msg2")}
+	item1 := &persist.Log{RemoteAddr: []byte("127.0.0.1"), Message: []byte("msg1")}
+	item2 := &persist.Log{RemoteAddr: []byte("127.0.0.1"), Message: []byte("msg2")}
 
 	err = b.Append(item1)
 	if err != nil {
