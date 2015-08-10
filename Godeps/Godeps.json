@@ -35,10 +35,6 @@
 			"Rev": "e4ec8152c15fc46bd5056ce65997a07c7d415325"
 		},
 		{
-			"ImportPath": "github.com/ugorji/go/codec",
-			"Rev": "5abd4e96a45c386928ed2ca2a7ef63e2533e18ec"
-		},
-		{
 			"ImportPath": "github.com/xeipuuv/gojsonpointer",
 			"Rev": "636edb2500d21f2ed09ea96a00deb36bbd07cf70"
 		},
