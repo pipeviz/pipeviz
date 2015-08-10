@@ -51,7 +51,8 @@ func init() {
 		}
 	}()
 
-	// Iniitally set the latestGraph to a new, empty one to avoid nil pointer
+	// Initially set the latestGraph to a new, empty one to avoid nil pointer
+	// TODO fix this now that we have journal persistence
 	latestGraph = represent.NewGraph()
 }
 
@@ -76,7 +77,7 @@ func graphToJson(g represent.CoreGraph) ([]byte, error) {
 
 	// TODO use something that lets us write to a reusable byte buffer instead
 	return json.Marshal(struct {
-		Id       int           `json:"id"`
+		Id       uint64        `json:"id"`
 		Vertices []interface{} `json:"vertices"`
 	}{
 		Id:       g.MsgId(),

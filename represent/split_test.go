@@ -38,7 +38,7 @@ const (
 	D_commit   string = "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
 	D_version  string = "2.2"
 	D_semver   string = "0.12.9"
-	D_msgid    int    = 1
+	D_msgid    uint64 = 1
 	D_datetime string = "2015-01-09T02:01:20.000Z" // TODO don't let JS stupidity drive date format
 )
 

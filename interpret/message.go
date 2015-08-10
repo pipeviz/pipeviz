@@ -8,7 +8,7 @@ import (
 )
 
 type Message struct {
-	Id int
+	Id uint64
 	m  *message
 }
 

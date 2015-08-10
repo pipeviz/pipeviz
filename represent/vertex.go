@@ -33,7 +33,7 @@ func GenericMerge(old, nu ps.Map) ps.Map {
 	return old
 }
 
-func assignEnvLink(mid int, e interpret.EnvLink, m ps.Map, excl bool) ps.Map {
+func assignEnvLink(mid uint64, e interpret.EnvLink, m ps.Map, excl bool) ps.Map {
 	m = assignAddress(mid, e.Address, m, excl)
 	// nick is logically separate from network identity, so excl has no effect
 	if e.Nick != "" {
@@ -43,7 +43,7 @@ func assignEnvLink(mid int, e interpret.EnvLink, m ps.Map, excl bool) ps.Map {
 	return m
 }
 
-func assignAddress(mid int, a interpret.Address, m ps.Map, excl bool) ps.Map {
+func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map {
 	if a.Hostname != "" {
 		if excl {
 			m = m.Delete("ipv4")

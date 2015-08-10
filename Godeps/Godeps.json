@@ -6,6 +6,11 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.0-115-gc2745b3",
+			"Rev": "c2745b3c62985affcf08d0522135f4747e9b81f3"
+		},
+		{
 			"ImportPath": "github.com/gorilla/websocket",
 			"Rev": "ecff5aabe41f13b4cdf897e3c0c9bbccbe552a29"
 		},
@@ -18,6 +23,10 @@
 			"Rev": "33ddf69629c1bcea76b04f4a4e9e00e4cce82eb6"
 		},
 		{
+			"ImportPath": "github.com/philhofer/fwd",
+			"Rev": "4dbda5e2904d044d23cc4bef84e8360c458caf7f"
+		},
+		{
 			"ImportPath": "github.com/spf13/cobra",
 			"Rev": "ebb2d55f56cfec37ad899ad410b823805cc38e3c"
 		},
@@ -28,6 +37,11 @@
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
 			"Rev": "e4ec8152c15fc46bd5056ce65997a07c7d415325"
+		},
+		{
+			"ImportPath": "github.com/tinylib/msgp/msgp",
+			"Comment": "v1.0-alpha-43-gcd4fb15",
+			"Rev": "cd4fb1548c31d88af25205dc021be20935aec720"
 		},
 		{
 			"ImportPath": "github.com/xeipuuv/gojsonpointer",
