@@ -5,7 +5,7 @@ package journal
 // DO NOT EDIT
 
 import (
-	"github.com/tinylib/msgp/msgp"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
 )
 
 // DecodeMsg implements msgp.Decodable

@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/middleware"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/represent"
-	"github.com/zenazn/goji/graceful"
-	"github.com/zenazn/goji/web"
-	"github.com/zenazn/goji/web/middleware"
 )
 
 type Ingestor struct {
