@@ -27,3 +27,6 @@ _testmain.go
 
 # ignore js things
 bower_components
+
+# ignore any boltdb files that may hang around
+*.bolt
