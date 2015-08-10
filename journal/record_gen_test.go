@@ -11,7 +11,7 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
 )
 
-func TestMarshalUnmarshalLog(t *testing.T) {
+func TestMarshalUnmarshalRecord(t *testing.T) {
 	v := Record{}
 	bts, err := v.MarshalMsg(nil)
 	if err != nil {
@@ -34,7 +34,7 @@ func TestMarshalUnmarshalLog(t *testing.T) {
 	}
 }
 
-func BenchmarkMarshalMsgLog(b *testing.B) {
+func BenchmarkMarshalMsgRecord(b *testing.B) {
 	v := Record{}
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -43,7 +43,7 @@ func BenchmarkMarshalMsgLog(b *testing.B) {
 	}
 }
 
-func BenchmarkAppendMsgLog(b *testing.B) {
+func BenchmarkAppendMsgRecord(b *testing.B) {
 	v := Record{}
 	bts := make([]byte, 0, v.Msgsize())
 	bts, _ = v.MarshalMsg(bts[0:0])
@@ -55,7 +55,7 @@ func BenchmarkAppendMsgLog(b *testing.B) {
 	}
 }
 
-func BenchmarkUnmarshalLog(b *testing.B) {
+func BenchmarkUnmarshalRecord(b *testing.B) {
 	v := Record{}
 	bts, _ := v.MarshalMsg(nil)
 	b.ReportAllocs()
@@ -69,7 +69,7 @@ func BenchmarkUnmarshalLog(b *testing.B) {
 	}
 }
 
-func TestEncodeDecodeLog(t *testing.T) {
+func TestEncodeDecodeRecord(t *testing.T) {
 	v := Record{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
@@ -93,7 +93,7 @@ func TestEncodeDecodeLog(t *testing.T) {
 	}
 }
 
-func BenchmarkEncodeLog(b *testing.B) {
+func BenchmarkEncodeRecord(b *testing.B) {
 	v := Record{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
@@ -107,7 +107,7 @@ func BenchmarkEncodeLog(b *testing.B) {
 	en.Flush()
 }
 
-func BenchmarkDecodeLog(b *testing.B) {
+func BenchmarkDecodeRecord(b *testing.B) {
 	v := Record{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)

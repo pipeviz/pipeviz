@@ -4,9 +4,7 @@ package journal
 // MSGP CODE GENERATION TOOL (github.com/tinylib/msgp)
 // DO NOT EDIT
 
-import (
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
-)
+import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
 
 // DecodeMsg implements msgp.Decodable
 func (z *Record) DecodeMsg(dc *msgp.Reader) (err error) {
@@ -15,15 +13,19 @@ func (z *Record) DecodeMsg(dc *msgp.Reader) (err error) {
 	if err != nil {
 		return
 	}
-	if ssz != 4 {
-		err = msgp.ArrayError{Wanted: 4, Got: ssz}
+	if ssz != 5 {
+		err = msgp.ArrayError{Wanted: 5, Got: ssz}
 		return
 	}
 	z.Index, err = dc.ReadUint64()
 	if err != nil {
 		return
 	}
-	z.Time, err = dc.ReadTime()
+	z.TimeSec, err = dc.ReadInt64()
+	if err != nil {
+		return
+	}
+	z.TimeNSec, err = dc.ReadInt64()
 	if err != nil {
 		return
 	}
@@ -40,8 +42,8 @@ func (z *Record) DecodeMsg(dc *msgp.Reader) (err error) {
 
 // EncodeMsg implements msgp.Encodable
 func (z *Record) EncodeMsg(en *msgp.Writer) (err error) {
-	// array header, size 4
-	err = en.Append(0x94)
+	// array header, size 5
+	err = en.Append(0x95)
 	if err != nil {
 		return err
 	}
@@ -49,7 +51,11 @@ func (z *Record) EncodeMsg(en *msgp.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = en.WriteTime(z.Time)
+	err = en.WriteInt64(z.TimeSec)
+	if err != nil {
+		return
+	}
+	err = en.WriteInt64(z.TimeNSec)
 	if err != nil {
 		return
 	}
@@ -67,10 +73,11 @@ func (z *Record) EncodeMsg(en *msgp.Writer) (err error) {
 // MarshalMsg implements msgp.Marshaler
 func (z *Record) MarshalMsg(b []byte) (o []byte, err error) {
 	o = msgp.Require(b, z.Msgsize())
-	// array header, size 4
-	o = append(o, 0x94)
+	// array header, size 5
+	o = append(o, 0x95)
 	o = msgp.AppendUint64(o, z.Index)
-	o = msgp.AppendTime(o, z.Time)
+	o = msgp.AppendInt64(o, z.TimeSec)
+	o = msgp.AppendInt64(o, z.TimeNSec)
 	o = msgp.AppendBytes(o, z.RemoteAddr)
 	o = msgp.AppendBytes(o, z.Message)
 	return
@@ -84,8 +91,8 @@ func (z *Record) UnmarshalMsg(bts []byte) (o []byte, err error) {
 		if err != nil {
 			return
 		}
-		if ssz != 4 {
-			err = msgp.ArrayError{Wanted: 4, Got: ssz}
+		if ssz != 5 {
+			err = msgp.ArrayError{Wanted: 5, Got: ssz}
 			return
 		}
 	}
@@ -93,7 +100,11 @@ func (z *Record) UnmarshalMsg(bts []byte) (o []byte, err error) {
 	if err != nil {
 		return
 	}
-	z.Time, bts, err = msgp.ReadTimeBytes(bts)
+	z.TimeSec, bts, err = msgp.ReadInt64Bytes(bts)
+	if err != nil {
+		return
+	}
+	z.TimeNSec, bts, err = msgp.ReadInt64Bytes(bts)
 	if err != nil {
 		return
 	}
@@ -110,6 +121,6 @@ func (z *Record) UnmarshalMsg(bts []byte) (o []byte, err error) {
 }
 
 func (z *Record) Msgsize() (s int) {
-	s = 1 + msgp.Uint64Size + msgp.TimeSize + msgp.BytesPrefixSize + len(z.RemoteAddr) + msgp.BytesPrefixSize + len(z.Message)
+	s = 1 + msgp.Uint64Size + msgp.Int64Size + msgp.Int64Size + msgp.BytesPrefixSize + len(z.RemoteAddr) + msgp.BytesPrefixSize + len(z.Message)
 	return
 }
