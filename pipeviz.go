@@ -109,7 +109,7 @@ func RunWebapp(addr string) {
 }
 
 // Rebuilds the graph from the extant entries in a journal.
-func restoreGraph(j journal.LogStore) (represent.CoreGraph, error) {
+func restoreGraph(j journal.JournalStore) (represent.CoreGraph, error) {
 	g := represent.NewGraph()
 
 	var item *journal.Record

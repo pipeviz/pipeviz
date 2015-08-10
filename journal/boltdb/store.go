@@ -27,7 +27,7 @@ type BoltStore struct {
 }
 
 // NewBoltStore creates a handle to a BoltDB-backed log store
-func NewBoltStore(path string) (journal.LogStore, error) {
+func NewBoltStore(path string) (journal.JournalStore, error) {
 	// Allow 1s timeout on obtaining a file lock
 	b, err := bolt.Open(path, fileMode, &bolt.Options{Timeout: time.Second})
 	if err != nil {

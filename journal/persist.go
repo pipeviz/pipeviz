@@ -4,7 +4,7 @@ package journal
 
 // LogStore describes a storage backend for Pipeviz's append-only log.
 // Based largely on the LogStorage interface in github.com/hashicorp/raft.
-type LogStore interface {
+type JournalStore interface {
 	// Returns the number of items in the log. Probably expensive, call with care.
 	Count() (uint64, error)
 

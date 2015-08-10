@@ -17,7 +17,7 @@ import (
 )
 
 type Ingestor struct {
-	journal       journal.LogStore
+	journal       journal.JournalStore
 	schema        *gjs.Schema
 	interpretChan chan *journal.Record
 	brokerChan    chan represent.CoreGraph

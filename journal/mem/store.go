@@ -18,7 +18,7 @@ type MemJournal struct {
 }
 
 // NewMemStore initializes a new memory-backed journal.
-func NewMemStore() journal.LogStore {
+func NewMemStore() journal.JournalStore {
 	s := &MemJournal{
 		j: make([]*journal.Record, 0),
 	}
