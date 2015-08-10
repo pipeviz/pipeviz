@@ -11,6 +11,7 @@ type LogStore interface {
 	// Gets the log item at a given index.
 	Get(index uint64) (*Record, error)
 
-	// Appends a log item. If successful, an Index is assigned to the provided Log.
-	Append(log *Record) error
+	// NewEntry creates a record from the provided data, appends it onto the
+	// end of the journal, and returns the created record.
+	NewEntry(message []byte, remoteAddr string) (*Record, error)
 }

@@ -26,9 +26,9 @@ type Record struct {
 
 // NewRecord creates a new Record struct with a current timestamp. The
 // expectation is that it will be immediately persisted to disk.
-func NewRecord(message []byte, RemoteAddr string) Record {
+func NewRecord(message []byte, RemoteAddr string) *Record {
 	t := time.Now()
-	return Record{
+	return &Record{
 		Index:      0,
 		TimeSec:    t.Unix(),
 		TimeNSec:   t.UnixNano(),

@@ -10,7 +10,8 @@ import (
 
 // Ensure initializing the bolt journal works as expected
 func TestNewBoltStore(t *testing.T) {
-	b, err := NewBoltStore("test.boltdb")
+	ls, err := NewBoltStore("test.boltdb")
+	b := ls.(*BoltStore)
 	defer func() {
 		b.conn.Close()
 		os.Remove("test.boltdb")
@@ -33,8 +34,9 @@ func TestNewBoltStore(t *testing.T) {
 }
 
 // Test that appending messages, then subsequently getting them, works as expected
-func TestAppendGet(t *testing.T) {
-	b, err := NewBoltStore("test.boltdb")
+func TestNewEntryGetCount(t *testing.T) {
+	ls, err := NewBoltStore("test.boltdb")
+	b := ls.(*BoltStore)
 	defer func() {
 		b.conn.Close()
 		os.Remove("test.boltdb")
@@ -44,20 +46,24 @@ func TestAppendGet(t *testing.T) {
 		t.Errorf("Failed to create bolt store with err %s", err)
 	}
 
-	item1 := &journal.Record{RemoteAddr: []byte("127.0.0.1"), Message: []byte("msg1")}
-	item2 := &journal.Record{RemoteAddr: []byte("127.0.0.1"), Message: []byte("msg2")}
+	m1 := []byte("msg1")
+	a1 := "127.0.0.1"
+	m2 := []byte("msg2")
+	a2 := "127.0.0.1"
 
-	err = b.Append(item1)
+	var item1, item2 *journal.Record
+
+	item1, err = b.NewEntry(m1, a1)
 	if err != nil {
-		t.Errorf("Failed to complete first Append() due to err: %s", err)
+		t.Errorf("Failed to complete first NewEntry() due to err: %s", err)
 	}
 	if item1.Index != 1 {
 		t.Errorf("First log item should have been assigned index 1, got %d", item1.Index)
 	}
 
-	err = b.Append(item2)
+	item2, err = b.NewEntry(m2, a2)
 	if err != nil {
-		t.Errorf("Failed to complete second Append() due to err: %s", err)
+		t.Errorf("Failed to complete second NewEntry() due to err: %s", err)
 	}
 	if item2.Index != 2 {
 		t.Errorf("Second log item should have been assigned index 2, got %d", item2.Index)

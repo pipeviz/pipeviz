@@ -73,9 +73,8 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 		}
 
 		if result.Valid() {
-			item := &journal.Record{RemoteAddr: []byte(r.RemoteAddr), Message: b}
 			// Index of message gets written by the LogStore
-			err := s.journal.Append(item)
+			record, err := s.journal.NewEntry(b, r.RemoteAddr)
 			if err != nil {
 				w.WriteHeader(500)
 				// should we tell the client this?
@@ -85,13 +84,13 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 
 			// super-sloppy write back to client, but does the trick
 			w.WriteHeader(202) // use 202 because it's a little more correct
-			w.Write([]byte(strconv.FormatUint(item.Index, 10)))
+			w.Write([]byte(strconv.FormatUint(record.Index, 10)))
 
 			// FIXME passing directly from here means it's possible for messages to arrive
 			// at the interpretation layer in a different order than they went into the log
 			// ...especially if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
 
-			s.interpretChan <- item
+			s.interpretChan <- record
 		} else {
 			// Invalid results, so write back 422 for malformed entity
 			w.WriteHeader(422)

@@ -27,7 +27,7 @@ type BoltStore struct {
 }
 
 // NewBoltStore creates a handle to a BoltDB-backed log store
-func NewBoltStore(path string) (*BoltStore, error) {
+func NewBoltStore(path string) (journal.LogStore, error) {
 	// Allow 1s timeout on obtaining a file lock
 	b, err := bolt.Open(path, fileMode, &bolt.Options{Timeout: time.Second})
 	if err != nil {
@@ -88,34 +88,40 @@ func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
 	return l, nil
 }
 
-// Append pushes a log item into the boltdb storage.
-func (b *BoltStore) Append(log *journal.Record) error {
+// NewEntry creates a record from the provided data, appends that record onto
+// the end of the journal, then returns the created record.
+func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*journal.Record, error) {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer tx.Rollback()
 
 	// no need to sync b/c the conn.Begin(true) call will block
 	bucket := tx.Bucket(bucketName)
 
-	log.Index, err = bucket.NextSequence()
+	record := journal.NewRecord(message, remoteAddr)
+	record.Index, err = bucket.NextSequence()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	key := make([]byte, 8)
-	binary.BigEndian.PutUint64(key, log.Index)
-	val, err := log.MarshalMsg(nil) // nil will alloc for us
+	binary.BigEndian.PutUint64(key, record.Index)
+	val, err := record.MarshalMsg(nil) // TODO nil will alloc for us; keep this zero-alloc
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := bucket.Put(key, val); err != nil {
-		return err
+	if err = bucket.Put(key, val); err != nil {
+		return nil, err
 	}
 
-	return tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return record, nil
 }
 
 // Count reports the number of items in the journal by opening a db cursor to

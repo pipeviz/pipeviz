@@ -12,14 +12,14 @@ import (
 	"github.com/tag1consulting/pipeviz/journal"
 )
 
-type memJournal struct {
+type MemJournal struct {
 	j    []*journal.Record
 	lock sync.RWMutex
 }
 
 // NewMemStore initializes a new memory-backed journal.
-func NewMemStore() *memJournal {
-	s := &memJournal{
+func NewMemStore() journal.LogStore {
+	s := &MemJournal{
 		j: make([]*journal.Record, 0),
 	}
 
@@ -27,7 +27,7 @@ func NewMemStore() *memJournal {
 }
 
 // Count returns the number of items in the journal.
-func (s *memJournal) Count() (uint64, error) {
+func (s *MemJournal) Count() (uint64, error) {
 	s.lock.RLock()
 
 	c := len(s.j)
@@ -36,8 +36,8 @@ func (s *memJournal) Count() (uint64, error) {
 	return uint64(c), nil
 }
 
-// Get returns the log entry at the provided index.
-func (s *memJournal) Get(index uint64) (*journal.Record, error) {
+// Get returns the journal entry at the provided index.
+func (s *MemJournal) Get(index uint64) (*journal.Record, error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -49,13 +49,16 @@ func (s *memJournal) Get(index uint64) (*journal.Record, error) {
 	return s.j[i-1], nil
 }
 
-// Append pushes a new log entry onto the end of the journal.
-func (s *memJournal) Append(log *journal.Record) error {
+// NewEntry creates a record from the provided data, appends that record onto
+// the end of the journal, then returns the created record.
+func (s *MemJournal) NewEntry(message []byte, remoteAddr string) (*journal.Record, error) {
 	s.lock.Lock()
 
-	log.Index = uint64(len(s.j) + 2)
-	s.j = append(s.j, log)
+	record := journal.NewRecord(message, remoteAddr)
+	record.Index = uint64(len(s.j) + 2)
+
+	s.j = append(s.j, record)
 
 	s.lock.Unlock()
-	return nil
+	return record, nil
 }
