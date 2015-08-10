@@ -1,4 +1,4 @@
-package persist
+package journal
 
 // The persist package contains the persistence layer for pipeviz's append-only journal.
 

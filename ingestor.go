@@ -9,7 +9,7 @@ import (
 
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/interpret"
-	"github.com/tag1consulting/pipeviz/persist"
+	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
@@ -17,9 +17,9 @@ import (
 )
 
 type Ingestor struct {
-	journal       persist.LogStore
+	journal       journal.LogStore
 	schema        *gjs.Schema
-	interpretChan chan *persist.Record
+	interpretChan chan *journal.Record
 	brokerChan    chan represent.CoreGraph
 }
 
@@ -73,7 +73,7 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 		}
 
 		if result.Valid() {
-			item := &persist.Record{RemoteAddr: []byte(r.RemoteAddr), Message: b}
+			item := &journal.Record{RemoteAddr: []byte(r.RemoteAddr), Message: b}
 			// Index of message gets written by the LogStore
 			err := s.journal.Append(item)
 			if err != nil {

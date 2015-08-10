@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
-	"github.com/tag1consulting/pipeviz/persist"
+	"github.com/tag1consulting/pipeviz/journal"
 )
 
 const (
@@ -64,7 +64,7 @@ func (b *BoltStore) init() error {
 }
 
 // Get returns the item associated with the given index.
-func (b *BoltStore) Get(idx uint64) (*persist.Record, error) {
+func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
 	tx, err := b.conn.Begin(false)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (b *BoltStore) Get(idx uint64) (*persist.Record, error) {
 		return nil, errors.New("index not found")
 	}
 
-	l := &persist.Record{}
+	l := &journal.Record{}
 	if err := decodeMsgPack(val, l); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (b *BoltStore) Get(idx uint64) (*persist.Record, error) {
 }
 
 // Append pushes a log item into the boltdb storage.
-func (b *BoltStore) Append(log *persist.Record) error {
+func (b *BoltStore) Append(log *journal.Record) error {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
 		return err
