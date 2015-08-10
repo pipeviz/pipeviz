@@ -28,12 +28,7 @@ func NewMemStore() journal.LogStore {
 
 // Count returns the number of items in the journal.
 func (s *MemJournal) Count() (uint64, error) {
-	s.lock.RLock()
-
-	c := len(s.j)
-
-	s.lock.RUnlock()
-	return uint64(c), nil
+	return uint64(len(s.j)), nil
 }
 
 // Get returns the journal entry at the provided index.
@@ -55,7 +50,7 @@ func (s *MemJournal) NewEntry(message []byte, remoteAddr string) (*journal.Recor
 	s.lock.Lock()
 
 	record := journal.NewRecord(message, remoteAddr)
-	record.Index = uint64(len(s.j) + 2)
+	record.Index = uint64(len(s.j) + 1)
 
 	s.j = append(s.j, record)
 
