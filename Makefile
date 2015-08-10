@@ -4,6 +4,7 @@ all:
 
 dev:
 	go get github.com/jteeuwen/go-bindata...
+	go get github.com/tinylib/msgp
 	go-bindata -o fixtures/bindata.go -prefix="fixtures/ein" -pkg="fixtures" fixtures/ein
 
 install:
