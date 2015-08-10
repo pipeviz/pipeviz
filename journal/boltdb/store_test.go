@@ -94,4 +94,40 @@ func TestNewEntryGetCount(t *testing.T) {
 	if !bytes.Equal([]byte("msg1"), get2.Message) {
 		t.Errorf("Second persisted message was incorrect, expected %q got %q", "msg1", get2.Message)
 	}
+
+	// Now close the db, reopen it and make sure it looks like it should
+	err = b.conn.Close()
+	if err != nil {
+		t.Errorf("Failed to close bolt db correctly, with error %s", err)
+	}
+
+	ls2, err := NewBoltStore("test.boltdb")
+	b = ls2.(*BoltStore)
+
+	// Just rerun all the same read tests now
+	// Test Count()
+	count, err = b.Count()
+	if err != nil {
+		t.Errorf("Failed to complete Count() due to err: %s", err)
+	}
+	if count != 2 {
+		t.Errorf("After two appends Count() should report two items; reported %d", count)
+	}
+
+	// Test Get(), pulling keys in reverse order
+	get1, err = b.Get(2)
+	if err != nil {
+		t.Errorf("Failed to complete Get() on second item due to err: %s", err)
+	}
+	if !bytes.Equal([]byte("msg2"), get1.Message) {
+		t.Errorf("Second persisted message was incorrect, expected %q got %q", "msg2", get1.Message)
+	}
+
+	get2, err = b.Get(1)
+	if err != nil {
+		t.Errorf("Failed to complete Get() on first item due to err: %s", err)
+	}
+	if !bytes.Equal([]byte("msg1"), get2.Message) {
+		t.Errorf("Second persisted message was incorrect, expected %q got %q", "msg1", get2.Message)
+	}
 }
