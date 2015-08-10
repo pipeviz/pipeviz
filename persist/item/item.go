@@ -2,7 +2,10 @@
 //msgp:tuple Log
 package item
 
-import "time"
+import (
+	"net"
+	"time"
+)
 
 // Log is a single log entry in the journal.
 type Log struct {
@@ -17,4 +20,13 @@ type Log struct {
 
 	// The body of the message.
 	Message []byte `msg:"message"`
+}
+
+func NewLog(message []byte, RemoteAddr string) *Log {
+	return &Log{
+		Index:      0,
+		Time:       time.Now(),
+		RemoteAddr: net.ParseIP(RemoteAddr),
+		Message:    message,
+	}
 }
