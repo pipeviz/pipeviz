@@ -23,7 +23,6 @@ var (
 type BoltStore struct {
 	conn *bolt.DB
 	path string
-	next uint64 // TODO rely on bolt's NextSequence()
 }
 
 // NewBoltStore creates a handle to a BoltDB-backed log store
@@ -37,7 +36,6 @@ func NewBoltStore(path string) (*BoltStore, error) {
 	store := &BoltStore{
 		conn: b,
 		path: path,
-		next: 0,
 	}
 
 	// initialize the one bucket we use
@@ -45,9 +43,6 @@ func NewBoltStore(path string) (*BoltStore, error) {
 		store.conn.Close()
 		return nil, err
 	}
-
-	store.next, _ = store.count()
-	store.next += 1
 
 	return store, nil
 }
@@ -99,35 +94,30 @@ func (b *BoltStore) Append(log *item.Log) error {
 	defer tx.Rollback()
 
 	// no need to sync b/c the conn.Begin(true) call will block
-	log.Index = b.next
+	bucket := tx.Bucket(bucketName)
+
+	log.Index, err = bucket.NextSequence()
+	if err != nil {
+		return err
+	}
+
 	key := uint64ToBytes(log.Index)
 	val, err := encodeMsgPack(log)
 	if err != nil {
 		return err
 	}
 
-	bucket := tx.Bucket(bucketName)
 	if err := bucket.Put(key, val.Bytes()); err != nil {
 		return err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	b.next += 1
-	return nil
+	return tx.Commit()
 }
 
-// Count reports the total number of items in the journal.
-// Just relies on the outer state counter for convenience.
+// Count reports the number of items in the journal by opening a db cursor to
+// grab the last item from the bucket. Because we're append-only, this is
+// guaranteed to be the last one, and thus its index is the count..
 func (b *BoltStore) Count() (uint64, error) {
-	return b.next - 1, nil
-}
-
-// Performs the actual count by having the cursor grab the last item from the
-// bucket. Because we're append-only, this is guaranteed to be the right one.
-func (b *BoltStore) count() (uint64, error) {
 	tx, err := b.conn.Begin(false)
 	if err != nil {
 		return 0, err

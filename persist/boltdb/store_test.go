@@ -20,11 +20,6 @@ func TestNewBoltStore(t *testing.T) {
 		t.Errorf("Failed to create bolt store with err %s", err)
 	}
 
-	// Ensure db is empty
-	if b.next != 1 {
-		t.Errorf("New bolt journal should start with next == 1, was %d", b.next)
-	}
-
 	// Ensure expected bucket exists
 	tx, err := b.conn.Begin(false)
 	defer tx.Rollback()
