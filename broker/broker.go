@@ -8,12 +8,18 @@ package broker
 
 import (
 	"sync"
+	"sync/atomic"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/represent"
 )
 
 // TODO switch to doing this all with DI instead, i think
 var singletonBroker *GraphBroker = New()
+
+// Package-level var to count the total number of brokers that have been created.
+// Purely for instrumentation, logging purposes.
+var brokerCount uint64 = 0
 
 // Get returns the singleton graph broker that (is assumed to) consume from the
 // main state machine's processing loop.
@@ -29,11 +35,18 @@ type GraphBroker struct {
 	// TODO be lock-free
 	lock sync.RWMutex
 	subs map[GraphReceiver]GraphSender
+	id   uint64 // internal id, just for instrumentation
 }
 
 // New creates a pointer to a new, fully initialized GraphBroker.
 func New() *GraphBroker {
-	return &GraphBroker{lock: sync.RWMutex{}, subs: make(map[GraphReceiver]GraphSender)}
+	gb := &GraphBroker{lock: sync.RWMutex{}, subs: make(map[GraphReceiver]GraphSender), id: atomic.AddUint64(&brokerCount, 1)}
+
+	log.WithFields(log.Fields{
+		"system":    "broker",
+		"broker-id": gb.id,
+	}).Debug("New graph broker created")
+	return gb
 }
 
 // Fanout initiates a goroutine that fans out each graph passed through the
@@ -41,6 +54,11 @@ func New() *GraphBroker {
 // the fanout goroutine starts are automatically incorporated.
 func (gb *GraphBroker) Fanout(input GraphReceiver) {
 	go func() {
+		log.WithFields(log.Fields{
+			"system":    "broker",
+			"broker-id": gb.id,
+		}).Debug("New fanout initiated from graph broker")
+
 		for in := range input {
 			// for now we just iterate straight through and send in one goroutine
 			for k, c := range gb.subs {
@@ -63,6 +81,11 @@ func (gb *GraphBroker) Fanout(input GraphReceiver) {
 func (gb *GraphBroker) Subscribe() GraphReceiver {
 	gb.lock.Lock()
 
+	log.WithFields(log.Fields{
+		"system":    "broker",
+		"broker-id": gb.id,
+	}).Debug("New subscriber to graph broker")
+
 	// Unbuffered. Listeners must be careful not to do too much in their receiving
 	// goroutine, lest they create a pileup!
 	c := make(chan represent.CoreGraph, 0)
@@ -79,6 +102,12 @@ func (gb *GraphBroker) Subscribe() GraphReceiver {
 // effect on the brokering behavior, and the channel will not be closed.
 func (gb *GraphBroker) Unsubscribe(recv GraphReceiver) {
 	gb.lock.Lock()
+
+	log.WithFields(log.Fields{
+		"system":    "broker",
+		"broker-id": gb.id,
+	}).Debug("Receiver unsubscribed from graph broker")
+
 	if c, exists := gb.subs[recv]; exists {
 		delete(gb.subs, recv)
 		close(c)
