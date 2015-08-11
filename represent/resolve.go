@@ -1,8 +1,7 @@
 package represent
 
 import (
-	"fmt"
-
+	log "github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
 )
@@ -39,7 +38,10 @@ func Resolve(g CoreGraph, mid uint64, src VertexTuple, d EdgeSpec) (StandardEdge
 	case interpret.DataAlpha:
 		return resolveDataAlpha(g, mid, src, es)
 	default:
-		panic(fmt.Sprintf("OMG WUT NO SUPPORT FER %T", d)) // FIXME panic lulz
+		log.WithFields(log.Fields{
+			"system":   "edge-resolution",
+			"edgespec": d,
+		}).Error("No resolution method for provided EdgeSpec") // TODO is it ok to not halt here?
 	}
 
 	return StandardEdge{}, false

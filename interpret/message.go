@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type Message struct {
@@ -72,7 +74,10 @@ func (m *Message) Each(f func(vertex interface{})) {
 			byts, err := hex.DecodeString(e.ID.CommitStr)
 			// TODO ...validation, logging, sth
 			if err != nil {
-				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+				log.WithFields(log.Fields{
+					"system":    "interpet",
+					"semantics": true, // TODO have some constants/errtypes for this
+				}).Warn("Invalid input: logic state's referenced commit sha1 was not hex encoded")
 			}
 			copy(e.ID.Commit[:], byts[0:20])
 			e.ID.CommitStr = ""
@@ -92,7 +97,11 @@ func (m *Message) Each(f func(vertex interface{})) {
 	for _, e := range m.m.C {
 		byts, err := hex.DecodeString(e.Sha1Str)
 		if err != nil {
-			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			log.WithFields(log.Fields{
+				"system":    "interpet",
+				"semantics": true, // TODO have some constants/errtypes for this
+			}).Warn("Invalid input: commit sha1 was not hex encoded. Skipping item")
+			continue
 		}
 		copy(e.Sha1[:], byts[0:20])
 		e.Sha1Str = ""
@@ -100,7 +109,11 @@ func (m *Message) Each(f func(vertex interface{})) {
 		for _, pstr := range e.ParentsStr {
 			byts, err := hex.DecodeString(pstr)
 			if err != nil {
-				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+				log.WithFields(log.Fields{
+					"system":    "interpet",
+					"semantics": true, // TODO have some constants/errtypes for this
+				}).Warn("Invalid input: commit parent sha1 was not hex encoded. Skipping parent")
+				continue
 			}
 			var sha1 Sha1
 			copy(sha1[:], byts[0:20])
@@ -113,7 +126,11 @@ func (m *Message) Each(f func(vertex interface{})) {
 	for _, e := range m.m.Cm {
 		byts, err := hex.DecodeString(e.Sha1Str)
 		if err != nil {
-			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			log.WithFields(log.Fields{
+				"system":    "interpet",
+				"semantics": true, // TODO have some constants/errtypes for this
+			}).Warn("Invalid input: commit meta's referenced commit sha1 was not hex encoded. Skipping item")
+			continue
 		}
 		copy(e.Sha1[:], byts[0:20])
 		e.Sha1Str = ""
