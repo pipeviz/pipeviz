@@ -33,6 +33,13 @@ var (
 	dbPath  *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
 )
 
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp:  true,
+		DisableSorting: true,
+	})
+}
+
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
 	if err != nil {
