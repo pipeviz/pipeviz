@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 )
 
 type Message struct {
