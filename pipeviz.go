@@ -17,15 +17,15 @@ import (
 	"github.com/tag1consulting/pipeviz/webapp"
 )
 
-// Pipeviz has two fully separated HTTP ports - one for input into the logic
+// Pipeviz uses two separate HTTP ports - one for input into the logic
 // machine, and one for graph data consumption. This is done primarily
 // because security/firewall concerns are completely different, and having
 // separate ports makes it much easier to implement separate policies.
 // Differing semantics are a contributing, but lesser consideration.
 const (
-	DefaultIngestionPort = 2309 // 2309, because Cayte
-	DefaultAppPort       = 8008
-	MaxMessageSize       = 5 << 20 // Max input message size is 5MB
+	DefaultIngestionPort int = 2309 // 2309, because Cayte
+	DefaultAppPort           = 8008
+	MaxMessageSize           = 5 << 20 // Max input message size is 5MB
 )
 
 var (
