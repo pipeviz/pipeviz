@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
 )
@@ -66,6 +67,10 @@ type coreGraph struct {
 }
 
 func NewGraph() CoreGraph {
+	log.WithFields(log.Fields{
+		"system": "engine",
+	}).Debug("New coreGraph created")
+
 	return &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 }
 
@@ -165,14 +170,25 @@ func (g *coreGraph) MsgId() uint64 {
 func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	var ess edgeSpecSet
 
+	logEntry := log.WithFields(log.Fields{
+		"system": "engine",
+		"msgid":  msg.Id,
+	})
+
+	logEntry.Info("Merging message ", msg.Id, "into graph")
+
 	g := og.clone()
 	g.msgid = msg.Id
 
 	// Process incoming elements from the message
 	msg.Each(func(d interface{}) {
 		// Split each input element into vertex and edge specs
-		// TODO errs
-		sds, _ := Split(d, msg.Id)
+		sds, err := Split(d, msg.Id)
+
+		if err != nil {
+			logEntry.WithField("err", err).Warnf("Error while splitting input element of type %T; discarding", d)
+			return
+		}
 
 		// Ensure vertices are present
 		var tuples []VertexTuple
@@ -272,9 +288,17 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 //
 // Either way, return value is the vid for the vertex.
 func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple) {
+	logEntry := log.WithFields(log.Fields{
+		"system": "engine",
+		"msgid":  msgid,
+		"vtype":  sd.Vertex.Typ(),
+	})
+
+	logEntry.Debug("Performing vertex unification")
 	vid := Identify(g, sd)
 
 	if vid == 0 {
+		logEntry.Debug("No match on unification, creating new vertex")
 		final = VertexTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		g.vserial += 1
 		final.id = g.vserial
@@ -283,8 +307,10 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple)
 		for _, spec := range sd.EdgeSpecs {
 			switch spec.(type) {
 			case interpret.EnvLink, SpecDatasetHierarchy:
+				logEntry.Debugf("Doing early resolve on EdgeSpec of type %T", spec)
 				edge, success := Resolve(g, msgid, final, spec)
 				if success { // could fail if corresponding env not yet declared
+					logEntry.Debug("Early resolve succeeded")
 					g.vserial += 1
 					edge.id = g.vserial
 					final.oe = final.oe.Set(i2a(edge.id), edge)
@@ -295,15 +321,24 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple)
 					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
 					g.vtuples = g.vtuples.Set(i2a(final.id), final)
+				} else {
+					logEntry.Debug("Early resolve failed")
 				}
 			}
 		}
 	} else {
+		logEntry.WithField("vid", vid).Debug("Unification to a match")
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
 		vt := ivt.(VertexTuple)
 
-		// TODO err
-		nu, _ := vt.v.Merge(sd.Vertex)
+		nu, err := vt.v.Merge(sd.Vertex)
+		if err != nil {
+			logEntry.WithFields(log.Fields{
+				"vid": vid,
+				"err": err,
+			}).Error("Vertex merge returned an error")
+		}
+
 		final = VertexTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
 		g.vtuples = g.vtuples.Set(i2a(vid), final)
 	}
