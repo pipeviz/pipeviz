@@ -1,6 +1,6 @@
 # Fedora Dockerfile 0.1.1
 #
-# Build the docker container
+# Build the docker image 
 # docker  build -f Dockerfile.fedora -t eliza411/pipeviz .
 #
 # Run the container
