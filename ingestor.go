@@ -10,9 +10,9 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/middleware"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
+	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/represent"
 )
 
@@ -39,7 +39,7 @@ func (s *Ingestor) RunHttpIngestor(addr string) {
 func (s *Ingestor) buildIngestorMux() *web.Mux {
 	mb := web.New()
 	// TODO use more appropriate logger
-	mb.Use(middleware.Logger)
+	mb.Use(log.NewHttpLogger("ingestor"))
 	// Add middleware limiting body length to MaxMessageSize
 	mb.Use(func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {

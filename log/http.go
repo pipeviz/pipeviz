@@ -9,43 +9,40 @@ import (
 
 // TODO this is kinda hacked together, give it a once-over check
 
-// HttpLogger is pipeviz' logging http middleware. It implements http.Handler.
-type HttpLogger struct {
-	handler http.Handler
-	service string
-	log     *logrus.Logger
-}
-
 // NewHttpLogger returns an HttpLogger, suitable for use as http middleware.
-func NewHttpLogger(service string, log *logrus.Logger, h http.Handler) http.Handler {
-	entry := logrus.WithFields(logrus.Fields{
-		"service": service,
-	})
+func NewHttpLogger(service string) func(h http.Handler) http.Handler {
+	middleware := func(h http.Handler) http.Handler {
+		entry := logrus.WithFields(logrus.Fields{
+			"service": service,
+		})
 
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		lw := &basicWriter{ResponseWriter: w}
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			lw := &basicWriter{ResponseWriter: w}
 
-		entry.WithFields(logrus.Fields{
-			"uri":    r.URL.String(),
-			"method": r.Method,
-			"remote": r.RemoteAddr,
-		}).Info("Beginning request processing")
+			entry.WithFields(logrus.Fields{
+				"uri":    r.URL.String(),
+				"method": r.Method,
+				"remote": r.RemoteAddr,
+			}).Info("Beginning request processing")
 
-		t1 := time.Now()
-		h.ServeHTTP(lw, r)
+			t1 := time.Now()
+			h.ServeHTTP(lw, r)
 
-		lw.maybeWriteHeader()
+			lw.maybeWriteHeader()
 
-		entry.WithFields(logrus.Fields{
-			"status": lw.status(),
-			"uri":    r.URL.String(),
-			"method": r.Method,
-			"remote": r.RemoteAddr,
-			"wall":   time.Now().Sub(t1).String(),
-		}).Info("Request processing complete")
+			entry.WithFields(logrus.Fields{
+				"status": lw.status(),
+				"uri":    r.URL.String(),
+				"method": r.Method,
+				"remote": r.RemoteAddr,
+				"wall":   time.Now().Sub(t1).String(),
+			}).Info("Request processing complete")
+		}
+
+		return http.HandlerFunc(fn)
 	}
 
-	return http.HandlerFunc(fn)
+	return middleware
 }
 
 // basicWriter wraps a http.ResponseWriter that implements the minimal
