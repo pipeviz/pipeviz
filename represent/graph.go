@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
 )
@@ -66,6 +67,10 @@ type coreGraph struct {
 }
 
 func NewGraph() CoreGraph {
+	log.WithFields(log.Fields{
+		"system": "engine",
+	}).Debug("New coreGraph created")
+
 	return &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 }
 
@@ -163,7 +168,15 @@ func (g *coreGraph) MsgId() uint64 {
 
 // the method to merge a message into the graph
 func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
+	// TODO use a buffering pool to minimize allocs
 	var ess edgeSpecSet
+
+	logEntry := log.WithFields(log.Fields{
+		"system": "engine",
+		"msgid":  msg.Id,
+	})
+
+	logEntry.Infof("Merging message %d into graph", msg.Id)
 
 	g := og.clone()
 	g.msgid = msg.Id
@@ -171,8 +184,12 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	// Process incoming elements from the message
 	msg.Each(func(d interface{}) {
 		// Split each input element into vertex and edge specs
-		// TODO errs
-		sds, _ := Split(d, msg.Id)
+		sds, err := Split(d, msg.Id)
+
+		if err != nil {
+			logEntry.WithField("err", err).Warnf("Error while splitting input element of type %T; discarding", d)
+			return
+		}
 
 		// Ensure vertices are present
 		var tuples []VertexTuple
@@ -189,7 +206,9 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 			})
 		}
 	})
+	logEntry.Infof("Splitting all message elements produced %d edge spec sets", len(ess))
 
+	logEntry.Infof("Adding %d orphan edge spec sets from previous merges", len(g.orphans))
 	// Reinclude the held-over set of orphans for edge (re-)resolutions
 	var ess2 edgeSpecSet
 	// TODO lots of things very wrong with this approach, but works for first pass
@@ -202,6 +221,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 			vt, err := g.Get(orphan.vt.id)
 			if err != nil {
 				// but if that vid has gone away, forget about it completely
+				logEntry.Infof("Orphan vid %d went away, discarding from orphan list", orphan.vt.id)
 				continue
 			}
 			orphan.vt = vt
@@ -213,7 +233,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	// Put orphan stuff first so that it's guaranteed to be overwritten on conflict
 	ess = append(ess2, ess...)
 
-	// All vertices processed. now, process edges in passes, ensuring that each
+	// All vertices processed. Now, process edges in passes, ensuring that each
 	// pass diminishes the number of remaining edges. If it doesn't, the remaining
 	// edges need to be attached to null-vertices of the appropriate type.
 	//
@@ -224,28 +244,46 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	for ec = ess.EdgeCount(); ec != 0 && ec != lec; ec = ess.EdgeCount() {
 		pass += 1
 		lec = ec
+		l2 := logEntry.WithFields(log.Fields{
+			"pass":       pass,
+			"edge-count": ec,
+		})
+
+		l2.Debug("Beginning edge resolution pass")
 		for infokey, info := range ess {
+			l3 := logEntry.WithFields(log.Fields{
+				"vid":   info.vt.id,
+				"vtype": info.vt.v.Typ(),
+			})
 			specs := info.es
 			info.es = info.es[:0]
 			for _, spec := range specs {
+				l3.Debugf("Resolving EdgeSpec of type %T", spec)
 				edge, success := Resolve(g, msg.Id, info.vt, spec)
 				if success {
+					l4 := l3.WithField("target-vid", edge.Target)
+					l4.Debug("Successful edge resolution")
 
 					edge.Source = info.vt.id
 					if edge.id == 0 {
 						// new edge, allocate a new id for it
 						g.vserial++
 						edge.id = g.vserial
+						l4.WithField("edge-id", edge.id).Debug("New edge created")
+					} else {
+						l4.WithField("edge-id", edge.id).Debug("Edge will merge over existing edge")
 					}
 
 					info.vt.oe = info.vt.oe.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(info.vt.id), info.vt)
 
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
+
 					tvt := any.(VertexTuple)
 					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
 				} else {
+					l3.Debug("Unsuccessful edge resolution; reattempt on next pass")
 					// FIXME mem leaks if done this way...?
 					info.es = append(info.es, spec)
 				}
@@ -254,6 +292,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 			ess[infokey] = info
 		}
 	}
+	logEntry.WithField("passes", pass).Info("Edge resolution complete")
 
 	g.orphans = g.orphans[:0]
 	for _, info := range ess {
@@ -263,6 +302,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 
 		g.orphans = append(g.orphans, info)
 	}
+	logEntry.Infof("Adding %d orphan edge spec sets from previous merges", len(g.orphans))
 
 	return g
 }
@@ -272,9 +312,17 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 //
 // Either way, return value is the vid for the vertex.
 func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple) {
+	logEntry := log.WithFields(log.Fields{
+		"system": "engine",
+		"msgid":  msgid,
+		"vtype":  sd.Vertex.Typ(),
+	})
+
+	logEntry.Debug("Performing vertex unification")
 	vid := Identify(g, sd)
 
 	if vid == 0 {
+		logEntry.Debug("No match on unification, creating new vertex")
 		final = VertexTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
 		g.vserial += 1
 		final.id = g.vserial
@@ -283,8 +331,10 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple)
 		for _, spec := range sd.EdgeSpecs {
 			switch spec.(type) {
 			case interpret.EnvLink, SpecDatasetHierarchy:
+				logEntry.Debugf("Doing early resolve on EdgeSpec of type %T", spec)
 				edge, success := Resolve(g, msgid, final, spec)
 				if success { // could fail if corresponding env not yet declared
+					logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
 					g.vserial += 1
 					edge.id = g.vserial
 					final.oe = final.oe.Set(i2a(edge.id), edge)
@@ -295,15 +345,24 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple)
 					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
 					g.vtuples = g.vtuples.Set(i2a(final.id), final)
+				} else {
+					logEntry.Debug("Early resolve failed")
 				}
 			}
 		}
 	} else {
+		logEntry.WithField("vid", vid).Debug("Unification resulted in match")
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
 		vt := ivt.(VertexTuple)
 
-		// TODO err
-		nu, _ := vt.v.Merge(sd.Vertex)
+		nu, err := vt.v.Merge(sd.Vertex)
+		if err != nil {
+			logEntry.WithFields(log.Fields{
+				"vid": vid,
+				"err": err,
+			}).Warn("Merge of vertex properties returned an error; vertex will continue update into graph anyway")
+		}
+
 		final = VertexTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
 		g.vtuples = g.vtuples.Set(i2a(vid), final)
 	}

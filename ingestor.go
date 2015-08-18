@@ -7,12 +7,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/middleware"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
+	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/represent"
 )
 
@@ -30,16 +31,24 @@ type Ingestor struct {
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 //
 // Closes the provided interpretation channel if/when the http server terminates.
-func (s *Ingestor) RunHttpIngestor(addr string) {
-	// TODO receive returned error and log if non-nil
-	graceful.ListenAndServe(addr, s.buildIngestorMux())
+func (s *Ingestor) RunHttpIngestor(addr string) error {
+	err := graceful.ListenAndServe(addr, s.buildIngestorMux())
+	if err != nil {
+
+		logrus.WithFields(logrus.Fields{
+			"service": "ingestor",
+			"err":     err,
+		}).Error("Ingestion httpd failed to start")
+	}
+
 	close(s.interpretChan)
+	return err
 }
 
 func (s *Ingestor) buildIngestorMux() *web.Mux {
 	mb := web.New()
 	// TODO use more appropriate logger
-	mb.Use(middleware.Logger)
+	mb.Use(log.NewHttpLogger("ingestor"))
 	// Add middleware limiting body length to MaxMessageSize
 	mb.Use(func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +66,6 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			// Too long, or otherwise malformed request body
-			// TODO add a body
 			w.WriteHeader(400)
 			w.Write([]byte(err.Error()))
 			return

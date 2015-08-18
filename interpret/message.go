@@ -4,7 +4,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
+
+	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 )
 
 type Message struct {
@@ -22,12 +23,19 @@ type message struct {
 	Cm  []CommitMeta `json:"commit-meta"`
 }
 
+// UnmarshalJSON implements the json.Unmarshaler interface. It translates a
+// JSON message into a series of discrete objects that can then be merged
+// into the graph.
 func (m *Message) UnmarshalJSON(data []byte) error {
+	logEntry := log.WithFields(log.Fields{
+		"system": "interpet",
+		"msgid":  m.Id,
+	})
+
 	m.m = new(message)
 	err := json.Unmarshal(data, m.m)
 	if err != nil {
-		// FIXME logging
-		fmt.Println(err)
+		logEntry.WithField("err", err).Info("Error while unmarshaling message JSON")
 	}
 
 	// TODO separate all of this into pluggable/generated structures
@@ -63,36 +71,55 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Each takes an injected iteration function, traverses all the objects
+// translated from the JSON, and passes them into the function. Iteration
+// cannot be prematurely terminated by the injected function.
 func (m *Message) Each(f func(vertex interface{})) {
+	logEntry := log.WithFields(log.Fields{
+		"system": "interpet",
+		"msgid":  m.Id,
+	})
+
 	for _, e := range m.m.Env {
+		logEntry.WithField("vtype", "environment").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 	for _, e := range m.m.Ls {
 		if e.ID.CommitStr != "" {
 			byts, err := hex.DecodeString(e.ID.CommitStr)
-			// TODO ...validation, logging, sth
 			if err != nil {
-				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+				log.WithFields(log.Fields{
+					"system":    "interpet",
+					"semantics": true, // TODO have some constants/errtypes for this
+				}).Warn("Invalid input: logic state's referenced commit sha1 was not hex encoded")
 			}
 			copy(e.ID.Commit[:], byts[0:20])
 			e.ID.CommitStr = ""
 		}
 
+		logEntry.WithField("vtype", "logic state").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 	for _, e := range m.m.Pds {
+		logEntry.WithField("vtype", "parent dataset").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 	for _, e := range m.m.Ds {
+		logEntry.WithField("vtype", "dataset").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 	for _, e := range m.m.P {
+		logEntry.WithField("vtype", "process").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 	for _, e := range m.m.C {
 		byts, err := hex.DecodeString(e.Sha1Str)
 		if err != nil {
-			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			log.WithFields(log.Fields{
+				"system":    "interpet",
+				"semantics": true, // TODO have some constants/errtypes for this
+			}).Warn("Invalid input: commit sha1 was not hex encoded. Skipping item")
+			continue
 		}
 		copy(e.Sha1[:], byts[0:20])
 		e.Sha1Str = ""
@@ -100,7 +127,11 @@ func (m *Message) Each(f func(vertex interface{})) {
 		for _, pstr := range e.ParentsStr {
 			byts, err := hex.DecodeString(pstr)
 			if err != nil {
-				panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+				log.WithFields(log.Fields{
+					"system":    "interpet",
+					"semantics": true, // TODO have some constants/errtypes for this
+				}).Warn("Invalid input: commit parent sha1 was not hex encoded. Skipping parent")
+				continue
 			}
 			var sha1 Sha1
 			copy(sha1[:], byts[0:20])
@@ -108,16 +139,22 @@ func (m *Message) Each(f func(vertex interface{})) {
 		}
 		e.ParentsStr = nil
 
+		logEntry.WithField("vtype", "git commit").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 	for _, e := range m.m.Cm {
 		byts, err := hex.DecodeString(e.Sha1Str)
 		if err != nil {
-			panic("omgwtfbbq that has to be hex encoded") // FIXME panic lulz
+			log.WithFields(log.Fields{
+				"system":    "interpet",
+				"semantics": true, // TODO have some constants/errtypes for this
+			}).Warn("Invalid input: commit meta's referenced commit sha1 was not hex encoded. Skipping item")
+			continue
 		}
 		copy(e.Sha1[:], byts[0:20])
 		e.Sha1Str = ""
 
+		logEntry.WithField("vtype", "commit meta").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 }

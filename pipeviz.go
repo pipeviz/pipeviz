@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
+	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
@@ -16,15 +17,15 @@ import (
 	"github.com/tag1consulting/pipeviz/webapp"
 )
 
-// Pipeviz has two fully separated HTTP ports - one for input into the logic
+// Pipeviz uses two separate HTTP ports - one for input into the logic
 // machine, and one for graph data consumption. This is done primarily
 // because security/firewall concerns are completely different, and having
 // separate ports makes it much easier to implement separate policies.
 // Differing semantics are a contributing, but lesser consideration.
 const (
-	DefaultIngestionPort = 2309 // 2309, because Cayte
-	DefaultAppPort       = 8008
-	MaxMessageSize       = 5 << 20 // Max input message size is 5MB
+	DefaultIngestionPort int = 2309 // 2309, because Cayte
+	DefaultAppPort           = 8008
+	MaxMessageSize           = 5 << 20 // Max input message size is 5MB
 )
 
 var (
@@ -32,16 +33,29 @@ var (
 	dbPath  *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
 )
 
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp:  true,
+		DisableSorting: true,
+	})
+}
+
 func main() {
 	src, err := ioutil.ReadFile("./schema.json")
 	if err != nil {
-		panic(err.Error())
+		log.WithFields(log.Fields{
+			"system": "main",
+			"err":    err,
+		}).Fatal("Could not locate master schema file, exiting")
 	}
 
 	// The master JSON schema used for validating all incoming messages
 	masterSchema, err := gjs.NewSchema(gjs.NewStringLoader(string(src)))
 	if err != nil {
-		panic(err.Error())
+		log.WithFields(log.Fields{
+			"system": "main",
+			"err":    err,
+		}).Fatal("Error while creating a schema object from the master schema file, exiting")
 	}
 
 	// Channel to receive persisted messages from HTTP workers. 1000 cap to allow
@@ -59,14 +73,20 @@ func main() {
 
 	j, err := boltdb.NewBoltStore(*dbPath + "/journal.bolt")
 	if err != nil {
-		panic(err.Error())
+		log.WithFields(log.Fields{
+			"system": "main",
+			"err":    err,
+		}).Fatal("Error while setting up journal store, exiting")
 	}
 
 	// Restore the graph from the journal (or start from nothing if journal is empty)
 	// TODO move this down to after ingestor is started
 	g, err := restoreGraph(j)
 	if err != nil {
-		panic(err.Error())
+		log.WithFields(log.Fields{
+			"system": "main",
+			"err":    err,
+		}).Fatal("Error while rebuilding the graph from the journal")
 	}
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between

@@ -1,8 +1,7 @@
 package represent
 
 import (
-	"fmt"
-
+	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
 )
@@ -12,14 +11,6 @@ func Identify(g CoreGraph, sd SplitData) int {
 	// default one didn't do it, use specialists to narrow further
 
 	switch sd.Vertex.(type) {
-	default:
-		if ids == nil {
-			return 0
-		} else if len(ids) == 1 {
-			return ids[0]
-		}
-
-		panic("ZOMG CAN'T IDENTIFY")
 	case vertexLogicState, vertexProcess, vertexComm, vertexParentDataset, vertexDataset:
 		// TODO vertexDataset needs special disambiguation; it has a second structural edge (poor idea anyway)
 		if len(ids) == 1 && definitive {
@@ -29,6 +20,18 @@ func Identify(g CoreGraph, sd SplitData) int {
 	case vertexTestResult:
 		return identifyByGitHashSpec(g, sd, ids)
 	}
+
+	if ids == nil {
+		return 0
+	} else if len(ids) == 1 {
+		return ids[0]
+	}
+
+	log.WithFields(log.Fields{
+		"system": "identification",
+		"vtype":  sd.Vertex.Typ(),
+	}).Panic("Vertex identification failed") // TODO much better info for this
+	panic("Vertex identification failed")
 }
 
 // Peforms a generalized search for vertex identification, with a particular head-nod to
@@ -55,7 +58,10 @@ func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
 
 	if chk == nil {
 		// TODO obviously this is just to canary; change to error when stabilized
-		panic(fmt.Sprintf("missing identify checker for type %T", sd.Vertex))
+		log.WithFields(log.Fields{
+			"system": "identification",
+			"vtype":  sd.Vertex.Typ(),
+		}).Panic("Missing identify checker for vertex type") // TODO much better info for this
 	}
 
 	filtered := matches[:0] // destructive zero-alloc filtering

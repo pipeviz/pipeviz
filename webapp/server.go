@@ -2,16 +2,16 @@ package webapp
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"path/filepath"
 	"text/template"
 	"time"
 
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/middleware"
 	"github.com/tag1consulting/pipeviz/broker"
+	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/represent"
 )
 
@@ -60,7 +60,7 @@ func init() {
 func NewMux() *web.Mux {
 	m := web.New()
 
-	m.Use(middleware.Logger)
+	m.Use(log.NewHttpLogger("webapp"))
 	m.Get("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetDir))))
 	m.Get("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir(jsDir))))
 	m.Get("/", WebRoot)
@@ -94,7 +94,10 @@ func WebRoot(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles(filepath.Join(tmplDir, "index.html"))
 	if err != nil {
-		log.Fatal(err)
+		logrus.WithFields(logrus.Fields{
+			"system": "webapp",
+			"err":    err,
+		}).Error("Failed to parse index.html template file")
 	}
 	t.Execute(w, vars)
 }
@@ -102,8 +105,15 @@ func WebRoot(w http.ResponseWriter, r *http.Request) {
 func OpenSocket(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		entry := logrus.WithFields(logrus.Fields{
+			"system": "webapp",
+			"err":    err,
+		})
+
 		if _, ok := err.(websocket.HandshakeError); !ok {
-			log.Println(err)
+			entry.Error("Error on attempting upgrade to websocket")
+		} else {
+			entry.Warn("Handshake error on websocket upgrade")
 		}
 		return
 	}
@@ -155,7 +165,10 @@ func wsWriter(ws *websocket.Conn) {
 func graphToSock(ws *websocket.Conn, g represent.CoreGraph) {
 	j, err := graphToJson(g)
 	if err != nil {
-		log.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"system": "webapp",
+			"err":    err,
+		}).Error("Error while marshaling graph into JSON for transmission over websocket")
 	}
 
 	if j != nil {

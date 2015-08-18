@@ -3,6 +3,7 @@ package represent
 import (
 	"bytes"
 
+	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 )
 
@@ -271,8 +272,11 @@ VertexInspector:
 
 		adjvt, err := g.Get(vid)
 		if err != nil {
-			// TODO panic, really?
-			panic("got nonexistent vid - should be impossible")
+			log.WithFields(log.Fields{
+				"system": "engine",
+				"err":    err,
+			}).Error("Attempted to get nonexistent vid during traversal - should be impossible")
+			continue
 		}
 
 		// FIXME can't rely on Typ() method here, need to store it
