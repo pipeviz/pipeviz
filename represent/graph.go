@@ -261,8 +261,12 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 				l3.Debugf("Resolving EdgeSpec of type %T", spec)
 				edge, success := Resolve(g, msg.Id, info.vt, spec)
 				if success {
-					l4 := l3.WithField("target-vid", edge.Target)
-					l4.Debug("Successful edge resolution")
+					l4 := l3.WithFields(log.Fields{
+						"target-vid": edge.Target,
+						"etype":      edge.EType,
+					})
+
+					l4.Debug("Edge resolved successfully")
 
 					edge.Source = info.vt.id
 					if edge.id == 0 {
