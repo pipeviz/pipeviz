@@ -29,7 +29,7 @@ var reachCounter = function() {
                 visited[value] = true;
                 return accum.concat(_.foldl(_.filter(g.predecessors(value), function(v) { return !_.has(visited,v); }), r, [value]));
             }, function(accum, value) { return value; });
-            r.cache = mpfc;
+            r.cache = mpfc.cache;
 
             if (pred === undefined || pred.length === 0) {
                 return 0;
@@ -54,7 +54,7 @@ var reachCounter = function() {
                 visited[value] = true;
                 return accum.concat(_.foldl(_.filter(g.successors(value), function(v) { return !_.has(visited,v); }), r, [value]));
             }, function(accum, value) { return value; });
-            r.cache = msfc;
+            r.cache = msfc.cache;
 
             if (succ === undefined) {
                 return 0;
