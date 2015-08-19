@@ -174,6 +174,10 @@ func graphToSock(ws *websocket.Conn, g represent.CoreGraph) {
 	if j != nil {
 		ws.SetWriteDeadline(time.Now().Add(writeWait))
 		if err := ws.WriteMessage(websocket.TextMessage, j); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"system": "webapp",
+				"err":    err,
+			}).Error("Error while writing graph data to websocket")
 			return
 		}
 	}
