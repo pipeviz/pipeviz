@@ -366,6 +366,8 @@ function extractVizGraph(pvg, repo, noelide) {
         ediam = diameter;
     }
 
+    // A 'segment' is an unbroken chain of commits that have only one parent commit
+    // (of degree 0 or 1 in the reduced commit tree)
     var segmentinfo = _(vmeta)
         .mapValues(function(v, k) {
             return {
@@ -426,7 +428,7 @@ function extractVizGraph(pvg, repo, noelide) {
             }), function(meta, rank) {
                 segmentinfo[meta.segment].rank = Math.max(segmentinfo[meta.segment].rank, rank);
             });
-        });
+        }).value();
 
     // FINALLY, assign x and y coords to all visible vertices
     var vertices;
