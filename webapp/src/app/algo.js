@@ -383,8 +383,8 @@ function extractVizGraph(pvg, repo, noelide) {
             return {
                 ids: _.map(v, function(v2) { return v2.id; }),
                 pseg: v[0].pseg, // parent seg (pseg) must be the same for all vertices in a seg
-                maxreach: _.max(v, 'reach'),
-                maxtreach: _.max(v, 'treach'),
+                maxreach: _.max(v, 'reach').reach,
+                maxtreach: _.max(v, 'treach').treach,
                 rank: 0,
             };
         })
