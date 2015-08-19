@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/mutil"
 )
 
 // TODO this is kinda hacked together, give it a once-over check
@@ -17,7 +18,7 @@ func NewHttpLogger(service string) func(h http.Handler) http.Handler {
 		})
 
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			lw := &basicWriter{ResponseWriter: w}
+			lw := mutil.WrapWriter(w)
 
 			entry.WithFields(logrus.Fields{
 				"uri":    r.URL.String(),
@@ -28,10 +29,12 @@ func NewHttpLogger(service string) func(h http.Handler) http.Handler {
 			t1 := time.Now()
 			h.ServeHTTP(lw, r)
 
-			lw.maybeWriteHeader()
+			if lw.Status() == 0 {
+				lw.WriteHeader(http.StatusOK)
+			}
 
 			entry.WithFields(logrus.Fields{
-				"status": lw.status(),
+				"status": lw.Status(),
 				"uri":    r.URL.String(),
 				"method": r.Method,
 				"remote": r.RemoteAddr,
@@ -43,40 +46,4 @@ func NewHttpLogger(service string) func(h http.Handler) http.Handler {
 	}
 
 	return middleware
-}
-
-// basicWriter wraps a http.ResponseWriter that implements the minimal
-// http.ResponseWriter interface.
-type basicWriter struct {
-	http.ResponseWriter
-	wroteHeader bool
-	code        int
-	bytes       int
-}
-
-func (b *basicWriter) WriteHeader(code int) {
-	if !b.wroteHeader {
-		b.code = code
-		b.wroteHeader = true
-		b.ResponseWriter.WriteHeader(code)
-	}
-}
-
-func (b *basicWriter) Write(buf []byte) (int, error) {
-	b.maybeWriteHeader()
-	return b.ResponseWriter.Write(buf)
-}
-
-func (b *basicWriter) maybeWriteHeader() {
-	if !b.wroteHeader {
-		b.WriteHeader(http.StatusOK)
-	}
-}
-
-func (b *basicWriter) status() int {
-	return b.code
-}
-
-func (b *basicWriter) Unwrap() http.ResponseWriter {
-	return b.ResponseWriter
 }
