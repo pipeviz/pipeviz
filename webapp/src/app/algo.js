@@ -208,7 +208,7 @@ var vizExtractor = {
 
         return fg;
     },
-    treeAndRoot: function(cg, boundaryCommits, elide) {
+    treeAndRoot: function(cg, boundaryCommits) {
         var tree = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
@@ -249,13 +249,6 @@ var vizExtractor = {
             treewalk(k);
         });
 
-        // But if we're not doing elision, then ALSO walk from sources.
-        if (!elide) {
-            //_.each(cg.sources(), function(d) {
-                //treewalk(d);
-            //});
-        }
-
         // Now we have to find the topologically greatest common root among all candidates.
         var root;
 
@@ -286,7 +279,7 @@ var vizExtractor = {
 
         return [tree, root];
     },
-    extractTree: function(cg, tree, root, focalCommits) {
+    extractTree: function(cg, tree, root, focalCommits, noelideCommits) {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
@@ -296,34 +289,31 @@ var vizExtractor = {
         mainwalk = function(v, path, segment, pseg) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
             var succ = tree.successors(v) || [];
-            if (_.has(focalCommits, v)) {
+
+            // we always record something into vmeta, and everything except 'interesting' is
+            // always the same
+            vmeta[v] = {
+                depth: path.length, // distance from root
+                interesting: false, // assume the commit isn't interesting for now
+                // count of reachable focal commits in original commit graph
+                reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
+                // count of reachable focal commits in the tree/almost-induced subgraph
+                treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
+                segment: segment,
+                pseg: pseg
+            };
+
+            // now we decide if the commit is *also* interesting
+            if (_.has(focalCommits, v) || _.has(noelideCommits, v)) {
+                // all focal or noelide commits are interesting
                 idepths.push(path.length);
-                vmeta[v] = {
-                    depth: path.length, // distance from root
-                    interesting: true, // all focal commits are interesting
-                    // count of reachable focal commits in original commit graph
-                    reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
-                    // count of reachable focal commits in the tree/almost-induced subgraph
-                    treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
-                    segment: segment,
-                    pseg: pseg
-                };
+                vmeta[v].interesting = true;
             } else {
-                var psucc = path.length === 0 ? [] : tree.successors(path[path.length -1]),
-                // interesting only if has multiple successors, or parent did
-                interesting = succ.length > 1 || psucc.length > 1;
-
-                vmeta[v] = {
-                    depth: path.length,
-                    interesting: interesting,
-                    reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
-                    treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
-                    segment: segment,
-                    pseg: pseg
-                };
-
-                if (interesting) {
-                    // if this one's interesting, push it onto the idepths list
+                // otherwise, only interesting if the commit or its parent has multiple successors
+                var psucc = path.length === 0 ? [] : tree.successors(path[path.length -1]);
+                if (succ.length > 1 || psucc.length > 1) {
+                    vmeta[v].interesting = true;
+                    // also push it onto the idepths list
                     idepths.push(path.length);
                 }
             }
@@ -378,11 +368,11 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
 
         // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
-    var tr = vizExtractor.treeAndRoot(cg, boundaryCommits, elide),
+    var tr = vizExtractor.treeAndRoot(cg, boundaryCommits),
         tree = tr[0],
         root = tr[1];
 
-    var main = vizExtractor.extractTree(cg, tree, root, focalCommits),
+    var main = vizExtractor.extractTree(cg, tree, root, focalCommits, noelideCommits),
         vmeta = main[0],
         protolinks = main[1],
         diameter = main[2],
