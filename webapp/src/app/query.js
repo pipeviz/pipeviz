@@ -11,13 +11,18 @@ var appsFromRepo = function(graph, repo) {
 };
 
 var getCommit = function(g, d) {
-    if (d.Typ() === "logic-state") {
-        var vedges = _.filter(_.map(d.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
-        if (vedges.length !== 0) {
-            return g.get(vedges[0].target);
-        }
-    } else if (d.Typ() === "commit") {
-        return d;
+    switch (d.Typ()) {
+        case "logic-state":
+        case "git-tag":
+        case "git-branch":
+            var vedges = _.filter(_.map(d.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
+            if (vedges.length !== 0) {
+                return g.get(vedges[0].target);
+            }
+            break;
+
+        case "commit":
+            return d;
     }
     return;
 };

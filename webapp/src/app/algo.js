@@ -69,15 +69,17 @@ var reachCounter = function() {
 };
 
 // Bitmask constants representing the different ways a commit can operate within the pipeline viz algo.
-// In practice, boundary commits will typically also be focal, but this is not necessarily the case, so
-// the mask tracks the properties separately.
+// Focals are usually noelide and boundaries are usually focal and noelide, but this is not necessarily
+// the case, so the mask keeps each property separate.
 // TODO declare as const w/ES6
 
     // Commit is used as a boundary in establishing the range of commits to visualize.
-var V_BOUNDARY = 0x02,
+var V_BOUNDARY = 0x04,
+    // If the commit is in range, the reduced commit tree should include a path to it.
+    V_FOCAL = 0x02,
     // If the commit is in range, it should never be elided.
-    V_FOCAL = 0x01,
-    // Uninteresting, won't show up unless something else draws it in. The default.
+    V_NOELIDE = 0x01,
+    // Uninteresting, won't show up unless something else draws it in. This is default.
     V_UNINTERESTING = 0x00;
 
 var vizExtractor = {
@@ -94,8 +96,44 @@ var vizExtractor = {
                 return count < accum[1] ? accum : [repo, count];
             }, ["", 0])[0];
     },
-    findGuideCommits: function(pvg, repo, branches, tags) {
+    // Searches the pvg for commits that will play various roles in determining the boundaries
+    // and spatial positions in the pipeline visualization.
+    findGuideCommits: function(pvg, repo, branchlvl, taglvl) {
+        var guide = {};
 
+        // FIXME note that the old method dup'd the vertex object - will need to do that somewhere else now
+        // TODO doing it all in one pass b/c pvg is dumb and it's O(n) to get vertex subsets
+        _.each(pvg.vertices(pq.or(isType("git-branch"), isType("git-tag"), isType("logic-state"))), function(v) {
+            var level = V_UNINTERESTING,
+                commit = getCommit(pvg, v);
+
+            if (commit !== undefined && commit.propv("repository") === repo) {
+                switch (v.Typ()) {
+                    case "logic-state":
+                        level = V_BOUNDARY | V_FOCAL | V_NOELIDE;
+                    break;
+                    case "git-tag":
+                        level = taglvl;
+                    break;
+                    case "git-branch":
+                        level = branchlvl;
+                    break;
+                }
+
+                if (!_.has(guide, commit.id)) {
+                    guide[commit.id] = {
+                        level: 0,
+                        assoc: [],
+                    };
+                }
+
+                // levels are designed to be additive, so we always OR them together here
+                guide[commit.id].level |= level;
+                guide[commit.id].assoc.push(v);
+            }
+        });
+
+        return guide;
     },
     focalLogicStateByRepo: function(pvg, repo) {
         var focalCommits = {},

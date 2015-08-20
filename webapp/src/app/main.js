@@ -167,10 +167,10 @@ var VizPrep = React.createClass({
             JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts);
     },
     render: function() {
-        // TODO hardcode branches/tags as focal for now
-        var branches = V_FOCAL,
-            tags = V_FOCAL,
-            guides = vizExtractor.findGuideCommits(this.props.graph, repo, branches, tags);
+        // TODO hardcode branches/tags for now
+        var branches = V_FOCAL | V_NOELIDE,
+            tags = V_NOELIDE,
+            guides = vizExtractor.findGuideCommits(this.props.graph, this.props.focalRepo, branches, tags);
 
         return React.createElement(Viz, {
             width: this.props.width,
