@@ -68,16 +68,18 @@ var reachCounter = function() {
     };
 };
 
-//var vizExtractorProto = {
-    //apply: function(pvg) {
-        //this._pvg = pvg;
-    //}
-//},
-//vizExtractor = function(pvg) {
-    //var ve = Object.create(vizExtractorProto);
-    //ve.apply(pvg);
-    //return ve;
-//}
+// Bitmask constants representing the different ways a commit can operate within the pipeline viz algo.
+// In practice, boundary commits will typically also be focal, but this is not necessarily the case, so
+// the mask tracks the properties separately.
+// TODO declare as const w/ES6
+
+    // Commit is used as a boundary in establishing the range of commits to visualize.
+var V_BOUNDARY = 0x02,
+    // If the commit is in range, it should never be elided.
+    V_FOCAL = 0x01,
+    // Uninteresting, won't show up unless something else draws it in. The default.
+    V_UNINTERESTING = 0x00;
+
 var vizExtractor = {
     mostCommonRepo: function(pvg) {
         return _(pvg.verticesWithType("logic-state"))
@@ -91,6 +93,9 @@ var vizExtractor = {
             .reduce(function(accum, count, repo) {
                 return count < accum[1] ? accum : [repo, count];
             }, ["", 0])[0];
+    },
+    findGuideCommits: function(pvg, repo, branches, tags) {
+
     },
     focalLogicStateByRepo: function(pvg, repo) {
         var focalCommits = {},
