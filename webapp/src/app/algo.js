@@ -74,11 +74,13 @@ var reachCounter = function() {
 // TODO declare as const w/ES6
 
     // Commit is used as a boundary in establishing the range of commits to visualize.
-var V_BOUNDARY = 0x04,
+var V_BOUNDARY = 0x08,
+    // Consider this commit when performing reachability counts (for segment spread ranking).
+    V_REACHRANK = 0x04,
     // If the commit is in range, the reduced commit tree should include a path to it.
     V_FOCAL = 0x02,
-    // If the commit is in range, it should never be elided.
-    V_NOELIDE = 0x01,
+    // If the commit is in range, don't elide it - there's something interesting there.
+    V_INTERESTING = 0x01,
     // Uninteresting, won't show up unless something else draws it in. This is default.
     V_UNINTERESTING = 0x00;
 
@@ -110,7 +112,7 @@ var vizExtractor = {
             if (commit !== undefined && commit.propv("repository") === repo) {
                 switch (v.Typ()) {
                     case "logic-state":
-                        level = V_BOUNDARY | V_FOCAL | V_NOELIDE;
+                        level = V_BOUNDARY | V_FOCAL | V_INTERESTING | V_REACHRANK;
                     break;
                     case "git-tag":
                         level = taglvl;
@@ -279,7 +281,7 @@ var vizExtractor = {
 
         return [tree, root];
     },
-    extractTree: function(cg, tree, root, focalCommits, noelideCommits) {
+    extractTree: function(cg, tree, root, focalCommits, interestingCommits, rankCommits) {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
@@ -295,16 +297,16 @@ var vizExtractor = {
             vmeta[v] = {
                 depth: path.length, // distance from root
                 interesting: false, // assume the commit isn't interesting for now
-                // count of reachable focal commits in original commit graph
-                reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
-                // count of reachable focal commits in the tree/almost-induced subgraph
-                treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
+                // count of reachable ranking commits in original commit graph
+                reach: rc.throughPredecessors(cg, v, _.keys(rankCommits)),
+                // count of reachable ranking commits in the tree/almost-induced subgraph
+                treach: rc.throughSuccessors(tree, v, _.keys(rankCommits)),
                 segment: segment,
                 pseg: pseg
             };
 
             // now we decide if the commit is *also* interesting
-            if (_.has(focalCommits, v) || _.has(noelideCommits, v)) {
+            if (_.has(focalCommits, v) || _.has(interestingCommits, v)) {
                 // all focal or noelide commits are interesting
                 idepths.push(path.length);
                 vmeta[v].interesting = true;
@@ -359,7 +361,8 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
 //function extractVizGraph(pvg, repo, elide) {
     var boundaryCommits = _.pick(guideCommits, function(gc) { return gc.level & V_BOUNDARY; }),
         focalCommits = _.pick(guideCommits, function(gc) { return gc.level & V_FOCAL; }),
-        noelideCommits = _.pick(guideCommits, function(gc) { return gc.level & V_NOELIDE; });
+        interestingCommits = _.pick(guideCommits, function(gc) { return gc.level & V_INTERESTING; }),
+        rankCommits = _.pick(guideCommits, function(gc) { return gc.level & V_REACHRANK; });
 
     // We must have boundary commits for the algorithm to do anything. If there are none, bail.
     if (boundaryCommits.length === 0) {
@@ -372,7 +375,7 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
         tree = tr[0],
         root = tr[1];
 
-    var main = vizExtractor.extractTree(cg, tree, root, focalCommits, noelideCommits),
+    var main = vizExtractor.extractTree(cg, tree, root, focalCommits, interestingCommits, rankCommits),
         vmeta = main[0],
         protolinks = main[1],
         diameter = main[2],
