@@ -58,13 +58,21 @@ var pvGraphProto = {
         });
     },
     // Returns a graphlib.Graph object representing the graph(s) of all known
-    // commit objects.
+    // commit objects. If an argument is passed, it is assumed to be the name
+    // of the repo to which results should be restricted.
     commitGraph: function() {
-        var g = new graphlib.Graph();
-        var that = this;
+        var fltr,
+            g = new graphlib.Graph();
+            that = this;
 
-        //_.each(_.filter(this._objects, filters.vertices), function(vertex) {
-        _.each(_.filter(this._objects, function(d) { return filters.vertices(d) && isType("commit")(d); }), function(commit) {
+        if (arguments.length === 0) {
+            fltr = pq.and(filters.vertices, isType("commit"));
+        } else {
+            var repo = arguments[0];
+            fltr = pq.and(filters.vertices, isType("commit"), function(c) { return c.propv("repository") === repo; });
+        }
+
+        _.each(_.filter(this._objects, fltr), function(commit) {
             g.setNode(commit.id);
             _.each(_.filter(_.map(commit.outEdges, function(edgeId) { return that.get(edgeId); }), isType("parent-commit")), function (edge) {
                 g.setEdge(commit.id, edge.target, edge.prop("pnum").value);
