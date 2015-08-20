@@ -367,7 +367,7 @@ function extractVizGraph(pvg, repo, noelide) {
     }
 
     // A 'segment' is an unbroken chain of commits that have only one parent commit
-    // (of degree 0 or 1 in the reduced commit tree)
+    // (of degree 0 or 1 in the simplified commit tree)
     var segmentinfo = _(vmeta)
         .mapValues(function(v, k) {
             return {
@@ -387,48 +387,60 @@ function extractVizGraph(pvg, repo, noelide) {
                 maxtreach: _.max(v, 'treach').treach,
                 rank: 0,
             };
-        })
-        .value(); // object keyed by segment number w/segment info
+        }).value(); // object keyed by segment number w/segment info
 
-    _(vmeta).groupBy(function(v) { return v.depth; })
-        .each(function(metas, x) {
-            _.each(metas.sort(function(a, b) {
-                // for shorthand
-                var ab = segmentinfo[a.segment],
-                    bb = segmentinfo[b.segment];
+    // Next, we determine rankings for each segment.
+    //
+    // Begin by grouping vertex metadata by their depth in the tree, then iterate across
+    // the groups. It is inherently guaranteed that each segment has at most one member
+    // in each depth group.
+    _.each(_.groupBy(vmeta, function(v) { return v.depth; }), function(depthgroup) {
+        // Up to four-dimensional sort of depth group. When this is complete, the depth
+        // group is sorted by appropriate rank.
+        //
+        depthgroup.sort(function(a, b) {
+            // for shorthand
+            var ab = segmentinfo[a.segment],
+                bb = segmentinfo[b.segment];
 
-                // Multi-layer sort. First layer is treach
-                if (ab.maxtreach === bb.maxtreach) {
-                    // Second layer is reach.
-                    if (ab.maxreach === bb.maxreach) {
-                        // Next, we go by the length of the segment.
-                        if (ab.ids.length === bb.ids.length) {
-                            // If all of these are equal, we have to make an arbitrary decision,
-                            // which we persist as rank. So we check rank first to see if that's
-                            // already happened
-                            if (ab.rank === bb.rank) {
-                                // TODO do we need a flag to indicate it's set this way?
-                                bb.rank += 1;
-                                return -1;
-                            } else { // Cascade back down through elses
-                                return ab.rank - bb.rank;
-                            }
-                        } else {
-                            // We want the longer one
-                            return ab.ids.length - bb.ids.length;
-                        }
-                    } else {
-                        // more reach is better
-                        return ab.maxreach - bb.maxreach;
-                    }
-                } else {
-                    // more treach is better
-                    return ab.maxtreach - bb.maxtreach;
-                }
-            }), function(meta, rank) {
-                segmentinfo[meta.segment].rank = Math.max(segmentinfo[meta.segment].rank, rank);
-            });
-        }).value();
+            // Multi-dimensional sort. First is tree-reach ("treach"), which is the number
+            // of focal commits reachable in the tree extracted from the commit graph. We
+            // compare the maximum value in each segment.
+            if (ab.maxtreach !== bb.maxtreach) {
+                return bb.maxtreach - ab.maxtreach;
+
+            // Second is reach, which is the number of focal commits reachable in the
+            // original commit graph. Again, we compare the maximum value in the
+            // segment, not the reach of the individual vertex.
+            } else if (ab.maxreach !== bb.maxreach) {
+                return bb.maxreach - ab.maxreach;
+
+            // If both of those are the same, then we prefer the longer segment.
+            } else if (ab.ids.length !== bb.ids.length) {
+                return bb.ids.length - ab.ids.length;
+
+            // If all of these are equal, check to see if different ranks have already
+            // been assigned for segments, and rely on those.
+            } else if (ab.rank !== bb.rank) {
+                return ab.rank - bb.rank;
+
+            // If all of these are equal, we have to make an arbitrary decision,
+            // which we persist as rank. So we check rank first to see if that's
+            // already happened
+            } else { // Cascade back down through elses
+                // TODO could this change compare order results? doing so makes sort's behavior undefined
+                // TODO do we need a flag to indicate it's set this way?
+                bb.rank += 1;
+                return -1;
+            }
+        });
+
+        // With the depth group sorted, walk across it and ensure each segment's rank is at
+        // least that of its index within the sorted group.
+        _.each(depthgroup, function(meta, rank) {
+            segmentinfo[meta.segment].rank = Math.max(segmentinfo[meta.segment].rank, rank);
+        });
+    });
 
     // FINALLY, assign x and y coords to all visible vertices
     var vertices;
