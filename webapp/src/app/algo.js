@@ -164,7 +164,7 @@ var vizExtractor = {
 
         return fg;
     },
-    treeAndRoot: function(cg, focalCommits, noelide) {
+    treeAndRoot: function(cg, focalCommits, elide) {
         var tree = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
@@ -204,8 +204,9 @@ var vizExtractor = {
         _.each(focalCommits, function(d, k) {
             treewalk(k);
         });
+
         // But if we're not doing elision, then ALSO walk from sources.
-        if (noelide) {
+        if (!elide) {
             //_.each(cg.sources(), function(d) {
                 //treewalk(d);
             //});
@@ -320,7 +321,7 @@ var vizExtractor = {
  * for the app/commit viz.
  *
  */
-function extractVizGraph(pvg, repo, noelide) {
+function extractVizGraph(pvg, repo, elide) {
     var focals = vizExtractor.focalLogicStateByRepo(pvg, repo),
         focal = focals[0],
         focalCommits = focals[1];
@@ -332,7 +333,7 @@ function extractVizGraph(pvg, repo, noelide) {
     var cg = pvg.commitGraph(), // the git commit graph TODO narrow to only commits in repo
         // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
-        tr = vizExtractor.treeAndRoot(cg, focalCommits, noelide),
+        tr = vizExtractor.treeAndRoot(cg, focalCommits, elide),
         tree = tr[0],
         root = tr[1];
 
@@ -343,7 +344,7 @@ function extractVizGraph(pvg, repo, noelide) {
         idepths = main[3];
 
     var elidable, elranges, ediam;
-    if (!noelide) {
+    if (elide) {
         // now we have all the base meta; construct elidables lists and segment rankings
         elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; });
         // also compute the minimum set of contiguous elidable depths
@@ -444,7 +445,7 @@ function extractVizGraph(pvg, repo, noelide) {
 
     // FINALLY, assign x and y coords to all visible vertices
     var vertices;
-    if (!noelide) {
+    if (elide) {
         vertices = _(vmeta)
             .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
             .mapValues(function(v, k) {
@@ -480,7 +481,7 @@ function extractVizGraph(pvg, repo, noelide) {
         _.mapValues(segmentinfo, function() { return []; }),
         _.groupBy(vertices, function(v) { return v.segment; })
     );
-    if (!noelide) {
+    if (elide) {
 
         // build an offset map telling us how much a segment's internal offset should
         // be increased by to give the real x-position

@@ -171,7 +171,7 @@ var VizPrep = React.createClass({
             width: this.props.width,
             height: this.props.height,
             graph: this.props.graph,
-            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo, this.props.opts.noelide.flag),
+            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo, this.props.opts.elide.flag),
             opts: this.props.opts,
             selected: this.props.selected,
         });
@@ -267,7 +267,7 @@ var App = React.createClass({
             selected: undefined,
             opts: {
                 revx: {label: "Reverse x positions", flag: false},
-                noelide: {label: "No commit elision", flag: false},
+                elide: {label: "Elide boring commits", flag: false},
             },
         };
     },
