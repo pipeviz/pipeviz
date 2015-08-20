@@ -524,19 +524,19 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
             return _.indexOf(elidable, v.depth, true) === -1;
         }), function(v, k) {
             return _.assign({
-                ref: _.has(focalCommits, k) ? focalCommits[k].assoc[0] : pvg.get(k), // TODO handle multiple on same commit
+                ref: _.has(focalCommits, k) ? focalCommits[k].assoc : [pvg.get(k)],
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
             }, v);
         });
     } else {
         vertices = _.mapValues(vmeta, function(v, k) {
-                return _.assign({
-                    ref: _.has(focalCommits, k) ? focalCommits[k].assoc[0] : pvg.get(k), // TODO handle multiple on same commit
-                    x: v.depth, // without elision, depth is x
-                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
-                }, v);
-            });
+            return _.assign({
+                ref: _.has(focalCommits, k) ? focalCommits[k].assoc : [pvg.get(k)],
+                x: v.depth, // without elision, depth is x
+                y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+            }, v);
+        });
     }
 
     // Build up the list of links
