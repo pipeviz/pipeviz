@@ -210,14 +210,15 @@ var vizExtractor = {
 
         return fg;
     },
-    treeAndRoot: function(cg, boundaryCommits) {
+    treeAndRoot: function(cg, boundaryCommits, focalCommits) {
         var tree = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
 
-        // Nearly the same walk as for the focal graph, but only follow first
-        // parent. Builds root candidate list AND build the first-parent tree
-        // (almost an induced subgraph, but not quite) at the same time.
+        // To build the tree, we start from each boundary commit and walk back up the
+        // commit history, following ONLY first-parent. We carefully track every
+        // time the walker revisits a vertex, as each of these points is a candidate
+        // for being the root of the tree.
         var treewalk = function(v, last) {
             // We always want to record the (reversed) edge, unless last does not exist
             if (last !== undefined) {
@@ -233,7 +234,6 @@ var vizExtractor = {
             // Only visit first parent; that's the path that matters to our subgraph/tree
             // We also discount successors where the current commit is not the first parent,
             // as otherwise we'd still form a graph, not a tree.
-            // TODO this may not be great - https://github.com/tag1consulting/pipeviz/issues/108
             var succ = _.filter(cg.successors(v) || [], function(s) {
                 return cg.edge(v, s) === 1;
             });
@@ -251,33 +251,76 @@ var vizExtractor = {
             treewalk(k);
         });
 
-        // Now we have to find the topologically greatest common root among all candidates.
-        var root;
+        // Sort the candidates list so we can use binary search.
+        candidates.sort(function(a, b) { return a - b; });
 
-        // If there's only one boundary vertex then things are a little weird - for
+        // Now we have to find the topologically greatest common root among all candidates.
+        var root,
+        oob = {}; // Tracks "out-of-bound" commits; those between the natural root and the earliest candidate
+
+        // Things are a little weird if there's only one boundary vertex - for
         // one, the treewalk won't find any candidates. In that case, set the
         // candidates list to the single vertex itself.
         if (_.size(boundaryCommits) === 1) {
-            //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
-            root = _.keys(boundaryCommits)[0];
-        } else {
-            // This identifies the shared root (in git terms, the merge base) from all
-            // candidates by walking down the reversed subgraph/tree until we find a
-            // vertex in the candidate list. The first one we find is guaranteed to
-            // be the root.
-            var rootfind = function(v) {
-                if (candidates.indexOf(v) !== -1) {
-                    root = v;
-                    return;
-                }
-
-                var succ = tree.successors(v) || [];
-                if (succ.length > 0) {
-                    rootfind(succ[0]);
-                }
-            };
-            rootfind(tree.sources()[0]);
+            candidates.push(_.keys(boundaryCommits)[0]);
         }
+
+        // This identifies the shared root (in git terms, the merge base) from all
+        // candidates by walking down the reversed subgraph/tree until we find a
+        // vertex in the candidate list. The first one we find is guaranteed to
+        // be the root.
+        var rootfind = function(v) {
+            if (_.indexOf(candidates, v, true) !== -1) {
+                root = v;
+                return;
+            }
+
+            // Record this as an "out-of-bound" vertex
+            oob[v] = true;
+
+            var succ = tree.successors(v) || [];
+            if (succ.length > 0) {
+                rootfind(succ[0]);
+            }
+        };
+        rootfind(tree.sources()[0]);
+
+        // With the root found using the boundary commits, we now must do another walk
+        // through the commit graph using the focal commits as starting points, to see if
+        // they add any additional paths to the tree that weren't already covered by the
+        // boundary commits.
+        var focalwalk = function(init, v, path, last) {
+            // If there's a last visited, build up our list of edges to be optionally
+            // added to the tree
+            if (last !== undefined) {
+                path.push([v, last]);
+            }
+
+            // We infer from the treewalk's 'visited' map. If it's visited but oob,
+            // then we bail on the whole path; if it's visited and not oob, we incorporate
+            // the new path into the tree.
+            if (_.has(visited, v)) {
+                if (!_.has(oob, v)) {
+                    _.each(path, function(pair) {
+                        tree.setEdge(pair[0], pair[1]);
+                    });
+                }
+                return;
+            }
+
+            var succ = _.filter(cg.successors(v) || [], function(s) {
+                return cg.edge(v, s) === 1;
+            });
+            if (succ.length > 0) {
+                focalwalk(succ[0], v);
+            }
+
+            visited[v] = true;
+        };
+
+        _.each(focalCommits, function(d, k) {
+            focalwalk(k, k, []);
+        });
 
         return [tree, root];
     },
@@ -368,9 +411,9 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
         return;
     }
 
-        // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
+        // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm. also, it hasn't been refactored for the commit role tiers
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
-    var tr = vizExtractor.treeAndRoot(cg, boundaryCommits),
+    var tr = vizExtractor.treeAndRoot(cg, boundaryCommits, focalCommits),
         tree = tr[0],
         root = tr[1];
 
@@ -463,9 +506,8 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
                 return ab.rank - bb.rank;
 
             // If all of these are equal, we have to make an arbitrary decision,
-            // which we persist as rank. So we check rank first to see if that's
-            // already happened
-            } else { // Cascade back down through elses
+            // which is persisted to the segment's rank.
+            } else {
                 // TODO could this change compare order results? doing so makes sort's behavior undefined
                 // TODO do we need a flag to indicate it's set this way?
                 bb.rank += 1;
@@ -518,8 +560,8 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
         _.mapValues(segmentinfo, function() { return []; }),
         _.groupBy(vertices, function(v) { return v.segment; })
     );
-    if (elide) {
 
+    if (elide) {
         // build an offset map telling us how much a segment's internal offset should
         // be increased by to give the real x-position
         var segoffset = _.mapValues(segmentinfo, function(seg, k) {
