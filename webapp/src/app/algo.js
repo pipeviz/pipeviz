@@ -396,7 +396,6 @@ var vizExtractor = {
  *
  */
 function extractVizGraph(pvg, cg, guideCommits, elide) {
-//function extractVizGraph(pvg, repo, elide) {
     var boundaryCommits = _.pick(guideCommits, function(gc) { return gc.level & V_BOUNDARY; }),
         focalCommits = _.pick(guideCommits, function(gc) { return gc.level & V_FOCAL; }),
         interestingCommits = _.pick(guideCommits, function(gc) { return gc.level & V_INTERESTING; }),
