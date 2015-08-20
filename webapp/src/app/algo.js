@@ -154,6 +154,7 @@ var vizExtractor = {
 
         return [focal, focalCommits];
     },
+    // FIXME note that the sense of "focal" here is from before the refactoring that split the focal concept into the bitmask
     focalTransposedGraph: function(cg, focalCommits) {
         var fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
         visited = {},
@@ -207,7 +208,7 @@ var vizExtractor = {
 
         return fg;
     },
-    treeAndRoot: function(cg, focalCommits, elide) {
+    treeAndRoot: function(cg, boundaryCommits, elide) {
         var tree = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
@@ -241,10 +242,10 @@ var vizExtractor = {
             visited[v] = true;
         };
 
-        // Always walk the focal commit, b/c just walking sources can miss them
-        // if they're on a path that is only reachable from a sink along a n>1
+        // Always walk the boundary commits, b/c just walking the commit graph's source vertices
+        // can miss them if they're on a path that is only reachable from a sink along a n>1
         // parent of a merge.
-        _.each(focalCommits, function(d, k) {
+        _.each(boundaryCommits, function(d, k) {
             treewalk(k);
         });
 
@@ -258,12 +259,12 @@ var vizExtractor = {
         // Now we have to find the topologically greatest common root among all candidates.
         var root;
 
-        // If there's only one focal vertex then things are a little weird - for
+        // If there's only one boundary vertex then things are a little weird - for
         // one, the treewalk won't find any candidates. In that case, set the
         // candidates list to the single vertex itself.
-        if (_.size(focalCommits) === 1) {
+        if (_.size(boundaryCommits) === 1) {
             //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
-            root = _.keys(focalCommits)[0];
+            root = _.keys(boundaryCommits)[0];
         } else {
             // This identifies the shared root (in git terms, the merge base) from all
             // candidates by walking down the reversed subgraph/tree until we find a
@@ -364,19 +365,20 @@ var vizExtractor = {
  * for the app/commit viz.
  *
  */
-function extractVizGraph(pvg, repo, elide) {
-    var focals = vizExtractor.focalLogicStateByRepo(pvg, repo),
-        focal = focals[0],
-        focalCommits = focals[1];
+function extractVizGraph(pvg, cg, guideCommits, elide) {
+//function extractVizGraph(pvg, repo, elide) {
+    var boundaryCommits = _.pick(guideCommits, function(gc) { return gc.level & V_BOUNDARY; }),
+        focalCommits = _.pick(guideCommits, function(gc) { return gc.level & V_FOCAL; }),
+        noelideCommits = _.pick(guideCommits, function(gc) { return gc.level & V_NOELIDE; });
 
-    if (focal.length === 0) {
+    // We must have boundary commits for the algorithm to do anything. If there are none, bail.
+    if (boundaryCommits.length === 0) {
         return;
     }
 
-    var cg = pvg.commitGraph(), // the git commit graph TODO narrow to only commits in repo
         // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
-        tr = vizExtractor.treeAndRoot(cg, focalCommits, elide),
+    var tr = vizExtractor.treeAndRoot(cg, boundaryCommits, elide),
         tree = tr[0],
         root = tr[1];
 

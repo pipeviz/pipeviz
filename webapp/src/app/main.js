@@ -176,7 +176,8 @@ var VizPrep = React.createClass({
             width: this.props.width,
             height: this.props.height,
             graph: this.props.graph,
-            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo, this.props.opts.elide.flag),
+            //vizdata: extractVizGraph(this.props.graph, this.props.focalRepo, this.props.opts.elide.flag),
+            vizdata: extractVizGraph(this.props.graph, pvg.commitGraph(this.props.focalRepo), this.props.opts.elide.flag),
             opts: this.props.opts,
             selected: this.props.selected,
         });
