@@ -521,24 +521,23 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
     // FINALLY, assign x and y coords to all visible vertices
     var vertices;
     if (elide) {
-        vertices = _(vmeta)
-            .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
-            .mapValues(function(v, k) {
-                return _.assign({
-                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
-                    x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
-                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
-                }, v);
-            }).value();
+        vertices = _.mapValues(_.pick(vmeta, function(v) {
+            return _.indexOf(elidable, v.depth, true) === -1;
+        }), function(v, k) {
+            return _.assign({
+                ref: _.has(focalCommits, k) ? focalCommits[k].assoc[0] : pvg.get(k), // TODO handle multiple on same commit
+                x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
+                y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+            }, v);
+        });
     } else {
-        vertices = _(vmeta)
-            .mapValues(function(v, k) {
+        vertices = _.mapValues(vmeta, function(v, k) {
                 return _.assign({
-                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
+                    ref: _.has(focalCommits, k) ? focalCommits[k].assoc[0] : pvg.get(k), // TODO handle multiple on same commit
                     x: v.depth, // without elision, depth is x
                     y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
                 }, v);
-            }).value();
+            });
     }
 
     // Build up the list of links
