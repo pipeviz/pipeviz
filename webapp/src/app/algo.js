@@ -121,7 +121,7 @@ var vizExtractor = {
                 if (!_.has(guide, commit.id)) {
                     guide[commit.id] = {
                         level: 0,
-                        assoc: [],
+                        assoc: [commit],
                     };
                 }
 
@@ -524,7 +524,7 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
             return _.indexOf(elidable, v.depth, true) === -1;
         }), function(v, k) {
             return _.assign({
-                ref: _.has(focalCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
+                ref: _.has(festoonedCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
             }, v);
@@ -532,7 +532,7 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
     } else {
         vertices = _.mapValues(vmeta, function(v, k) {
             return _.assign({
-                ref: _.has(focalCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
+                ref: _.has(festoonedCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
                 x: v.depth, // without elision, depth is x
                 y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
             }, v);

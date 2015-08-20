@@ -24,19 +24,55 @@ var Viz = React.createClass({
         // x-coordinate space is the elided diameter as a factor of viewport width
         var selections = {},
             props = this.props,
-            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.flag);
+            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.flag),
+            LOGICSTATE = 0x01,
+            BRANCH = 0x02,
+            TAG = 0x04;
+
+        // put each referred-to vertex into a subarray of its own type for easy access & checking later
+        _.each(props.vizdata.vertices, function(v, k) {
+            v.refs = {
+                commits: [],
+                ls: [],
+                branches: [],
+                tags: [],
+            };
+
+            _.each(v.ref, function(v2) {
+                switch (v2.Typ()) {
+                    case "logic-state":
+                        v.refs.ls.push(v2);
+                        break;
+                    case "git-tag":
+                        v.refs.tags.push(v2);
+                        break;
+                    case "git-branch":
+                        v.refs.branches.push(v2);
+                        break;
+                    case "commit":
+                        v.refs.commits.push(v2);
+                        break;
+                }
+            });
+        });
 
         // Outer g first
         selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
 
         // Vertices
         selections.vertices = selections.outerg.selectAll('.node')
-            .data(props.vizdata.vertices, function(d) { return d.ref.id; });
+            .data(props.vizdata.vertices, function(d) { return d.ref[0].id; });
 
         selections.vertices.exit().transition().remove(); // exit removes vertex
         // tons of stuff to do on enter
         selections.veg = selections.vertices.enter().append('g') // store the enter group and build it up
-            .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
+            .attr('class', function(d) {
+                if (d.refs.ls.length > 0) {
+                    return "node logic-state";
+                } else {
+                    return "node commit";
+                }
+            })
             // so we don't transition from 0,0
             .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; })
             // and start from invisible
@@ -51,12 +87,12 @@ var Viz = React.createClass({
             .attr('dy', "1.4em")
             .attr('x', 0)
             .attr('class', function(d) {
-                if (d.ref.Typ() !== "logic-state") {
+                if (d.refs.ls.length === 0) {
                     return "";
                 }
+
                 var output = 'commit-subtext',
-                    commit = getCommit(props.graph, d.ref),
-                    testState = getTestState(props.graph, commit);
+                    testState = getTestState(props.graph, d.refs.commits[0]);
                 if (testState !== undefined) {
                     output += ' commit-' + testState;
                 }
@@ -71,19 +107,33 @@ var Viz = React.createClass({
 
         // now work within the g for each vtx
         selections.vertices.select('circle').transition()
-            .attr('r', function(d) { return d.ref.Typ() === "commit" ? tf.unit()*0.03 : tf.unit()*0.3; });
+            .attr('r', function(d) {
+                return d.refs.ls.length === 0 ? tf.unit()*0.03 : tf.unit()*0.3;
+            });
 
         // and the info text
         selections.nodetext = selections.vertices.select('text').transition();
         selections.nodetext.select('.vtx-label')
-            .text(function(d) { return d.ref.propv("lgroup"); }); // set text value to data from lgroup
+            .text(function(d) {
+                // set text value to data from lgroup
+                return d.refs.ls.length === 0 ? "" : d.refs.ls[0].propv("lgroup");
+            });
         selections.nodetext.select('.commit-subtext') // set the commit text on update
-            .text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); });
+            .text(function(d) {
+                if (d.refs.branches.length > 0) {
+                    return d.refs.branches[0].propv("name");
+                } else if (d.refs.tags.length > 0) {
+                    return "tags/" + d.refs.tags[0].propv("name");
+                } else {
+                    return getCommit(props.graph, d.ref[0]).propv("sha1").slice(0, 7);
+                }
+            });
 
         // Links
         selections.links = selections.outerg.select('#commitview-edges').selectAll('.link')
             .data(props.vizdata.links, function(d) {
-                return d[0].ref.id + '-' +  d[1].ref.id;
+                // FIXME relying on non-guaranteed fact that the commit is always first in ref list
+                return d[0].ref[0].id + '-' +  d[1].ref[0].id;
             });
 
         selections.links.exit().transition()
