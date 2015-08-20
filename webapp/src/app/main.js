@@ -168,8 +168,8 @@ var VizPrep = React.createClass({
     },
     render: function() {
         // TODO hardcode branches/tags for now
-        var branches = V_FOCAL | V_INTERESTING,
-            tags = V_INTERESTING,
+        var branches = V_FOCAL | V_FESTOONED,
+            tags = V_FESTOONED,
             guides = vizExtractor.findGuideCommits(this.props.graph, this.props.focalRepo, branches, tags);
 
         return React.createElement(Viz, {

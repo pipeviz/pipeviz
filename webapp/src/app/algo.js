@@ -79,8 +79,8 @@ var V_BOUNDARY = 0x08,
     V_REACHRANK = 0x04,
     // If the commit is in range, the reduced commit tree should include a path to it.
     V_FOCAL = 0x02,
-    // If the commit is in range, don't elide it - there's something interesting there.
-    V_INTERESTING = 0x01,
+    // There's something visible on this commit. If it's in range, don't elide it.
+    V_FESTOONED = 0x01,
     // Uninteresting, won't show up unless something else draws it in. This is default.
     V_UNINTERESTING = 0x00;
 
@@ -108,7 +108,7 @@ var vizExtractor = {
             if (commit !== undefined && commit.propv("repository") === repo) {
                 switch (v.Typ()) {
                     case "logic-state":
-                        level = V_BOUNDARY | V_FOCAL | V_INTERESTING | V_REACHRANK;
+                        level = V_BOUNDARY | V_FOCAL | V_FESTOONED | V_REACHRANK;
                     break;
                     case "git-tag":
                         level = taglvl;
@@ -320,7 +320,7 @@ var vizExtractor = {
 
         return [tree, root];
     },
-    extractTree: function(cg, tree, root, focalCommits, interestingCommits, rankCommits) {
+    extractTree: function(cg, tree, root, focalCommits, festoonedCommits, rankCommits) {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
@@ -347,7 +347,7 @@ var vizExtractor = {
             };
 
             // now we decide if the commit is eligible for elision
-            if (_.has(focalCommits, v) || _.has(interestingCommits, v)) {
+            if (_.has(focalCommits, v) || _.has(festoonedCommits, v)) {
                 idepths.push(path.length);
             } else {
                 // otherwise, only safe from elision if the commit or its parent has multiple successors
@@ -398,7 +398,7 @@ var vizExtractor = {
 function extractVizGraph(pvg, cg, guideCommits, elide) {
     var boundaryCommits = _.pick(guideCommits, function(gc) { return gc.level & V_BOUNDARY; }),
         focalCommits = _.pick(guideCommits, function(gc) { return gc.level & V_FOCAL; }),
-        interestingCommits = _.pick(guideCommits, function(gc) { return gc.level & V_INTERESTING; }),
+        festoonedCommits = _.pick(guideCommits, function(gc) { return gc.level & V_FESTOONED; }),
         rankCommits = _.pick(guideCommits, function(gc) { return gc.level & V_REACHRANK; });
 
     // We must have boundary commits for the algorithm to do anything. If there are none, bail.
@@ -412,7 +412,7 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
         tree = tr[0],
         root = tr[1];
 
-    var main = vizExtractor.extractTree(cg, tree, root, focalCommits, interestingCommits, rankCommits),
+    var main = vizExtractor.extractTree(cg, tree, root, focalCommits, festoonedCommits, rankCommits),
         vmeta = main[0],
         protolinks = main[1],
         diameter = main[2],
@@ -524,7 +524,7 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
             return _.indexOf(elidable, v.depth, true) === -1;
         }), function(v, k) {
             return _.assign({
-                ref: _.has(focalCommits, k) ? focalCommits[k].assoc : [pvg.get(k)],
+                ref: _.has(focalCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
                 x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
                 y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
             }, v);
@@ -532,7 +532,7 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
     } else {
         vertices = _.mapValues(vmeta, function(v, k) {
             return _.assign({
-                ref: _.has(focalCommits, k) ? focalCommits[k].assoc : [pvg.get(k)],
+                ref: _.has(focalCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
                 x: v.depth, // without elision, depth is x
                 y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
             }, v);
