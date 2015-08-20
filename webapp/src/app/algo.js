@@ -285,7 +285,7 @@ var vizExtractor = {
         // through the commit graph using the focal commits as starting points, to see if
         // they add any additional paths to the tree that weren't already covered by the
         // boundary commits.
-        var focalwalk = function(init, v, path, last) {
+        var focalwalk = function(v, path, last) {
             // If there's a last visited, build up our list of edges to be optionally
             // added to the tree
             if (last !== undefined) {
@@ -315,7 +315,7 @@ var vizExtractor = {
         };
 
         _.each(focalCommits, function(d, k) {
-            focalwalk(k, k, []);
+            focalwalk(k, []);
         });
 
         return [tree, root];
