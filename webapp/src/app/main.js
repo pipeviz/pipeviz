@@ -24,10 +24,7 @@ var Viz = React.createClass({
         // x-coordinate space is the elided diameter as a factor of viewport width
         var selections = {},
             props = this.props,
-            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.flag),
-            LOGICSTATE = 0x01,
-            BRANCH = 0x02,
-            TAG = 0x04;
+            tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.flag);
 
         // put each referred-to vertex into a subarray of its own type for easy access & checking later
         _.each(props.vizdata.vertices, function(v, k) {
@@ -87,7 +84,7 @@ var Viz = React.createClass({
             .attr('dy', "1.4em")
             .attr('x', 0)
             .attr('class', function(d) {
-                if (d.refs.ls.length === 0) {
+                if (d.ref.length === 1) {
                     return "";
                 }
 
