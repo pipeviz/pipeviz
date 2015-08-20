@@ -286,35 +286,34 @@ var vizExtractor = {
         protolinks = [], // we can start figuring out some links in the next walk
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
         diameter = 0, // maximum depth reached. Useful info later that we can avoid recalculating
-        idepths = [], // list of interesting depths, to avoid another walk later
+        idepths = [], // list of interesting depths (so, no elision), to avoid another walk later
         rc = reachCounter(), // create a new memoizing reach counter
+        rankIds = _.keys(rankCommits), // just to avoid repeating this in the walk
         mainwalk = function(v, path, segment, pseg) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
             var succ = tree.successors(v) || [];
 
-            // we always record something into vmeta, and everything except 'interesting' is
-            // always the same
+            // every commit in the tree makes it into the vmeta
             vmeta[v] = {
-                depth: path.length, // distance from root
-                interesting: false, // assume the commit isn't interesting for now
+                // distance from root
+                depth: path.length,
                 // count of reachable ranking commits in original commit graph
-                reach: rc.throughPredecessors(cg, v, _.keys(rankCommits)),
+                reach: rc.throughPredecessors(cg, v, rankIds),
                 // count of reachable ranking commits in the tree/almost-induced subgraph
-                treach: rc.throughSuccessors(tree, v, _.keys(rankCommits)),
+                treach: rc.throughSuccessors(tree, v, rankIds),
+                // the segment to which the commit belongs
                 segment: segment,
+                // the commit's parent segment
                 pseg: pseg
             };
 
-            // now we decide if the commit is *also* interesting
+            // now we decide if the commit is eligible for elision
             if (_.has(focalCommits, v) || _.has(interestingCommits, v)) {
-                // all focal or noelide commits are interesting
                 idepths.push(path.length);
-                vmeta[v].interesting = true;
             } else {
-                // otherwise, only interesting if the commit or its parent has multiple successors
+                // otherwise, only safe from elision if the commit or its parent has multiple successors
                 var psucc = path.length === 0 ? [] : tree.successors(path[path.length -1]);
                 if (succ.length > 1 || psucc.length > 1) {
-                    vmeta[v].interesting = true;
                     // also push it onto the idepths list
                     idepths.push(path.length);
                 }
