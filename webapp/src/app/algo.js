@@ -230,12 +230,11 @@ var vizExtractor = {
             // Only visit first parent; that's the path that matters to our subgraph/tree
             // We also discount successors where the current commit is not the first parent,
             // as otherwise we'd still form a graph, not a tree.
-            var succ = _.filter(cg.successors(v) || [], function(s) {
+            _.each(_.filter(cg.successors(v) || [], function(s) {
                 return cg.edge(v, s) === 1;
+            }), function(next) {
+                treewalk(next, v);
             });
-            if (succ.length > 0) {
-                treewalk(succ[0], v);
-            }
 
             visited[v] = true;
         };
@@ -304,12 +303,11 @@ var vizExtractor = {
                 return;
             }
 
-            var succ = _.filter(cg.successors(v) || [], function(s) {
+            _.each(_.filter(cg.successors(v) || [], function(s) {
                 return cg.edge(v, s) === 1;
+            }), function(next) {
+                focalwalk(next, path, v);
             });
-            if (succ.length > 0) {
-                focalwalk(succ[0], path, v);
-            }
 
             visited[v] = true;
         };
