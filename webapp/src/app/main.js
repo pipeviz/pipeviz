@@ -75,7 +75,13 @@ var Viz = React.createClass({
             // and start from invisible
             .style('opacity', 0)
             // attach click handler for infobar
-            .on('click', props.selected);
+            .on('click', function(tgt) {
+                if (tgt.refs.ls.length > 0) {
+                    props.selected(tgt.refs.ls[0]);
+                } else {
+                    props.selected(tgt.refs.commits[0]);
+                }
+            });
         selections.veg.append('circle');
         selections.nte = selections.veg.append('text');
         selections.nte.append('tspan') // add vertex label tspan on enter
@@ -353,7 +359,7 @@ var App = React.createClass({
         this.setState({vizcfgs: _.merge(this.state.vizcfgs, _.zipObject([[vc, v]]))});
     },
     setSelected: function(tgt) {
-        this.setState({selected: tgt.ref});
+        this.setState({selected: tgt});
     },
     getDefaultProps: function() {
         return {
