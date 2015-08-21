@@ -418,20 +418,29 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
 
     var elidable, elranges, ediam;
     if (elide) {
-        // now we have all the base meta; construct elidables lists and segment rankings
+        // Now we have all the base meta; construct elidables lists and segment rankings
         elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; });
-        // also compute the minimum set of contiguous elidable depths
+        // Also compute the minimum set of contiguous elidable depths.
         elranges = _.reduce(elidable, function(accum, v, k, coll) {
             if (coll[k-1] === v-1) {
                 // contiguous section, push onto last series
                 accum[accum.length - 1].push(v);
             } else {
-                // non-contiguous, start a new series
+                // Non-contiguous, start a new series.
                 accum.push([v]);
             }
 
             return accum;
         }, []);
+
+        // Remove elision ranges of length 1, as they just confuse things. Also
+        // expunge those depths from the elidable list.
+        _.each(_.remove(elranges, function(v) {
+            return v.length === 1;
+        }), function(loner) {
+            _.pull(elidable, loner[0]);
+        });
+
         // we also need the elided diameter
         ediam = diameter - elidable.length;
     } else {
