@@ -23,6 +23,15 @@ div#controlbar {
     color: #fff;
 }
 
+#controlbar .vizctrl {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+#controlbar .ctrlgroup {
+    padding: 0 0.3em 0 0.3em;
+}
+
 body {
     /*just be sloppy and sure for now*/
     margin: 0;

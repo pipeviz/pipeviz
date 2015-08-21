@@ -248,7 +248,7 @@ var InfoBar = React.createClass({
             return React.DOM.div(outer);
         }
 
-        // TODO right now we only have two possibilities - commit or logic-state - but this will need to become its WHOLE own subsystem
+        // TODO way too hardcoded right now
         if (t.vertex.type === "logic-state") {
             // First, pick a title. Start with the nick
             var infotitle = "Instance of ",
@@ -294,21 +294,35 @@ var InfoBar = React.createClass({
 var ControlBar = React.createClass({
     displayName: 'pipeviz-control',
     render: function() {
-        var oc = this.props.changeOpts;
-            var boxes = _.map(this.props.opts, function(v, opt) {
+        var oc = this.props.changeOpts,
+        boxes = _.map(this.props.opts, function(v, opt) {
             return (React.createElement("input", {
                 key: opt,
                 type: "checkbox",
                 checked: v.flag,
                 onChange: oc.bind(this, opt, v)
             }, v.label));
+        }),
+        cc = this.props.changeCfgs,
+        vizbits = _.map(this.props.vizcfgs, function(v, vc) {
+            return React.createElement("span", {id: "vizctrl-" + vc, className: ["vizctrl"]}, v.label, _.map([
+                [V_BOUNDARY | V_FOCAL | V_FESTOONED, "Boundary"],
+                [V_FOCAL | V_FESTOONED, "Focal"],
+                [V_FESTOONED, "Festoon"],
+                [V_UNINTERESTING, "Hide"]
+            ], function(rdio) {
+                return React.createElement("input", {
+                    key: vc + rdio[1].toLowerCase(),
+                    type: "radio",
+                    checked: v.state === rdio[0],
+                    onChange: cc.bind(this, vc, v)
+                }, rdio[1]);
+            }));
         });
 
-        return (
-            React.createElement("div", {id: "controlbar"},
-                "Options: ", boxes
-            )
-        );
+        return React.createElement("div", {id: "controlbar"},
+                React.createElement("span", {className: "ctrlgroup"}, "Options: ", boxes),
+                React.createElement("span", {className: "ctrlgroup"}, "Viz components: ", vizbits));
     },
 });
 
@@ -321,11 +335,19 @@ var App = React.createClass({
                 revx: {label: "Reverse x positions", flag: false},
                 elide: {label: "Elide boring commits", flag: false},
             },
+            vizcfgs: {
+                branches: {label: "Branches: ", state: V_FOCAL | V_FESTOONED },
+                tags: {label: "Tags: ", state: V_FESTOONED },
+            }
         };
     },
     changeOpts: function(opt, v) {
         v.flag = !v.flag;
         this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
+    },
+    changeCfgs: function(vc, v) {
+        v.flag = !v.flag;
+        this.setState({vizcfgs: _.merge(this.state.vizcfgs, _.zipObject([[vc, v]]))});
     },
     setSelected: function(tgt) {
         this.setState({selected: tgt.ref});
@@ -340,7 +362,7 @@ var App = React.createClass({
     },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-            React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts}),
+            React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts, vizcfgs: this.state.vizcfgs, changeCfgs: this.changeCfgs}),
             React.createElement(VizPrep, {
                 width: this.props.vizWidth,
                 height: this.props.vizHeight,
