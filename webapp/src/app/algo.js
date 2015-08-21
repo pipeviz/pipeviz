@@ -308,7 +308,7 @@ var vizExtractor = {
                 return cg.edge(v, s) === 1;
             });
             if (succ.length > 0) {
-                focalwalk(succ[0], v);
+                focalwalk(succ[0], path, v);
             }
 
             visited[v] = true;
