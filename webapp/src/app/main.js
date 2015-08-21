@@ -211,13 +211,16 @@ var VizPrep = React.createClass({
     shouldComponentUpdate: function(nextProps) {
         // In the graph object, state is invariant with respect to the message id.
         return nextProps.graph.mid !== this.props.graph.mid ||
-            JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts);
+            JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts) ||
+            JSON.stringify(this.props.vizcfgs) !== JSON.stringify(nextProps.vizcfgs);
     },
     render: function() {
-        // TODO hardcode branches/tags for now
-        var branches = V_FOCAL | V_FESTOONED,
-            tags = V_FESTOONED,
-            guides = vizExtractor.findGuideCommits(this.props.graph, this.props.focalRepo, branches, tags);
+        var guides = vizExtractor.findGuideCommits(
+            this.props.graph,
+            this.props.focalRepo,
+            this.props.vizcfgs.branches,
+            this.props.vizcfgs.tags
+        );
 
         return React.createElement(Viz, {
             width: this.props.width,
@@ -315,7 +318,7 @@ var ControlBar = React.createClass({
                     key: vc + rdio[1].toLowerCase(),
                     type: "radio",
                     checked: v.state === rdio[0],
-                    onChange: cc.bind(this, vc, v)
+                    onChange: cc.bind(this, vc, v, rdio[0])
                 }, rdio[1]);
             }));
         });
@@ -345,8 +348,8 @@ var App = React.createClass({
         v.flag = !v.flag;
         this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
     },
-    changeCfgs: function(vc, v) {
-        v.flag = !v.flag;
+    changeCfgs: function(vc, v, newval) {
+        v.state = newval;
         this.setState({vizcfgs: _.merge(this.state.vizcfgs, _.zipObject([[vc, v]]))});
     },
     setSelected: function(tgt) {
@@ -362,13 +365,19 @@ var App = React.createClass({
     },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-            React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts, vizcfgs: this.state.vizcfgs, changeCfgs: this.changeCfgs}),
+            React.createElement(ControlBar, {
+                opts: this.state.opts,
+                changeOpts: this.changeOpts,
+                vizcfgs: this.state.vizcfgs,
+                changeCfgs: this.changeCfgs
+            }),
             React.createElement(VizPrep, {
                 width: this.props.vizWidth,
                 height: this.props.vizHeight,
                 graph: this.props.graph,
                 focalRepo: vizExtractor.mostCommonRepo(this.props.graph),
                 opts: JSON.parse(JSON.stringify(this.state.opts)),
+                vizcfgs: _.mapValues(this.state.vizcfgs, function(vc) { return vc.state; }),
                 selected: this.setSelected,
             }),
             React.createElement(InfoBar, {
