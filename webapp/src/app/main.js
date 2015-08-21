@@ -26,23 +26,62 @@ var Viz = React.createClass({
             props = this.props,
             tf = createTransforms(props.width, props.height - 30, props.vizdata.ediam, props.vizdata.segments.length, props.opts.revx.flag);
 
+        // put each referred-to vertex into a subarray of its own type for easy access & checking later
+        _.each(props.vizdata.vertices, function(v, k) {
+            v.refs = {
+                commits: [],
+                ls: [],
+                branches: [],
+                tags: [],
+            };
+
+            _.each(v.ref, function(v2) {
+                switch (v2.Typ()) {
+                    case "logic-state":
+                        v.refs.ls.push(v2);
+                        break;
+                    case "git-tag":
+                        v.refs.tags.push(v2);
+                        break;
+                    case "git-branch":
+                        v.refs.branches.push(v2);
+                        break;
+                    case "commit":
+                        v.refs.commits.push(v2);
+                        break;
+                }
+            });
+        });
+
         // Outer g first
         selections.outerg = d3.select(this.getDOMNode()).select('#commit-pipeline');
 
         // Vertices
         selections.vertices = selections.outerg.selectAll('.node')
-            .data(props.vizdata.vertices, function(d) { return d.ref.id; });
+            .data(props.vizdata.vertices, function(d) { return d.ref[0].id; });
 
         selections.vertices.exit().transition().remove(); // exit removes vertex
         // tons of stuff to do on enter
         selections.veg = selections.vertices.enter().append('g') // store the enter group and build it up
-            .attr('class', function(d) { return 'node ' + d.ref.Typ(); })
+            .attr('class', function(d) {
+                if (d.refs.ls.length > 0) {
+                    return "node logic-state";
+                } else {
+                    return "node commit";
+                }
+            })
             // so we don't transition from 0,0
             .attr('transform', function(d) { return 'translate(' + tf.x(d.x) + ',' + tf.y(d.y) + ')'; })
             // and start from invisible
             .style('opacity', 0)
             // attach click handler for infobar
-            .on('click', props.selected);
+            .on('click', function(tgt) {
+                if (tgt.refs.ls.length > 0) {
+                    props.selected(tgt.refs.ls[0]);
+                } else {
+                    props.selected(tgt.refs.commits[0]);
+                }
+            });
         selections.veg.append('circle');
         selections.nte = selections.veg.append('text');
         selections.nte.append('tspan') // add vertex label tspan on enter
@@ -51,12 +90,12 @@ var Viz = React.createClass({
             .attr('dy', "1.4em")
             .attr('x', 0)
             .attr('class', function(d) {
-                if (d.ref.Typ() !== "logic-state") {
+                if (d.ref.length === 1) {
                     return "";
                 }
+
                 var output = 'commit-subtext',
-                    commit = getCommit(props.graph, d.ref),
-                    testState = getTestState(props.graph, commit);
+                    testState = getTestState(props.graph, d.refs.commits[0]);
                 if (testState !== undefined) {
                     output += ' commit-' + testState;
                 }
@@ -71,19 +110,33 @@ var Viz = React.createClass({
 
         // now work within the g for each vtx
         selections.vertices.select('circle').transition()
-            .attr('r', function(d) { return d.ref.Typ() === "commit" ? tf.unit()*0.03 : tf.unit()*0.3; });
+            .attr('r', function(d) {
+                return d.refs.ls.length === 0 ? tf.unit()*0.03 : tf.unit()*0.3;
+            });
 
         // and the info text
         selections.nodetext = selections.vertices.select('text').transition();
         selections.nodetext.select('.vtx-label')
-            .text(function(d) { return d.ref.propv("lgroup"); }); // set text value to data from lgroup
+            .text(function(d) {
+                // set text value to data from lgroup
+                return d.refs.ls.length === 0 ? "" : d.refs.ls[0].propv("lgroup");
+            });
         selections.nodetext.select('.commit-subtext') // set the commit text on update
-            .text(function(d) { return getCommit(props.graph, d.ref).propv("sha1").slice(0, 7); });
+            .text(function(d) {
+                if (d.refs.branches.length > 0) {
+                    return d.refs.branches[0].propv("name");
+                } else if (d.refs.tags.length > 0) {
+                    return "tags/" + d.refs.tags[0].propv("name");
+                } else {
+                    return getCommit(props.graph, d.ref[0]).propv("sha1").slice(0, 7);
+                }
+            });
 
         // Links
         selections.links = selections.outerg.select('#commitview-edges').selectAll('.link')
             .data(props.vizdata.links, function(d) {
-                return d[0].ref.id + '-' +  d[1].ref.id;
+                // FIXME relying on non-guaranteed fact that the commit is always first in ref list
+                return d[0].ref[0].id + '-' +  d[1].ref[0].id;
             });
 
         selections.links.exit().transition()
@@ -109,7 +162,7 @@ var Viz = React.createClass({
         selections.elisions = selections.outerg.selectAll('.elision-bar')
             .data(_.map(props.vizdata.elranges, function(range) {
                 // creates the same string as what's used in vizdata.xmap
-                return range[0] + ' - ' + range[range.length - 1];
+                return range[0] + '-' + range[range.length - 1];
             }), _.identity);
 
         selections.elisions.exit().transition().remove(); // remove on exit
@@ -164,14 +217,22 @@ var VizPrep = React.createClass({
     shouldComponentUpdate: function(nextProps) {
         // In the graph object, state is invariant with respect to the message id.
         return nextProps.graph.mid !== this.props.graph.mid ||
-            JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts);
+            JSON.stringify(this.props.opts) !== JSON.stringify(nextProps.opts) ||
+            JSON.stringify(this.props.vizcfgs) !== JSON.stringify(nextProps.vizcfgs);
     },
     render: function() {
+        var guides = vizExtractor.findGuideCommits(
+            this.props.graph,
+            this.props.focalRepo,
+            this.props.vizcfgs.branches,
+            this.props.vizcfgs.tags
+        );
+
         return React.createElement(Viz, {
             width: this.props.width,
             height: this.props.height,
             graph: this.props.graph,
-            vizdata: extractVizGraph(this.props.graph, this.props.focalRepo, this.props.opts.elide.flag),
+            vizdata: extractVizGraph(this.props.graph, this.props.graph.commitGraph(this.props.focalRepo), guides, this.props.opts.elide.flag),
             opts: this.props.opts,
             selected: this.props.selected,
         });
@@ -196,7 +257,7 @@ var InfoBar = React.createClass({
             return React.DOM.div(outer);
         }
 
-        // TODO right now we only have two possibilities - commit or logic-state - but this will need to become its WHOLE own subsystem
+        // TODO way too hardcoded right now
         if (t.vertex.type === "logic-state") {
             // First, pick a title. Start with the nick
             var infotitle = "Instance of ",
@@ -242,21 +303,35 @@ var InfoBar = React.createClass({
 var ControlBar = React.createClass({
     displayName: 'pipeviz-control',
     render: function() {
-        var oc = this.props.changeOpts;
-            var boxes = _.map(this.props.opts, function(v, opt) {
+        var oc = this.props.changeOpts,
+        boxes = _.map(this.props.opts, function(v, opt) {
             return (React.createElement("input", {
                 key: opt,
                 type: "checkbox",
                 checked: v.flag,
                 onChange: oc.bind(this, opt, v)
             }, v.label));
+        }),
+        cc = this.props.changeCfgs,
+        vizbits = _.map(this.props.vizcfgs, function(v, vc) {
+            return React.createElement("span", {id: "vizctrl-" + vc, className: ["vizctrl"]}, v.label, _.map([
+                [V_BOUNDARY | V_FOCAL | V_FESTOONED, "Boundary"],
+                [V_FOCAL | V_FESTOONED, "Focal"],
+                [V_FESTOONED, "Festoon"],
+                [V_UNINTERESTING, "Hide"]
+            ], function(rdio) {
+                return React.createElement("input", {
+                    key: vc + rdio[1].toLowerCase(),
+                    type: "radio",
+                    checked: v.state === rdio[0],
+                    onChange: cc.bind(this, vc, v, rdio[0])
+                }, rdio[1]);
+            }));
         });
 
-        return (
-            React.createElement("div", {id: "controlbar"},
-                "Options: ", boxes
-            )
-        );
+        return React.createElement("div", {id: "controlbar"},
+                React.createElement("span", {className: "ctrlgroup"}, "Options: ", boxes),
+                React.createElement("span", {className: "ctrlgroup"}, "Viz components: ", vizbits));
     },
 });
 
@@ -269,14 +344,22 @@ var App = React.createClass({
                 revx: {label: "Reverse x positions", flag: false},
                 elide: {label: "Elide boring commits", flag: false},
             },
+            vizcfgs: {
+                branches: {label: "Branches: ", state: V_FOCAL | V_FESTOONED },
+                tags: {label: "Tags: ", state: V_FESTOONED },
+            }
         };
     },
     changeOpts: function(opt, v) {
         v.flag = !v.flag;
         this.setState({opts: _.merge(this.state.opts, _.zipObject([[opt, v]]))});
     },
+    changeCfgs: function(vc, v, newval) {
+        v.state = newval;
+        this.setState({vizcfgs: _.merge(this.state.vizcfgs, _.zipObject([[vc, v]]))});
+    },
     setSelected: function(tgt) {
-        this.setState({selected: tgt.ref});
+        this.setState({selected: tgt});
     },
     getDefaultProps: function() {
         return {
@@ -288,13 +371,19 @@ var App = React.createClass({
     },
     render: function() {
         return React.createElement("div", {id: "pipeviz"},
-            React.createElement(ControlBar, {opts: this.state.opts, changeOpts: this.changeOpts}),
+            React.createElement(ControlBar, {
+                opts: this.state.opts,
+                changeOpts: this.changeOpts,
+                vizcfgs: this.state.vizcfgs,
+                changeCfgs: this.changeCfgs
+            }),
             React.createElement(VizPrep, {
                 width: this.props.vizWidth,
                 height: this.props.vizHeight,
                 graph: this.props.graph,
                 focalRepo: vizExtractor.mostCommonRepo(this.props.graph),
                 opts: JSON.parse(JSON.stringify(this.state.opts)),
+                vizcfgs: _.mapValues(this.state.vizcfgs, function(vc) { return vc.state; }),
                 selected: this.setSelected,
             }),
             React.createElement(InfoBar, {

@@ -68,29 +68,70 @@ var reachCounter = function() {
     };
 };
 
-//var vizExtractorProto = {
-    //apply: function(pvg) {
-        //this._pvg = pvg;
-    //}
-//},
-//vizExtractor = function(pvg) {
-    //var ve = Object.create(vizExtractorProto);
-    //ve.apply(pvg);
-    //return ve;
-//}
+// Bitmask constants representing the different ways a commit can operate within the pipeline viz algo.
+// Focals are usually noelide and boundaries are usually focal and noelide, but this is not necessarily
+// the case, so the mask keeps each property separate.
+// TODO declare as const w/ES6
+
+    // Commit is used as a boundary in establishing the range of commits to visualize.
+var V_BOUNDARY = 0x08,
+    // Consider this commit when performing reachability counts (for segment spread ranking).
+    V_REACHRANK = 0x04,
+    // If the commit is in range, the reduced commit tree should include a path to it.
+    V_FOCAL = 0x02,
+    // There's something visible on this commit. If it's in range, don't elide it.
+    V_FESTOONED = 0x01,
+    // Uninteresting, won't show up unless something else draws it in. This is default.
+    V_UNINTERESTING = 0x00;
+
 var vizExtractor = {
     mostCommonRepo: function(pvg) {
         return _(pvg.verticesWithType("logic-state"))
-            .filter(function(v) {
-                var vedges = _.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"));
-                return vedges.length !== 0;
-            })
-            .countBy(function(v) {
-                return pvg.get(_.filter(_.map(v.outEdges, function(edgeId) { return pvg.get(edgeId); }), isType("version"))[0].target).propv("repository");
-            })
+            .map(function(v) { return getRepositoryName(pvg, v); })
+            .filter()
+            .countBy()
             .reduce(function(accum, count, repo) {
                 return count < accum[1] ? accum : [repo, count];
             }, ["", 0])[0];
+    },
+    // Searches the pvg for commits that will play various roles in determining the boundaries
+    // and spatial positions in the pipeline visualization.
+    findGuideCommits: function(pvg, repo, branchlvl, taglvl) {
+        var guide = {};
+
+        // FIXME note that the old method dup'd the vertex object - will need to do that somewhere else now
+        // TODO doing it all in one pass b/c pvg is dumb and it's O(n) to get vertex subsets
+        _.each(pvg.vertices(pq.or(isType("git-branch"), isType("git-tag"), isType("logic-state"))), function(v) {
+            var level = V_UNINTERESTING,
+                commit = getCommit(pvg, v);
+
+            if (commit !== undefined && commit.propv("repository") === repo) {
+                switch (v.Typ()) {
+                    case "logic-state":
+                        level = V_BOUNDARY | V_FOCAL | V_FESTOONED | V_REACHRANK;
+                    break;
+                    case "git-tag":
+                        level = taglvl;
+                    break;
+                    case "git-branch":
+                        level = branchlvl;
+                    break;
+                }
+
+                if (!_.has(guide, commit.id)) {
+                    guide[commit.id] = {
+                        level: 0,
+                        assoc: [commit],
+                    };
+                }
+
+                // levels are designed to be additive, so we always OR them together here
+                guide[commit.id].level |= level;
+                guide[commit.id].assoc.push(v);
+            }
+        });
+
+        return guide;
     },
     focalLogicStateByRepo: function(pvg, repo) {
         var focalCommits = {},
@@ -111,6 +152,7 @@ var vizExtractor = {
 
         return [focal, focalCommits];
     },
+    // FIXME note that the sense of "focal" here is from before the refactoring that split the focal concept into the bitmask
     focalTransposedGraph: function(cg, focalCommits) {
         var fg = new graphlib.Graph(), // graph with all non-focal vertices contracted and edges transposed (direction reversed)
         visited = {},
@@ -164,14 +206,15 @@ var vizExtractor = {
 
         return fg;
     },
-    treeAndRoot: function(cg, focalCommits, elide) {
+    treeAndRoot: function(cg, boundaryCommits, focalCommits) {
         var tree = new graphlib.Graph(), // A tree, almost an induced subgraph, of first-parent paths in the commit graph
         visited = {},
         candidates = [];
 
-        // Nearly the same walk as for the focal graph, but only follow first
-        // parent. Builds root candidate list AND build the first-parent tree
-        // (almost an induced subgraph, but not quite) at the same time.
+        // To build the tree, we start from each boundary commit and walk back up the
+        // commit history, following ONLY first-parent. We carefully track every
+        // time the walker revisits a vertex, as each of these points is a candidate
+        // for being the root of the tree.
         var treewalk = function(v, last) {
             // We always want to record the (reversed) edge, unless last does not exist
             if (last !== undefined) {
@@ -187,99 +230,128 @@ var vizExtractor = {
             // Only visit first parent; that's the path that matters to our subgraph/tree
             // We also discount successors where the current commit is not the first parent,
             // as otherwise we'd still form a graph, not a tree.
-            // TODO this may not be great - https://github.com/tag1consulting/pipeviz/issues/108
-            var succ = _.filter(cg.successors(v) || [], function(s) {
+            _.each(_.filter(cg.successors(v) || [], function(s) {
                 return cg.edge(v, s) === 1;
+            }), function(next) {
+                treewalk(next, v);
             });
-            if (succ.length > 0) {
-                treewalk(succ[0], v);
-            }
 
             visited[v] = true;
         };
 
-        // Always walk the focal commit, b/c just walking sources can miss them
-        // if they're on a path that is only reachable from a sink along a n>1
+        // Always walk the boundary commits, b/c just walking the commit graph's source vertices
+        // can miss them if they're on a path that is only reachable from a sink along a n>1
         // parent of a merge.
-        _.each(focalCommits, function(d, k) {
+        _.each(boundaryCommits, function(d, k) {
             treewalk(k);
         });
 
-        // But if we're not doing elision, then ALSO walk from sources.
-        if (!elide) {
-            //_.each(cg.sources(), function(d) {
-                //treewalk(d);
-            //});
-        }
+        // Sort the candidates list so we can use binary search.
+        candidates.sort(function(a, b) { return a - b; });
 
         // Now we have to find the topologically greatest common root among all candidates.
-        var root;
+        var root,
+        oob = {}; // Tracks "out-of-bound" commits; those between the natural root and the earliest candidate
 
-        // If there's only one focal vertex then things are a little weird - for
+        // Things are a little weird if there's only one boundary vertex - for
         // one, the treewalk won't find any candidates. In that case, set the
         // candidates list to the single vertex itself.
-        if (_.size(focalCommits) === 1) {
-            //if (focal.length === 1) { TODO i think this will be correct once there's multi-focus per commit handling
-            root = _.keys(focalCommits)[0];
-        } else {
-            // This identifies the shared root (in git terms, the merge base) from all
-            // candidates by walking down the reversed subgraph/tree until we find a
-            // vertex in the candidate list. The first one we find is guaranteed to
-            // be the root.
-            var rootfind = function(v) {
-                if (candidates.indexOf(v) !== -1) {
-                    root = v;
-                    return;
-                }
-
-                var succ = tree.successors(v) || [];
-                if (succ.length > 0) {
-                    rootfind(succ[0]);
-                }
-            };
-            rootfind(tree.sources()[0]);
+        if (_.size(boundaryCommits) === 1) {
+            candidates.push(_.keys(boundaryCommits)[0]);
         }
+
+        // This identifies the shared root (in git terms, the merge base) from all
+        // candidates by walking down the reversed subgraph/tree until we find a
+        // vertex in the candidate list. The first one we find is guaranteed to
+        // be the root.
+        var rootfind = function(v) {
+            if (_.indexOf(candidates, v, true) !== -1) {
+                root = v;
+                return;
+            }
+
+            // Record this as an "out-of-bound" vertex
+            oob[v] = true;
+
+            var succ = tree.successors(v) || [];
+            if (succ.length > 0) {
+                rootfind(succ[0]);
+            }
+        };
+        rootfind(tree.sources()[0]);
+
+        // With the root found using the boundary commits, we now must do another walk
+        // through the commit graph using the focal commits as starting points, to see if
+        // they add any additional paths to the tree that weren't already covered by the
+        // boundary commits.
+        var focalwalk = function(v, path, last) {
+            // If there's a last visited, build up our list of edges to be optionally
+            // added to the tree
+            if (last !== undefined) {
+                path.push([v, last]);
+            }
+
+            // We infer from the treewalk's 'visited' map. If it's visited but oob,
+            // then we bail on the whole path; if it's visited and not oob, we incorporate
+            // the new path into the tree.
+            if (_.has(visited, v)) {
+                if (!_.has(oob, v)) {
+                    _.each(path, function(pair) {
+                        tree.setEdge(pair[0], pair[1]);
+                    });
+                }
+                return;
+            }
+
+            _.each(_.filter(cg.successors(v) || [], function(s) {
+                return cg.edge(v, s) === 1;
+            }), function(next) {
+                focalwalk(next, path, v);
+            });
+
+            visited[v] = true;
+        };
+
+        _.each(focalCommits, function(d, k) {
+            focalwalk(k, []);
+        });
 
         return [tree, root];
     },
-    extractTree: function(cg, tree, root, focalCommits) {
+    extractTree: function(cg, tree, root, focalCommits, festoonedCommits, rankCommits) {
         var vmeta = {}, // metadata we build for each vertex. keyed by vertex id
         protolinks = [], // we can start figuring out some links in the next walk
         segments = 0, // total number of divergent segment paths. starts at 0, increases as needed
         diameter = 0, // maximum depth reached. Useful info later that we can avoid recalculating
-        idepths = [], // list of interesting depths, to avoid another walk later
+        idepths = [], // list of interesting depths (so, no elision), to avoid another walk later
         rc = reachCounter(), // create a new memoizing reach counter
+        rankIds = _.keys(rankCommits), // just to avoid repeating this in the walk
         mainwalk = function(v, path, segment, pseg) {
             // tree, so zero possibility of revisiting any vtx; no "visited" checks needed
             var succ = tree.successors(v) || [];
-            if (_.has(focalCommits, v)) {
+
+            // every commit in the tree makes it into the vmeta
+            vmeta[v] = {
+                // distance from root
+                depth: path.length,
+                // count of reachable ranking commits in original commit graph
+                reach: rc.throughPredecessors(cg, v, rankIds),
+                // count of reachable ranking commits in the tree/almost-induced subgraph
+                treach: rc.throughSuccessors(tree, v, rankIds),
+                // the segment to which the commit belongs
+                segment: segment,
+                // the commit's parent segment
+                pseg: pseg
+            };
+
+            // now we decide if the commit is eligible for elision
+            if (_.has(focalCommits, v) || _.has(festoonedCommits, v)) {
                 idepths.push(path.length);
-                vmeta[v] = {
-                    depth: path.length, // distance from root
-                    interesting: true, // all focal commits are interesting
-                    // count of reachable focal commits in original commit graph
-                    reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
-                    // count of reachable focal commits in the tree/almost-induced subgraph
-                    treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
-                    segment: segment,
-                    pseg: pseg
-                };
             } else {
-                var psucc = path.length === 0 ? [] : tree.successors(path[path.length -1]),
-                // interesting only if has multiple successors, or parent did
-                interesting = succ.length > 1 || psucc.length > 1;
-
-                vmeta[v] = {
-                    depth: path.length,
-                    interesting: interesting,
-                    reach: rc.throughPredecessors(cg, v, _.keys(focalCommits)),
-                    treach: rc.throughSuccessors(tree, v, _.keys(focalCommits)),
-                    segment: segment,
-                    pseg: pseg
-                };
-
-                if (interesting) {
-                    // if this one's interesting, push it onto the idepths list
+                // otherwise, only safe from elision if the commit or its parent has multiple successors
+                var psucc = path.length === 0 ? [] : tree.successors(path[path.length -1]);
+                if (succ.length > 1 || psucc.length > 1) {
+                    // also push it onto the idepths list
                     idepths.push(path.length);
                 }
             }
@@ -321,23 +393,24 @@ var vizExtractor = {
  * for the app/commit viz.
  *
  */
-function extractVizGraph(pvg, repo, elide) {
-    var focals = vizExtractor.focalLogicStateByRepo(pvg, repo),
-        focal = focals[0],
-        focalCommits = focals[1];
+function extractVizGraph(pvg, cg, guideCommits, elide) {
+    var boundaryCommits = _.pick(guideCommits, function(gc) { return gc.level & V_BOUNDARY; }),
+        focalCommits = _.pick(guideCommits, function(gc) { return gc.level & V_FOCAL; }),
+        festoonedCommits = _.pick(guideCommits, function(gc) { return gc.level & V_FESTOONED; }),
+        rankCommits = _.pick(guideCommits, function(gc) { return gc.level & V_REACHRANK; });
 
-    if (focal.length === 0) {
+    // We must have boundary commits for the algorithm to do anything. If there are none, bail.
+    if (boundaryCommits.length === 0) {
         return;
     }
 
-    var cg = pvg.commitGraph(), // the git commit graph TODO narrow to only commits in repo
-        // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm
+        // TODO this is commented b/c there's something horribly non-performant in the fgwalk impl atm. also, it hasn't been refactored for the commit role tiers
         //fg = vizExtractor.focalTransposedGraph(cg, focalCommits),
-        tr = vizExtractor.treeAndRoot(cg, focalCommits, elide),
+    var tr = vizExtractor.treeAndRoot(cg, boundaryCommits, focalCommits),
         tree = tr[0],
         root = tr[1];
 
-    var main = vizExtractor.extractTree(cg, tree, root, focalCommits),
+    var main = vizExtractor.extractTree(cg, tree, root, focalCommits, festoonedCommits, rankCommits),
         vmeta = main[0],
         protolinks = main[1],
         diameter = main[2],
@@ -345,20 +418,29 @@ function extractVizGraph(pvg, repo, elide) {
 
     var elidable, elranges, ediam;
     if (elide) {
-        // now we have all the base meta; construct elidables lists and segment rankings
+        // Now we have all the base meta; construct elidables lists and segment rankings
         elidable = _.filter(_.range(diameter+1), function(depth) { return _.indexOf(idepths, depth, true) === -1; });
-        // also compute the minimum set of contiguous elidable depths
+        // Also compute the minimum set of contiguous elidable depths.
         elranges = _.reduce(elidable, function(accum, v, k, coll) {
             if (coll[k-1] === v-1) {
                 // contiguous section, push onto last series
                 accum[accum.length - 1].push(v);
             } else {
-                // non-contiguous, start a new series
+                // Non-contiguous, start a new series.
                 accum.push([v]);
             }
 
             return accum;
         }, []);
+
+        // Remove elision ranges of length 1, as they just confuse things. Also
+        // expunge those depths from the elidable list.
+        _.each(_.remove(elranges, function(v) {
+            return v.length === 1;
+        }), function(loner) {
+            _.pull(elidable, loner[0]);
+        });
+
         // we also need the elided diameter
         ediam = diameter - elidable.length;
     } else {
@@ -380,9 +462,10 @@ function extractVizGraph(pvg, repo, elide) {
             };
         })
         .groupBy(function(v) { return v.segment; }) // collects vertices on same segment into a single array
-        .mapValues(function(v) {
+        .mapValues(function(v, k) {
             return {
                 ids: _.map(v, function(v2) { return v2.id; }),
+                id: parseInt(k), // id of this segment. redundant with the key, but useful later
                 pseg: v[0].pseg, // parent seg (pseg) must be the same for all vertices in a seg
                 maxreach: _.max(v, 'reach').reach,
                 maxtreach: _.max(v, 'treach').treach,
@@ -426,9 +509,8 @@ function extractVizGraph(pvg, repo, elide) {
                 return ab.rank - bb.rank;
 
             // If all of these are equal, we have to make an arbitrary decision,
-            // which we persist as rank. So we check rank first to see if that's
-            // already happened
-            } else { // Cascade back down through elses
+            // which is persisted to the segment's rank.
+            } else {
                 // TODO could this change compare order results? doing so makes sort's behavior undefined
                 // TODO do we need a flag to indicate it's set this way?
                 bb.rank += 1;
@@ -443,27 +525,28 @@ function extractVizGraph(pvg, repo, elide) {
         });
     });
 
-    // FINALLY, assign x and y coords to all visible vertices
+    // FINALLY, assign x and y coords to all visible vertices. Remember that the contents
+    // of this var represent only those vertices that will ultimately be shown - so if
+    // elision is on, there's potentially a lot less in here.
     var vertices;
     if (elide) {
-        vertices = _(vmeta)
-            .pick(function(v) { return _.indexOf(elidable, v.depth, true) === -1; })
-            .mapValues(function(v, k) {
-                return _.assign({
-                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
-                    x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
-                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
-                }, v);
-            }).value();
+        vertices = _.mapValues(_.pick(vmeta, function(v) {
+            return _.indexOf(elidable, v.depth, true) === -1;
+        }), function(v, k) {
+            return _.assign({
+                ref: _.has(festoonedCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
+                x: v.depth - _.sortedIndex(elidable, v.depth), // x is depth, less preceding elided x-positions
+                y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+            }, v);
+        });
     } else {
-        vertices = _(vmeta)
-            .mapValues(function(v, k) {
-                return _.assign({
-                    ref: _.has(focalCommits, k) ? focalCommits[k][0] : pvg.get(k), // TODO handle multiple on same commit
-                    x: v.depth, // without elision, depth is x
-                    y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
-                }, v);
-            }).value();
+        vertices = _.mapValues(vmeta, function(v, k) {
+            return _.assign({
+                ref: _.has(festoonedCommits, k) ? festoonedCommits[k].assoc : [pvg.get(k)],
+                x: v.depth, // without elision, depth is x
+                y: segmentinfo[v.segment].rank // y is just the segment rank TODO alternate up/down projection
+            }, v);
+        });
     }
 
     // Build up the list of links
@@ -474,31 +557,36 @@ function extractVizGraph(pvg, repo, elide) {
     // links, now that the vertices list is assembled and ready.
     _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
-    // collect the vertices together by segment in a way that it's easy to see
-    // where connections are needed to cross elision ranges
+    // collect vertices - so, those which are going to be shown, but NOT those being elided,
+    // if any - together by segment. vtxbyseg is a map keyed by segment id, where each value
+    // is an array containing the set of vertices that will ultimately be shown from that
+    // segment. This makes it easy to spot where connections are needed to cross elision ranges.
     var vtxbyseg = _.merge(
         // make sure we get all segments, even empties
         _.mapValues(segmentinfo, function() { return []; }),
         _.groupBy(vertices, function(v) { return v.segment; })
     );
+
     if (elide) {
+        // Recursive function to count total length of parent segments.
+        var segOffsetCounter = function(rseg) {
+            // pseg === id IFF we're on segment 0, which is the base
+            return rseg.pseg === rseg.id ? vtxbyseg[rseg.id].length : vtxbyseg[rseg.id].length + segOffsetCounter(segmentinfo[rseg.pseg]);
+        };
 
-        // build an offset map telling us how much a segment's internal offset should
-        // be increased by to give the real x-position
-        var segoffset = _.mapValues(segmentinfo, function(seg, k) {
-            // Recursive function to count length of parent segments
-            var r = _.memoize(function(id, rseg) {
-                // pseg === id IFF we're on segment 0, which is the base
-                return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
-            });
-
+        // build an offset map telling us how much a vertex's own position within
+        // its segment must be increased by to give the real x-position
+        var segoffset = _.mapValues(segmentinfo, function(seg) {
             // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
-            return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
+            return seg.id === 0 ? 0 : segOffsetCounter(segmentinfo[seg.pseg]);
         });
 
         // then walk through the vertices in order and make the links (elision or no)
         _.each(vtxbyseg, function(vtxs) {
-            _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+            _.each(_.values(vtxs).sort(function(a, b) {
+                // sorting by depth ensures we'll be traversing the segment's vertices in order
+                return a.depth - b.depth;
+            }), function(v, k, coll) {
                 xmap[v.depth] = segoffset[v.segment] + k;
                 if (k === 0) {
                     // all other ops require looking back at previous item, but if
@@ -508,7 +596,7 @@ function extractVizGraph(pvg, repo, elide) {
 
                 // if this is true, it means there's an elided range between these two elements
                 if (v.depth !== coll[k-1].depth + 1) {
-                    xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
+                    xmap[(coll[k-1].depth + 1) + '-' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
                 }
 
                 // whether or not there's elision, adjacent vertices in this list need a link
@@ -527,8 +615,6 @@ function extractVizGraph(pvg, repo, elide) {
         });
         xmap = _.zipObject(_.unzip([_.range(diameter+1), _.range(diameter+1)]));
     }
-
-    // TODO branches/tags
 
     return {
         vertices: _.values(vertices),

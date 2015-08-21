@@ -5,8 +5,12 @@
             "branches": ["master"]
         },
         {
-            "sha1": "9b40850723142cf888be2b3e5b601c55f7eda8c8",
+            "sha1": "ee1ae5c49ec8be3f2be3ff81453e00f5c1c56ff7",
             "branches": ["websockets"]
+        },
+        {
+            "sha1": "9b40850723142cf888be2b3e5b601c55f7eda8c8",
+            "tags": ["v0.1.0"]
         },
         {
             "sha1": "e2380c9819bc45a79c5ad37980139cee98d5c7fd",
@@ -32,10 +36,6 @@
         {
             "sha1": "fe07ee25998b9f19cb4aa07cb416be3ffbb4c4be",
             "branches": ["frontend-fp"]
-        },
-        {
-            "sha1": "4b938030157c10cf0fb5ed22c5cc4569edf50813",
-            "tags": ["old-proto"]
         }
     ]
 }

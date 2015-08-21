@@ -11,13 +11,18 @@ var appsFromRepo = function(graph, repo) {
 };
 
 var getCommit = function(g, d) {
-    if (d.Typ() === "logic-state") {
-        var vedges = _.filter(_.map(d.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
-        if (vedges.length !== 0) {
-            return g.get(vedges[0].target);
-        }
-    } else if (d.Typ() === "commit") {
-        return d;
+    switch (d.Typ()) {
+        case "logic-state":
+        case "git-tag":
+        case "git-branch":
+            var vedges = _.filter(_.map(d.outEdges, function(edgeId) { return g.get(edgeId); }), isType("version"));
+            if (vedges.length !== 0) {
+                return g.get(vedges[0].target);
+            }
+            break;
+
+        case "commit":
+            return d;
     }
     return;
 };
@@ -27,14 +32,20 @@ var getCommit = function(g, d) {
  * return the name of the repository associated with the commit.
  */
 var getRepositoryName = function(g, d) {
-    if (d.Typ() === "logic-state") {
-        d = getCommit(g, d);
-        if (_.isUndefined(d)) {
-            return;
-        }
+    switch (d.Typ()) {
+        case "logic-state":
+        case "git-tag":
+        case "git-branch":
+            d = getCommit(g, d);
+            if (d === undefined) {
+                break;
+            }
+            // we have a commit now, so fall through to commit case
+        case "commit":
+            // TODO for now this is a prop on the commit, but it'll soon be its own vtx
+            return d.propv("repository");
     }
-    // TODO for now this is a prop on the commit, but it'll soon be its own vtx
-    return d.propv("repository");
+    return;
 };
 
 /**
