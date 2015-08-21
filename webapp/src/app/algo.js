@@ -453,9 +453,10 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
             };
         })
         .groupBy(function(v) { return v.segment; }) // collects vertices on same segment into a single array
-        .mapValues(function(v) {
+        .mapValues(function(v, k) {
             return {
                 ids: _.map(v, function(v2) { return v2.id; }),
+                id: parseInt(k), // id of this segment. redundant with the key, but useful later
                 pseg: v[0].pseg, // parent seg (pseg) must be the same for all vertices in a seg
                 maxreach: _.max(v, 'reach').reach,
                 maxtreach: _.max(v, 'treach').treach,
@@ -515,7 +516,9 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
         });
     });
 
-    // FINALLY, assign x and y coords to all visible vertices
+    // FINALLY, assign x and y coords to all visible vertices. Remember that the contents
+    // of this var represent only those vertices that will ultimately be shown - so if
+    // elision is on, there's potentially a lot less in here.
     var vertices;
     if (elide) {
         vertices = _.mapValues(_.pick(vmeta, function(v) {
@@ -545,8 +548,10 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
     // links, now that the vertices list is assembled and ready.
     _.each(protolinks, function(d) { links.push([vertices[d[0]], vertices[d[1]]]); });
 
-    // collect the vertices together by segment in a way that it's easy to see
-    // where connections are needed to cross elision ranges
+    // collect vertices - so, those which are going to be shown, but NOT those being elided,
+    // if any - together by segment. vtxbyseg is a map keyed by segment id, where each value
+    // is an array containing the set of vertices that will ultimately be shown from that
+    // segment. This makes it easy to spot where connections are needed to cross elision ranges.
     var vtxbyseg = _.merge(
         // make sure we get all segments, even empties
         _.mapValues(segmentinfo, function() { return []; }),
@@ -554,22 +559,25 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
     );
 
     if (elide) {
-        // build an offset map telling us how much a segment's internal offset should
-        // be increased by to give the real x-position
-        var segoffset = _.mapValues(segmentinfo, function(seg, k) {
-            // Recursive function to count length of parent segments
-            var r = _.memoize(function(id, rseg) {
-                // pseg === id IFF we're on segment 0, which is the base
-                return rseg.pseg === id ? vtxbyseg[id].length : vtxbyseg[id].length + r(id, segmentinfo[id]);
-            });
+        // Recursive function to count total length of parent segments.
+        var segOffsetCounter = function(rseg) {
+            // pseg === id IFF we're on segment 0, which is the base
+            return rseg.pseg === rseg.id ? vtxbyseg[rseg.id].length : vtxbyseg[rseg.id].length + segOffsetCounter(segmentinfo[rseg.pseg]);
+        };
 
+        // build an offset map telling us how much a vertex's own position within
+        // its segment must be increased by to give the real x-position
+        var segoffset = _.mapValues(segmentinfo, function(seg) {
             // Return total length of parent segments, but not self length. Return 0 if first segment (no parents)
-            return k === "0" ? 0 : r(seg.pseg, segmentinfo[seg.pseg]);
+            return seg.id === 0 ? 0 : segOffsetCounter(segmentinfo[seg.pseg]);
         });
 
         // then walk through the vertices in order and make the links (elision or no)
         _.each(vtxbyseg, function(vtxs) {
-            _.each(_.values(vtxs).sort(function(a, b) { return a.depth - b.depth; }), function(v, k, coll) {
+            _.each(_.values(vtxs).sort(function(a, b) {
+                // sorting by depth ensures we'll be traversing the segment's vertices in order
+                return a.depth - b.depth;
+            }), function(v, k, coll) {
                 xmap[v.depth] = segoffset[v.segment] + k;
                 if (k === 0) {
                     // all other ops require looking back at previous item, but if
@@ -598,8 +606,6 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
         });
         xmap = _.zipObject(_.unzip([_.range(diameter+1), _.range(diameter+1)]));
     }
-
-    // TODO branches/tags
 
     return {
         vertices: _.values(vertices),
