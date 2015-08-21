@@ -156,7 +156,7 @@ var Viz = React.createClass({
         selections.elisions = selections.outerg.selectAll('.elision-bar')
             .data(_.map(props.vizdata.elranges, function(range) {
                 // creates the same string as what's used in vizdata.xmap
-                return range[0] + ' - ' + range[range.length - 1];
+                return range[0] + '-' + range[range.length - 1];
             }), _.identity);
 
         selections.elisions.exit().transition().remove(); // remove on exit

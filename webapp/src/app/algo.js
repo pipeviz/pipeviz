@@ -596,7 +596,7 @@ function extractVizGraph(pvg, cg, guideCommits, elide) {
 
                 // if this is true, it means there's an elided range between these two elements
                 if (v.depth !== coll[k-1].depth + 1) {
-                    xmap[(coll[k-1].depth + 1) + ' - ' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
+                    xmap[(coll[k-1].depth + 1) + '-' + (v.depth - 1)] = segoffset[v.segment] + k-0.5;
                 }
 
                 // whether or not there's elision, adjacent vertices in this list need a link
