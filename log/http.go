@@ -11,10 +11,10 @@ import (
 // TODO this is kinda hacked together, give it a once-over check
 
 // NewHttpLogger returns an HttpLogger, suitable for use as http middleware.
-func NewHttpLogger(service string) func(h http.Handler) http.Handler {
+func NewHttpLogger(system string) func(h http.Handler) http.Handler {
 	middleware := func(h http.Handler) http.Handler {
 		entry := logrus.WithFields(logrus.Fields{
-			"service": service,
+			"system": system,
 		})
 
 		fn := func(w http.ResponseWriter, r *http.Request) {

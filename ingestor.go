@@ -36,8 +36,8 @@ func (s *Ingestor) RunHttpIngestor(addr string) error {
 	if err != nil {
 
 		logrus.WithFields(logrus.Fields{
-			"service": "ingestor",
-			"err":     err,
+			"system": "ingestor",
+			"err":    err,
 		}).Error("Ingestion httpd failed to start")
 	}
 
