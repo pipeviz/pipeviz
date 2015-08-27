@@ -52,6 +52,11 @@ const schemaRaw = `
             "type": "array",
             "minItems": 1,
             "items": { "$ref": "#/definitions/commit-meta" }
+        },
+        "yum-pkg": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#definitions/yum-pkg" }
         }
     },
     "additionalProperties": false,
@@ -415,6 +420,20 @@ const schemaRaw = `
                 }
             },
             "required": [ "sha1" ],
+            "additionalProperties": false
+        },
+        "yum-pkg": {
+            "type": "object",
+            "description": "A package, as understood by the yum package manager used in rpm-based Linux distributions.",
+            "properties": {
+                "name": { "type": "string" },
+                "repository": { "type": "string" },
+                "version": { "type": "string" },
+                "epoch": { "type": "integer" },
+                "release": { "type": "string" },
+                "arch": { "type": "string" }
+            }
+            "required": [ "name", "repository", "version", "release", "epoch", "arch" ],
             "additionalProperties": false
         }
     }
