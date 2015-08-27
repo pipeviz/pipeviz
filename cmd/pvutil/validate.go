@@ -427,13 +427,12 @@ const schemaRaw = `
             "description": "A package, as understood by the yum package manager used in rpm-based Linux distributions.",
             "properties": {
                 "name": { "type": "string" },
-                "repository": { "type": "string" },
                 "version": { "type": "string" },
                 "epoch": { "type": "integer" },
                 "release": { "type": "string" },
                 "arch": { "type": "string" }
-            }
-            "required": [ "name", "repository", "version", "release", "epoch", "arch" ],
+            },
+            "required": [ "name", "version", "release", "epoch", "arch" ],
             "additionalProperties": false
         }
     }
