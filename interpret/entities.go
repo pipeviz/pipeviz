@@ -165,3 +165,12 @@ type ListenAddr struct {
 	Type  string   `json:"type"`
 	Path  string   `json:"path"`
 }
+
+type YumPkg struct {
+	Name       string `json:"name"`
+	Repository string `json:"repository"`
+	Version    string `json:"version"`
+	Epoch      int    `json:"epoch"`
+	Release    string `json:"release"`
+	Arch       string `json:"arch"`
+}
