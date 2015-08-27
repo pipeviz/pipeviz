@@ -75,6 +75,8 @@ func Split(d interface{}, id uint64) ([]SplitData, error) {
 		return splitParentDataset(v, id)
 	case interpret.Dataset:
 		return splitDataset(v, id)
+	case interpret.YumPkg:
+		return splitYumPkg(v, id)
 	}
 
 	return nil, errors.New("No handler for object type")
@@ -274,6 +276,19 @@ func splitDataset(d interpret.Dataset, id uint64) ([]SplitData, error) {
 
 	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
 	edges = append(edges, d.Genesis)
+
+	return []SplitData{{v, edges}}, nil
+}
+
+func splitYumPkg(d interpret.YumPkg, id uint64) ([]SplitData, error) {
+	v := vertexYumPkg{props: ps.NewMap()}
+	var edges EdgeSpecs
+
+	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
+	v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.Version})
+	v.props = v.props.Set("epoch", Property{MsgSrc: id, Value: d.Epoch})
+	v.props = v.props.Set("release", Property{MsgSrc: id, Value: d.Release})
+	v.props = v.props.Set("arch", Property{MsgSrc: id, Value: d.Arch})
 
 	return []SplitData{{v, edges}}, nil
 }

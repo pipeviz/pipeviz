@@ -290,3 +290,25 @@ func (vtx vertexParentDataset) Merge(ivtx Vertex) (Vertex, error) {
 	vtx.props = GenericMerge(vtx.props, ivtx.Props())
 	return vtx, nil
 }
+
+type vertexYumPkg struct {
+	props ps.Map
+}
+
+func (vtx vertexYumPkg) Props() ps.Map {
+	return vtx.props
+}
+
+func (vtx vertexYumPkg) Typ() VType {
+	return "parent-dataset"
+}
+
+func (vtx vertexYumPkg) Merge(ivtx Vertex) (Vertex, error) {
+	if _, ok := ivtx.(vertexYumPkg); !ok {
+		// NOTE remember, formatting with types means reflection
+		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
+	}
+
+	vtx.props = GenericMerge(vtx.props, ivtx.Props())
+	return vtx, nil
+}
