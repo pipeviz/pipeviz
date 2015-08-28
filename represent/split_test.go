@@ -37,6 +37,7 @@ const (
 	D_nick     string = "bar-nick"
 	D_commit   string = "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
 	D_version  string = "2.2"
+	D_pkgname  string = "bigparty"
 	D_semver   string = "0.12.9"
 	D_msgid    uint64 = 1
 	D_datetime string = "2015-01-09T02:01:20.000Z" // TODO don't let JS stupidity drive date format
@@ -65,6 +66,14 @@ var D_ls interpret.LogicState = interpret.LogicState{
 	Nick:   D_nick,
 	Path:   "/usr/local/src/imaginationland",
 	Type:   "code",
+}
+
+var D_yp interpret.YumPkg = interpret.YumPkg{
+	Name:    D_pkgname,
+	Version: D_version,
+	Epoch:   7,
+	Release: "4.el7_1",
+	Arch:    "x86_64",
 }
 
 // A matrix of standard interpret.Address values, including all permutations of field presence
@@ -195,6 +204,14 @@ type FixtureParentDatasetSplit struct {
 }
 
 var F_ParentDataset []FixtureParentDatasetSplit
+
+type FixtureYumPkgSplit struct {
+	Summary string
+	Input   interpret.YumPkg
+	Output  []SplitData
+}
+
+var F_YumPkg []FixtureYumPkgSplit
 
 func init() {
 	hexify := func(hash string) (ret interpret.Sha1) {
@@ -807,6 +824,21 @@ func init() {
 			},
 		},
 	}
+
+	F_YumPkg = []FixtureYumPkgSplit{
+		{
+			Summary: "Only YumPkg test; direct values passthrough",
+			Input:   D_yp,
+			Output: []SplitData{
+				{
+					Vertex: vertexYumPkg{
+						mapPropPairs(D_msgid, p{"name", D_pkgname}, p{"version", D_version}, p{"epoch", 7}, p{"release", "4.el7_1"}, p{"arch", "x86_64"}),
+					},
+					EdgeSpecs: nil,
+				},
+			},
+		},
+	}
 }
 
 // ******** Utility funcs
@@ -956,6 +988,20 @@ func TestSplitDataset(t *testing.T) {
 func TestSplitParentDataset(t *testing.T) {
 	for _, fixture := range F_ParentDataset {
 		t.Log("Split test on parent dataset fixture:", fixture.Summary)
+
+		// by convention we're always using msgid 1 in fixtures
+		sd, err := Split(fixture.Input, D_msgid)
+		if err != nil {
+			t.Error(err)
+		}
+
+		compareSplitData(fixture.Output, sd, t)
+	}
+}
+
+func TestSplitYumPkg(t *testing.T) {
+	for _, fixture := range F_YumPkg {
+		t.Log("Split test on yumpkg fixture:", fixture.Summary)
 
 		// by convention we're always using msgid 1 in fixtures
 		sd, err := Split(fixture.Input, D_msgid)

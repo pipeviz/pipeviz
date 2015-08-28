@@ -21,6 +21,7 @@ type message struct {
 	P   []Process    `json:"processes"`
 	C   []Commit     `json:"commits"`
 	Cm  []CommitMeta `json:"commit-meta"`
+	Yp  []YumPkg     `json:"yum-pkg"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface. It translates a
@@ -155,6 +156,11 @@ func (m *Message) Each(f func(vertex interface{})) {
 		e.Sha1Str = ""
 
 		logEntry.WithField("vtype", "commit meta").Debug("Preparing to emit object from Message.Each")
+		f(e)
+	}
+
+	for _, e := range m.m.Yp {
+		logEntry.WithField("vtype", "yum-pkg").Debug("Preparing to emit object from Message.Each")
 		f(e)
 	}
 }

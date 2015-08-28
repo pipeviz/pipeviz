@@ -149,6 +149,7 @@ func init() {
 		IdentifierTestResult{},
 		IdentifierParentDataset{},
 		IdentifierComm{},
+		IdentifierYumPkg{},
 	}
 }
 
@@ -391,4 +392,25 @@ func (i IdentifierComm) Matches(a Vertex, b Vertex) bool {
 	} else {
 		return mapValEqAnd(l.Props(), r.Props(), "type", "port")
 	}
+}
+
+type IdentifierYumPkg struct{}
+
+func (i IdentifierYumPkg) CanIdentify(data Vertex) bool {
+	_, ok := data.(vertexYumPkg)
+	return ok
+}
+
+func (i IdentifierYumPkg) Matches(a Vertex, b Vertex) bool {
+	l, ok := a.(vertexYumPkg)
+	if !ok {
+		return false
+	}
+	r, ok := b.(vertexYumPkg)
+	if !ok {
+		return false
+	}
+
+	// TODO is this actually the correct matching pattern?
+	return mapValEq(l.Props(), r.Props(), "name", "version", "arch", "epoch")
 }
