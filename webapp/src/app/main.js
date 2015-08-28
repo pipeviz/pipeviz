@@ -83,6 +83,22 @@ var Viz = React.createClass({
                 }
             });
         selections.veg.append('circle');
+
+        selections.veg.append('image')
+            .attr('class', 'provider-logo')
+            .attr('height', 22)
+            .attr('width', 22)
+            .attr('y', '-37')
+            .attr('x', '-10')
+            .attr('xlink:href', function(d) {
+                if (d.refs.ls.length > 0) {
+                    var e = getEnvironment(props.graph, d.refs.ls[0]);
+                    if (e.propv("provider") !== undefined) {
+                        return "assets/" + e.propv("provider") + ".svg";
+                    }
+                }
+            });
+
         selections.nte = selections.veg.append('text');
         selections.nte.append('tspan') // add vertex label tspan on enter
             .attr('class', 'vtx-label');
