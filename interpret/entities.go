@@ -6,14 +6,14 @@ import (
 )
 
 type Environment struct {
-	Address     Address         `json:"address"`
-	Os          string          `json:"os"`
-	Provider    string          `json:"provider"`
-	Type        string          `json:"type"`
-	Nick        string          `json:"nick"`
-	LogicStates []LogicState    `json:"logic-states"`
-	Datasets    []ParentDataset `json:"datasets"`
-	Processes   []Process       `json:"processes"`
+	Address     Address         `json:"address,omitempty"`
+	Os          string          `json:"os,omitempty"`
+	Provider    string          `json:"provider,omitempty"`
+	Type        string          `json:"type,omitempty"`
+	Nick        string          `json:"nick,omitempty"`
+	LogicStates []LogicState    `json:"logic-states,omitempty"`
+	Datasets    []ParentDataset `json:"datasets,omitempty"`
+	Processes   []Process       `json:"processes,omitempty"`
 }
 
 type EnvLink struct {
