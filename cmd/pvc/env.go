@@ -39,10 +39,10 @@ func envCommand() *cobra.Command {
 // runGenEnv is the main entry point for running the environment-generating
 // env subcommand.
 func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
-	var e interpret.Environment
+	e := &interpret.Environment{}
 
 	if !cmd.Flags().Lookup("no-detect").Changed {
-		e = detectEnvDefaults()
+		*e = detectEnvDefaults()
 	}
 
 	// Write directly to stdout, at least for now
@@ -54,7 +54,7 @@ func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Fprintf(w, "\n")
-		ec.printCurrentState(w, e)
+		ec.printCurrentState(w, *e)
 		fmt.Fprintf(w, "\n")
 		fmt.Fprintf(w, "Select a value to edit by number, (s)end, or (q)uit: ")
 
