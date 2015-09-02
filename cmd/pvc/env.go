@@ -34,10 +34,10 @@ func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
 	var e interpret.Environment
 
 	if !cmd.Flags().Lookup("no-detect").Changed {
-		e = interpret.Environment{}
+		e = detectEnvDefaults()
 	}
 
-	// For now, write directly to stdout
+	// Write directly to stdout, at least for now
 	w := os.Stdout
 
 	fmt.Println("Generating an environment message...")
@@ -53,7 +53,6 @@ func detectEnvDefaults() (e interpret.Environment) {
 		e.Address.Hostname = ""
 	}
 
-	// Relying on the running program, not the actual system, but...
 	e.Os = runtime.GOOS
 
 	return e
@@ -62,8 +61,27 @@ func detectEnvDefaults() (e interpret.Environment) {
 // printMenu prints to stdout a menu showing the current data in the
 // message to be generated.
 func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
-	fmt.Println()
-	if e.Address.Hostname == "" {
-		fmt.Print("  1. FQDN: [empty] ")
-	}
+	fmt.Fprintln(w, "Environment data:")
+	var n int
+
+	n++
+	//if e.Address.Hostname == "" {
+	//fmt.Fprintf(w, "  %v. *FQDN: [empty]\n", n)
+	//} else {
+	fmt.Fprintf(w, "  %v. FQDN: %q\n", n, e.Address.Hostname)
+	//}
+
+	n++
+	fmt.Fprintf(w, "  %v. Ipv4: %q\n", n, e.Address.Ipv4)
+	n++
+	fmt.Fprintf(w, "  %v. Ipv6: %q\n", n, e.Address.Ipv6)
+
+	n++
+	fmt.Fprintf(w, "  %v. OS: %q\n", n, e.Os)
+
+	n++
+	fmt.Fprintf(w, "  %v. Nickname: %q\n", n, e.Nick)
+
+	n++
+	fmt.Fprintf(w, "  %v. Provider: %q\n", n, e.Nick)
 }
