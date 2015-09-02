@@ -52,6 +52,7 @@ func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
 
 	fmt.Fprintln(w, "Generating an environment message...")
 	reader := bufio.NewReader(os.Stdin)
+MenuLoop:
 	for {
 		fmt.Fprintf(w, "\n")
 		ec.printCurrentState(w, *e)
@@ -97,12 +98,37 @@ func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
 				if interr != nil {
 					continue
 				} else if 0 < num && num < 7 {
-					// do the thing
+					switch num {
+					case 1:
+						collectEnv(w, reader, e)
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					}
+					continue MenuLoop
 				} else {
 					continue
 				}
 			}
 		}
+	}
+}
+
+func collectEnv(w io.Writer, r io.Reader, e *interpret.Environment) {
+	fmt.Fprintf(w, "\n\nEditing FQDN\nCurrent Value: %q\n", e.Address.Hostname)
+	fmt.Fprint(w, "New value: ")
+
+	for {
+		var input string
+		_, err := fmt.Fscanln(r, &input)
+		if err == nil {
+			e.Address.Hostname = input
+			break
+		}
+
+		fmt.Fprintf(w, "\nInvalid input. New value: ")
 	}
 }
 
