@@ -1,10 +1,18 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"runtime"
+	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/interpret"
@@ -40,9 +48,62 @@ func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
 	// Write directly to stdout, at least for now
 	w := os.Stdout
 
-	fmt.Println("Generating an environment message...")
-	ec.printCurrentState(w, e)
-	//reader := bufio.NewReader(os.Stdin)
+	client := http.Client{Timeout: 5 * time.Second}
+
+	fmt.Fprintln(w, "Generating an environment message...")
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Fprintf(w, "\n")
+		ec.printCurrentState(w, e)
+		fmt.Fprintf(w, "\n")
+		fmt.Fprintf(w, "Select a value to edit by number, (s)end, or (q)uit: ")
+
+		var input string
+		for {
+			l, err := fmt.Fscanln(reader, &input)
+			if l > 1 || err != nil {
+				continue
+			}
+
+			switch input {
+			case "q", "quit":
+				fmt.Fprintf(w, "\nQuitting; message was not sent\n")
+				os.Exit(1)
+			case "s", "send":
+				msg, err := json.Marshal(e)
+				if err != nil {
+					log.Fatalf("\nFailed to marshal JSON of environment object, no message sent\n")
+				}
+
+				resp, err := client.Post(cmd.Flags().Lookup("target").Value.String(), "application/json", bytes.NewReader(msg))
+				if err != nil {
+					log.Fatalf(err.Error())
+				}
+
+				bod, err := ioutil.ReadAll(resp.Body)
+				resp.Body.Close()
+				if err != nil {
+					log.Fatalf(err.Error())
+				}
+
+				if resp.StatusCode >= 200 && resp.StatusCode <= 300 {
+					fmt.Printf("%v, msgid %v\n", resp.StatusCode, string(bod))
+				} else {
+					fmt.Printf("Message was rejected with code %v and message %v\n", resp.StatusCode, string(bod))
+				}
+
+			default:
+				num, interr := strconv.Atoi(input)
+				if interr != nil {
+					continue
+				} else if 0 < num && num < 7 {
+					// do the thing
+				} else {
+					continue
+				}
+			}
+		}
+	}
 }
 
 // Inspects the currently running system to fill in some default values.
