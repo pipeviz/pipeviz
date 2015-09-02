@@ -1,38 +1,44 @@
 # Pipeviz
 
+Pipeviz is a system for visualizing what you need to know as a software-driven organization: your development workflow, the state of your infrastructure, and more. It's a database, and visualization webapp rolled into one, informed by an ecosystem of agents and other message producers.
+
 ## Installation
 
-Pipeviz is, for now, structured as a standard executable Go program where, given a functioning local Go environment, simply running
+Pipeviz requires that you either have a working Go environment, or that you use the provided Dockerfiles to do it for you. There are three basic cases:
+
+* Hacking on pipeviz (frontend or backend): local Go environment.
+* Hacking on message producers: you can get away with Docker.
+* Actually running pipeviz: Docker, or whatever your hosting environment dictates.
+
+If you're going the Docker route, the Dockerfiles have their own instructions. For a local Go environment, setting it up oughtn't be too difficult. [These instructions](http://www.golangbootcamp.com/book/get_setup) should get you there. Make sure you set your `$GOPATH` and update your `$PATH` with the `$GOPATH/bin` directory, as it recommends!
+
+Once you have a working environment, you'll start by getting the package. Because pipeviz is currently a private repository, this can be little tricky. If you have a Github authentication token (for HTTPS cloning) already set up, then this will work:
 
 ```
 go get github.com/tag1consulting/pipeviz
 ```
 
-will download and build an executable binary, placing it at `$GOPATH/bin/pipeviz`. However, because the repository is currently private, and because `go get` operates over http, it will require that you provide your Github credentials for http cloning. This can be a bit of a pain, so there’s an alternative:
+This is the standard method for fetching Go packages, and will work once the pipeviz repository is public. But if you don't have an HTTPS token set up, do this instead:
 
 ```
-$ cd $GOPATH/src
-$ mkdir -p github.com/tag1consulting
-$ git clone git@github.com:tag1consulting/pipeviz github.com/tag1consulting/pipeviz
-$ go get -u -f github.com/tag1consulting/pipeviz
+mkdir -p $GOPATH/src/github.com/tag1consulting
+git clone git@github.com:tag1consulting/pipeviz $GOPATH/src/github.com/tag1consulting/pipeviz
 ```
 
-The `-f` flag will make `go get` ignore the fact that the repo is set to clone over ssh instead of http, and just update it that way instead. At which point, it should build you a pipeviz binary.
-
-However, the main binary isn’t actually that useful (yet). The `pvutil` binary, on the other hand, can be used to create dot files representing the results of interpreting message fixtures, which can then be transformed by graphviz (dot, specifically) into visualizations.
-
-To build pvutil, `cd` into the root of the pipeviz repository, then run `make; make install`. The `pvutil` binary should then be installed to `$GOPATH/bin`, at which point you can run `pvutil dotdump` to create the dot output file, or simply pipe it to dot: `pvutil dotdump -a | dot -Tpng > output.png`.
-
-### Git log generation for messages
-
-command used to generate the formatted git commit logs:
+This puts the repository in the same place as where `go get` would have dropped it. Whichever way you use, the next step is to `cd` into that directory and install:
 
 ```
-git log \
-    --pretty=format:'"%H": {"parents":["%P"],"author": "%an <%ae>","date": "%ad","message": "%s"},' \
-    $@ | \
-    perl -pe 'BEGIN{print "{"}; END{print "[]}\n"}' | \
-    perl -pe 's/},\[\]}/}}/'
+cd $GOPATH/src/github.com/tag1consulting/pipeviz
+make install
 ```
 
-...almost. note that this is broken because it doesn’t correctly break out multiple parent commits (a merge) into separate array elements - that’s gotta be done manually.
+This will install several binaries into your `$GOPATH/bin` directory: `pvc`, `pvutil`, and `pipeviz` itself.
+
+And finally, there are some frontend packages that need installing for the webapp. For this, you'll need [bower](http://bower.io/#install-bower):
+
+```
+cd webapp
+bower install
+```
+
+You're done! You can just run `pipeviz` with no arguments, and it will bind (on loopback only) to port 8008 for the webapp, and 2309 for message ingestion.
