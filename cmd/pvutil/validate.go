@@ -71,7 +71,7 @@ const schemaRaw = `
                     "default": "virtual"
                 },
                 "os": {
-                    "enum": [ "windows", "unix" ],
+                    "enum": [ "windows", "linux", "darwin", "freebsd", "unix" ],
                     "default": "unix"
                 },
                 "address": {
