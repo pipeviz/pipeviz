@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -72,11 +73,10 @@ MenuLoop:
 	for {
 		fmt.Fprintf(w, "\n")
 		ec.printCurrentState(w, *e)
-		fmt.Fprintf(w, "\n")
-		fmt.Fprintf(w, "Select a value to edit by number, (s)end, or (q)uit: ")
 
 		var input string
 		for {
+			fmt.Fprintf(w, "\nSelect a value to edit by number, (p)rint current JSON message, (s)end, or (q)uit: ")
 			l, err := fmt.Fscanln(reader, &input)
 			if l > 1 || err != nil {
 				continue
@@ -87,10 +87,7 @@ MenuLoop:
 				fmt.Fprintf(w, "\nQuitting; message was not sent\n")
 				os.Exit(1)
 			case "s", "send":
-				// wrap the env up in a map that'll marshal into workable JSON
-				m := wrapForJSON(*e)
-
-				msg, err := json.Marshal(m)
+				msg, err := toJSONBytes(*e)
 				if err != nil {
 					log.Fatalf("\nFailed to marshal JSON of environment object, no message sent\n")
 				}
@@ -107,11 +104,29 @@ MenuLoop:
 				}
 
 				if resp.StatusCode >= 200 && resp.StatusCode <= 300 {
-					fmt.Printf("Message accepted (%v), msgid %v\n", resp.StatusCode, string(bod))
+					fmt.Printf("Message accepted (HTTP code %v), msgid %v\n", resp.StatusCode, string(bod))
 				} else {
-					fmt.Printf("Message was rejected with code %v and message %v\n", resp.StatusCode, string(bod))
+					fmt.Printf("Message was rejected with HTTP code %v and message %v\n", resp.StatusCode, string(bod))
 				}
 				break MenuLoop
+
+			case "p", "print":
+				byts, err := toJSONBytes(*e)
+				if err != nil {
+					fmt.Fprintf(w, "Error while generating JSON for printing: %q", err.Error())
+					continue MenuLoop
+				}
+
+				var prettied bytes.Buffer
+				err = json.Indent(&prettied, byts, "", "    ")
+				if err != nil {
+					fmt.Fprintf(w, "Error while generating JSON for printing: %q", err.Error())
+					continue MenuLoop
+				}
+
+				fmt.Fprintf(w, "\nMessage that will be sent to %s:\n", cmd.Flags().Lookup("target").Value)
+				prettied.WriteTo(w)
+				w.WriteString("\n")
 
 			default:
 				num, interr := strconv.Atoi(input)
@@ -147,6 +162,18 @@ func wrapForJSON(e interpret.Environment) map[string]interface{} {
 	m := make(map[string]interface{})
 	m["environments"] = []interpret.Environment{e}
 	return m
+}
+
+func toJSONBytes(e interpret.Environment) ([]byte, error) {
+	// Convert the env to JSON
+	m := wrapForJSON(e)
+
+	msg, err := json.Marshal(m)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("\nError while marshaling data to JSON for validation: %s\n", err.Error()))
+	}
+
+	return msg, nil
 }
 
 func collectFQDN(w io.Writer, r io.Reader, e *interpret.Environment) {
@@ -307,12 +334,9 @@ func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
 }
 
 func validateAndPrint(w io.Writer, e interpret.Environment) {
-	// Convert the env to JSON
-	m := wrapForJSON(e)
-
-	msg, err := json.Marshal(m)
+	msg, err := toJSONBytes(e)
 	if err != nil {
-		fmt.Fprintf(w, "\nError while marshaling data to JSON for validation: %s\n", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
 
