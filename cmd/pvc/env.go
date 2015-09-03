@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"runtime"
@@ -121,10 +122,15 @@ MenuLoop:
 					case 1:
 						collectFQDN(w, reader, e)
 					case 2:
+						collectIpv4(w, reader, e)
 					case 3:
+						collectIpv6(w, reader, e)
 					case 4:
+						collectOS(w, reader, e)
 					case 5:
+						collectNick(w, reader, e)
 					case 6:
+						collectProvider(w, reader, e)
 					}
 					continue MenuLoop
 				} else {
@@ -155,7 +161,105 @@ func collectFQDN(w io.Writer, r io.Reader, e *interpret.Environment) {
 			break
 		}
 
-		fmt.Fprintf(w, "\nInvalid input. New value: ")
+		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
+	}
+}
+
+func collectIpv4(w io.Writer, r io.Reader, e *interpret.Environment) {
+	fmt.Fprintf(w, "\n\nEditing IPv4\nCurrent Value: %q\n", e.Address.Ipv4)
+	fmt.Fprint(w, "New value: ")
+
+	for {
+		var input string
+		_, err := fmt.Fscanln(r, &input)
+		if err == nil {
+			addr := net.ParseIP(input)
+			if addr == nil {
+				// failed to parse IP, invalid input
+				fmt.Fprintf(w, "\nNot a valid IP address.\nNew value: ")
+			} else if addr.To4() == nil {
+				// not a valid IPv4
+				fmt.Fprintf(w, "\nNot a valid IPv4 address.\nNew value: ")
+			} else {
+				e.Address.Ipv4 = addr.String()
+				break
+			}
+		} else {
+			fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
+		}
+	}
+}
+
+func collectIpv6(w io.Writer, r io.Reader, e *interpret.Environment) {
+	fmt.Fprintf(w, "\n\nEditing IPv6\nCurrent Value: %q\n", e.Address.Ipv6)
+	fmt.Fprint(w, "New value: ")
+
+	for {
+		var input string
+		_, err := fmt.Fscanln(r, &input)
+		if err == nil {
+			addr := net.ParseIP(input)
+			if addr == nil {
+				// failed to parse IP, invalid input
+				fmt.Fprintf(w, "\nNot a valid IP address.\nNew value: ")
+			} else if addr.To16() == nil {
+				// not a valid IPv4
+				fmt.Fprintf(w, "\nNot a valid IPv6 address.\nNew value: ")
+			} else {
+				e.Address.Ipv6 = addr.String()
+				break
+			}
+		} else {
+			fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
+		}
+	}
+}
+
+func collectOS(w io.Writer, r io.Reader, e *interpret.Environment) {
+	fmt.Fprintf(w, "\n\nEditing OS\nCurrent Value: %q\n", e.OS)
+	fmt.Fprint(w, "New value: ")
+
+	for {
+		var input string
+		_, err := fmt.Fscanln(r, &input)
+		if err == nil {
+			e.OS = input
+			break
+		}
+
+		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
+	}
+}
+
+func collectNick(w io.Writer, r io.Reader, e *interpret.Environment) {
+	fmt.Fprintf(w, "\n\nEditing Nick\nCurrent Value: %q\n", e.Nick)
+	fmt.Fprint(w, "New value: ")
+
+	for {
+		var input string
+		_, err := fmt.Fscanln(r, &input)
+		if err == nil {
+			e.Nick = input
+			break
+		}
+
+		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
+	}
+}
+
+func collectProvider(w io.Writer, r io.Reader, e *interpret.Environment) {
+	fmt.Fprintf(w, "\n\nEditing Provider\nCurrent Value: %q\n", e.Provider)
+	fmt.Fprint(w, "New value: ")
+
+	for {
+		var input string
+		_, err := fmt.Fscanln(r, &input)
+		if err == nil {
+			e.Provider = input
+			break
+		}
+
+		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
 	}
 }
 
@@ -194,7 +298,7 @@ func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
 	fmt.Fprintf(w, "  %v. OS: %q\n", n, e.OS)
 
 	n++
-	fmt.Fprintf(w, "  %v. Nickname: %q\n", n, e.Nick)
+	fmt.Fprintf(w, "  %v. Nick: %q\n", n, e.Nick)
 
 	n++
 	fmt.Fprintf(w, "  %v. Provider: %q\n", n, e.Nick)
