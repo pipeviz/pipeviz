@@ -71,7 +71,11 @@ MenuLoop:
 				fmt.Fprintf(w, "\nQuitting; message was not sent\n")
 				os.Exit(1)
 			case "s", "send":
-				msg, err := json.Marshal(e)
+				// wrap the env up in a map that'll marshal into workable JSON
+				m := make(map[string]interface{})
+				m["environments"] = []interpret.Environment{*e}
+
+				msg, err := json.Marshal(m)
 				if err != nil {
 					log.Fatalf("\nFailed to marshal JSON of environment object, no message sent\n")
 				}
@@ -88,10 +92,11 @@ MenuLoop:
 				}
 
 				if resp.StatusCode >= 200 && resp.StatusCode <= 300 {
-					fmt.Printf("%v, msgid %v\n", resp.StatusCode, string(bod))
+					fmt.Printf("Message accepted (%v), msgid %v\n", resp.StatusCode, string(bod))
 				} else {
 					fmt.Printf("Message was rejected with code %v and message %v\n", resp.StatusCode, string(bod))
 				}
+				break MenuLoop
 
 			default:
 				num, interr := strconv.Atoi(input)
