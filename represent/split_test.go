@@ -48,7 +48,7 @@ var D_commithash interpret.Sha1
 // Default values for use in environments; these complement the constants
 var D_env interpret.Environment = interpret.Environment{
 	Address:  M_addr[0],
-	Os:       "unix",
+	OS:       "unix",
 	Provider: "vagrant",
 	Type:     "physical",
 	Nick:     D_nick,
@@ -149,7 +149,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Output: []SplitData{
 			{
 				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.Os}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
+					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.OS}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
 				},
 				EdgeSpecs: nil,
 			},

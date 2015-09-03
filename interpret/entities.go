@@ -7,7 +7,7 @@ import (
 
 type Environment struct {
 	Address     Address         `json:"address,omitempty"`
-	Os          string          `json:"os,omitempty"`
+	OS          string          `json:"os,omitempty"`
 	Provider    string          `json:"provider,omitempty"`
 	Type        string          `json:"type,omitempty"`
 	Nick        string          `json:"nick,omitempty"`

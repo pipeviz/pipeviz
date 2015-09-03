@@ -167,7 +167,7 @@ func detectEnvDefaults() (e interpret.Environment) {
 		e.Address.Hostname = ""
 	}
 
-	e.Os = runtime.GOOS
+	e.OS = runtime.GOOS
 
 	return e
 }
@@ -191,7 +191,7 @@ func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
 	fmt.Fprintf(w, "  %v. Ipv6: %q\n", n, e.Address.Ipv6)
 
 	n++
-	fmt.Fprintf(w, "  %v. OS: %q\n", n, e.Os)
+	fmt.Fprintf(w, "  %v. OS: %q\n", n, e.OS)
 
 	n++
 	fmt.Fprintf(w, "  %v. Nickname: %q\n", n, e.Nick)
