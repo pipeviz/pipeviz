@@ -15,8 +15,12 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/schema"
 )
+
+var schemaMaster *gjs.Schema
 
 // TODO we just use this as a way to namespace common names
 type envCmd struct{}
@@ -48,6 +52,17 @@ func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
 	// Write directly to stdout, at least for now
 	w := os.Stdout
 
+	// Prep schema to validate the messages as we go
+	raw, err := schema.Master()
+	if err != nil {
+		fmt.Fprintln(w, "WARNING: Failed to open master schema file; pvc cannot validate outgoing messages.")
+	}
+
+	schemaMaster, err = gjs.NewSchema(gjs.NewStringLoader(string(raw)))
+	if err != nil {
+		panic("bad schema...?")
+	}
+
 	client := http.Client{Timeout: 5 * time.Second}
 
 	fmt.Fprintln(w, "Generating an environment message...")
@@ -72,8 +87,7 @@ MenuLoop:
 				os.Exit(1)
 			case "s", "send":
 				// wrap the env up in a map that'll marshal into workable JSON
-				m := make(map[string]interface{})
-				m["environments"] = []interpret.Environment{*e}
+				m := wrapForJSON(*e)
 
 				msg, err := json.Marshal(m)
 				if err != nil {
@@ -105,7 +119,7 @@ MenuLoop:
 				} else if 0 < num && num < 7 {
 					switch num {
 					case 1:
-						collectEnv(w, reader, e)
+						collectFQDN(w, reader, e)
 					case 2:
 					case 3:
 					case 4:
@@ -121,7 +135,15 @@ MenuLoop:
 	}
 }
 
-func collectEnv(w io.Writer, r io.Reader, e *interpret.Environment) {
+// wrapForJSON converts an environment into a map that will serialize
+// appropriate pipeviz message JSON.
+func wrapForJSON(e interpret.Environment) map[string]interface{} {
+	m := make(map[string]interface{})
+	m["environments"] = []interpret.Environment{e}
+	return m
+}
+
+func collectFQDN(w io.Writer, r io.Reader, e *interpret.Environment) {
 	fmt.Fprintf(w, "\n\nEditing FQDN\nCurrent Value: %q\n", e.Address.Hostname)
 	fmt.Fprint(w, "New value: ")
 
@@ -176,4 +198,30 @@ func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
 
 	n++
 	fmt.Fprintf(w, "  %v. Provider: %q\n", n, e.Nick)
+
+	validateAndPrint(w, e)
+}
+
+func validateAndPrint(w io.Writer, e interpret.Environment) {
+	// Convert the env to JSON
+	m := wrapForJSON(e)
+
+	msg, err := json.Marshal(m)
+	if err != nil {
+		fmt.Fprintf(w, "\nError while marshaling data to JSON for validation: %s\n", err.Error())
+		return
+	}
+
+	// Validate the current state of the message
+	result, err := schemaMaster.Validate(gjs.NewStringLoader(string(msg)))
+	if err != nil {
+		fmt.Fprintf(w, "\nError while attempting to validate data: %s\n", err.Error())
+		return
+	}
+	if !result.Valid() {
+		fmt.Fprintln(w, "\nAs it stands now, the data will fail validation if sent to a pipeviz server. Errors:")
+		for _, desc := range result.Errors() {
+			fmt.Fprintf(w, "\t%s\n", desc)
+		}
+	}
 }
