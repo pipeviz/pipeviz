@@ -1,6 +1,30 @@
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+
+	"github.com/spf13/cobra"
+	"github.com/tag1consulting/pipeviz/interpret"
+)
+
+type menuLevel interface {
+	Info() ([]byte, error)
+	Prompt() ([]byte, error)
+	Accept(string) error
+	Next(*cliRunner) *cliRunner
+}
+
+// cliRunner coordinates control over and interaction with a level
+// of interaction in the UI
+type cliRunner struct {
+	parent *cliRunner
+	obj    menuLevel
+	w      io.Writer
+}
 
 func main() {
 	root := &cobra.Command{Use: "pvc"}
@@ -37,4 +61,21 @@ func toJSONBytes(e interpret.Environment) ([]byte, error) {
 	}
 
 	return msg, nil
+}
+
+func runCreate(cmd *cobra.Command, args []string) {
+	// Create the root runner
+	//cr := &cliRunner{
+	//w: os.Stdout,
+	//}
+}
+
+type mainMenu struct {
+}
+
+func (m *mainMenu) Info() ([]byte, error) {
+	var b bytes.Buffer
+	b.WriteString("Which type of state would you like to describe to pipeviz: ")
+
+	return b.Bytes(), nil
 }
