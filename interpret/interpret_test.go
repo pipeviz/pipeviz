@@ -10,9 +10,10 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/fixtures"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/schema"
 )
 
-var schema *gjs.Schema
+var masterSchema *gjs.Schema
 
 var Msgs []*interpret.Message
 
@@ -30,12 +31,12 @@ func init() {
 		Msgs = append(Msgs, m)
 	}
 
-	src, err := ioutil.ReadFile("../schema.json")
+	src, err := schema.Master()
 	if err != nil {
 		panic(fmt.Sprint("Failed to open master schema file, test must abort. Note: this test must be run from the pipeviz repo root. message:", err.Error()))
 	}
 
-	schema, err = gjs.NewSchema(gjs.NewStringLoader(string(src)))
+	masterSchema, err = gjs.NewSchema(gjs.NewStringLoader(string(src)))
 	if err != nil {
 		panic(fmt.Sprint("Failed to create a schema object from the master schema.json:", err.Error()))
 	}
@@ -57,7 +58,7 @@ func TestMessageValidity(t *testing.T) {
 
 		src, _ := ioutil.ReadFile("../fixtures/ein/" + f.Name())
 		msg := gjs.NewStringLoader(string(src))
-		result, err := schema.Validate(msg)
+		result, err := masterSchema.Validate(msg)
 
 		if err != nil {
 			panic(err.Error())
@@ -111,7 +112,7 @@ func BenchmarkValidateMessageOne(b *testing.B) {
 	msg := gjs.NewStringLoader(string(d))
 
 	for i := 0; i < b.N; i++ {
-		schema.Validate(msg)
+		masterSchema.Validate(msg)
 	}
 }
 
@@ -120,7 +121,7 @@ func BenchmarkValidateMessageTwo(b *testing.B) {
 	msg := gjs.NewStringLoader(string(d))
 
 	for i := 0; i < b.N; i++ {
-		schema.Validate(msg)
+		masterSchema.Validate(msg)
 	}
 }
 
@@ -131,7 +132,7 @@ func BenchmarkValidateMessageOneAndTwo(b *testing.B) {
 	msg2 := gjs.NewStringLoader(string(d2))
 
 	for i := 0; i < b.N; i++ {
-		schema.Validate(msg1)
-		schema.Validate(msg2)
+		masterSchema.Validate(msg1)
+		masterSchema.Validate(msg2)
 	}
 }

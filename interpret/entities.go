@@ -6,61 +6,61 @@ import (
 )
 
 type Environment struct {
-	Address     Address         `json:"address"`
-	Os          string          `json:"os"`
-	Provider    string          `json:"provider"`
-	Type        string          `json:"type"`
-	Nick        string          `json:"nick"`
-	LogicStates []LogicState    `json:"logic-states"`
-	Datasets    []ParentDataset `json:"datasets"`
-	Processes   []Process       `json:"processes"`
+	Address     Address         `json:"address,omitempty"`
+	OS          string          `json:"os,omitempty"`
+	Provider    string          `json:"provider,omitempty"`
+	Type        string          `json:"type,omitempty"`
+	Nick        string          `json:"nick,omitempty"`
+	LogicStates []LogicState    `json:"logic-states,omitempty"`
+	Datasets    []ParentDataset `json:"datasets,omitempty"`
+	Processes   []Process       `json:"processes,omitempty"`
 }
 
 type EnvLink struct {
-	Address Address `json:"address"`
-	Nick    string  `json:"nick"`
+	Address Address `json:"address,omitempty"`
+	Nick    string  `json:"nick,omitempty"`
 }
 
 type Address struct {
-	Hostname string `json:"hostname"`
-	Ipv4     string `json:"ipv4"`
-	Ipv6     string `json:"ipv6"`
+	Hostname string `json:"hostname,omitempty"`
+	Ipv4     string `json:"ipv4,omitempty"`
+	Ipv6     string `json:"ipv6,omitempty"`
 }
 
 type LogicState struct {
-	Datasets    []DataLink `json:"datasets"`
-	Environment EnvLink    `json:"environment"`
+	Datasets    []DataLink `json:"datasets,omitempty"`
+	Environment EnvLink    `json:"environment,omitempty"`
 	ID          struct {
-		Commit    Sha1
-		CommitStr string `json:"commit"`
-		Version   string `json:"version"`
-		Semver    string `json:"semver"`
-	} `json:"id"`
-	Lgroup string `json:"lgroup"`
-	Nick   string `json:"nick"`
-	Path   string `json:"path"`
-	Type   string `json:"type"`
+		Commit    Sha1   `json:"-"`
+		CommitStr string `json:"commit,omitempty"`
+		Version   string `json:"version,omitempty"`
+		Semver    string `json:"semver,omitempty"`
+	} `json:"id,omitempty"`
+	Lgroup string `json:"lgroup,omitempty"`
+	Nick   string `json:"nick,omitempty"`
+	Path   string `json:"path,omitempty"`
+	Type   string `json:"type,omitempty"`
 }
 
 type DataLink struct {
-	Name        string   `json:"name"`
-	Type        string   `json:"type"`
-	Subset      string   `json:"subset"`
-	Interaction string   `json:"interaction"`
-	ConnUnix    ConnUnix `json:"connUnix"`
-	ConnNet     ConnNet  `json:"connNet"`
+	Name        string   `json:"name,omitempty"`
+	Type        string   `json:"type,omitempty"`
+	Subset      string   `json:"subset,omitempty"`
+	Interaction string   `json:"interaction,omitempty"`
+	ConnUnix    ConnUnix `json:"connUnix,omitempty"`
+	ConnNet     ConnNet  `json:"connNet,omitempty"`
 }
 
 type ConnNet struct {
-	Hostname string `json:"hostname"`
-	Ipv4     string `json:"ipv4"`
-	Ipv6     string `json:"ipv6"`
-	Port     int    `json:"port"`
-	Proto    string `json:"proto"`
+	Hostname string `json:"hostname,omitempty"`
+	Ipv4     string `json:"ipv4,omitempty"`
+	Ipv6     string `json:"ipv6,omitempty"`
+	Port     int    `json:"port,omitempty"`
+	Proto    string `json:"proto,omitempty"`
 }
 
 type ConnUnix struct {
-	Path string `json:"path"`
+	Path string `json:"path,omitempty"`
 }
 
 type Sha1 [20]byte
@@ -99,36 +99,36 @@ func (s Sha1) String() string {
 
 type CommitMeta struct {
 	Sha1      Sha1
-	Sha1Str   string   `json:"sha1"`
-	Tags      []string `json:"tags"`
-	Branches  []string `json:"branches"`
-	TestState string   `json:"testState"`
+	Sha1Str   string   `json:"sha1,omitempty"`
+	Tags      []string `json:"tags,omitempty"`
+	Branches  []string `json:"branches,omitempty"`
+	TestState string   `json:"testState,omitempty"`
 }
 
 type Commit struct {
-	Author     string `json:"author"`
-	Date       string `json:"date"`
+	Author     string `json:"author,omitempty"`
+	Date       string `json:"date,omitempty"`
 	Parents    []Sha1
-	ParentsStr []string `json:"parents"`
+	ParentsStr []string `json:"parents,omitempty"`
 	Sha1       Sha1
-	Sha1Str    string `json:"sha1"`
-	Subject    string `json:"subject"`
-	Repository string `json:"repository"`
+	Sha1Str    string `json:"sha1,omitempty"`
+	Subject    string `json:"subject,omitempty"`
+	Repository string `json:"repository,omitempty"`
 }
 
 // FIXME this metaset/set design is not recursive, but it will need to be
 type ParentDataset struct {
-	Environment EnvLink   `json:"environment"`
-	Path        string    `json:"path"`
-	Name        string    `json:"name"`
-	Subsets     []Dataset `json:"subsets"`
+	Environment EnvLink   `json:"environment,omitempty"`
+	Path        string    `json:"path,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	Subsets     []Dataset `json:"subsets,omitempty"`
 }
 
 type Dataset struct {
-	Name       string      `json:"name"`
+	Name       string      `json:"name,omitempty"`
 	Parent     string      // TODO yechhhh...how do we qualify the hierarchy?
-	CreateTime string      `json:"create-time"`
-	Genesis    DataGenesis `json:"genesis"`
+	CreateTime string      `json:"create-time,omitempty"`
+	Genesis    DataGenesis `json:"genesis,omitempty"`
 }
 
 type DataGenesis interface {
@@ -138,9 +138,9 @@ type DataGenesis interface {
 // TODO this form implies a snap that only existed while 'in flight' - that is, no
 // dump artfiact that exists on disk anywhere. Need to incorporate that case, though.
 type DataProvenance struct {
-	Address  Address  `json:"address"`
-	Dataset  []string `json:"dataset"`
-	SnapTime string   `json:"snap-time"`
+	Address  Address  `json:"address,omitempty"`
+	Dataset  []string `json:"dataset,omitempty"`
+	SnapTime string   `json:"snap-time,omitempty"`
 }
 
 type DataAlpha string
@@ -149,28 +149,28 @@ func (d DataAlpha) _dg()      {}
 func (d DataProvenance) _dg() {}
 
 type Process struct {
-	Pid         int          `json:"pid"`
-	Cwd         string       `json:"cwd"`
-	Dataset     string       `json:"dataset"`
-	Environment EnvLink      `json:"environment"`
-	Group       string       `json:"group"`
-	Listen      []ListenAddr `json:"listen"`
-	LogicStates []string     `json:"logic-states"`
-	User        string       `json:"user"`
+	Pid         int          `json:"pid,omitempty"`
+	Cwd         string       `json:"cwd,omitempty"`
+	Dataset     string       `json:"dataset,omitempty"`
+	Environment EnvLink      `json:"environment,omitempty"`
+	Group       string       `json:"group,omitempty"`
+	Listen      []ListenAddr `json:"listen,omitempty"`
+	LogicStates []string     `json:"logic-states,omitempty"`
+	User        string       `json:"user,omitempty"`
 }
 
 type ListenAddr struct {
-	Port  int      `json:"port"`
-	Proto []string `json:"proto"`
-	Type  string   `json:"type"`
-	Path  string   `json:"path"`
+	Port  int      `json:"port,omitempty"`
+	Proto []string `json:"proto,omitempty"`
+	Type  string   `json:"type,omitempty"`
+	Path  string   `json:"path,omitempty"`
 }
 
 type YumPkg struct {
-	Name       string `json:"name"`
-	Repository string `json:"repository"`
-	Version    string `json:"version"`
-	Epoch      int    `json:"epoch"`
-	Release    string `json:"release"`
-	Arch       string `json:"arch"`
+	Name       string `json:"name,omitempty"`
+	Repository string `json:"repository,omitempty"`
+	Version    string `json:"version,omitempty"`
+	Epoch      int    `json:"epoch,omitempty"`
+	Release    string `json:"release,omitempty"`
+	Arch       string `json:"arch,omitempty"`
 }

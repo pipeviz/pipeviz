@@ -85,8 +85,8 @@ func Split(d interface{}, id uint64) ([]SplitData, error) {
 func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
 	// seven distinct props
 	v := vertexEnvironment{props: ps.NewMap()}
-	if d.Os != "" {
-		v.props = v.props.Set("os", Property{MsgSrc: id, Value: d.Os})
+	if d.OS != "" {
+		v.props = v.props.Set("os", Property{MsgSrc: id, Value: d.OS})
 	}
 	if d.Provider != "" {
 		v.props = v.props.Set("provider", Property{MsgSrc: id, Value: d.Provider})

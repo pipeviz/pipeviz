@@ -81,12 +81,12 @@ FileLoop:
 
 			raw, err := reader.ReadString('\n')
 			if err != nil {
-				log.Fatalf("Bad input, terminating fixr\n")
+				erro.Fatalf("Bad input, terminating fixr\n")
 			}
 
 			input := strings.Split(strings.Trim(raw, " \n"), " ")
 			if len(input) < 1 {
-				log.Fatalf("TODO huh how would this happen\n")
+				erro.Fatalf("TODO huh how would this happen\n")
 			}
 			switch input[0] {
 			case "k", "skip":
