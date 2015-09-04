@@ -29,6 +29,7 @@ type cliRunner struct {
 func main() {
 	root := &cobra.Command{Use: "pvc"}
 	root.AddCommand(envCommand())
+	root.AddCommand(lsCommand())
 
 	var target string
 	root.PersistentFlags().StringVarP(&target, "target", "t", "http://localhost:2309", "Address of the target pipeviz daemon.")
@@ -51,9 +52,9 @@ func wrapForJSON(v interface{}) map[string]interface{} {
 	return m
 }
 
-func toJSONBytes(e interpret.Environment) ([]byte, error) {
+func toJSONBytes(v interface{}) ([]byte, error) {
 	// Convert the data to a map that will write out the correct JSON
-	m := wrapForJSON(e)
+	m := wrapForJSON(v)
 
 	msg, err := json.Marshal(m)
 	if err != nil {
