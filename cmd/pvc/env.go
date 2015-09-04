@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -32,7 +31,7 @@ func envCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "env [-n|--no-detect]",
 		Short: "Generates a pipeviz message describing an environment.",
-		Long:  "Generates a valid pipeviz message describing an environment. Sends the message to a target server, if one is provided; otherwise prints the message and exits.",
+		Long:  "Generates a valid message describing an environment from user input, then sends the message to a target pipeviz server.",
 		Run:   ec.runGenEnv,
 	}
 
@@ -154,26 +153,6 @@ MenuLoop:
 			}
 		}
 	}
-}
-
-// wrapForJSON converts an environment into a map that will serialize
-// appropriate pipeviz message JSON.
-func wrapForJSON(e interpret.Environment) map[string]interface{} {
-	m := make(map[string]interface{})
-	m["environments"] = []interpret.Environment{e}
-	return m
-}
-
-func toJSONBytes(e interpret.Environment) ([]byte, error) {
-	// Convert the env to JSON
-	m := wrapForJSON(e)
-
-	msg, err := json.Marshal(m)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("\nError while marshaling data to JSON for validation: %s\n", err.Error()))
-	}
-
-	return msg, nil
 }
 
 func collectFQDN(w io.Writer, r io.Reader, e *interpret.Environment) {
