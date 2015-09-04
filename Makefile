@@ -1,9 +1,9 @@
 all:
 	go get -d ./...
-
-install:
 	go get github.com/jteeuwen/go-bindata/...
 	go get github.com/tinylib/msgp
+
+install:
 	go generate -x ./schema
 	go install
 	go install ./cmd/...
