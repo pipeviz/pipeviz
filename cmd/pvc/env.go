@@ -180,16 +180,9 @@ func collectFQDN(w io.Writer, r io.Reader, e *interpret.Environment) {
 	fmt.Fprintf(w, "\n\nEditing FQDN\nCurrent Value: %q\n", e.Address.Hostname)
 	fmt.Fprint(w, "New value: ")
 
-	for {
-		var input string
-		_, err := fmt.Fscanln(r, &input)
-		if err == nil {
-			e.Address.Hostname = input
-			break
-		}
-
-		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
-	}
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	e.Address.Hostname = scn.Text()
 }
 
 func collectIpv4(w io.Writer, r io.Reader, e *interpret.Environment) {
@@ -230,10 +223,10 @@ func collectIpv6(w io.Writer, r io.Reader, e *interpret.Environment) {
 				// failed to parse IP, invalid input
 				fmt.Fprintf(w, "\nNot a valid IP address.\nNew value: ")
 			} else if addr.To16() == nil {
-				// not a valid IPv4
+				// not a valid IPv6
 				fmt.Fprintf(w, "\nNot a valid IPv6 address.\nNew value: ")
 			} else {
-				e.Address.Ipv6 = addr.String()
+				e.Address.Ipv6 = addr.To16().String()
 				break
 			}
 		} else {
@@ -246,48 +239,27 @@ func collectOS(w io.Writer, r io.Reader, e *interpret.Environment) {
 	fmt.Fprintf(w, "\n\nEditing OS\nCurrent Value: %q\n", e.OS)
 	fmt.Fprint(w, "New value: ")
 
-	for {
-		var input string
-		_, err := fmt.Fscanln(r, &input)
-		if err == nil {
-			e.OS = input
-			break
-		}
-
-		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
-	}
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	e.OS = scn.Text()
 }
 
 func collectNick(w io.Writer, r io.Reader, e *interpret.Environment) {
 	fmt.Fprintf(w, "\n\nEditing Nick\nCurrent Value: %q\n", e.Nick)
 	fmt.Fprint(w, "New value: ")
 
-	for {
-		var input string
-		_, err := fmt.Fscanln(r, &input)
-		if err == nil {
-			e.Nick = input
-			break
-		}
-
-		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
-	}
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	e.Nick = scn.Text()
 }
 
 func collectProvider(w io.Writer, r io.Reader, e *interpret.Environment) {
 	fmt.Fprintf(w, "\n\nEditing Provider\nCurrent Value: %q\n", e.Provider)
 	fmt.Fprint(w, "New value: ")
 
-	for {
-		var input string
-		_, err := fmt.Fscanln(r, &input)
-		if err == nil {
-			e.Provider = input
-			break
-		}
-
-		fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
-	}
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	e.Provider = scn.Text()
 }
 
 // Inspects the currently running system to fill in some default values.
@@ -328,7 +300,7 @@ func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
 	fmt.Fprintf(w, "  %v. Nick: %q\n", n, e.Nick)
 
 	n++
-	fmt.Fprintf(w, "  %v. Provider: %q\n", n, e.Nick)
+	fmt.Fprintf(w, "  %v. Provider: %q\n", n, e.Provider)
 
 	validateAndPrint(w, e)
 }
