@@ -31,7 +31,7 @@ type LogicState struct {
 	Datasets    []DataLink `json:"datasets,omitempty"`
 	Environment EnvLink    `json:"environment,omitempty"`
 	ID          struct {
-		Commit    Sha1
+		Commit    Sha1   `json:"-"`
 		CommitStr string `json:"commit,omitempty"`
 		Version   string `json:"version,omitempty"`
 		Semver    string `json:"semver,omitempty"`

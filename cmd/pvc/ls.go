@@ -217,7 +217,7 @@ func (lsc lsCmd) collectCommit(w io.Writer, r io.Reader, ls *interpret.LogicStat
 
 		commit := scn.Text()
 		byts, err := hex.DecodeString(commit)
-		if err == nil || len(byts) != 20 {
+		if err != nil || len(byts) != 20 {
 			fmt.Fprintf(w, "\n%s is not a valid Git commit.\n\nNew value: ", commit)
 		} else {
 			ls.ID.CommitStr = commit
