@@ -63,6 +63,27 @@ func toJSONBytes(e interpret.Environment) ([]byte, error) {
 	return msg, nil
 }
 
+func validateAndPrint(w io.Writer, v interface{}) {
+	msg, err := toJSONBytes(v)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Validate the current state of the message
+	result, err := schemaMaster.Validate(gjs.NewStringLoader(string(msg)))
+	if err != nil {
+		fmt.Fprintf(w, "\nError while attempting to validate data: %s\n", err.Error())
+		return
+	}
+	if !result.Valid() {
+		fmt.Fprintln(w, "\nAs it stands now, the data will fail validation if sent to a pipeviz server. Errors:")
+		for _, desc := range result.Errors() {
+			fmt.Fprintf(w, "\t%s\n", desc)
+		}
+	}
+}
+
 func runCreate(cmd *cobra.Command, args []string) {
 	// Create the root runner
 	//cr := &cliRunner{

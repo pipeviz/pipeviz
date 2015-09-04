@@ -283,24 +283,3 @@ func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
 
 	validateAndPrint(w, e)
 }
-
-func validateAndPrint(w io.Writer, e interpret.Environment) {
-	msg, err := toJSONBytes(e)
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	// Validate the current state of the message
-	result, err := schemaMaster.Validate(gjs.NewStringLoader(string(msg)))
-	if err != nil {
-		fmt.Fprintf(w, "\nError while attempting to validate data: %s\n", err.Error())
-		return
-	}
-	if !result.Valid() {
-		fmt.Fprintln(w, "\nAs it stands now, the data will fail validation if sent to a pipeviz server. Errors:")
-		for _, desc := range result.Errors() {
-			fmt.Fprintf(w, "\t%s\n", desc)
-		}
-	}
-}
