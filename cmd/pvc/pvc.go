@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/interpret"
 )
 
@@ -72,7 +73,7 @@ func validateAndPrint(w io.Writer, v interface{}) {
 	}
 
 	// Validate the current state of the message
-	result, err := schemaMaster.Validate(gjs.NewStringLoader(string(msg)))
+	result, err := schemaMaster.Validate(gojsonschema.NewStringLoader(string(msg)))
 	if err != nil {
 		fmt.Fprintf(w, "\nError while attempting to validate data: %s\n", err.Error())
 		return

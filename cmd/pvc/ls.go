@@ -3,15 +3,17 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -32,6 +34,9 @@ func lsCommand() *cobra.Command {
 		Run:   lsc.runGenLS,
 	}
 
+	var nodetect bool
+	cmd.Flags().BoolVarP(&nodetect, "no-detect", "n", false, "Skip automated detection of suggested values.")
+
 	return cmd
 }
 
@@ -39,6 +44,10 @@ func lsCommand() *cobra.Command {
 // ls subcommand.
 func (lsc lsCmd) runGenLS(cmd *cobra.Command, args []string) {
 	ls := &interpret.LogicState{}
+
+	if !cmd.Flags().Lookup("no-detect").Changed {
+		*ls = lsc.detectDefaults()
+	}
 
 	// Write directly to stdout, at least for now
 	w := os.Stdout
@@ -151,90 +160,125 @@ MenuLoop:
 	}
 }
 
-func (lsc lsCmd) collectFQDN(w io.Writer, r io.Reader, ls *interpret.LogicState) {
-	fmt.Fprintf(w, "\n\nEditing FQDN\nCurrent Value: %q\n", ls.Address.Hostname)
-	fmt.Fprint(w, "New value: ")
+func (lsc lsCmd) collectPath(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Path\nCurrent Value: %q\n", ls.Path)
+	fmt.Fprint(w, "\nNew value: ")
 
 	scn := bufio.NewScanner(r)
-	scn.Scan()
-	ls.Address.Hostname = scn.Text()
-}
-
-func (lsc lsCmd) collectIpv4(w io.Writer, r io.Reader, e *interpret.LogicState) {
-	fmt.Fprintf(w, "\n\nEditing IPv4\nCurrent Value: %q\n", e.Address.Ipv4)
-	fmt.Fprint(w, "New value: ")
-
 	for {
-		var input string
-		_, err := fmt.Fscanln(r, &input)
+		scn.Scan()
+		path := scn.Text()
+
+		f, err := os.Open(filepath.Clean(path))
 		if err == nil {
-			addr := net.ParseIP(input)
-			if addr == nil {
-				// failed to parse IP, invalid input
-				fmt.Fprintf(w, "\nNot a valid IP address.\nNew value: ")
-			} else if addr.To4() == nil {
-				// not a valid IPv4
-				fmt.Fprintf(w, "\nNot a valid IPv4 address.\nNew value: ")
+			ls.Path = f.Name()
+
+			stat, _ := f.Stat()
+			if stat.IsDir() {
+				ls.Type = "code"
+			} else if strings.HasSuffix(f.Name(), ".so") {
+				ls.Type = "library"
 			} else {
-				e.Address.Ipv4 = addr.String()
-				break
+				ls.Type = "binary"
 			}
+
+			break
 		} else {
-			fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
+			fmt.Fprintf(w, "\n%s does not exist.\n\nNew value: ", path)
 		}
 	}
 }
 
-func (lsc lsCmd) collectIpv6(w io.Writer, r io.Reader, e *interpret.LogicState) {
-	fmt.Fprintf(w, "\n\nEditing IPv6\nCurrent Value: %q\n", e.Address.Ipv6)
-	fmt.Fprint(w, "New value: ")
+func (lsc lsCmd) collectHostFQDN(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Host FQDN\nCurrent Value: %q\n", ls.Environment.Address.Hostname)
+	fmt.Fprint(w, "\nNew value: ")
+
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	ls.Environment.Address.Hostname = scn.Text()
+}
+
+func (lsc lsCmd) collectHostNick(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Host Nick\nCurrent Value: %q\n", ls.Environment.Nick)
+	fmt.Fprint(w, "\nNew value: ")
+
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	ls.Environment.Nick = scn.Text()
+}
+
+func (lsc lsCmd) collectCommit(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Git commit\nCurrent Value: %q\n", ls.ID.CommitStr)
+	fmt.Fprint(w, "\nNew value: ")
 
 	for {
-		var input string
-		_, err := fmt.Fscanln(r, &input)
-		if err == nil {
-			addr := net.ParseIP(input)
-			if addr == nil {
-				// failed to parse IP, invalid input
-				fmt.Fprintf(w, "\nNot a valid IP address.\nNew value: ")
-			} else if addr.To16() == nil {
-				// not a valid IPv6
-				fmt.Fprintf(w, "\nNot a valid IPv6 address.\nNew value: ")
-			} else {
-				e.Address.Ipv6 = addr.To16().String()
-				break
-			}
+		scn := bufio.NewScanner(r)
+		scn.Scan()
+
+		commit := scn.Text()
+		byts, err := hex.DecodeString(commit)
+		if err == nil || len(byts) != 20 {
+			fmt.Fprintf(w, "\n%s is not a valid Git commit.\n\nNew value: ", commit)
 		} else {
-			fmt.Fprintf(w, "\nInvalid input.\nNew value: ")
+			ls.ID.CommitStr = commit
+			break
 		}
 	}
 }
 
-func (lsc lsCmd) collectOS(w io.Writer, r io.Reader, e *interpret.LogicState) {
-	fmt.Fprintf(w, "\n\nEditing OS\nCurrent Value: %q\n", e.OS)
-	fmt.Fprint(w, "New value: ")
+func (lsc lsCmd) collectVersion(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Version\nCurrent Value: %q\n", ls.ID.Version)
+	fmt.Fprint(w, "\nNew value: ")
 
 	scn := bufio.NewScanner(r)
 	scn.Scan()
-	e.OS = scn.Text()
+	ls.ID.Version = scn.Text()
 }
 
-func (lsc lsCmd) collectNick(w io.Writer, r io.Reader, e *interpret.LogicState) {
-	fmt.Fprintf(w, "\n\nEditing Nick\nCurrent Value: %q\n", e.Nick)
-	fmt.Fprint(w, "New value: ")
+func (lsc lsCmd) collectSemver(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Semver\nCurrent Value: %q\n", ls.ID.Semver)
+	fmt.Fprint(w, "\nNew value: ")
 
 	scn := bufio.NewScanner(r)
 	scn.Scan()
-	e.Nick = scn.Text()
+	ls.ID.Semver = scn.Text()
 }
 
-func (lsc lsCmd) collectProvider(w io.Writer, r io.Reader, e *interpret.LogicState) {
-	fmt.Fprintf(w, "\n\nEditing Provider\nCurrent Value: %q\n", e.Provider)
-	fmt.Fprint(w, "New value: ")
+func (lsc lsCmd) collectLgroup(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Logical group\nCurrent Value: %q\n", ls.Lgroup)
+	fmt.Fprint(w, "\nNew value: ")
 
 	scn := bufio.NewScanner(r)
 	scn.Scan()
-	e.Provider = scn.Text()
+	ls.Lgroup = scn.Text()
+}
+
+func (lsc lsCmd) collectNick(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Logical group\nCurrent Value: %q\n", ls.Nick)
+	fmt.Fprint(w, "\nNew value: ")
+
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	ls.Nick = scn.Text()
+}
+
+func (lsc lsCmd) collectType(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+	fmt.Fprintf(w, "\n\nEditing Logical group\nCurrent Value: %q\n", ls.Type)
+	fmt.Fprint(w, "\nNew value: ")
+
+	scn := bufio.NewScanner(r)
+	scn.Scan()
+	ls.Type = scn.Text()
+}
+
+func (lsc lsCmd) detectDefaults() (ls interpret.LogicState) {
+	var err error
+	ls.Environment.Address.Hostname, err = os.Hostname()
+	if err != nil {
+		ls.Environment.Address.Hostname = ""
+	}
+
+	return ls
 }
 
 // printMenu prints to stdout a menu showing the current data in the
@@ -244,25 +288,27 @@ func (lsc lsCmd) printCurrentState(w io.Writer, e interpret.LogicState) {
 	var n int
 
 	n++
-	//if e.Address.Hostname == "" {
-	//fmt.Fprintf(w, "  %v. *FQDN: [empty]\n", n)
-	//} else {
-	fmt.Fprintf(w, "  %v. FQDN: %q\n", n, e.Address.Hostname)
-	//}
+	fmt.Fprintf(w, "  %v. Path: %q\n", n, e.Path)
 
 	n++
-	fmt.Fprintf(w, "  %v. Ipv4: %q\n", n, e.Address.Ipv4)
+	fmt.Fprintf(w, "  %v. Host FQDN: %q\n", n, e.Environment.Address.Hostname)
 	n++
-	fmt.Fprintf(w, "  %v. Ipv6: %q\n", n, e.Address.Ipv6)
+	fmt.Fprintf(w, "  %v. Host Nick: %q\n", n, e.Environment.Nick)
 
 	n++
-	fmt.Fprintf(w, "  %v. OS: %q\n", n, e.OS)
+	fmt.Fprintf(w, "  %v. Git commit: %q\n", n, e.ID.CommitStr)
+	n++
+	fmt.Fprintf(w, "  %v. Version: %q\n", n, e.ID.Version)
+	n++
+	fmt.Fprintf(w, "  %v. Semver:  %q\n", n, e.ID.Semver)
+
+	n++
+	fmt.Fprintf(w, "  %v. Logical group:  %q\n", n, e.Lgroup)
 
 	n++
 	fmt.Fprintf(w, "  %v. Nick: %q\n", n, e.Nick)
-
 	n++
-	fmt.Fprintf(w, "  %v. Provider: %q\n", n, e.Provider)
+	fmt.Fprintf(w, "  %v. Type: %q\n", n, e.Type)
 
 	validateAndPrint(w, e)
 }
