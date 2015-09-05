@@ -57,10 +57,10 @@ var D_env interpret.Environment = interpret.Environment{
 // Default values for logic states; as defined, will induce no edges.
 var D_ls interpret.LogicState = interpret.LogicState{
 	ID: struct {
-		Commit    interpret.Sha1
-		CommitStr string `json:"commit"`
-		Version   string `json:"version"`
-		Semver    string `json:"semver"`
+		Commit    interpret.Sha1 `json:"-"`
+		CommitStr string         `json:"commit,omitempty"`
+		Version   string         `json:"version,omitempty"`
+		Semver    string         `json:"semver,omitempty"`
 	}{Version: D_version},
 	Lgroup: "bigparty",
 	Nick:   D_nick,
@@ -223,10 +223,10 @@ func init() {
 	D_commithash = hexify("e26e7ec4823e4c0dfd145c1032b150e41a947ea6")
 
 	lsIds := []struct {
-		Commit    interpret.Sha1
-		CommitStr string `json:"commit"`
-		Version   string `json:"version"`
-		Semver    string `json:"semver"`
+		Commit    interpret.Sha1 `json:"-"`
+		CommitStr string         `json:"commit,omitempty"`
+		Version   string         `json:"version,omitempty"`
+		Semver    string         `json:"semver,omitempty"`
 	}{
 		{Commit: hexify(D_commit)},
 		{Version: D_version},
