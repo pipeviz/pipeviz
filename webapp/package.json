@@ -10,9 +10,10 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "ampersand-router": "^3.0.2",
+    "d3": "~3.5.3",
     "graphlib": "1.0.7",
     "lodash": "^3.10.0",
-    "d3": "~3.5.3",
     "react": "~0.13.2"
   },
   "devDependencies": {

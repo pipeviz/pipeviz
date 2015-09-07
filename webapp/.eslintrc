@@ -10,7 +10,7 @@
   "globals": {
     "_": true,
     "d3": true,
-    "require": true
+    "React": true
   },
   "rules": {
     // Errors.
@@ -33,7 +33,6 @@
     "no-array-constructor": 2,
     "no-caller": 2,
     "no-catch-shadow": 2,
-    "no-console": 0,
     "no-empty-label": 2,
     "no-eval": 2,
     "no-extend-native": 2,
@@ -89,6 +88,8 @@
         "property": "prop"
       },
       "requireReturn": false
-    }]
+    }],
+    // Ignore
+    "no-console": 0
   }
 }
