@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"strconv"
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
@@ -14,6 +13,7 @@ import (
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/journal/boltdb"
 	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/schema"
 	"github.com/tag1consulting/pipeviz/webapp"
 )
 
@@ -41,7 +41,7 @@ func init() {
 }
 
 func main() {
-	src, err := ioutil.ReadFile("./schema.json")
+	src, err := schema.Master()
 	if err != nil {
 		log.WithFields(log.Fields{
 			"system": "main",
