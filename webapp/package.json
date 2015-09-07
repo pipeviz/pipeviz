@@ -1,0 +1,28 @@
+{
+  "name": "pipeviz",
+  "main": "src/app.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/sdboyer/pipeviz",
+  "authors": [
+    "Sam Boyer <tech@samboyer.org>",
+    "Théodore Biadala <theodore@biadala.net>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "graphlib": "1.0.7",
+    "lodash": "^3.10.0",
+    "d3": "~3.5.3",
+    "react": "~0.13.2"
+  },
+  "devDependencies": {
+    "browserify": "^11.0.1",
+    "uglifyjs": "^2.4.10",
+    "watchify": "^3.4.0"
+  },
+  "scripts": {
+    "build": "npm run build-dev && uglifyjs --source-map js/bundle.min.map js/bundle.js -o js/bundle.min.js",
+    "build-dev": "browserify lib/index.js > js/bundle.js",
+    "watch-dev": "watchify lib/index.js -o js/bundle.js -v"
+  }
+}

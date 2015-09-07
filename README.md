@@ -34,11 +34,4 @@ make install
 
 This will install several binaries into your `$GOPATH/bin` directory: `pvc`, `pvutil`, and `pipeviz` itself.
 
-And finally, there are some frontend packages that need installing for the webapp. For this, you'll need [bower](http://bower.io/#install-bower):
-
-```
-cd webapp
-bower install
-```
-
 You're done! You can just run `pipeviz` with no arguments, and it will bind (on loopback only) to port 8008 for the webapp, and 2309 for message ingestion.
