@@ -1,3 +1,4 @@
+// @todo split that up, should be templates.
 var d3 = require('d3');
 var React = require('react');
 var _ = require('lodash');
@@ -374,7 +375,7 @@ var ControlBar = React.createClass({
   }
 });
 
-var App = React.createClass({
+var App = module.exports.App = React.createClass({
   dispayName: "pipeviz",
   getInitialState: function () {
     var undef;
@@ -433,11 +434,3 @@ var App = React.createClass({
     );
   }
 });
-
-var e = React.render(React.createElement(App), document.body);
-var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
-var lastg;
-genesis.onmessage = function (m) {
-  lastg = pvd.pvGraph(JSON.parse(m.data));
-  e.setProps({graph: lastg});
-};
