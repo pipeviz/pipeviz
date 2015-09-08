@@ -17,7 +17,7 @@ import (
 
 var (
 	assetDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "assets")
-	jsDir    = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "src")
+	jsDir    = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "js")
 	tmplDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "tmpl")
 )
 
