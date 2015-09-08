@@ -18,12 +18,13 @@
   },
   "devDependencies": {
     "browserify": "^11.0.1",
+    "exorcist": "^0.4.0",
     "uglifyjs": "^2.4.10",
     "watchify": "^3.4.0"
   },
   "scripts": {
-    "build": "npm run build-dev && uglifyjs --source-map js/bundle.min.map js/bundle.js -o js/bundle.min.js",
-    "build-dev": "browserify lib/index.js > js/bundle.js",
+    "build": "npm run build-dev && uglifyjs --in-source-map js/bundle.map --source-map js/bundle.min.map js/bundle.js -o js/bundle.min.js",
+    "build-dev": "browserify lib/index.js --debug | exorcist js/bundle.map > js/bundle.js",
     "watch-dev": "watchify lib/index.js -o js/bundle.js -v"
   }
 }
