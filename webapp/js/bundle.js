@@ -18,10 +18,8 @@ module.exports = {
 
     var page = React.render(React.createElement(main.App), document.body);
     var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
-    var lastg;
     genesis.onmessage = function (m) {
-      lastg = pvd.pvGraph(JSON.parse(m.data));
-      page.setProps({graph: lastg});
+      page.setProps({graph: pvd.pvGraph(JSON.parse(m.data))});
     };
 
     // listen for new pages from the router
@@ -4928,7 +4926,9 @@ function drainQueue() {
         currentQueue = queue;
         queue = [];
         while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
         }
         queueIndex = -1;
         len = queue.length;
@@ -4980,7 +4980,6 @@ process.binding = function (name) {
     throw new Error('process.binding is not supported');
 };
 
-// TODO(shtylman)
 process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');

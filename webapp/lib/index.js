@@ -17,10 +17,8 @@ module.exports = {
 
     var page = React.render(React.createElement(main.App), document.body);
     var genesis = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock");
-    var lastg;
     genesis.onmessage = function (m) {
-      lastg = pvd.pvGraph(JSON.parse(m.data));
-      page.setProps({graph: lastg});
+      page.setProps({graph: pvd.pvGraph(JSON.parse(m.data))});
     };
 
     // listen for new pages from the router
