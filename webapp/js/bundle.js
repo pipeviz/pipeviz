@@ -521,7 +521,6 @@ module.exports.App = React.createClass({
 
 },{"../utils/algo":5,"../utils/pvd":6,"../utils/query":7,"d3":54,"lodash":75,"react":230}],3:[function(require,module,exports){
 var React = require('react');
-var _ = require('lodash');
 
 
 var Data = React.createClass({
@@ -538,11 +537,10 @@ module.exports.App = React.createClass({
   }
 });
 
-},{"lodash":75,"react":230}],4:[function(require,module,exports){
+},{"react":230}],4:[function(require,module,exports){
 var Router = require('ampersand-router');
 var commits = require('./page/commits');
 var data = require('./page/data');
-var pvd = require('./utils/pvd');
 
 module.exports = Router.extend({
   routes: {
@@ -565,7 +563,7 @@ module.exports = Router.extend({
   }
 });
 
-},{"./page/commits":2,"./page/data":3,"./utils/pvd":6,"ampersand-router":9}],5:[function(require,module,exports){
+},{"./page/commits":2,"./page/data":3,"ampersand-router":9}],5:[function(require,module,exports){
 var _ = require('lodash');
 var graphlib = require('graphlib');
 var query = require('./query');

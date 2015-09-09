@@ -5,7 +5,8 @@
     "commonjs": true
   },
   "ecmaFeatures": {
-    "modules": true
+    "modules": true,
+    "templateStrings": true
   },
   "globals": {
     "_": true,
@@ -82,14 +83,14 @@
     "yoda": [2, "never"],
     // Warnings.
     "max-nested-callbacks": [1, 3],
-    "valid-jsdoc": [1, {
+    // Ignore.
+    "valid-jsdoc": [0, {
       "prefer": {
         "returns": "return",
         "property": "prop"
       },
       "requireReturn": false
     }],
-    // Ignore
     "no-console": 0
   }
 }

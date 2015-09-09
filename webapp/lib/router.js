@@ -1,7 +1,6 @@
 var Router = require('ampersand-router');
 var commits = require('./page/commits');
 var data = require('./page/data');
-var pvd = require('./utils/pvd');
 
 module.exports = Router.extend({
   routes: {

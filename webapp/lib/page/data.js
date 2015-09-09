@@ -1,5 +1,4 @@
 var React = require('react');
-var _ = require('lodash');
 
 
 var Data = React.createClass({
