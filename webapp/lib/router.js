@@ -1,14 +1,22 @@
 var Router = require('ampersand-router');
-var main = require('./utils/main');
+var commits = require('./page/commits');
+var data = require('./page/data');
+var pvd = require('./utils/pvd');
 
 module.exports = Router.extend({
   routes: {
-    '': 'home',
+    '': 'commits',
+    'data': 'data',
+    'commits': 'commits',
     '(*path)': 'catchAll'
   },
 
-  home: function () {
-    this.trigger('newPage', main.App);
+  commits: function () {
+    this.trigger('newPage', commits.App);
+  },
+
+  data: function () {
+    this.trigger('newPage', data.App);
   },
 
   catchAll: function () {

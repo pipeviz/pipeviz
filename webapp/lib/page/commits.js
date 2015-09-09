@@ -2,9 +2,9 @@
 var d3 = require('d3');
 var React = require('react');
 var _ = require('lodash');
-var pvd = require('./pvd');
-var algo = require('./algo');
-var query = require('./query');
+var pvd = require('../utils/pvd');
+var algo = require('../utils/algo');
+var query = require('../utils/query');
 
 
 var Viz = React.createClass({
@@ -369,13 +369,14 @@ var ControlBar = React.createClass({
       }));
     });
 
-    return React.createElement("div", {id: "controlbar"},
-      React.createElement("span", {className: "ctrlgroup"}, "Options: ", boxes),
-      React.createElement("span", {className: "ctrlgroup"}, "Viz components: ", vizbits));
+    return React.createElement("aside", {id: "aside"},
+      React.createElement("div", {className: "ctrlgroup"}, "Options: ", boxes),
+      React.createElement("div", {className: "ctrlgroup"}, "Viz components: ", vizbits),
+      this.props.infoBar);
   }
 });
 
-var App = module.exports.App = React.createClass({
+module.exports.App = React.createClass({
   dispayName: "pipeviz",
   getInitialState: function () {
     var undef;
@@ -411,13 +412,7 @@ var App = module.exports.App = React.createClass({
     };
   },
   render: function () {
-    return React.createElement("div", {id: "pipeviz"},
-      React.createElement(ControlBar, {
-        opts: this.state.opts,
-        changeOpts: this.changeOpts,
-        vizcfgs: this.state.vizcfgs,
-        changeCfgs: this.changeCfgs
-      }),
+    return React.createElement('section', {id: 'pipeviz'},
       React.createElement(VizPrep, {
         width: this.props.vizWidth,
         height: this.props.vizHeight,
@@ -427,9 +422,15 @@ var App = module.exports.App = React.createClass({
         vizcfgs: _.mapValues(this.state.vizcfgs, function (vc) { return vc.state; }),
         selected: this.setSelected
       }),
-      React.createElement(InfoBar, {
-        selected: this.state.selected,
-        pvg: this.props.graph
+      React.createElement(ControlBar, {
+        opts: this.state.opts,
+        changeOpts: this.changeOpts,
+        vizcfgs: this.state.vizcfgs,
+        changeCfgs: this.changeCfgs,
+        infoBar: React.createElement(InfoBar, {
+          selected: this.state.selected,
+          pvg: this.props.graph
+        })
       })
     );
   }

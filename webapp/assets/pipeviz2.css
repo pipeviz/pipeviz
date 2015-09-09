@@ -31,11 +31,6 @@ div#controlbar {
     padding: 0 0.5em 0 0.5em;
 }
 
-body {
-    /*just be sloppy and sure for now*/
-    margin: 0;
-    padding: 0;
-}
 
 image.provider-logo {
     alignment-baseline: middle;
