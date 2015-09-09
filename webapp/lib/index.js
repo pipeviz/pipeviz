@@ -1,7 +1,7 @@
 /* eslint no-unused-vars: 0 */
 var Router = require('./router');
 var algo = require('./utils/algo');
-var commits = require('./page/commits');
+var commitPipeline = require('./page/commit-pipeline');
 var pvd = require('./utils/pvd');
 var query = require('./utils/query');
 
@@ -68,7 +68,7 @@ module.exports = {
         module.exports.navigate(event.target.getAttribute('href'));
       }
     });
-    var links = ['commits', 'data'].map(function (link) {
+    var links = ['commit-pipeline', 'data'].map(function (link) {
       return `<a href="${link}">${link}</a> `;
     }).forEach(function (link) {
       header.innerHTML += link;

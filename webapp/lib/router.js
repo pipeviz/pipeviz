@@ -1,17 +1,17 @@
 var Router = require('ampersand-router');
-var commits = require('./page/commits');
+var commitPipeline = require('./page/commit-pipeline');
 var data = require('./page/data');
 
 module.exports = Router.extend({
   routes: {
-    '': 'commits',
+    '': 'commitPipeline',
     'data': 'data',
-    'commits': 'commits',
+    'commit-pipeline': 'commitPipeline',
     '(*path)': 'catchAll'
   },
 
-  commits: function () {
-    this.trigger('newPage', commits.App);
+  commitPipeline: function () {
+    this.trigger('newPage', commitPipeline.App);
   },
 
   data: function () {

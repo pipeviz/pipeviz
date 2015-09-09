@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: 0 */
 var Router = require('./router');
 var algo = require('./utils/algo');
-var commits = require('./page/commits');
+var commitPipeline = require('./page/commit-pipeline');
 var pvd = require('./utils/pvd');
 var query = require('./utils/query');
 
@@ -69,7 +69,7 @@ module.exports = {
         module.exports.navigate(event.target.getAttribute('href'));
       }
     });
-    var links = ['commits', 'data'].map(function (link) {
+    var links = ['commit-pipeline', 'data'].map(function (link) {
       return `<a href="${link}">${link}</a> `;
     }).forEach(function (link) {
       header.innerHTML += link;
@@ -80,7 +80,7 @@ module.exports = {
 // run it
 module.exports.run();
 
-},{"./page/commits":2,"./router":4,"./utils/algo":5,"./utils/pvd":6,"./utils/query":7,"react":230}],2:[function(require,module,exports){
+},{"./page/commit-pipeline":2,"./router":4,"./utils/algo":5,"./utils/pvd":6,"./utils/query":7,"react":230}],2:[function(require,module,exports){
 // @todo split that up, should be templates.
 var d3 = require('d3');
 var React = require('react');
@@ -539,19 +539,19 @@ module.exports.App = React.createClass({
 
 },{"react":230}],4:[function(require,module,exports){
 var Router = require('ampersand-router');
-var commits = require('./page/commits');
+var commitPipeline = require('./page/commit-pipeline');
 var data = require('./page/data');
 
 module.exports = Router.extend({
   routes: {
-    '': 'commits',
+    '': 'commitPipeline',
     'data': 'data',
-    'commits': 'commits',
+    'commit-pipeline': 'commitPipeline',
     '(*path)': 'catchAll'
   },
 
-  commits: function () {
-    this.trigger('newPage', commits.App);
+  commitPipeline: function () {
+    this.trigger('newPage', commitPipeline.App);
   },
 
   data: function () {
@@ -563,7 +563,7 @@ module.exports = Router.extend({
   }
 });
 
-},{"./page/commits":2,"./page/data":3,"ampersand-router":9}],5:[function(require,module,exports){
+},{"./page/commit-pipeline":2,"./page/data":3,"ampersand-router":9}],5:[function(require,module,exports){
 var _ = require('lodash');
 var graphlib = require('graphlib');
 var query = require('./query');
