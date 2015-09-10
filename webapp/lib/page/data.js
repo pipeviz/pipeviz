@@ -101,7 +101,7 @@ var Data = React.createClass({
     },
     shouldComponentUpdate: function (p, s) {
         return s.query !== this.state.query ||
-            p.data !== this.props.data ||
+            p.graph.mid !== this.props.graph.mid ||
             p.onClick !== this.props.onClick;
     },
     createFilterer: function(data, options) {

@@ -623,7 +623,7 @@ var Data = React.createClass({
     },
     shouldComponentUpdate: function (p, s) {
         return s.query !== this.state.query ||
-            p.data !== this.props.data ||
+            p.graph.mid !== this.props.graph.mid ||
             p.onClick !== this.props.onClick;
     },
     createFilterer: function(data, options) {
@@ -644,7 +644,7 @@ module.exports.App = React.createClass({
     };
   },
   render: function () {
-    return React.createElement('section', {id: 'pipeviz'}, React.createElement(Data, {graph: this.props.graph }));
+    return React.createElement('section', {id: 'pipeviz'}, React.createElement(Data, {graph: this.props.graph}));
   }
 });
 
@@ -1522,7 +1522,7 @@ module.exports = React.createClass({
             p.string.split(p.highlight).map(function(part, index) {
                 return span({ key: index },
                     index > 0 ?
-                        span({ className: 'json-inspector__hl' }, p.highlight) :
+                        span({ className: 'pv-dataviewer__hl' }, p.highlight) :
                         null,
                     part);
             }));
@@ -1813,7 +1813,7 @@ module.exports = React.createClass({
     },
     render: function() {
         return input({
-            className: 'json-inspector__search',
+            className: 'pv-dataviewer__search',
             type: 'search',
             placeholder: 'Search',
             ref: 'query',

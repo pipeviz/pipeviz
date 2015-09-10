@@ -13,7 +13,7 @@ module.exports = React.createClass({
     },
     render: function() {
         return input({
-            className: 'json-inspector__search',
+            className: 'pv-dataviewer__search',
             type: 'search',
             placeholder: 'Search',
             ref: 'query',

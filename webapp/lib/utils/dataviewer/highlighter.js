@@ -22,7 +22,7 @@ module.exports = React.createClass({
             p.string.split(p.highlight).map(function(part, index) {
                 return span({ key: index },
                     index > 0 ?
-                        span({ className: 'json-inspector__hl' }, p.highlight) :
+                        span({ className: 'pv-dataviewer__hl' }, p.highlight) :
                         null,
                     part);
             }));
