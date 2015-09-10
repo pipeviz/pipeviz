@@ -63,8 +63,9 @@ func NewMux() *web.Mux {
 	m.Use(log.NewHttpLogger("webapp"))
 	m.Get("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetDir))))
 	m.Get("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir(jsDir))))
-	m.Get("/", WebRoot)
+	//m.Get("/data", WebRoot)
 	m.Get("/sock", OpenSocket)
+	m.Get("/*", http.StripPrefix("/", http.HandlerFunc(WebRoot)))
 
 	return m
 }
