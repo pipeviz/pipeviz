@@ -11,16 +11,11 @@ var isEmpty = require('../utils/dataviewer/is-empty');
 var lens = require('../utils/dataviewer/lens');
 var noop = require('../utils/dataviewer/noop');
 
-//var Data = React.createClass({
-  //displayName: 'pipeviz-data',
-  //render: function () {
-    //return React.createElement("aside", {id: "aside"}, React.createElement("div", {}, "Woot!"));
-  //}
-//});
+var pvd = require('../utils/pvd.js');
 
 var Data = React.createClass({
     propTypes: {
-        data: React.PropTypes.object,
+        graph: React.PropTypes.object.isRequired,
         // For now it expects a factory function, not element.
         search: React.PropTypes.oneOfType([
             React.PropTypes.func,
@@ -34,7 +29,6 @@ var Data = React.createClass({
 
     getDefaultProps: function() {
         return {
-            data: null,
             search: searchBar,
             className: '',
             id: 'pv-dataviewer',
@@ -64,7 +58,7 @@ var Data = React.createClass({
         var p = this.props;
         var s = this.state;
 
-        var data = s.query ? s.filterer(s.query) : p.data;
+        var data = s.query ? s.filterer(s.query) : p.graph.vertices();
 
         var rootNode = leaf({
             data: data,
@@ -122,7 +116,12 @@ var Data = React.createClass({
 
 module.exports.App = React.createClass({
   displayName: "pipeviz",
+  getDefaultProps: function () {
+    return {
+      graph: pvd.pvGraph({id: 0, vertices: []})
+    };
+  },
   render: function () {
-    return React.createElement('section', {id: 'pipeviz'}, React.createElement(Data));
+    return React.createElement('section', {id: 'pipeviz'}, React.createElement(Data, {graph: this.props.graph}));
   }
 });

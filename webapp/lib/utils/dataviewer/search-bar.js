@@ -1,4 +1,4 @@
-var debounce = require('debounce');
+var _ = require('lodash');
 var React = require('react');
 var input = React.DOM.input;
 
@@ -17,7 +17,7 @@ module.exports = React.createClass({
             type: 'search',
             placeholder: 'Search',
             ref: 'query',
-            onChange: debounce(this.update, this.props.timeout)
+            onChange: _.debounce(this.update, this.props.timeout)
         });
     },
     update: function() {

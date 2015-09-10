@@ -1,4 +1,4 @@
-var assign = require('object-assign');
+var _ = require('lodash');
 var keys = Object.keys;
 
 var type = require('./type');
@@ -46,7 +46,7 @@ function find(data, query, options) {
                 matches = find(value, query, options);
 
                 if (!isEmpty(matches)) {
-                    assign(acc, pair(key, matches));
+                    _.assign(acc, pair(key, matches));
                 }
             }
         }
