@@ -64,7 +64,7 @@ var Leaf = React.createClass({
           } else if (_.has(data, 'isPropObj')) {
             // Condense property objects into a single "value"
             return D.span({ className: 'pv-dataviewer__value pv-dataviewer__propvalue pv-dataviewer__value_' + type(data.value).toLowerCase() },
-                          this.format(String(data.value)) + "  (from msg: " + data.msgsrc + ")",
+                          data.value + "  (from msg: " + data.msgsrc + ")",
                           this.renderInteractiveLabel(data.value, false));
           }
 
@@ -91,7 +91,7 @@ var Leaf = React.createClass({
       graph: p.graph
     };
 
-    if (this.state.expanded && !isPrimitive(data)) {
+    if (this.state.expanded && !isPrimitive(data) && !_.has(data, 'isPropObj')) {
       if (pvd.isVertex(data) || pvd.isEdge(data)) {
         var isv = pvd.isVertex(data);
         // id up front
@@ -131,7 +131,6 @@ var Leaf = React.createClass({
           label: "properties",
           key: getLeafKey("properties", {}) // just cheat
         }, shared, { isExpanded: function() { return true; }}))); // always expand from prop level downwards
-        //}, shared))); // always expand from prop level downwards
 
         // finally, if it's a vertex, add the edges
         if (isv) {
@@ -177,7 +176,7 @@ var Leaf = React.createClass({
   renderShowOriginalButton: function() {
     var p = this.props;
 
-    if (isPrimitive(p.data) || this.state.original || !p.getOriginal || !p.query || contains(this.keypath(), p.query)) {
+    if (isPrimitive(p.data) || _.has(p.data, 'isPropObj') || this.state.original || !p.getOriginal || !p.query || contains(this.keypath(), p.query)) {
       return null;
     }
 
@@ -314,7 +313,8 @@ function contains(string, substring) {
 
 function isPrimitive(value) {
     var t = type(value);
-    return (t !== 'Object' || _.has(value, 'isPropObj')) && t !== 'Array';
+    //return (t !== 'Object' || _.has(value, 'isPropObj')) && t !== 'Array';
+    return t !== 'Object' && t !== 'Array';
 }
 
 module.exports = Leaf;
