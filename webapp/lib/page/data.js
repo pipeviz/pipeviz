@@ -69,7 +69,8 @@ var Data = React.createClass({
       label: 'root',
       root: true,
       isExpanded: p.isExpanded,
-      interactiveLabel: p.interactiveLabel
+      interactiveLabel: p.interactiveLabel,
+      graph: p.graph
     });
 
     var notFound = D.div({ className: 'pv-dataviewer__not-found' }, 'Nothing found');
