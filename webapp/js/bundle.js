@@ -551,7 +551,6 @@ var Data = React.createClass({
 
   getDefaultProps: function() {
     return {
-      search: searchBar,
       className: '',
       id: 'pv-dataviewer',
       onClick: noop,
