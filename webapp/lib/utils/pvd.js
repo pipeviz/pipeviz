@@ -19,7 +19,10 @@ var vertexProto = module.exports.vertexProto = {
 // vertex factory
 var pvVertex = function (obj) {
   return _.assign(Object.create(vertexProto),
-    obj, {outEdges: _.map(obj.outEdges, function (d) { return d.id; })}
+    obj, {
+      outEdges: _.map(obj.outEdges, function (d) { return d.id; }),
+      inEdges: _.map(obj.inEdges, function (d) { return d.id; })
+    }
   );
 };
 

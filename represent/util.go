@@ -27,7 +27,7 @@ func mapPropPairs(mid uint64, pairs ...p) (m ps.Map) {
 type flatVTuple struct {
 	Id       int        `json:"id"`
 	V        flatVertex `json:"vertex"`
-	InEdges  []flatEdge `json:"-"`
+	InEdges  []flatEdge `json:"inEdges"`
 	OutEdges []flatEdge `json:"outEdges"`
 }
 

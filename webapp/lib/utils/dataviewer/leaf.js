@@ -142,6 +142,15 @@ var Leaf = React.createClass({
             label: "outEdges",
             key: getLeafKey("outEdges", {}) // just cheat
           }, shared)));
+
+          children.push(leaf(_.assign({
+            data: _.assign(Object.create(expander),
+                           _.zipObject(_.map(data.inEdges, function(eid) {
+                             return [eid, p.graph.get(eid)];
+                           }))),
+            label: "inEdges",
+            key: getLeafKey("inEdges", {}) // just cheat
+          }, shared)));
         }
 
         return children;
