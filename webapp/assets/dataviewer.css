@@ -4,7 +4,7 @@
 }
 
 .pv-dataviewer__leaf {
-    padding-left: 10px;
+    padding-left: 15px;
 }
 
 .pv-dataviewer__line {
@@ -25,10 +25,6 @@
     z-index: -1;
 
     pointer-events: none;
-}
-
-.pv-dataviewer__line:hover:after {
-    background: rgba(0, 0, 0, 0.06);
 }
 
 .pv-dataviewer__leaf_composite > .pv-dataviewer__line {
@@ -70,6 +66,22 @@
 
 .pv-dataviewer__value_number {
     color: #d28445;
+}
+
+.pv-dataviewer__leaf_root > .pv-dataviewer__vertex_leaf {
+    background: none;
+}
+
+.pv-dataviewer__vertex_leaf {
+    background: #def2c8;
+}
+
+.pv-dataviewer__edge_leaf {
+    background: #fcecc9;
+}
+
+.pv-dataviewer__line:hover:after {
+    background: rgba(0, 0, 0, 0.06);
 }
 
 .pv-dataviewer__hl {

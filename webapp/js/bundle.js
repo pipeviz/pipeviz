@@ -1783,6 +1783,14 @@ var Leaf = React.createClass({
       cn += ' pv-dataviewer__leaf_composite';
     }
 
+    if (pvd.isVertex(this.props.data)) {
+      cn += ' pv-dataviewer__vertex_leaf';
+    }
+
+    if (pvd.isEdge(this.props.data)) {
+      cn += ' pv-dataviewer__edge_leaf';
+    }
+
     return cn;
   },
   toggle: function() {
