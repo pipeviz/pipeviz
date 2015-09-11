@@ -1599,6 +1599,11 @@ var Leaf = React.createClass({
           if (pvd.isVertex(data) || pvd.isEdge(data)) {
             return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
                           data.Typ() + (query.objectLabel(data) ? ' ' + query.objectLabel(data) : ''));
+          } else if (_.has(data, 'isPropObj')) {
+            // Condense property objects into a single "value"
+            return D.span({ className: 'pv-dataviewer__value pv-dataviewer__propvalue pv-dataviewer__value_' + type(data.value).toLowerCase() },
+                          this.format(String(data.value)) + "  (from msg: " + data.msgsrc + ")",
+                          this.renderInteractiveLabel(data.value, false));
           }
 
           return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
@@ -1658,7 +1663,9 @@ var Leaf = React.createClass({
 
         // now, props
         children.push(leaf(_.assign({
-          data: pvd.isVertex(data) ? data.vertex.properties : data.properties,
+          data: _.mapValues(pvd.isVertex(data) ? data.vertex.properties : data.properties, function(v) {
+            return _.assign({isPropObj: true}, v);
+          }),
           label: "properties",
           key: getLeafKey("properties", {}) // just cheat
         }, shared, { isExpanded: function() { return true; }}))); // always expand from prop level downwards
@@ -1754,6 +1761,7 @@ var Leaf = React.createClass({
   },
   data: function() {
     return this.state.original || this.props.data;
+    //return this.state.original || (_.has(this.props.data, 'isPropObj') ? this.props.data.value : this.props.data);
   },
   format: function(string) {
     return highlighter({
@@ -1844,7 +1852,7 @@ function contains(string, substring) {
 
 function isPrimitive(value) {
     var t = type(value);
-    return t !== 'Object' && t !== 'Array';
+    return (t !== 'Object' || _.has(value, 'isPropObj')) && t !== 'Array';
 }
 
 module.exports = Leaf;
