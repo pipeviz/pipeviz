@@ -589,11 +589,12 @@ var Data = React.createClass({
       id: p.id,
       getOriginal: this.getOriginal,
       query: s.query,
-      label: 'root',
+      label: 'pv data',
       root: true,
       isExpanded: p.isExpanded,
       interactiveLabel: p.interactiveLabel,
-      graph: p.graph
+      graph: p.graph,
+      filter: s.filter
     });
 
     var notFound = D.div({ className: 'pv-dataviewer__not-found' }, 'Nothing found');
@@ -1506,6 +1507,7 @@ var Leaf = React.createClass({
   getDefaultProps: function() {
     return {
       root: false,
+      filter: '',
       prefix: ''
     };
   },
@@ -1536,6 +1538,13 @@ var Leaf = React.createClass({
   renderTitle: function() {
     var data = this.data();
     var t = type(data);
+
+    // special case for root
+    if (this.props.root) {
+      return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
+                    _.filter([data.length, this.props.filter, "vertices", '(at message ' + this.props.graph.mid + ')']).join(' ')
+                   );
+    }
 
     switch (t) {
       case 'Array':

@@ -22,6 +22,7 @@ var Leaf = React.createClass({
   getDefaultProps: function() {
     return {
       root: false,
+      filter: '',
       prefix: ''
     };
   },
@@ -52,6 +53,13 @@ var Leaf = React.createClass({
   renderTitle: function() {
     var data = this.data();
     var t = type(data);
+
+    // special case for root
+    if (this.props.root) {
+      return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
+                    _.filter([data.length, this.props.filter, "vertices", '(at message ' + this.props.graph.mid + ')']).join(' ')
+                   );
+    }
 
     switch (t) {
       case 'Array':
