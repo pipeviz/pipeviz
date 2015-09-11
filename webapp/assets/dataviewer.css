@@ -26,6 +26,9 @@
 
     pointer-events: none;
 }
+.pv-dataviewer__filter label {
+    padding: 0 0.2em 0 0.2em;
+}
 
 .pv-dataviewer__leaf_composite > .pv-dataviewer__line {
     cursor: pointer;
@@ -72,7 +75,8 @@
     background: none;
 }
 
-.pv-dataviewer__vertex_leaf {
+.pv-dataviewer__vertex_leaf,
+.pv-dataviewer__leaf_root > .pv-dataviewer__vertex_leaf.pv-dataviewer__leaf_expanded {
     background: #def2c8;
 }
 

@@ -3,15 +3,14 @@ var D = React.DOM;
 
 var Leaf = require('../utils/dataviewer/leaf');
 var leaf = React.createFactory(Leaf);
-var SearchBar = require('../utils/dataviewer/search-bar');
-var searchBar = React.createFactory(SearchBar);
+var FilterBar = require('../utils/dataviewer/filter-bar');
+var filterBar = React.createFactory(FilterBar);
 
-var filterer = require('../utils/dataviewer/filterer');
 var isEmpty = require('../utils/dataviewer/is-empty');
 var lens = require('../utils/dataviewer/lens');
 var noop = require('../utils/dataviewer/noop');
 
-var pvd = require('../utils/pvd.js');
+var pvd = require('../utils/pvd');
 
 var Data = React.createClass({
   propTypes: {
@@ -24,7 +23,6 @@ var Data = React.createClass({
     onClick: React.PropTypes.func,
     validateQuery: React.PropTypes.func,
     isExpanded: React.PropTypes.func,
-    filterOptions: React.PropTypes.object
   },
 
   getDefaultProps: function() {
@@ -32,7 +30,6 @@ var Data = React.createClass({
       className: '',
       id: 'pv-dataviewer',
       onClick: noop,
-      filterOptions: {},
       validateQuery: function(query) {
         return query.length >= 2;
       },
@@ -50,14 +47,15 @@ var Data = React.createClass({
   },
   getInitialState: function() {
     return {
-      query: ''
+      query: '',
+      filter: ''
     };
   },
   render: function() {
     var p = this.props;
     var s = this.state;
 
-    var data = s.query ? s.filterer(s.query) : p.graph.vertices();
+    var data = s.filter ? p.graph.verticesWithType(s.filter) : p.graph.vertices();
 
     var rootNode = leaf({
       data: data,
@@ -79,12 +77,12 @@ var Data = React.createClass({
                  isEmpty(data) ? notFound : rootNode);
   },
   renderToolbar: function() {
-    var search = this.props.search;
-
-    if (search) {
-      return D.div({ className: 'pv-dataviewer__toolbar' },
-                   search({ onChange: this.search, data: this.props.data }));
-    }
+    return D.div({ className: 'pv-dataviewer__toolbar' },
+                 filterBar({
+                   onChange: this.setFilter,
+                   selected: this.state.filter,
+                   options: this.props.graph.types(),
+                 }));
   },
   search: function(query) {
     if (query === '' || this.props.validateQuery(query)) {
@@ -93,21 +91,16 @@ var Data = React.createClass({
       });
     }
   },
-  componentDidMount: function() {
-    this.createFilterer(this.props.data, this.props.filterOptions);
-  },
-  componentWillReceiveProps: function(p) {
-    this.createFilterer(p.data, p.filterOptions);
+  setFilter: function(type) {
+    this.setState({
+      filter: type,
+    });
   },
   shouldComponentUpdate: function (p, s) {
     return s.query !== this.state.query ||
+      s.filter !== this.state.filter ||
       p.graph.mid !== this.props.graph.mid ||
       p.onClick !== this.props.onClick;
-  },
-  createFilterer: function(data, options) {
-    this.setState({
-      filterer: filterer(data, options)
-    });
   },
   getOriginal: function(path) {
     return lens(this.props.data, path);

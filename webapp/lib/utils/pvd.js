@@ -68,6 +68,9 @@ var pvGraphProto = {
       return d.isVertex() && d.vertex.type === typ;
     });
   },
+  types: function() {
+    return this.vTypes.slice();
+  },
   // Returns a graphlib.Graph object representing the graph(s) of all known
   // commit objects. If an argument is passed, it is assumed to be the name
   // of the repo to which results should be restricted.
@@ -99,10 +102,15 @@ module.exports.pvGraph = function (obj) {
   return _.assign(Object.create(pvGraphProto), (function () {
       var o = {
         _objects: {},
-        mid: obj.id
+        mid: obj.id,
+        vTypes: []
       };
 
       _.each(obj.vertices, function (d) {
+        if (_.indexOf(o.vTypes, d.vertex.type) === -1) {
+          o.vTypes.push(d.vertex.type);
+        }
+
         o._objects[d.id] = pvVertex(d);
         _.each(d.outEdges, function (d2) { o._objects[d2.id] = pvEdge(d2); });
       });
