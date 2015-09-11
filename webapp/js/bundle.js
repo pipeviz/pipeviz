@@ -1678,6 +1678,11 @@ var Leaf = React.createClass({
         return Object.keys(data).map(function(key) {
           var value = data[key];
 
+          // hardcode: use the vertex id instead of array position
+          if (p.root) {
+            key = data[key].id;
+          }
+
           return leaf({
             data: value,
             label: key,
