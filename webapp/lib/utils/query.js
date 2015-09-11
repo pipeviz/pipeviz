@@ -108,6 +108,8 @@ module.exports.objectLabel = function (obj) {
         return obj.propv("name");
       case "envlink":
         return obj.propv("hostname") || obj.propv("ipv4") || obj.propv("ipv6") || obj.propv("nick");
+      case "parent-commit":
+        return obj.propv("sha1").slice(0, 7);
     }
   }
 };

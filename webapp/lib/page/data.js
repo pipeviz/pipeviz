@@ -45,7 +45,7 @@ var Data = React.createClass({
        * @return {Boolean}
        */
       isExpanded: function(keypath, value) {
-        return false;
+        return typeof value.initialExpand === 'function' ? value.initialExpand() : false;
       }
     };
   },

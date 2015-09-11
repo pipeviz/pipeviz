@@ -129,7 +129,10 @@ var Leaf = React.createClass({
         // finally, if it's a vertex, add the edges
         if (isv) {
           children.push(leaf(_.assign({
-            data: _.zipObject(_.map(data.outEdges, function(eid) { return [eid, p.graph.get(eid)]; })),
+            data: _.assign(Object.create(expander),
+                           _.zipObject(_.map(data.outEdges, function(eid) {
+                             return [eid, p.graph.get(eid)];
+                           }))),
             label: "outEdges",
             key: getLeafKey("outEdges", {}) // just cheat
           }, shared)));
@@ -276,6 +279,10 @@ var Leaf = React.createClass({
     }
   }
 });
+
+var expander = {
+  initialExpand: function() { return true; }
+};
 
 // FIXME: There should be a better way to call a component factory from inside
 // component definition.

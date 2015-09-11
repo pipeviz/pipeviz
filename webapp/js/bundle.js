@@ -567,7 +567,7 @@ var Data = React.createClass({
        * @return {Boolean}
        */
       isExpanded: function(keypath, value) {
-        return false;
+        return typeof value.initialExpand === 'function' ? value.initialExpand() : false;
       }
     };
   },
@@ -1667,7 +1667,10 @@ var Leaf = React.createClass({
         // finally, if it's a vertex, add the edges
         if (isv) {
           children.push(leaf(_.assign({
-            data: _.zipObject(_.map(data.outEdges, function(eid) { return [eid, p.graph.get(eid)]; })),
+            data: _.assign(Object.create(expander),
+                           _.zipObject(_.map(data.outEdges, function(eid) {
+                             return [eid, p.graph.get(eid)];
+                           }))),
             label: "outEdges",
             key: getLeafKey("outEdges", {}) // just cheat
           }, shared)));
@@ -1814,6 +1817,10 @@ var Leaf = React.createClass({
     }
   }
 });
+
+var expander = {
+  initialExpand: function() { return true; }
+};
 
 // FIXME: There should be a better way to call a component factory from inside
 // component definition.
@@ -2210,6 +2217,8 @@ module.exports.objectLabel = function (obj) {
         return obj.propv("name");
       case "envlink":
         return obj.propv("hostname") || obj.propv("ipv4") || obj.propv("ipv6") || obj.propv("nick");
+      case "parent-commit":
+        return obj.propv("sha1").slice(0, 7);
     }
   }
 };
