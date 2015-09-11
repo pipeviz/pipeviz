@@ -110,6 +110,4 @@ module.exports.objectLabel = function (obj) {
         return obj.propv("hostname") || obj.propv("ipv4") || obj.propv("ipv6") || obj.propv("nick");
     }
   }
-
-  return null;
 };

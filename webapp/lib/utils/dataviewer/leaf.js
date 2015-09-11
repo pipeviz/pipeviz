@@ -60,7 +60,7 @@ var Leaf = React.createClass({
         case 'Object':
           if (pvd.isVertex(data) || pvd.isEdge(data)) {
             return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
-                          data.Typ() + ' ' + query.objectLabel(data));
+                          data.Typ() + (query.objectLabel(data) ? ' ' + query.objectLabel(data) : ''));
           }
 
           return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
