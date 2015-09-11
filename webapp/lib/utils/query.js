@@ -78,3 +78,38 @@ module.exports.getTestState = function (g, c) {
   });
   return testState;
 };
+
+/**
+ * Given an object, returns a string appropriate for use as a label.
+ *
+ * This string may or may not be globally unique. Do not rely on it for that.
+ */
+module.exports.objectLabel = function (obj) {
+  if (typeof obj.Typ === "function") {
+    switch (obj.Typ()) {
+      // first vertex types
+      case "logic-state":
+        return obj.propv("path");
+      case "git-tag":
+      case "git-branch":
+      case "dataset":
+      case "parent-dataset":
+        return obj.propv("name");
+      case "commit":
+        return obj.propv("sha1").slice(0, 7);
+      case "process":
+        return obj.propv("pid");
+      case "environment":
+        return obj.propv("hostname") || obj.propv("ipv4") || obj.propv("ipv6");
+      case "comm":
+        return obj.propv("port") || obj.propv("path");
+      // now, edges
+      case "datalink":
+        return obj.propv("name");
+      case "envlink":
+        return obj.propv("hostname") || obj.propv("ipv4") || obj.propv("ipv6") || obj.propv("nick");
+    }
+  }
+
+  return null;
+};

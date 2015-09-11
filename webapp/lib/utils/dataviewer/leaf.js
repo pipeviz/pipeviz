@@ -7,6 +7,8 @@ var type = require('./type');
 var Highlighter = require('./highlighter');
 var highlighter = React.createFactory(Highlighter);
 
+var query = require('../query.js');
+
 var PATH_PREFIX = '.root.';
 
 var Leaf = React.createClass({
@@ -51,16 +53,21 @@ var Leaf = React.createClass({
         var t = type(data);
 
         switch (t) {
-            case 'Array':
-                return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
-                    '[] ' + items(data.length));
+          case 'Array':
+            return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
+                          '[] ' + items(data.length));
             case 'Object':
+              if (typeof data.Typ === "function") {
                 return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
-                    '{} ' + items(Object.keys(data).length));
+                              data.Typ() + ' ' + query.objectLabel(data));
+              }
+
+              return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_helper' },
+                            '{} ' + items(Object.keys(data).length));
             default:
-                return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_' + t.toLowerCase() },
-                    this.format(String(data)),
-                    this.renderInteractiveLabel(data, false));
+              return D.span({ className: 'pv-dataviewer__value pv-dataviewer__value_' + t.toLowerCase() },
+                            this.format(String(data)),
+                            this.renderInteractiveLabel(data, false));
         }
     },
     renderChildren: function() {

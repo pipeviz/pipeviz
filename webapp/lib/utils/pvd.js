@@ -23,7 +23,7 @@ var pvVertex = function (obj) {
   );
 };
 
-var edgeProto = {
+var edgeProto = module.exports.edgeProto =  {
   isVertex: function () { return false; },
   Typ: function () { return this.etype; },
   prop: function (path) {
