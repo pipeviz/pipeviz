@@ -30,6 +30,11 @@ var edgeProto = module.exports.edgeProto =  {
     if (_.has(this.properties, path)) {
       return this.properties[path];
     }
+  },
+  propv: function (path) {
+    if (_.has(this.properties, path)) {
+      return this.properties[path].value;
+    }
   }
 };
 
@@ -138,6 +143,24 @@ var filters = {
   edges: function (d) {
     return !d.isVertex();
   }
+};
+
+/**
+ * Checks the provided object to see if it is one of our edge types.
+ *
+ * This is performed by checking the object prototype chain.
+ */
+module.exports.isEdge = function(obj) {
+  return edgeProto.isPrototypeOf(obj);
+};
+
+/**
+ * Checks the provided object to see if it is one of our vertex types.
+ *
+ * This is performed by checking the object prototype chain.
+ */
+module.exports.isVertex = function(obj) {
+  return vertexProto.isPrototypeOf(obj);
 };
 
 var isType = module.exports.isType = function (typ) {
