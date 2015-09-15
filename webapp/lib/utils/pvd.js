@@ -19,16 +19,24 @@ var vertexProto = module.exports.vertexProto = {
 // vertex factory
 var pvVertex = function (obj) {
   return _.assign(Object.create(vertexProto),
-    obj, {outEdges: _.map(obj.outEdges, function (d) { return d.id; })}
+    obj, {
+      outEdges: _.map(obj.outEdges, function (d) { return d.id; }),
+      inEdges: _.map(obj.inEdges, function (d) { return d.id; })
+    }
   );
 };
 
-var edgeProto = {
+var edgeProto = module.exports.edgeProto =  {
   isVertex: function () { return false; },
   Typ: function () { return this.etype; },
   prop: function (path) {
     if (_.has(this.properties, path)) {
       return this.properties[path];
+    }
+  },
+  propv: function (path) {
+    if (_.has(this.properties, path)) {
+      return this.properties[path].value;
     }
   }
 };
@@ -59,6 +67,9 @@ var pvGraphProto = {
     return _.filter(this._objects, function (d) {
       return d.isVertex() && d.vertex.type === typ;
     });
+  },
+  types: function() {
+    return this.vTypes.slice();
   },
   // Returns a graphlib.Graph object representing the graph(s) of all known
   // commit objects. If an argument is passed, it is assumed to be the name
@@ -91,10 +102,15 @@ module.exports.pvGraph = function (obj) {
   return _.assign(Object.create(pvGraphProto), (function () {
       var o = {
         _objects: {},
-        mid: obj.id
+        mid: obj.id,
+        vTypes: []
       };
 
       _.each(obj.vertices, function (d) {
+        if (_.indexOf(o.vTypes, d.vertex.type) === -1) {
+          o.vTypes.push(d.vertex.type);
+        }
+
         o._objects[d.id] = pvVertex(d);
         _.each(d.outEdges, function (d2) { o._objects[d2.id] = pvEdge(d2); });
       });
@@ -138,6 +154,24 @@ var filters = {
   edges: function (d) {
     return !d.isVertex();
   }
+};
+
+/**
+ * Checks the provided object to see if it is one of our edge types.
+ *
+ * This is performed by checking the object prototype chain.
+ */
+module.exports.isEdge = function(obj) {
+  return edgeProto.isPrototypeOf(obj);
+};
+
+/**
+ * Checks the provided object to see if it is one of our vertex types.
+ *
+ * This is performed by checking the object prototype chain.
+ */
+module.exports.isVertex = function(obj) {
+  return vertexProto.isPrototypeOf(obj);
 };
 
 var isType = module.exports.isType = function (typ) {

@@ -309,7 +309,7 @@ var InfoBar = React.createClass({
       var env = query.getEnvironment(pvg, t);
       var commit = query.getCommit(pvg, t);
 
-      listitems.push(React.DOM.li({}, "Located on " + query.getEnvName(env) + " at " + t.propv("path")));
+      listitems.push(React.DOM.li({}, "Located on " + query.objectLabel(env) + " at " + t.propv("path")));
       listitems.push(React.DOM.li({}, "Commit info:"));
       listitems.push(React.DOM.ul({
         children: [
@@ -353,20 +353,24 @@ var ControlBar = React.createClass({
     var cc = this.props.changeCfgs;
     var vizbits = _.map(this.props.vizcfgs, function (v, vc) {
       return React.createElement("span", {
-        id: "vizctrl-" + vc, className: ["vizctrl"]
-      }, v.label, _.map([
-        [algo.V_BOUNDARY | algo.V_FOCAL | algo.V_FESTOONED, "Boundary"],
-        [algo.V_FOCAL | algo.V_FESTOONED, "Focal"],
-        [algo.V_FESTOONED, "Festoon"],
-        [algo.V_UNINTERESTING, "Hide"]
-      ], function (rdio) {
-        return React.createElement("input", {
-          key: vc + rdio[1].toLowerCase(),
-          type: "radio",
-          checked: v.state === rdio[0],
-          onChange: cc.bind(this, vc, v, rdio[0])
-        }, rdio[1]);
-      }));
+        id: "vizctrl-" + vc,
+        className: ["vizctrl"]
+      },
+      v.label,
+      _.map([
+          [algo.V_BOUNDARY | algo.V_FOCAL | algo.V_FESTOONED, "Boundary"],
+          [algo.V_FOCAL | algo.V_FESTOONED, "Focal"],
+          [algo.V_FESTOONED, "Festoon"],
+          [algo.V_UNINTERESTING, "Hide"]
+        ], function (rdio) {
+          return React.createElement("input", {
+            key: vc + rdio[1].toLowerCase(),
+            type: "radio",
+            checked: v.state === rdio[0],
+            onChange: cc.bind(this, vc, v, rdio[0])
+          }, rdio[1]);
+        })
+      );
     });
 
     return React.createElement("aside", {id: "aside"},
