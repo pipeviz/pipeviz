@@ -49,7 +49,8 @@
     padding: 2px;
 }
 
-.pv-dataviewer__key {
+.pv-dataviewer__key,
+.pv-dataviewer__msgsrc {
     color: #505050;
 }
 

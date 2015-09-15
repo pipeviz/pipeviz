@@ -72,7 +72,7 @@ var Leaf = React.createClass({
           } else if (_.has(data, 'isPropObj')) {
             // Condense property objects into a single "value"
             return D.span({ className: 'pv-dataviewer__value pv-dataviewer__propvalue pv-dataviewer__value_' + type(data.value).toLowerCase() },
-                          data.value + "  (from msg: " + data.msgsrc + ")",
+                          data.value, D.span({ className: 'pv-dataviewer__msgsrc' }, "  (from msg: " + data.msgsrc + ")"),
                           this.renderInteractiveLabel(data.value, false));
           }
 
