@@ -24,7 +24,7 @@
   },
   "scripts": {
     "build": "npm run build-dev",
-    "build-dev": "browserify lib/index.js --debug | exorcist js/bundle.map > js/bundle.js",
-    "watch-dev": "watchify lib/index.js -o js/bundle.js -v"
+    "build-dev": "browserify src/index.js --debug | exorcist public/assets/js/bundle.map > public/assets/js/bundle.js",
+    "watch-dev": "watchify src/index.js -o public/assets/js/bundle.js -v"
   }
 }

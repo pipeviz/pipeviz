@@ -16,9 +16,8 @@ import (
 )
 
 var (
-	assetDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "assets")
-	jsDir    = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "js")
-	tmplDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "tmpl")
+	assetDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/public"), "assets")
+	tmplDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
 )
 
 var (
@@ -62,7 +61,6 @@ func NewMux() *web.Mux {
 
 	m.Use(log.NewHttpLogger("webapp"))
 	m.Get("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetDir))))
-	m.Get("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir(jsDir))))
 	m.Get("/sock", OpenSocket)
 	m.Get("/*", http.StripPrefix("/", http.HandlerFunc(WebRoot)))
 
