@@ -29,7 +29,7 @@ module.exports = {
   /**
    * One socket for everything we want out of the server.
    */
-  socket: new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/sock"),
+  socket: new WebSocket("ws://localhost:8008/sock"),
 
   /**
    * Keeping the socket value handy in case we change pages.
