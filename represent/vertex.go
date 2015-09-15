@@ -300,7 +300,7 @@ func (vtx vertexYumPkg) Props() ps.Map {
 }
 
 func (vtx vertexYumPkg) Typ() VType {
-	return "parent-dataset"
+	return "pkg-yum"
 }
 
 func (vtx vertexYumPkg) Merge(ivtx Vertex) (Vertex, error) {
