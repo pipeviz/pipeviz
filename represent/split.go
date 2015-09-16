@@ -100,32 +100,19 @@ func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
 }
 
 func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
-	v := vertexLogicState{props: ps.NewMap()}
+	v := types.NewVertex("logic-state", id,
+		types.PropPair{K: "path", V: d.Path},
+		types.PropPair{K: "lgroup", V: d.Lgroup},
+		types.PropPair{K: "nick", V: d.Nick},
+		types.PropPair{K: "type", V: d.Type},
+		types.PropPair{K: "version", V: d.ID.Version},
+		types.PropPair{K: "semver", V: d.ID.Semver},
+	)
+
 	var edges EdgeSpecs
 
-	// TODO do IDs need different handling?
-	v.props = v.props.Set("path", Property{MsgSrc: id, Value: d.Path})
-
-	if d.Lgroup != "" {
-		// TODO should be an edge, a simple semantic one
-		v.props = v.props.Set("lgroup", Property{MsgSrc: id, Value: d.Lgroup})
-	}
-	if d.Nick != "" {
-		v.props = v.props.Set("nick", Property{MsgSrc: id, Value: d.Nick})
-	}
-	if d.Type != "" {
-		v.props = v.props.Set("type", Property{MsgSrc: id, Value: d.Type})
-	}
-
-	// TODO should do anything with mutually exclusive properties here?
 	if !d.ID.Commit.IsEmpty() {
 		edges = append(edges, SpecCommit{d.ID.Commit})
-	}
-	if d.ID.Version != "" {
-		v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.ID.Version})
-	}
-	if d.ID.Semver != "" {
-		v.props = v.props.Set("semver", Property{MsgSrc: id, Value: d.ID.Semver})
 	}
 
 	for _, dl := range d.Datasets {

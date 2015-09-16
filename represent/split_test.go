@@ -269,8 +269,9 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[0], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						SpecCommit{hexify(D_commit)},
@@ -284,8 +285,9 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[1], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"version", D_version}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"version", D_version}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						M_envlink[1],
@@ -298,8 +300,9 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[2], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						M_envlink[1],
@@ -319,8 +322,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						SpecCommit{hexify(D_commit)},
@@ -339,8 +343,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						datalinks[0],
@@ -360,8 +365,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						datalinks[2],

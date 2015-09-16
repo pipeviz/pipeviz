@@ -11,14 +11,14 @@ func Identify(g CoreGraph, sd SplitData) int {
 	ids, definitive := identifyDefault(g, sd)
 	// default one didn't do it, use specialists to narrow further
 
-	switch sd.Vertex.(type) {
-	case vertexLogicState, vertexProcess, vertexComm, vertexParentDataset, vertexDataset:
+	switch sd.Vertex.Typ() {
+	case "logic-state", "comm", "parent-dataset", "dataset":
 		// TODO vertexDataset needs special disambiguation; it has a second structural edge (poor idea anyway)
 		if len(ids) == 1 && definitive {
 			return ids[0]
 		}
 		return 0
-	case vertexTestResult:
+	case "test-result":
 		return identifyByGitHashSpec(g, sd, ids)
 	}
 
@@ -140,7 +140,6 @@ var Identifiers []Identifier
 
 func init() {
 	Identifiers = []Identifier{
-		IdentifierLogicState{},
 		IdentifierDataset{},
 		IdentifierProcess{},
 		IdentifierCommit{},
@@ -182,6 +181,8 @@ func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
 	switch a.Typ() {
 	case "environment":
 		return matchAddress(a.Props(), b.Props())
+	case "logic-state":
+		return mapValEq(a.Props(), b.Props(), "path")
 	default:
 		return false
 	}
@@ -207,26 +208,6 @@ func matchAddress(a, b ps.Map) bool {
 // Helper func to match env links
 func matchEnvLink(a, b ps.Map) bool {
 	return mapValEq(a, b, "nick") || matchAddress(a, b)
-}
-
-type IdentifierLogicState struct{}
-
-func (i IdentifierLogicState) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexLogicState)
-	return ok
-}
-
-func (i IdentifierLogicState) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexLogicState)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexLogicState)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "path")
 }
 
 type IdentifierDataset struct{}

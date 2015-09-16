@@ -70,28 +70,6 @@ func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map 
 	return m
 }
 
-type vertexLogicState struct {
-	props ps.Map
-}
-
-func (vtx vertexLogicState) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexLogicState) Typ() types.VType {
-	return "logic-state"
-}
-
-func (vtx vertexLogicState) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexLogicState); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
-}
-
 type vertexProcess struct {
 	props ps.Map
 }
