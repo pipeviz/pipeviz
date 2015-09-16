@@ -151,6 +151,7 @@ func init() {
 		IdentifierParentDataset{},
 		IdentifierComm{},
 		IdentifierYumPkg{},
+		IdentifierGeneric{},
 	}
 }
 
@@ -160,6 +161,31 @@ func init() {
 type Identifier interface {
 	CanIdentify(data types.Vtx) bool
 	Matches(a types.Vtx, b types.Vtx) bool
+}
+
+// New generic identifier - temporary!
+type IdentifierGeneric struct{}
+
+func (i IdentifierGeneric) CanIdentify(data types.Vtx) bool {
+	switch data.Typ() {
+	case "environment":
+		return true
+	default:
+		return false
+	}
+}
+
+func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
+	if a.Typ() != b.Typ() {
+		return false
+	}
+
+	switch a.Typ() {
+	case "environment":
+		return matchAddress(a.Props(), b.Props())
+	default:
+		return false
+	}
 }
 
 // Identifier for Environments
