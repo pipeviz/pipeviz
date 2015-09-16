@@ -75,13 +75,6 @@ func NewGraph() CoreGraph {
 	return &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 }
 
-type (
-	// A value indicating a vertex's type. For now, done as a string.
-	VType types.VType
-	// A value indicating an edge's type. For now, done as a string.
-	EType types.EType
-)
-
 const (
 	VTypeNone types.VType = ""
 	ETypeNone types.EType = ""
