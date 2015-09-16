@@ -92,28 +92,6 @@ func (vtx vertexDataset) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	return vtx, nil
 }
 
-type vertexCommit struct {
-	props ps.Map
-}
-
-func (vtx vertexCommit) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexCommit) Typ() types.VType {
-	return "commit"
-}
-
-func (vtx vertexCommit) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexCommit); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
-}
-
 type vertexGitBranch struct {
 	props ps.Map
 }

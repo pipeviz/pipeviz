@@ -167,13 +167,13 @@ func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 }
 
 func splitCommit(d interpret.Commit, id uint64) ([]SplitData, error) {
-	v := vertexCommit{props: ps.NewMap()}
-
-	v.props = v.props.Set("sha1", Property{MsgSrc: id, Value: d.Sha1})
-	v.props = v.props.Set("author", Property{MsgSrc: id, Value: d.Author})
-	v.props = v.props.Set("date", Property{MsgSrc: id, Value: d.Date})
-	v.props = v.props.Set("subject", Property{MsgSrc: id, Value: d.Subject})
-	v.props = v.props.Set("repository", Property{MsgSrc: id, Value: d.Repository})
+	v := types.NewVertex("commit", id,
+		types.PropPair{K: "sha1", V: d.Sha1},
+		types.PropPair{K: "Author", V: d.Author},
+		types.PropPair{K: "Date", V: d.Date},
+		types.PropPair{K: "Subject", V: d.Subject},
+		types.PropPair{K: "Repository", V: d.Repository},
+	)
 
 	var edges EdgeSpecs
 	for k, parent := range d.Parents {

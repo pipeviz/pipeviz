@@ -550,8 +550,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					Vertex: types.Vertex{
+						Type:       "commit",
+						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},
@@ -570,8 +571,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					Vertex: types.Vertex{
+						Type:       "commit",
+						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: nil,
 				},
@@ -589,8 +591,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					Vertex: types.Vertex{
+						Type:       "commit",
+						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},

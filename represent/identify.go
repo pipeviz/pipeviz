@@ -141,7 +141,6 @@ var Identifiers []Identifier
 func init() {
 	Identifiers = []Identifier{
 		IdentifierDataset{},
-		IdentifierCommit{},
 		IdentifierGitTag{},
 		IdentifierGitBranch{},
 		IdentifierTestResult{},
@@ -164,7 +163,7 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.Vtx) bool {
 	switch data.Typ() {
-	case "environment", "logic-state", "process", "comm":
+	case "environment", "logic-state", "process", "comm", "commit":
 		return true
 	default:
 		return false
@@ -190,6 +189,8 @@ func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
 		} else {
 			return mapValEqAnd(a.Props(), b.Props(), "type", "port")
 		}
+	case "commit":
+		return mapValEq(a.Props(), b.Props(), "sha1")
 	default:
 		return false
 	}
@@ -235,30 +236,6 @@ func (i IdentifierDataset) Matches(a types.Vtx, b types.Vtx) bool {
 	}
 
 	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierCommit struct{}
-
-func (i IdentifierCommit) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexCommit)
-	return ok
-}
-
-func (i IdentifierCommit) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexCommit)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexCommit)
-	if !ok {
-		return false
-	}
-
-	// TODO mapValEq should be able to handle this
-	//lsha, lexists := l.Props().Lookup("sha1")
-	//rsha, rexists := r.Props().Lookup("sha1")
-	//return rexists && lexists && bytes.Equal(lsha.(Property).Value.([]byte), rsha.(Property).Value.([]byte))
-	return mapValEq(l.Props(), r.Props(), "sha1")
 }
 
 type IdentifierGitTag struct{}
