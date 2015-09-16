@@ -1,11 +1,11 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({180:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({181:[function(require,module,exports){
 var index = require('../index');
 var commitPipeline = require('../viz/commit-pipeline');
 
 index.openSocket();
 index.display(commitPipeline.App, document.querySelector('#main'));
 
-},{"../index":179,"../viz/commit-pipeline":193}],193:[function(require,module,exports){
+},{"../index":180,"../viz/commit-pipeline":194}],194:[function(require,module,exports){
 // @todo split that up, should be templates.
 var d3 = require('d3');
 var React = require('react');
@@ -448,7 +448,7 @@ module.exports.App = React.createClass({
   }
 });
 
-},{"../utils/algo":182,"../utils/pvd":191,"../utils/query":192,"d3":2,"lodash":23,"react":178}],182:[function(require,module,exports){
+},{"../utils/algo":183,"../utils/pvd":192,"../utils/query":193,"d3":2,"lodash":23,"react":178}],183:[function(require,module,exports){
 var _ = require('lodash');
 var graphlib = require('graphlib');
 var query = require('./query');
@@ -1193,7 +1193,7 @@ module.exports.clMapper = function (v) {
   return v;
 };
 
-},{"./pvd":191,"./query":192,"graphlib":3,"lodash":23}],2:[function(require,module,exports){
+},{"./pvd":192,"./query":193,"graphlib":3,"lodash":23}],2:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.5.6"
@@ -10698,5 +10698,5 @@ module.exports.clMapper = function (v) {
   if (typeof define === "function" && define.amd) define(d3); else if (typeof module === "object" && module.exports) module.exports = d3;
   this.d3 = d3;
 }();
-},{}]},{},[180])
+},{}]},{},[181])
 //# sourceMappingURL=commit-pipeline.js.map

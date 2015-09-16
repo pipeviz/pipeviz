@@ -1,5 +1,6 @@
 var React = require('react');
 var pvd = require('./utils/pvd');
+var config = require('./config');
 
 module.exports = {
 
@@ -7,7 +8,6 @@ module.exports = {
    * One socket for everything we want out of the server.
    */
   socket: null,
-
 
   /**
    * Keeping the socket value handy in case we change pages.
@@ -20,7 +20,8 @@ module.exports = {
    * Open socket.
    */
   openSocket: function () {
-    this.socket = new WebSocket("ws://localhost:8008/sock");
+    this.socket = new WebSocket("ws://" + config.server + config.path);
+    return this.socket;
   },
 
   display: function (page, container) {
@@ -33,5 +34,6 @@ module.exports = {
     if (mod.socketCache) {
       mod.socket.onmessage.call(mod.socket, mod.socketCache);
     }
+    return display;
   }
 };

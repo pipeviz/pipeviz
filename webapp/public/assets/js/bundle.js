@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({192:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({193:[function(require,module,exports){
 var _ = require('lodash');
 var pvd = require('./pvd');
 
@@ -115,9 +115,10 @@ module.exports.objectLabel = function (obj) {
   }
 };
 
-},{"./pvd":191,"lodash":23}],179:[function(require,module,exports){
+},{"./pvd":192,"lodash":23}],180:[function(require,module,exports){
 var React = require('react');
 var pvd = require('./utils/pvd');
+var config = require('./config');
 
 module.exports = {
 
@@ -125,7 +126,6 @@ module.exports = {
    * One socket for everything we want out of the server.
    */
   socket: null,
-
 
   /**
    * Keeping the socket value handy in case we change pages.
@@ -138,7 +138,8 @@ module.exports = {
    * Open socket.
    */
   openSocket: function () {
-    this.socket = new WebSocket("ws://localhost:8008/sock");
+    this.socket = new WebSocket("ws://" + config.server + config.path);
+    return this.socket;
   },
 
   display: function (page, container) {
@@ -151,10 +152,11 @@ module.exports = {
     if (mod.socketCache) {
       mod.socket.onmessage.call(mod.socket, mod.socketCache);
     }
+    return display;
   }
 };
 
-},{"./utils/pvd":191,"react":178}],191:[function(require,module,exports){
+},{"./config":179,"./utils/pvd":192,"react":178}],192:[function(require,module,exports){
 var _ = require('lodash');
 var graphlib = require('graphlib');
 
@@ -351,7 +353,13 @@ var isType = module.exports.isType = function (typ) {
   };
 };
 
-},{"graphlib":3,"lodash":23}],178:[function(require,module,exports){
+},{"graphlib":3,"lodash":23}],179:[function(require,module,exports){
+module.exports = {
+  server: 'localhost:8008',
+  path: '/sock'
+};
+
+},{}],178:[function(require,module,exports){
 module.exports = require('./lib/React');
 
 },{"./lib/React":51}],51:[function(require,module,exports){
