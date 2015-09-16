@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"path/filepath"
-	"text/template"
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
@@ -16,8 +15,7 @@ import (
 )
 
 var (
-	assetDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/public"), "assets")
-	tmplDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
+	publicDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
 )
 
 var (
@@ -60,9 +58,8 @@ func NewMux() *web.Mux {
 	m := web.New()
 
 	m.Use(log.NewHttpLogger("webapp"))
-	m.Get("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetDir))))
 	m.Get("/sock", OpenSocket)
-	m.Get("/*", http.StripPrefix("/", http.HandlerFunc(WebRoot)))
+	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
 
 	return m
 }
@@ -81,23 +78,6 @@ func graphToJson(g represent.CoreGraph) ([]byte, error) {
 		Id:       g.MsgId(),
 		Vertices: vertices,
 	})
-}
-
-func WebRoot(w http.ResponseWriter, r *http.Request) {
-	vars := struct {
-		Title string
-	}{
-		Title: "pipeviz",
-	}
-
-	t, err := template.ParseFiles(filepath.Join(tmplDir, "index.html"))
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"system": "webapp",
-			"err":    err,
-		}).Error("Failed to parse index.html template file")
-	}
-	t.Execute(w, vars)
 }
 
 func OpenSocket(w http.ResponseWriter, r *http.Request) {
