@@ -141,9 +141,6 @@ var Identifiers []Identifier
 func init() {
 	Identifiers = []Identifier{
 		IdentifierDataset{},
-		IdentifierGitTag{},
-		IdentifierGitBranch{},
-		IdentifierTestResult{},
 		IdentifierParentDataset{},
 		IdentifierYumPkg{},
 		IdentifierGeneric{},
@@ -191,6 +188,10 @@ func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
 		}
 	case "commit":
 		return mapValEq(a.Props(), b.Props(), "sha1")
+	case "git-tag", "git-branch":
+		return mapValEq(a.Props(), b.Props(), "name")
+	case "test-result":
+		return true // TODO LOLOLOL totally demonstrating how this system is broken
 	default:
 		return false
 	}
@@ -236,66 +237,6 @@ func (i IdentifierDataset) Matches(a types.Vtx, b types.Vtx) bool {
 	}
 
 	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierGitTag struct{}
-
-func (i IdentifierGitTag) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexGitTag)
-	return ok
-}
-
-func (i IdentifierGitTag) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexGitTag)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexGitTag)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierGitBranch struct{}
-
-func (i IdentifierGitBranch) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexGitBranch)
-	return ok
-}
-
-func (i IdentifierGitBranch) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexGitBranch)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexGitBranch)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierTestResult struct{}
-
-func (i IdentifierTestResult) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexTestResult)
-	return ok
-}
-
-func (i IdentifierTestResult) Matches(a types.Vtx, b types.Vtx) bool {
-	_, ok := a.(vertexTestResult)
-	if !ok {
-		return false
-	}
-	_, ok = b.(vertexTestResult)
-	if !ok {
-		return false
-	}
-
-	return true // TODO LOLOLOL totally demonstrating how this system is broken
 }
 
 type IdentifierParentDataset struct{}

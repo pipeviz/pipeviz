@@ -613,7 +613,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
@@ -628,13 +631,19 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "bar"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
@@ -650,25 +659,37 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "bar"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitBranch{mapPropPairs(D_msgid, p{"name", "qux"})},
+					Vertex: types.Vertex{
+						Type:       "git-branch",
+						Properties: mapPropPairs(D_msgid, p{"name", "qux"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitBranch{mapPropPairs(D_msgid, p{"name", "zoop"})},
+					Vertex: types.Vertex{
+						Type:       "git-branch",
+						Properties: mapPropPairs(D_msgid, p{"name", "zoop"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
@@ -684,13 +705,19 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexTestResult{mapPropPairs(D_msgid, p{"result", "passed"})},
+					Vertex: types.Vertex{
+						Type:       "test-result",
+						Properties: mapPropPairs(D_msgid, p{"result", "passed"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},

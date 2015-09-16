@@ -187,20 +187,17 @@ func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
 	for _, tag := range d.Tags {
-		v := vertexGitTag{ps.NewMap()}
-		v.props = v.props.Set("name", Property{MsgSrc: id, Value: tag})
+		v := types.NewVertex("git-tag", id, types.PropPair{"name", tag})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	for _, branch := range d.Branches {
-		v := vertexGitBranch{ps.NewMap()}
-		v.props = v.props.Set("name", Property{MsgSrc: id, Value: branch})
+		v := types.NewVertex("git-branch", id, types.PropPair{"name", branch})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	if d.TestState != "" {
-		v := vertexTestResult{ps.NewMap()}
-		v.props = v.props.Set("result", Property{MsgSrc: id, Value: d.TestState})
+		v := types.NewVertex("test-result", id, types.PropPair{"result", d.TestState})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
