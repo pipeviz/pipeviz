@@ -70,50 +70,6 @@ func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map 
 	return m
 }
 
-type vertexProcess struct {
-	props ps.Map
-}
-
-func (vtx vertexProcess) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexProcess) Typ() types.VType {
-	return "process"
-}
-
-func (vtx vertexProcess) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexProcess); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
-}
-
-type vertexComm struct {
-	props ps.Map
-}
-
-func (vtx vertexComm) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexComm) Typ() types.VType {
-	return "comm"
-}
-
-func (vtx vertexComm) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexComm); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
-}
-
 type vertexDataset struct {
 	props ps.Map
 }

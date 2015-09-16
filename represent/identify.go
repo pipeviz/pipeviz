@@ -141,13 +141,11 @@ var Identifiers []Identifier
 func init() {
 	Identifiers = []Identifier{
 		IdentifierDataset{},
-		IdentifierProcess{},
 		IdentifierCommit{},
 		IdentifierGitTag{},
 		IdentifierGitBranch{},
 		IdentifierTestResult{},
 		IdentifierParentDataset{},
-		IdentifierComm{},
 		IdentifierYumPkg{},
 		IdentifierGeneric{},
 	}
@@ -166,7 +164,7 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.Vtx) bool {
 	switch data.Typ() {
-	case "environment":
+	case "environment", "logic-state", "process", "comm":
 		return true
 	default:
 		return false
@@ -183,6 +181,15 @@ func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
 		return matchAddress(a.Props(), b.Props())
 	case "logic-state":
 		return mapValEq(a.Props(), b.Props(), "path")
+	case "process":
+		return mapValEq(a.Props(), b.Props(), "pid")
+	case "comm":
+		_, haspath := a.Props().Lookup("path")
+		if haspath {
+			return mapValEqAnd(a.Props(), b.Props(), "type", "path")
+		} else {
+			return mapValEqAnd(a.Props(), b.Props(), "type", "port")
+		}
 	default:
 		return false
 	}
@@ -252,27 +259,6 @@ func (i IdentifierCommit) Matches(a types.Vtx, b types.Vtx) bool {
 	//rsha, rexists := r.Props().Lookup("sha1")
 	//return rexists && lexists && bytes.Equal(lsha.(Property).Value.([]byte), rsha.(Property).Value.([]byte))
 	return mapValEq(l.Props(), r.Props(), "sha1")
-}
-
-type IdentifierProcess struct{}
-
-func (i IdentifierProcess) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexProcess)
-	return ok
-}
-
-func (i IdentifierProcess) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexProcess)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexProcess)
-	if !ok {
-		return false
-	}
-
-	// TODO numeric id within the 2^16 ring buffer that is pids is a horrible way to do this
-	return mapValEq(l.Props(), r.Props(), "pid")
 }
 
 type IdentifierGitTag struct{}
@@ -353,31 +339,6 @@ func (i IdentifierParentDataset) Matches(a types.Vtx, b types.Vtx) bool {
 	}
 
 	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
-}
-
-type IdentifierComm struct{}
-
-func (i IdentifierComm) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexComm)
-	return ok
-}
-
-func (i IdentifierComm) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexComm)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexComm)
-	if !ok {
-		return false
-	}
-
-	_, haspath := l.Props().Lookup("path")
-	if haspath {
-		return mapValEqAnd(l.Props(), r.Props(), "type", "path")
-	} else {
-		return mapValEqAnd(l.Props(), r.Props(), "type", "port")
-	}
 }
 
 type IdentifierYumPkg struct{}

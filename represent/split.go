@@ -127,20 +127,15 @@ func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
 func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
-	v := vertexProcess{props: ps.NewMap()}
+	v := types.NewVertex("process", id,
+		types.PropPair{K: "pid", V: d.Pid},
+		types.PropPair{K: "cwd", V: d.Cwd},
+		types.PropPair{K: "group", V: d.Group},
+		types.PropPair{K: "user", V: d.User},
+	)
+
 	var edges EdgeSpecs
 	edges = append(edges, d.Environment)
-
-	v.props = v.props.Set("pid", Property{MsgSrc: id, Value: d.Pid})
-	if d.Cwd != "" {
-		v.props = v.props.Set("cwd", Property{MsgSrc: id, Value: d.Cwd})
-	}
-	if d.Group != "" {
-		v.props = v.props.Set("group", Property{MsgSrc: id, Value: d.Group})
-	}
-	if d.User != "" {
-		v.props = v.props.Set("user", Property{MsgSrc: id, Value: d.User})
-	}
 
 	for _, ls := range d.LogicStates {
 		edges = append(edges, SpecLocalLogic{ls})
@@ -152,18 +147,19 @@ func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 
 	for _, listen := range d.Listen {
 		// TODO change this to use diff vtx types for unix domain sock and network sock
-		v2 := vertexComm{props: ps.NewMap()}
+		v2 := types.NewVertex("comm", id,
+			types.PropPair{K: "type", V: listen.Type},
+		)
 
 		if listen.Type == "unix" {
 			edges = append(edges, SpecUnixDomainListener{Path: listen.Path})
-			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
+			v2.Properties = v2.Properties.Set("path", types.Property{MsgSrc: id, Value: listen.Path})
 		} else {
 			for _, proto := range listen.Proto {
 				edges = append(edges, SpecNetListener{Port: listen.Port, Proto: proto})
 			}
-			v2.props = v2.props.Set("port", Property{MsgSrc: id, Value: listen.Port})
+			v2.Properties = v2.Properties.Set("port", types.Property{MsgSrc: id, Value: listen.Port})
 		}
-		v2.props = v2.props.Set("type", Property{MsgSrc: id, Value: listen.Type})
 		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment}})
 	}
 

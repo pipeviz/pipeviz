@@ -388,7 +388,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
@@ -408,8 +411,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{
-						mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[1],
@@ -430,7 +434,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
@@ -439,7 +446,10 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
@@ -458,7 +468,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/usr/local/src/imaginationland"},
@@ -466,7 +479,10 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
@@ -486,7 +502,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
@@ -497,13 +516,19 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
