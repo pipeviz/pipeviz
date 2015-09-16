@@ -10,7 +10,6 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "ampersand-router": "^3.0.2",
     "d3": "~3.5.3",
     "graphlib": "1.0.7",
     "lodash": "^3.10.0",
@@ -19,12 +18,11 @@
   "devDependencies": {
     "browserify": "^11.0.1",
     "exorcist": "^0.4.0",
-    "uglifyjs": "^2.4.10",
-    "watchify": "^3.4.0"
+    "factor-bundle": "^2.5.0",
+    "uglifyjs": "^2.4.10"
   },
   "scripts": {
     "build": "npm run build-dev",
-    "build-dev": "browserify src/index.js --debug | exorcist public/assets/js/bundle.map > public/assets/js/bundle.js",
-    "watch-dev": "watchify src/index.js -o public/assets/js/bundle.js -v"
+    "build-dev": "browserify src/page/*.js --debug -p [ factor-bundle -o 'exorcist public/assets/js/`basename $FILE`.map > public/assets/js/`basename $FILE`' ] | exorcist public/assets/js/bundle.js.map > public/assets/js/bundle.js"
   }
 }
