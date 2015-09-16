@@ -169,10 +169,10 @@ func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 func splitCommit(d interpret.Commit, id uint64) ([]SplitData, error) {
 	v := types.NewVertex("commit", id,
 		types.PropPair{K: "sha1", V: d.Sha1},
-		types.PropPair{K: "Author", V: d.Author},
-		types.PropPair{K: "Date", V: d.Date},
-		types.PropPair{K: "Subject", V: d.Subject},
-		types.PropPair{K: "Repository", V: d.Repository},
+		types.PropPair{K: "author", V: d.Author},
+		types.PropPair{K: "date", V: d.Date},
+		types.PropPair{K: "subject", V: d.Subject},
+		types.PropPair{K: "repository", V: d.Repository},
 	)
 
 	var edges EdgeSpecs

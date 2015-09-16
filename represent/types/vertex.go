@@ -63,6 +63,10 @@ type Vertex struct {
 	Properties ps.Map `json:"properties"`
 }
 
+type emptyChecker interface {
+	IsEmpty() bool
+}
+
 func isZero(v interface{}) (bool, error) {
 	switch v.(type) {
 	case bool:
@@ -75,6 +79,10 @@ func isZero(v interface{}) (bool, error) {
 		return v == "", nil
 	case [20]byte:
 		return v == [20]byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}, nil
+	default:
+		if ec, ok := v.(emptyChecker); ok {
+			return ec.IsEmpty(), nil
+		}
 	}
 	return false, errors.New("No static zero value defined for provided type")
 }
