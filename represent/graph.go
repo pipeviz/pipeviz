@@ -8,6 +8,7 @@ import (
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 var i2a = strconv.Itoa
@@ -76,14 +77,14 @@ func NewGraph() CoreGraph {
 
 type (
 	// A value indicating a vertex's type. For now, done as a string.
-	VType string
+	VType types.VType
 	// A value indicating an edge's type. For now, done as a string.
-	EType string
+	EType types.EType
 )
 
 const (
-	VTypeNone VType = ""
-	ETypeNone EType = ""
+	VTypeNone types.VType = ""
+	ETypeNone types.EType = ""
 )
 
 // Used in queries to specify property k/v pairs.
@@ -92,24 +93,9 @@ type PropQ struct {
 	V interface{}
 }
 
-type Vertex interface {
-	// Merges another vertex into this vertex. Error is indicated if the
-	// dynamic types do not match.
-	Merge(Vertex) (Vertex, error)
-	// Returns a string representing the object type. Used for namespacing keys, etc.
-	// While this is (currently) implemented as a method, its result must be invariant.
-	// TODO use string-const generator, other tricks to enforce invariance, compact space use
-	Typ() VType
-	// Returns a persistent map with the vertex's properties.
-	// TODO generate more type-restricted versions of the map?
-	Props() ps.Map
-	// Reports the keys of the properties used as the distinguishing identifiers for this vertex.
-	//Ids() []string
-}
-
 type VertexTuple struct {
 	id int
-	v  Vertex
+	v  types.Vtx
 	ie ps.Map
 	oe ps.Map
 }
@@ -120,7 +106,7 @@ func (vt VertexTuple) Id() int {
 }
 
 // Returns the vertex data of the vertex tuple.
-func (vt VertexTuple) Vertex() Vertex {
+func (vt VertexTuple) Vertex() types.Vtx {
 	return vt.v
 }
 

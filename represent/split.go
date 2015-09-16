@@ -5,10 +5,11 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 type SplitData struct {
-	Vertex    Vertex
+	Vertex    types.Vtx
 	EdgeSpecs EdgeSpecs
 }
 
@@ -84,28 +85,16 @@ func Split(d interface{}, id uint64) ([]SplitData, error) {
 
 func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
 	// seven distinct props
-	v := vertexEnvironment{props: ps.NewMap()}
-	if d.OS != "" {
-		v.props = v.props.Set("os", Property{MsgSrc: id, Value: d.OS})
-	}
-	if d.Provider != "" {
-		v.props = v.props.Set("provider", Property{MsgSrc: id, Value: d.Provider})
-	}
-	if d.Type != "" {
-		v.props = v.props.Set("type", Property{MsgSrc: id, Value: d.Type})
-	}
-	if d.Nick != "" {
-		v.props = v.props.Set("nick", Property{MsgSrc: id, Value: d.Nick})
-	}
-	if d.Address.Hostname != "" {
-		v.props = v.props.Set("hostname", Property{MsgSrc: id, Value: d.Address.Hostname})
-	}
-	if d.Address.Ipv4 != "" {
-		v.props = v.props.Set("ipv4", Property{MsgSrc: id, Value: d.Address.Ipv4})
-	}
-	if d.Address.Ipv6 != "" {
-		v.props = v.props.Set("ipv6", Property{MsgSrc: id, Value: d.Address.Ipv6})
-	}
+	//v := vertexEnvironment{props: ps.NewMap()}
+	v := types.NewVertex("environment", id,
+		types.PropPair{"os", d.OS},
+		types.PropPair{"provider", d.Provider},
+		types.PropPair{"type", d.Type},
+		types.PropPair{"nick", d.Nick},
+		types.PropPair{"hostname", d.Address.Hostname},
+		types.PropPair{"ipv4", d.Address.Ipv4},
+		types.PropPair{"ipv6", d.Address.Ipv6},
+	)
 
 	// By spec, Environments have no outbound edges
 	return []SplitData{{Vertex: v}}, nil

@@ -4,6 +4,7 @@ import (
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 func Identify(g CoreGraph, sd SplitData) int {
@@ -94,7 +95,7 @@ func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
 		}
 
 		for _, candidate := range filtered {
-			for _, edge2 := range g.OutWith(candidate.id, Qbe(EType("envlink"))) {
+			for _, edge2 := range g.OutWith(candidate.id, Qbe(types.EType("envlink"))) {
 				filtered2 = append(filtered2, candidate)
 				if edge2.Target == edge.Target {
 					return []int{candidate.id}, true
@@ -120,7 +121,7 @@ func identifyByGitHashSpec(g CoreGraph, sd SplitData, matches []int) int {
 		if spec, ok := es.(SpecCommit); ok {
 			// then search otherwise-matching vertices for a corresponding sha1 edge
 			for _, matchvid := range matches {
-				if len(g.OutWith(matchvid, Qbe(EType("version"), "sha1", spec.Sha1))) == 1 {
+				if len(g.OutWith(matchvid, Qbe(types.EType("version"), "sha1", spec.Sha1))) == 1 {
 					return matchvid
 				}
 			}
@@ -157,19 +158,19 @@ func init() {
 // that may be contained within the graph, and finding matches between these
 // types of objects
 type Identifier interface {
-	CanIdentify(data Vertex) bool
-	Matches(a Vertex, b Vertex) bool
+	CanIdentify(data types.Vtx) bool
+	Matches(a types.Vtx, b types.Vtx) bool
 }
 
 // Identifier for Environments
 type IdentifierEnvironment struct{}
 
-func (i IdentifierEnvironment) CanIdentify(data Vertex) bool {
+func (i IdentifierEnvironment) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexEnvironment)
 	return ok
 }
 
-func (i IdentifierEnvironment) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierEnvironment) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexEnvironment)
 	if !ok {
 		return false
@@ -206,12 +207,12 @@ func matchEnvLink(a, b ps.Map) bool {
 
 type IdentifierLogicState struct{}
 
-func (i IdentifierLogicState) CanIdentify(data Vertex) bool {
+func (i IdentifierLogicState) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexLogicState)
 	return ok
 }
 
-func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierLogicState) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexLogicState)
 	if !ok {
 		return false
@@ -226,12 +227,12 @@ func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierDataset struct{}
 
-func (i IdentifierDataset) CanIdentify(data Vertex) bool {
+func (i IdentifierDataset) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexDataset)
 	return ok
 }
 
-func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierDataset) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexDataset)
 	if !ok {
 		return false
@@ -246,12 +247,12 @@ func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierCommit struct{}
 
-func (i IdentifierCommit) CanIdentify(data Vertex) bool {
+func (i IdentifierCommit) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexCommit)
 	return ok
 }
 
-func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierCommit) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexCommit)
 	if !ok {
 		return false
@@ -270,12 +271,12 @@ func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierProcess struct{}
 
-func (i IdentifierProcess) CanIdentify(data Vertex) bool {
+func (i IdentifierProcess) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexProcess)
 	return ok
 }
 
-func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierProcess) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexProcess)
 	if !ok {
 		return false
@@ -291,12 +292,12 @@ func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierGitTag struct{}
 
-func (i IdentifierGitTag) CanIdentify(data Vertex) bool {
+func (i IdentifierGitTag) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexGitTag)
 	return ok
 }
 
-func (i IdentifierGitTag) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierGitTag) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexGitTag)
 	if !ok {
 		return false
@@ -311,12 +312,12 @@ func (i IdentifierGitTag) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierGitBranch struct{}
 
-func (i IdentifierGitBranch) CanIdentify(data Vertex) bool {
+func (i IdentifierGitBranch) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexGitBranch)
 	return ok
 }
 
-func (i IdentifierGitBranch) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierGitBranch) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexGitBranch)
 	if !ok {
 		return false
@@ -331,12 +332,12 @@ func (i IdentifierGitBranch) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierTestResult struct{}
 
-func (i IdentifierTestResult) CanIdentify(data Vertex) bool {
+func (i IdentifierTestResult) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexTestResult)
 	return ok
 }
 
-func (i IdentifierTestResult) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierTestResult) Matches(a types.Vtx, b types.Vtx) bool {
 	_, ok := a.(vertexTestResult)
 	if !ok {
 		return false
@@ -351,12 +352,12 @@ func (i IdentifierTestResult) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierParentDataset struct{}
 
-func (i IdentifierParentDataset) CanIdentify(data Vertex) bool {
+func (i IdentifierParentDataset) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexParentDataset)
 	return ok
 }
 
-func (i IdentifierParentDataset) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierParentDataset) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexParentDataset)
 	if !ok {
 		return false
@@ -371,12 +372,12 @@ func (i IdentifierParentDataset) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierComm struct{}
 
-func (i IdentifierComm) CanIdentify(data Vertex) bool {
+func (i IdentifierComm) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexComm)
 	return ok
 }
 
-func (i IdentifierComm) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierComm) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexComm)
 	if !ok {
 		return false
@@ -396,12 +397,12 @@ func (i IdentifierComm) Matches(a Vertex, b Vertex) bool {
 
 type IdentifierYumPkg struct{}
 
-func (i IdentifierYumPkg) CanIdentify(data Vertex) bool {
+func (i IdentifierYumPkg) CanIdentify(data types.Vtx) bool {
 	_, ok := data.(vertexYumPkg)
 	return ok
 }
 
-func (i IdentifierYumPkg) Matches(a Vertex, b Vertex) bool {
+func (i IdentifierYumPkg) Matches(a types.Vtx, b types.Vtx) bool {
 	l, ok := a.(vertexYumPkg)
 	if !ok {
 		return false

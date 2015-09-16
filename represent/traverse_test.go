@@ -6,6 +6,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 // just convenient shorthand
@@ -29,12 +30,12 @@ func (v dummyVertex) Props() ps.Map {
 
 // this breaks the rule that it can't change, but shouldn't matter and the whole
 // method should be going away soon anyway
-func (v dummyVertex) Typ() VType {
-	return VType(v.typ)
+func (v dummyVertex) Typ() types.VType {
+	return types.VType(v.typ)
 }
 
 // non-functional impl for now b/c this is probably going away
-func (vtx dummyVertex) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx dummyVertex) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	return vtx, nil
 }
 
@@ -67,7 +68,7 @@ func mkEdge(id, source, target int, msgid uint64, etype string, props ...interfa
 		id:     id,
 		Source: source,
 		Target: target,
-		EType:  EType(etype),
+		EType:  types.EType(etype),
 		Props:  ps.NewMap(),
 	}
 
@@ -126,7 +127,7 @@ func TestQbv(t *testing.T) {
 
 	assert.Equal(t, Qbv(), vertexFilter{}, "qbv with no args creates an empty vertexFilter")
 	assert.Equal(t, Qbv(), vertexFilter{vtype: VTypeNone}, "qbv with no args creates equivalent of passing VTypeNone as first arg")
-	assert.Equal(t, Qbv(VType("foo")), vertexFilter{vtype: VType("foo")}, "qbv with single arg assigns to VType struct prop")
+	assert.Equal(t, Qbv(types.VType("foo")), vertexFilter{vtype: types.VType("foo")}, "qbv with single arg assigns to VType struct prop")
 	assert.Equal(t, Qbv(VTypeNone, "foo"), vertexFilter{vtype: VTypeNone}, "qbv with two args ignores second (unpaired) arg")
 	assert.Equal(t, Qbv(VTypeNone, "foo", "bar"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with three args creates one pair of second (key) and third (value) args")
 	assert.Equal(t, Qbv(VTypeNone, "foo", "bar", "baz"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with four args creates one pair from 2nd and 3rd args, ignores 4th")
@@ -151,7 +152,7 @@ func TestQbe(t *testing.T) {
 
 	assert.Equal(t, Qbe(), edgeFilter{}, "qbe with no args creates an empty edgeFilter")
 	assert.Equal(t, Qbe(), edgeFilter{etype: ETypeNone}, "qbe with no args creates equivalent of passing ETypeNone as first arg")
-	assert.Equal(t, Qbe(EType("foo")), edgeFilter{etype: EType("foo")}, "qbe with single arg assigns to EType struct prop")
+	assert.Equal(t, Qbe(types.EType("foo")), edgeFilter{etype: types.EType("foo")}, "qbe with single arg assigns to EType struct prop")
 	assert.Equal(t, Qbe(ETypeNone, "foo"), edgeFilter{etype: ETypeNone}, "qbe with two args ignores second (unpaired) arg")
 	assert.Equal(t, Qbe(ETypeNone, "foo", "bar"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with three args creates one pair of second (key) and third (value) args")
 	assert.Equal(t, Qbe(ETypeNone, "foo", "bar", "baz"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with four args creates one pair from 2nd and 3rd args, ignores 4th")

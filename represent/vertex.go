@@ -5,6 +5,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 func GenericMerge(old, nu ps.Map) ps.Map {
@@ -79,11 +80,11 @@ func (vtx vertexEnvironment) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexEnvironment) Typ() VType {
+func (vtx vertexEnvironment) Typ() types.VType {
 	return "environment"
 }
 
-func (vtx vertexEnvironment) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexEnvironment) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexEnvironment); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -101,11 +102,11 @@ func (vtx vertexLogicState) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexLogicState) Typ() VType {
+func (vtx vertexLogicState) Typ() types.VType {
 	return "logic-state"
 }
 
-func (vtx vertexLogicState) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexLogicState) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexLogicState); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -123,11 +124,11 @@ func (vtx vertexProcess) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexProcess) Typ() VType {
+func (vtx vertexProcess) Typ() types.VType {
 	return "process"
 }
 
-func (vtx vertexProcess) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexProcess) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexProcess); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -145,11 +146,11 @@ func (vtx vertexComm) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexComm) Typ() VType {
+func (vtx vertexComm) Typ() types.VType {
 	return "comm"
 }
 
-func (vtx vertexComm) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexComm) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexComm); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -167,11 +168,11 @@ func (vtx vertexDataset) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexDataset) Typ() VType {
+func (vtx vertexDataset) Typ() types.VType {
 	return "dataset"
 }
 
-func (vtx vertexDataset) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexDataset) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexDataset); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -189,11 +190,11 @@ func (vtx vertexCommit) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexCommit) Typ() VType {
+func (vtx vertexCommit) Typ() types.VType {
 	return "commit"
 }
 
-func (vtx vertexCommit) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexCommit) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexCommit); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -211,11 +212,11 @@ func (vtx vertexGitBranch) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexGitBranch) Typ() VType {
+func (vtx vertexGitBranch) Typ() types.VType {
 	return "git-branch"
 }
 
-func (vtx vertexGitBranch) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexGitBranch) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexGitBranch); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -233,11 +234,11 @@ func (vtx vertexGitTag) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexGitTag) Typ() VType {
+func (vtx vertexGitTag) Typ() types.VType {
 	return "git-tag"
 }
 
-func (vtx vertexGitTag) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexGitTag) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexGitTag); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -255,11 +256,11 @@ func (vtx vertexTestResult) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexTestResult) Typ() VType {
+func (vtx vertexTestResult) Typ() types.VType {
 	return "test-result"
 }
 
-func (vtx vertexTestResult) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexTestResult) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexTestResult); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -277,11 +278,11 @@ func (vtx vertexParentDataset) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexParentDataset) Typ() VType {
+func (vtx vertexParentDataset) Typ() types.VType {
 	return "parent-dataset"
 }
 
-func (vtx vertexParentDataset) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexParentDataset) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexParentDataset); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
@@ -299,11 +300,11 @@ func (vtx vertexYumPkg) Props() ps.Map {
 	return vtx.props
 }
 
-func (vtx vertexYumPkg) Typ() VType {
+func (vtx vertexYumPkg) Typ() types.VType {
 	return "pkg-yum"
 }
 
-func (vtx vertexYumPkg) Merge(ivtx Vertex) (Vertex, error) {
+func (vtx vertexYumPkg) Merge(ivtx types.Vtx) (types.Vtx, error) {
 	if _, ok := ivtx.(vertexYumPkg); !ok {
 		// NOTE remember, formatting with types means reflection
 		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)

@@ -1,6 +1,9 @@
 package represent
 
-import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+import (
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/represent/types"
+)
 
 // Just reuse PropQ
 type p PropQ
@@ -32,7 +35,7 @@ type flatVTuple struct {
 }
 
 type flatVertex struct {
-	VType VType               `json:"type"`
+	VType types.VType         `json:"type"`
 	Props map[string]Property `json:"properties"`
 }
 
@@ -40,11 +43,11 @@ type flatEdge struct {
 	Id     int                 `json:"id"`
 	Source int                 `json:"source"`
 	Target int                 `json:"target"`
-	EType  EType               `json:"etype"`
+	EType  types.EType         `json:"etype"`
 	Props  map[string]Property `json:"properties"`
 }
 
-func vtoflat(v Vertex) (flat flatVertex) {
+func vtoflat(v types.Vtx) (flat flatVertex) {
 	flat.VType = v.Typ()
 
 	flat.Props = make(map[string]Property)
