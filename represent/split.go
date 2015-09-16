@@ -85,15 +85,14 @@ func Split(d interface{}, id uint64) ([]SplitData, error) {
 
 func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
 	// seven distinct props
-	//v := vertexEnvironment{props: ps.NewMap()}
 	v := types.NewVertex("environment", id,
-		types.PropPair{"os", d.OS},
-		types.PropPair{"provider", d.Provider},
-		types.PropPair{"type", d.Type},
-		types.PropPair{"nick", d.Nick},
-		types.PropPair{"hostname", d.Address.Hostname},
-		types.PropPair{"ipv4", d.Address.Ipv4},
-		types.PropPair{"ipv6", d.Address.Ipv6},
+		types.PropPair{K: "os", V: d.OS},
+		types.PropPair{K: "provider", V: d.Provider},
+		types.PropPair{K: "type", V: d.Type},
+		types.PropPair{K: "nick", V: d.Nick},
+		types.PropPair{K: "hostname", V: d.Address.Hostname},
+		types.PropPair{K: "ipv4", V: d.Address.Ipv4},
+		types.PropPair{K: "ipv6", V: d.Address.Ipv6},
 	)
 
 	// By spec, Environments have no outbound edges

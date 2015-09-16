@@ -8,6 +8,7 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 /*
@@ -112,8 +113,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		},
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"hostname", D_hostname}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"hostname", D_hostname}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -124,8 +126,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   interpret.Environment{Address: M_addr[1], Nick: D_nick},
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"ipv4", D_ipv4}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"ipv4", D_ipv4}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -136,8 +139,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   interpret.Environment{Address: M_addr[6], Nick: D_nick},
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"ipv4", D_ipv4}, p{"ipv6", D_ipv6}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"ipv4", D_ipv4}, p{"ipv6", D_ipv6}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -148,8 +152,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   D_env,
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.OS}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.OS}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
 				},
 				EdgeSpecs: nil,
 			},

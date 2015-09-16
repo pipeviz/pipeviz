@@ -140,7 +140,6 @@ var Identifiers []Identifier
 
 func init() {
 	Identifiers = []Identifier{
-		IdentifierEnvironment{},
 		IdentifierLogicState{},
 		IdentifierDataset{},
 		IdentifierProcess{},
@@ -186,27 +185,6 @@ func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
 	default:
 		return false
 	}
-}
-
-// Identifier for Environments
-type IdentifierEnvironment struct{}
-
-func (i IdentifierEnvironment) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexEnvironment)
-	return ok
-}
-
-func (i IdentifierEnvironment) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexEnvironment)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexEnvironment)
-	if !ok {
-		return false
-	}
-
-	return matchAddress(l.Props(), r.Props())
 }
 
 // Helper func to match addresses

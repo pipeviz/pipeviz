@@ -70,30 +70,6 @@ func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map 
 	return m
 }
 
-// All of the vertex types behave identically for now, but this will change as things mature
-
-type vertexEnvironment struct {
-	props ps.Map
-}
-
-func (vtx vertexEnvironment) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexEnvironment) Typ() types.VType {
-	return "environment"
-}
-
-func (vtx vertexEnvironment) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexEnvironment); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
-}
-
 type vertexLogicState struct {
 	props ps.Map
 }
