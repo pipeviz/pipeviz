@@ -109,7 +109,7 @@ module.exports.objectLabel = function (obj) {
       case "envlink":
         return obj.propv("hostname") || obj.propv("ipv4") || obj.propv("ipv6") || obj.propv("nick");
       case "parent-commit":
-        return (obj.propv("sha1") || '').slice(0, 7);
+        return obj.propv("sha1").slice(0, 7);
     }
   }
 };
