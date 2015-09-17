@@ -3,12 +3,12 @@ package represent
 import (
 	"errors"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 type SplitData struct {
-	Vertex    Vertex
+	Vertex    types.Vertex
 	EdgeSpecs EdgeSpecs
 }
 
@@ -84,60 +84,34 @@ func Split(d interface{}, id uint64) ([]SplitData, error) {
 
 func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
 	// seven distinct props
-	v := vertexEnvironment{props: ps.NewMap()}
-	if d.OS != "" {
-		v.props = v.props.Set("os", Property{MsgSrc: id, Value: d.OS})
-	}
-	if d.Provider != "" {
-		v.props = v.props.Set("provider", Property{MsgSrc: id, Value: d.Provider})
-	}
-	if d.Type != "" {
-		v.props = v.props.Set("type", Property{MsgSrc: id, Value: d.Type})
-	}
-	if d.Nick != "" {
-		v.props = v.props.Set("nick", Property{MsgSrc: id, Value: d.Nick})
-	}
-	if d.Address.Hostname != "" {
-		v.props = v.props.Set("hostname", Property{MsgSrc: id, Value: d.Address.Hostname})
-	}
-	if d.Address.Ipv4 != "" {
-		v.props = v.props.Set("ipv4", Property{MsgSrc: id, Value: d.Address.Ipv4})
-	}
-	if d.Address.Ipv6 != "" {
-		v.props = v.props.Set("ipv6", Property{MsgSrc: id, Value: d.Address.Ipv6})
-	}
+	v := types.NewVertex("environment", id,
+		types.PropPair{K: "os", V: d.OS},
+		types.PropPair{K: "provider", V: d.Provider},
+		types.PropPair{K: "type", V: d.Type},
+		types.PropPair{K: "nick", V: d.Nick},
+		types.PropPair{K: "hostname", V: d.Address.Hostname},
+		types.PropPair{K: "ipv4", V: d.Address.Ipv4},
+		types.PropPair{K: "ipv6", V: d.Address.Ipv6},
+	)
 
 	// By spec, Environments have no outbound edges
 	return []SplitData{{Vertex: v}}, nil
 }
 
 func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
-	v := vertexLogicState{props: ps.NewMap()}
+	v := types.NewVertex("logic-state", id,
+		types.PropPair{K: "path", V: d.Path},
+		types.PropPair{K: "lgroup", V: d.Lgroup},
+		types.PropPair{K: "nick", V: d.Nick},
+		types.PropPair{K: "type", V: d.Type},
+		types.PropPair{K: "version", V: d.ID.Version},
+		types.PropPair{K: "semver", V: d.ID.Semver},
+	)
+
 	var edges EdgeSpecs
 
-	// TODO do IDs need different handling?
-	v.props = v.props.Set("path", Property{MsgSrc: id, Value: d.Path})
-
-	if d.Lgroup != "" {
-		// TODO should be an edge, a simple semantic one
-		v.props = v.props.Set("lgroup", Property{MsgSrc: id, Value: d.Lgroup})
-	}
-	if d.Nick != "" {
-		v.props = v.props.Set("nick", Property{MsgSrc: id, Value: d.Nick})
-	}
-	if d.Type != "" {
-		v.props = v.props.Set("type", Property{MsgSrc: id, Value: d.Type})
-	}
-
-	// TODO should do anything with mutually exclusive properties here?
 	if !d.ID.Commit.IsEmpty() {
 		edges = append(edges, SpecCommit{d.ID.Commit})
-	}
-	if d.ID.Version != "" {
-		v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.ID.Version})
-	}
-	if d.ID.Semver != "" {
-		v.props = v.props.Set("semver", Property{MsgSrc: id, Value: d.ID.Semver})
 	}
 
 	for _, dl := range d.Datasets {
@@ -152,20 +126,15 @@ func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
 func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
-	v := vertexProcess{props: ps.NewMap()}
+	v := types.NewVertex("process", id,
+		types.PropPair{K: "pid", V: d.Pid},
+		types.PropPair{K: "cwd", V: d.Cwd},
+		types.PropPair{K: "group", V: d.Group},
+		types.PropPair{K: "user", V: d.User},
+	)
+
 	var edges EdgeSpecs
 	edges = append(edges, d.Environment)
-
-	v.props = v.props.Set("pid", Property{MsgSrc: id, Value: d.Pid})
-	if d.Cwd != "" {
-		v.props = v.props.Set("cwd", Property{MsgSrc: id, Value: d.Cwd})
-	}
-	if d.Group != "" {
-		v.props = v.props.Set("group", Property{MsgSrc: id, Value: d.Group})
-	}
-	if d.User != "" {
-		v.props = v.props.Set("user", Property{MsgSrc: id, Value: d.User})
-	}
 
 	for _, ls := range d.LogicStates {
 		edges = append(edges, SpecLocalLogic{ls})
@@ -177,18 +146,19 @@ func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 
 	for _, listen := range d.Listen {
 		// TODO change this to use diff vtx types for unix domain sock and network sock
-		v2 := vertexComm{props: ps.NewMap()}
+		v2 := types.NewVertex("comm", id,
+			types.PropPair{K: "type", V: listen.Type},
+		)
 
 		if listen.Type == "unix" {
 			edges = append(edges, SpecUnixDomainListener{Path: listen.Path})
-			v2.props = v2.props.Set("path", Property{MsgSrc: id, Value: listen.Path})
+			v2.Properties = v2.Properties.Set("path", types.Property{MsgSrc: id, Value: listen.Path})
 		} else {
 			for _, proto := range listen.Proto {
 				edges = append(edges, SpecNetListener{Port: listen.Port, Proto: proto})
 			}
-			v2.props = v2.props.Set("port", Property{MsgSrc: id, Value: listen.Port})
+			v2.Properties = v2.Properties.Set("port", types.Property{MsgSrc: id, Value: listen.Port})
 		}
-		v2.props = v2.props.Set("type", Property{MsgSrc: id, Value: listen.Type})
 		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment}})
 	}
 
@@ -196,13 +166,13 @@ func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 }
 
 func splitCommit(d interpret.Commit, id uint64) ([]SplitData, error) {
-	v := vertexCommit{props: ps.NewMap()}
-
-	v.props = v.props.Set("sha1", Property{MsgSrc: id, Value: d.Sha1})
-	v.props = v.props.Set("author", Property{MsgSrc: id, Value: d.Author})
-	v.props = v.props.Set("date", Property{MsgSrc: id, Value: d.Date})
-	v.props = v.props.Set("subject", Property{MsgSrc: id, Value: d.Subject})
-	v.props = v.props.Set("repository", Property{MsgSrc: id, Value: d.Repository})
+	v := types.NewVertex("commit", id,
+		types.PropPair{K: "sha1", V: d.Sha1},
+		types.PropPair{K: "author", V: d.Author},
+		types.PropPair{K: "date", V: d.Date},
+		types.PropPair{K: "subject", V: d.Subject},
+		types.PropPair{K: "repository", V: d.Repository},
+	)
 
 	var edges EdgeSpecs
 	for k, parent := range d.Parents {
@@ -216,20 +186,17 @@ func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]SplitData, error) {
 	sd := make([]SplitData, 0)
 
 	for _, tag := range d.Tags {
-		v := vertexGitTag{ps.NewMap()}
-		v.props = v.props.Set("name", Property{MsgSrc: id, Value: tag})
+		v := types.NewVertex("git-tag", id, types.PropPair{"name", tag})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	for _, branch := range d.Branches {
-		v := vertexGitBranch{ps.NewMap()}
-		v.props = v.props.Set("name", Property{MsgSrc: id, Value: branch})
+		v := types.NewVertex("git-branch", id, types.PropPair{"name", branch})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	if d.TestState != "" {
-		v := vertexTestResult{ps.NewMap()}
-		v.props = v.props.Set("result", Property{MsgSrc: id, Value: d.TestState})
+		v := types.NewVertex("test-result", id, types.PropPair{"result", d.TestState})
 		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
@@ -237,13 +204,11 @@ func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]SplitData, error) {
 }
 
 func splitParentDataset(d interpret.ParentDataset, id uint64) ([]SplitData, error) {
-	v := vertexParentDataset{props: ps.NewMap()}
+	v := types.NewVertex("parent-dataset", id,
+		types.PropPair{K: "name", V: d.Name},
+		types.PropPair{K: "path", V: d.Path},
+	)
 	var edges EdgeSpecs
-
-	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
-	if d.Path != "" {
-		v.props = v.props.Set("path", Property{MsgSrc: id, Value: d.Path})
-	}
 
 	edges = append(edges, d.Environment)
 
@@ -263,32 +228,28 @@ func splitParentDataset(d interpret.ParentDataset, id uint64) ([]SplitData, erro
 }
 
 func splitDataset(d interpret.Dataset, id uint64) ([]SplitData, error) {
-	v := vertexDataset{props: ps.NewMap()}
+	v := types.NewVertex("dataset", id,
+		types.PropPair{K: "name", V: d.Name},
+		// TODO convert input from string to int and force timestamps. javascript apparently likes
+		// ISO 8601, but go doesn't? so, timestamps.
+		types.PropPair{K: "create-time", V: d.CreateTime},
+	)
 	var edges EdgeSpecs
-
-	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
-
-	// TODO convert input from string to int and force timestamps. javascript apparently likes
-	// ISO 8601, but go doesn't? so, timestamps.
-	if d.CreateTime != "" {
-		v.props = v.props.Set("create-time", Property{MsgSrc: id, Value: d.CreateTime})
-	}
 
 	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
 	edges = append(edges, d.Genesis)
 
-	return []SplitData{{v, edges}}, nil
+	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
 func splitYumPkg(d interpret.YumPkg, id uint64) ([]SplitData, error) {
-	v := vertexYumPkg{props: ps.NewMap()}
-	var edges EdgeSpecs
+	v := types.NewVertex("dataset", id,
+		types.PropPair{K: "name", V: d.Name},
+		types.PropPair{K: "version", V: d.Version},
+		types.PropPair{K: "epoch", V: d.Epoch},
+		types.PropPair{K: "release", V: d.Release},
+		types.PropPair{K: "arch", V: d.Arch},
+	)
 
-	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
-	v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.Version})
-	v.props = v.props.Set("epoch", Property{MsgSrc: id, Value: d.Epoch})
-	v.props = v.props.Set("release", Property{MsgSrc: id, Value: d.Release})
-	v.props = v.props.Set("arch", Property{MsgSrc: id, Value: d.Arch})
-
-	return []SplitData{{v, edges}}, nil
+	return []SplitData{{Vertex: v}}, nil
 }

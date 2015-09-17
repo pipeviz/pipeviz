@@ -5,15 +5,16 @@ import (
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 type EFilter interface {
-	EType() EType
+	EType() types.EType
 	EProps() []PropQ
 }
 
 type VFilter interface {
-	VType() VType
+	VType() types.VType
 	VProps() []PropQ
 }
 
@@ -23,12 +24,12 @@ type VEFilter interface {
 }
 
 type edgeFilter struct {
-	etype EType
+	etype types.EType
 	props []PropQ
 }
 
 type vertexFilter struct {
-	vtype VType
+	vtype types.VType
 	props []PropQ
 }
 
@@ -38,7 +39,7 @@ type bothFilter struct {
 }
 
 // all temporary functions to just make query building a little easier for now
-func (vf vertexFilter) VType() VType {
+func (vf vertexFilter) VType() types.VType {
 	return vf.vtype
 }
 
@@ -46,7 +47,7 @@ func (vf vertexFilter) VProps() []PropQ {
 	return vf.props
 }
 
-func (vf vertexFilter) EType() EType {
+func (vf vertexFilter) EType() types.EType {
 	return ETypeNone
 }
 
@@ -58,7 +59,7 @@ func (vf vertexFilter) and(ef EFilter) VEFilter {
 	return bothFilter{vf, ef}
 }
 
-func (ef edgeFilter) VType() VType {
+func (ef edgeFilter) VType() types.VType {
 	return VTypeNone
 }
 
@@ -66,7 +67,7 @@ func (ef edgeFilter) VProps() []PropQ {
 	return nil
 }
 
-func (ef edgeFilter) EType() EType {
+func (ef edgeFilter) EType() types.EType {
 	return ef.etype
 }
 
@@ -84,9 +85,9 @@ func Qbv(v ...interface{}) vertexFilter {
 	case 0:
 		return vertexFilter{VTypeNone, nil}
 	case 1, 2:
-		return vertexFilter{v[0].(VType), nil}
+		return vertexFilter{v[0].(types.VType), nil}
 	default:
-		vf := vertexFilter{v[0].(VType), nil}
+		vf := vertexFilter{v[0].(types.VType), nil}
 		v = v[1:]
 
 		var k string
@@ -106,9 +107,9 @@ func Qbe(v ...interface{}) edgeFilter {
 	case 0:
 		return edgeFilter{ETypeNone, nil}
 	case 1, 2:
-		return edgeFilter{v[0].(EType), nil}
+		return edgeFilter{v[0].(types.EType), nil}
 	default:
-		ef := edgeFilter{v[0].(EType), nil}
+		ef := edgeFilter{v[0].(types.EType), nil}
 		v = v[1:]
 
 		var k string
@@ -161,7 +162,7 @@ func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) 
 				return
 			}
 
-			deprop := eprop.(Property)
+			deprop := eprop.(types.Property)
 			switch tv := deprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -229,7 +230,7 @@ func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []Vertex
 				return
 			}
 
-			deprop := eprop.(Property)
+			deprop := eprop.(types.Property)
 			switch tv := deprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -290,7 +291,7 @@ VertexInspector:
 				continue VertexInspector
 			}
 
-			dvprop := vprop.(Property)
+			dvprop := vprop.(types.Property)
 			switch tv := dvprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -330,7 +331,7 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []VertexTuple) {
 				return
 			}
 
-			dvprop := vprop.(Property)
+			dvprop := vprop.(types.Property)
 			switch tv := dvprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -351,7 +352,7 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []VertexTuple) {
 }
 
 func FindEnvironment(g CoreGraph, props ps.Map) (envid int, success bool) {
-	rv := g.VerticesWith(Qbv(VType("environment")))
+	rv := g.VerticesWith(Qbv(types.VType("environment")))
 	for _, vt := range rv {
 		if matchEnvLink(props, vt.v.Props()) {
 			return vt.id, true
@@ -363,7 +364,7 @@ func FindEnvironment(g CoreGraph, props ps.Map) (envid int, success bool) {
 
 func FindDataset(g CoreGraph, envid int, name []string) (id int, success bool) {
 	// first time through use the parent type
-	vtype := VType("parent-dataset")
+	vtype := types.VType("parent-dataset")
 
 	var n string
 	for len(name) > 0 {

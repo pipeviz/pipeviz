@@ -15,3 +15,6 @@ type JournalStore interface {
 	// end of the journal, and returns the created record.
 	NewEntry(message []byte, remoteAddr string) (*Record, error)
 }
+
+// RecordGetter is a function type that gets records out of a journal.
+type RecordGetter func(index uint64) (*Record, error)

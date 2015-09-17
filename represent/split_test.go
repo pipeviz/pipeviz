@@ -8,6 +8,7 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 /*
@@ -112,8 +113,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		},
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"hostname", D_hostname}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"hostname", D_hostname}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -124,8 +126,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   interpret.Environment{Address: M_addr[1], Nick: D_nick},
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"ipv4", D_ipv4}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"ipv4", D_ipv4}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -136,8 +139,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   interpret.Environment{Address: M_addr[6], Nick: D_nick},
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"ipv4", D_ipv4}, p{"ipv6", D_ipv6}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"ipv4", D_ipv4}, p{"ipv6", D_ipv6}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -148,8 +152,9 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   D_env,
 		Output: []SplitData{
 			{
-				Vertex: vertexEnvironment{
-					mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.OS}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
+				Vertex: types.Vertex{
+					Type:       "environment",
+					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.OS}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
 				},
 				EdgeSpecs: nil,
 			},
@@ -264,8 +269,9 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[0], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						SpecCommit{hexify(D_commit)},
@@ -279,8 +285,9 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[1], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"version", D_version}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"version", D_version}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						M_envlink[1],
@@ -293,8 +300,9 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[2], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						M_envlink[1],
@@ -314,8 +322,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						SpecCommit{hexify(D_commit)},
@@ -334,8 +343,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						datalinks[0],
@@ -355,8 +365,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexLogicState{
-						mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
+					Vertex: types.Vertex{
+						Type:       "logic-state",
+						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
 					EdgeSpecs: EdgeSpecs{
 						datalinks[2],
@@ -377,7 +388,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
@@ -397,8 +411,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{
-						mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[1],
@@ -419,7 +434,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
@@ -428,7 +446,10 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
@@ -447,7 +468,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/usr/local/src/imaginationland"},
@@ -455,7 +479,10 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
@@ -475,7 +502,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexProcess{mapPropPairs(D_msgid, p{"pid", 42})},
+					Vertex: types.Vertex{
+						Type:       "process",
+						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
@@ -486,13 +516,19 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
 				},
 				{
-					Vertex: vertexComm{mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"})},
+					Vertex: types.Vertex{
+						Type:       "comm",
+						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
@@ -514,8 +550,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					Vertex: types.Vertex{
+						Type:       "commit",
+						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},
@@ -534,8 +571,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					Vertex: types.Vertex{
+						Type:       "commit",
+						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: nil,
 				},
@@ -553,8 +591,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexCommit{
-						mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
+					Vertex: types.Vertex{
+						Type:       "commit",
+						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},
@@ -574,7 +613,10 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
@@ -589,13 +631,19 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "bar"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
@@ -611,25 +659,37 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "bar"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitBranch{mapPropPairs(D_msgid, p{"name", "qux"})},
+					Vertex: types.Vertex{
+						Type:       "git-branch",
+						Properties: mapPropPairs(D_msgid, p{"name", "qux"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexGitBranch{mapPropPairs(D_msgid, p{"name", "zoop"})},
+					Vertex: types.Vertex{
+						Type:       "git-branch",
+						Properties: mapPropPairs(D_msgid, p{"name", "zoop"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
@@ -645,13 +705,19 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexGitTag{mapPropPairs(D_msgid, p{"name", "foo"})},
+					Vertex: types.Vertex{
+						Type:       "git-tag",
+						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
 				{
-					Vertex: vertexTestResult{mapPropPairs(D_msgid, p{"result", "passed"})},
+					Vertex: types.Vertex{
+						Type:       "test-result",
+						Properties: mapPropPairs(D_msgid, p{"result", "passed"}),
+					},
 					EdgeSpecs: []EdgeSpec{
 						SpecCommit{D_commithash},
 					},
@@ -671,8 +737,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecDatasetHierarchy{[]string{"parentdata"}},
@@ -695,8 +762,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecDatasetHierarchy{[]string{"parentdata"}},
@@ -721,8 +789,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexParentDataset{
-						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					Vertex: types.Vertex{
+						Type:       "parent-dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
@@ -746,16 +815,18 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexParentDataset{
-						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					Vertex: types.Vertex{
+						Type:       "parent-dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
 				},
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
@@ -790,16 +861,18 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexParentDataset{
-						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					Vertex: types.Vertex{
+						Type:       "parent-dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
 				},
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
@@ -808,8 +881,9 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
@@ -831,8 +905,9 @@ func init() {
 			Input:   D_yp,
 			Output: []SplitData{
 				{
-					Vertex: vertexYumPkg{
-						mapPropPairs(D_msgid, p{"name", D_pkgname}, p{"version", D_version}, p{"epoch", 7}, p{"release", "4.el7_1"}, p{"arch", "x86_64"}),
+					Vertex: types.Vertex{
+						Type:       "pkg-yum",
+						Properties: mapPropPairs(D_msgid, p{"name", D_pkgname}, p{"version", D_version}, p{"epoch", 7}, p{"release", "4.el7_1"}, p{"arch", "x86_64"}),
 					},
 					EdgeSpecs: nil,
 				},

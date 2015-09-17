@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 // Generates a .dot-format representation of the given CoreGraph, suitable for
@@ -22,22 +23,22 @@ func GenerateDot(g CoreGraph) []byte {
 	for _, v := range g.VerticesWith(Qbv()) {
 		lbltype := "label"
 		var props string
-		switch v.v.(type) {
-		case vertexEnvironment:
+		switch v.v.Typ() {
+		case "environment":
 			props = "\tshape=house,style=filled,fillcolor=orange,fontsize=20\n"
-		case vertexLogicState:
+		case "logic-state":
 			props = "\tshape=box3d,style=filled,fillcolor=purple,fontcolor=white,fontsize=18,\n"
-		case vertexProcess:
+		case "process":
 			props = "\tshape=oval,style=filled,fillcolor=green,\n"
-		case vertexDataset, vertexParentDataset:
+		case "dataset", "parent-dataset":
 			props = "\tshape=folder,style=filled,fillcolor=brown,fontcolor=white,\n"
-		case vertexComm:
+		case "comm":
 			props = "\tshape=doubleoctagon,style=filled,fillcolor=cyan,\n"
-		case vertexCommit:
+		case "git-commit":
 			props = "\tshape=box,style=filled,fillcolor=grey\n"
-		case vertexGitTag, vertexGitBranch:
+		case "git-tag", "git-branch":
 			props = "\tshape=cds,margin=\"0.22,0.22\",\n"
-		case vertexTestResult:
+		case "test-result":
 			props = "\tshape=note\n"
 		}
 
@@ -46,10 +47,10 @@ func GenerateDot(g CoreGraph) []byte {
 			v.id, props, lbltype, v.id, v.v.Typ()))
 
 		v.v.Props().ForEach(func(k string, val ps.Any) {
-			prop := val.(Property)
+			prop := val.(types.Property)
 			var format string
 			switch pv := prop.Value.(type) {
-			case []byte:
+			case []byte, [20]byte:
 				format = "%x"
 			case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
 				format = "%d"
@@ -78,7 +79,7 @@ func GenerateDot(g CoreGraph) []byte {
 				edge.Source, edge.Target, edge.id, edge.EType))
 
 			edge.Props.ForEach(func(k2 string, val2 ps.Any) {
-				prop := val2.(Property)
+				prop := val2.(types.Property)
 				var format string
 				switch pv := prop.Value.(type) {
 				case []byte:

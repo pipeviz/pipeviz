@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
+	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/represent"
 )
@@ -59,6 +61,7 @@ func NewMux() *web.Mux {
 
 	m.Use(log.NewHttpLogger("webapp"))
 	m.Get("/sock", OpenSocket)
+	m.Get("/message/:mid", GetMessage)
 	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
 
 	return m
@@ -78,6 +81,35 @@ func graphToJson(g represent.CoreGraph) ([]byte, error) {
 		Id:       g.MsgId(),
 		Vertices: vertices,
 	})
+}
+
+func GetMessage(c web.C, w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseUint(c.URLParams["mid"], 10, 64)
+	if err != nil {
+		http.Error(w, http.StatusText(400), 400)
+		return
+	}
+
+	var getter journal.RecordGetter
+	var ok bool
+	if fun, exists := c.Env["journalGet"]; !exists {
+		http.Error(w, "Could not access log store", 500)
+		return
+	} else if getter, ok = fun.(journal.RecordGetter); !ok {
+		http.Error(w, "Could not access log store", 500)
+		return
+	}
+
+	rec, err := getter(id)
+	if err != nil {
+		// TODO Might be something other than not found, but oh well for now
+		http.Error(w, http.StatusText(404), 404)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(rec.Message)
 }
 
 func OpenSocket(w http.ResponseWriter, r *http.Request) {
