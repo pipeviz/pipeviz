@@ -6,41 +6,23 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
-// just convenient shorthand
-type tprops map[string]interface{}
-
-type dummyVertex struct {
-	msgid uint64
-	typ   string
-	props tprops
-}
-
-func (v dummyVertex) Props() ps.Map {
-	ret := ps.NewMap()
-
-	for k, val := range v.props {
-		ret = ret.Set(k, Property{MsgSrc: v.msgid, Value: val})
+func tprops(pairs ...interface{}) []types.PropPair {
+	ret := make([]types.PropPair, 0)
+	for k, v := range pairs {
+		if k%2 != 0 {
+			continue
+		}
+		ret = append(ret, types.PropPair{K: v.(string), V: pairs[k+1]})
 	}
-
 	return ret
-}
-
-// this breaks the rule that it can't change, but shouldn't matter and the whole
-// method should be going away soon anyway
-func (v dummyVertex) Typ() VType {
-	return VType(v.typ)
-}
-
-// non-functional impl for now b/c this is probably going away
-func (vtx dummyVertex) Merge(ivtx Vertex) (Vertex, error) {
-	return vtx, nil
 }
 
 // utility func to create a vtTuple. puts edges in the right place by
 // checking source/target ids. panics if they don't line up!
-func mkTuple(vid int, vtx dummyVertex, edges ...StandardEdge) VertexTuple {
+func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) VertexTuple {
 	vt := VertexTuple{
 		id: vid,
 		v:  vtx,
@@ -67,7 +49,7 @@ func mkEdge(id, source, target int, msgid uint64, etype string, props ...interfa
 		id:     id,
 		Source: source,
 		Target: target,
-		EType:  EType(etype),
+		EType:  types.EType(etype),
 		Props:  ps.NewMap(),
 	}
 
@@ -75,7 +57,7 @@ func mkEdge(id, source, target int, msgid uint64, etype string, props ...interfa
 	var v interface{}
 	for len(props) > 1 {
 		k, v, props = props[0].(string), props[1], props[2:]
-		e.Props = e.Props.Set(k, Property{MsgSrc: msgid, Value: v})
+		e.Props = e.Props.Set(k, types.Property{MsgSrc: msgid, Value: v})
 	}
 
 	return e
@@ -97,23 +79,23 @@ func getGraphFixture() *coreGraph {
 	edge13 := mkEdge(13, 3, 4, 4, "dummy-edge-type3", "eprop2", "bar", "eprop3", 42)
 
 	// vid 1, type "env". two props - "prop1": "bar", "prop2": 42. msgid 1
-	vt1 := mkTuple(1, dummyVertex{1, "env", tprops{"prop1": "foo", "prop2": 42}}, edge10, edge11) // one in, one out
+	vt1 := mkTuple(1, types.NewVertex("env", 1, tprops("prop1", "foo", "prop2", 42)...), edge10, edge11) // one in, one out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(1), vt1)
 
-	// vid 2, type "env". : "one prop - "prop1": "foo". msgid 2
-	vt2 := mkTuple(2, dummyVertex{2, "env", tprops{"prop1": "bar"}}, edge10) // one in
+	// vid 2, type "env". , "one prop - "prop1", "foo". msgid 2
+	vt2 := mkTuple(2, types.NewVertex("env", 2, tprops("prop1", "bar")...), edge10) // one in
 	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt2)
 
-	// vid 3, type "vt2". two props - "prop1": "bar", "bowser": "moo". msgid 3
-	vt3 := mkTuple(3, dummyVertex{3, "vt2", tprops{"prop1": "bar", "bowser": "moo"}}, edge11, edge12, edge13) // three out
+	// vid 3, type "vt2". two props - "prop1", "bar", "bowser", "moo". msgid 3
+	vt3 := mkTuple(3, types.NewVertex("vt2", 3, tprops("prop1", "bar", "bowser", "moo")...), edge11, edge12, edge13) // three out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt3)
 
-	// vid 4, type "vt3". three props - "prop1": "baz", "prop2": 42, "prop3": "qux". msgid 4
-	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "prop2": 42, "prop3": "qux"}}, edge12, edge13) // two in, same origin
+	// vid 4, type "vt3". three props - "prop1", "baz", "prop2", 42, "prop3", "qux". msgid 4
+	vt4 := mkTuple(4, types.NewVertex("vt3", 4, tprops("prop1", "baz", "prop2", 42, "prop3", "qux")...), edge12, edge13) // two in, same origin
 	g.vtuples = g.vtuples.Set(strconv.Itoa(4), vt4)
 
 	// vid 5, type "vt3". no props, no edges. msgid 5
-	vt5 := mkTuple(5, dummyVertex{5, "vt3", nil}) // none in or out
+	vt5 := mkTuple(5, types.NewVertex("vt3", 5)) // none in or out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(5), vt5)
 	g.vserial = 13
 
@@ -126,7 +108,7 @@ func TestQbv(t *testing.T) {
 
 	assert.Equal(t, Qbv(), vertexFilter{}, "qbv with no args creates an empty vertexFilter")
 	assert.Equal(t, Qbv(), vertexFilter{vtype: VTypeNone}, "qbv with no args creates equivalent of passing VTypeNone as first arg")
-	assert.Equal(t, Qbv(VType("foo")), vertexFilter{vtype: VType("foo")}, "qbv with single arg assigns to VType struct prop")
+	assert.Equal(t, Qbv(types.VType("foo")), vertexFilter{vtype: types.VType("foo")}, "qbv with single arg assigns to VType struct prop")
 	assert.Equal(t, Qbv(VTypeNone, "foo"), vertexFilter{vtype: VTypeNone}, "qbv with two args ignores second (unpaired) arg")
 	assert.Equal(t, Qbv(VTypeNone, "foo", "bar"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with three args creates one pair of second (key) and third (value) args")
 	assert.Equal(t, Qbv(VTypeNone, "foo", "bar", "baz"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with four args creates one pair from 2nd and 3rd args, ignores 4th")
@@ -151,7 +133,7 @@ func TestQbe(t *testing.T) {
 
 	assert.Equal(t, Qbe(), edgeFilter{}, "qbe with no args creates an empty edgeFilter")
 	assert.Equal(t, Qbe(), edgeFilter{etype: ETypeNone}, "qbe with no args creates equivalent of passing ETypeNone as first arg")
-	assert.Equal(t, Qbe(EType("foo")), edgeFilter{etype: EType("foo")}, "qbe with single arg assigns to EType struct prop")
+	assert.Equal(t, Qbe(types.EType("foo")), edgeFilter{etype: types.EType("foo")}, "qbe with single arg assigns to EType struct prop")
 	assert.Equal(t, Qbe(ETypeNone, "foo"), edgeFilter{etype: ETypeNone}, "qbe with two args ignores second (unpaired) arg")
 	assert.Equal(t, Qbe(ETypeNone, "foo", "bar"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with three args creates one pair of second (key) and third (value) args")
 	assert.Equal(t, Qbe(ETypeNone, "foo", "bar", "baz"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with four args creates one pair from 2nd and 3rd args, ignores 4th")
@@ -179,12 +161,12 @@ func TestVerticesWith(t *testing.T) {
 		t.Errorf("Should find 4 vertices with no filter; found %v", len(result))
 	}
 
-	result = g.VerticesWith(Qbv(VType("env")))
+	result = g.VerticesWith(Qbv(types.VType("env")))
 	if len(result) != 2 {
 		t.Errorf("Should find 2 vertices when filtering to type env; found %v", len(result))
 	}
 
-	result = g.VerticesWith(Qbv(VType("nonexistent-type")))
+	result = g.VerticesWith(Qbv(types.VType("nonexistent-type")))
 	if len(result) != 0 {
 		t.Errorf("Should find no vertices when filtering on type that's not present; found %v", len(result))
 	}
@@ -199,12 +181,12 @@ func TestVerticesWith(t *testing.T) {
 		t.Errorf("Should find no vertices when filtering on nonexistent prop key; found %v", len(result))
 	}
 
-	result = g.VerticesWith(Qbv(VType("env"), "prop1", "foo"))
+	result = g.VerticesWith(Qbv(types.VType("env"), "prop1", "foo"))
 	if len(result) != 1 {
 		t.Errorf("Should find one vertex when filtering to env types and with prop1 == \"foo\"; found %v", len(result))
 	}
 
-	result = g.VerticesWith(Qbv(VType("env"), "prop2", 42))
+	result = g.VerticesWith(Qbv(types.VType("env"), "prop2", 42))
 	if len(result) != 1 {
 		t.Errorf("Should find one vertex when filtering to env types and with prop2 == 42; found %v", len(result))
 	}
@@ -281,19 +263,19 @@ func TestOutInArcWith(t *testing.T) {
 	}
 
 	// basic edge type filtering
-	result = g.OutWith(3, Qbe(EType("dummy-edge-type2")))
+	result = g.OutWith(3, Qbe(types.EType("dummy-edge-type2")))
 	if len(result) != 2 {
 		t.Errorf("Vertex 2 should have two \"dummy-edge-type2\"-typed out-edges, but got %v edges", len(result))
 	}
 
 	// nonexistent type means no results
-	result = g.InWith(2, Qbe(EType("nonexistent-type")))
+	result = g.InWith(2, Qbe(types.EType("nonexistent-type")))
 	if len(result) != 0 {
 		t.Errorf("Vertex 2 should have no edges of a nonexistent type, but got %v edges", len(result))
 	}
 
 	// existing edge type, but not one this vt has
-	result = g.InWith(3, Qbe(EType("dummy-edge-type1")))
+	result = g.InWith(3, Qbe(types.EType("dummy-edge-type1")))
 	if len(result) != 0 {
 		t.Errorf("Vertex 3 has none of the \"dummy-edge-type1\" edges (though it is a real type in the graph); however, got %v edges", len(result))
 	}
@@ -321,7 +303,7 @@ func TestOutInArcWith(t *testing.T) {
 		t.Errorf("Vertex 3 should have no out-edges with \"eprop2\" at \"baz\" AND \"eprop3\" at 42 , but got %v edges", len(result))
 	}
 
-	result = g.OutWith(3, Qbe(EType("dummy-edge-type2"), "eprop2", "bar"))
+	result = g.OutWith(3, Qbe(types.EType("dummy-edge-type2"), "eprop2", "bar"))
 	if len(result) != 1 {
 		t.Errorf("Vertex 3 should have one out-edges that is dummy type2 AND has \"eprop2\" at \"bar\", but got %v edges", len(result))
 	}
@@ -400,22 +382,22 @@ func TestAdjacentWith(t *testing.T) {
 	}
 
 	// filter checks, beginning with edge and/or vertex typing
-	result = g.SuccessorsWith(3, Qbv(VType("vt3")))
+	result = g.SuccessorsWith(3, Qbv(types.VType("vt3")))
 	if len(result) != 1 {
 		t.Errorf("Vertex 4 has only one unique successor of type \"vt3\"; however, got %v vertices", len(result))
 	}
 
-	result = g.SuccessorsWith(3, Qbe(EType("dummy-edge-type2")))
+	result = g.SuccessorsWith(3, Qbe(types.EType("dummy-edge-type2")))
 	if len(result) != 2 {
 		t.Errorf("Vertex 4 has two out-edges of \"dummy-edge-type2\" and both point to different vertices, so expecting 2, but got %v vertices", len(result))
 	}
 
-	result = g.SuccessorsWith(3, Qbe(EType("dummy-edge-type2")).and(Qbv(VType("env"))))
+	result = g.SuccessorsWith(3, Qbe(types.EType("dummy-edge-type2")).and(Qbv(types.VType("env"))))
 	if len(result) != 1 {
 		t.Errorf("Vertex 4 has two unique successors along \"dummy-edge-type2\" out-edges, but only one is vtype \"env\". However, got %v vertices", len(result))
 	}
 
-	result = g.SuccessorsWith(3, Qbe(EType("dummy-edge-type3")).and(Qbv(VType("env"))))
+	result = g.SuccessorsWith(3, Qbe(types.EType("dummy-edge-type3")).and(Qbv(types.VType("env"))))
 	if len(result) != 0 {
 		t.Errorf("Vertex 4 has one unique successor along \"dummy-edge-type3\" out-edges, but it is not an \"env\" type. However, got %v vertices", len(result))
 	}
@@ -446,7 +428,7 @@ func TestAdjacentWith(t *testing.T) {
 		t.Errorf("Vertex 4 has only one unique successor with \"prop1\" at \"baz\" along an out-edge with \"eprop2\" at \"bar\"; however, got %v vertices", len(result))
 	}
 
-	result = g.SuccessorsWith(3, Qbe(ETypeNone, "eprop2", "bar").and(Qbv(VType("vt3"), "prop1", "baz")))
+	result = g.SuccessorsWith(3, Qbe(ETypeNone, "eprop2", "bar").and(Qbv(types.VType("vt3"), "prop1", "baz")))
 	if len(result) != 1 {
 		t.Errorf("Vertex 4 has one unique successor of type \"vt3\" with \"prop1\" at \"baz\" along an out-edge with \"eprop2\" at \"bar\"; however, got %v vertices", len(result))
 	}

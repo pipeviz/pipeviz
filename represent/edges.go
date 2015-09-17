@@ -1,12 +1,15 @@
 package represent
 
-import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+import (
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/represent/types"
+)
 
 type StandardEdge struct {
 	id     int
 	Source int
 	Target int
-	EType  EType
+	EType  types.EType
 	// TODO do these *actually* need to be persistent structures?
 	Props ps.Map
 }

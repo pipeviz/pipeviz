@@ -1,6 +1,9 @@
 package represent
 
-import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+import (
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/represent/types"
+)
 
 // Just reuse PropQ
 type p PropQ
@@ -19,7 +22,7 @@ func mapPairs(pairs ...p) (m ps.Map) {
 // with the provided mid as Property.MsgSrc.
 func mapPropPairs(mid uint64, pairs ...p) (m ps.Map) {
 	for k, kv := range pairs {
-		pairs[k] = p{K: kv.K, V: Property{MsgSrc: mid, Value: kv.V}}
+		pairs[k] = p{K: kv.K, V: types.Property{MsgSrc: mid, Value: kv.V}}
 	}
 	return mapPairs(pairs...)
 }
@@ -32,24 +35,24 @@ type flatVTuple struct {
 }
 
 type flatVertex struct {
-	VType VType               `json:"type"`
-	Props map[string]Property `json:"properties"`
+	VType types.VType               `json:"type"`
+	Props map[string]types.Property `json:"properties"`
 }
 
 type flatEdge struct {
-	Id     int                 `json:"id"`
-	Source int                 `json:"source"`
-	Target int                 `json:"target"`
-	EType  EType               `json:"etype"`
-	Props  map[string]Property `json:"properties"`
+	Id     int                       `json:"id"`
+	Source int                       `json:"source"`
+	Target int                       `json:"target"`
+	EType  types.EType               `json:"etype"`
+	Props  map[string]types.Property `json:"properties"`
 }
 
-func vtoflat(v Vertex) (flat flatVertex) {
+func vtoflat(v types.Vertex) (flat flatVertex) {
 	flat.VType = v.Typ()
 
-	flat.Props = make(map[string]Property)
+	flat.Props = make(map[string]types.Property)
 	v.Props().ForEach(func(k string, v ps.Any) {
-		flat.Props[k] = v.(Property) // TODO err...ever not property?
+		flat.Props[k] = v.(types.Property) // TODO err...ever not property?
 	})
 	return
 }
@@ -60,11 +63,11 @@ func etoflat(e StandardEdge) (flat flatEdge) {
 		Source: e.Source,
 		Target: e.Target,
 		EType:  e.EType,
-		Props:  make(map[string]Property),
+		Props:  make(map[string]types.Property),
 	}
 
 	e.Props.ForEach(func(k2 string, v2 ps.Any) {
-		flat.Props[k2] = v2.(Property)
+		flat.Props[k2] = v2.(types.Property)
 	})
 
 	return

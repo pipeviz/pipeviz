@@ -4,20 +4,21 @@ import (
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 func Identify(g CoreGraph, sd SplitData) int {
 	ids, definitive := identifyDefault(g, sd)
 	// default one didn't do it, use specialists to narrow further
 
-	switch sd.Vertex.(type) {
-	case vertexLogicState, vertexProcess, vertexComm, vertexParentDataset, vertexDataset:
+	switch sd.Vertex.Typ() {
+	case "logic-state", "comm", "parent-dataset", "dataset":
 		// TODO vertexDataset needs special disambiguation; it has a second structural edge (poor idea anyway)
 		if len(ids) == 1 && definitive {
 			return ids[0]
 		}
 		return 0
-	case vertexTestResult:
+	case "test-result":
 		return identifyByGitHashSpec(g, sd, ids)
 	}
 
@@ -94,7 +95,7 @@ func identifyDefault(g CoreGraph, sd SplitData) (ret []int, definitive bool) {
 		}
 
 		for _, candidate := range filtered {
-			for _, edge2 := range g.OutWith(candidate.id, Qbe(EType("envlink"))) {
+			for _, edge2 := range g.OutWith(candidate.id, Qbe(types.EType("envlink"))) {
 				filtered2 = append(filtered2, candidate)
 				if edge2.Target == edge.Target {
 					return []int{candidate.id}, true
@@ -120,7 +121,7 @@ func identifyByGitHashSpec(g CoreGraph, sd SplitData, matches []int) int {
 		if spec, ok := es.(SpecCommit); ok {
 			// then search otherwise-matching vertices for a corresponding sha1 edge
 			for _, matchvid := range matches {
-				if len(g.OutWith(matchvid, Qbe(EType("version"), "sha1", spec.Sha1))) == 1 {
+				if len(g.OutWith(matchvid, Qbe(types.EType("version"), "sha1", spec.Sha1))) == 1 {
 					return matchvid
 				}
 			}
@@ -139,17 +140,7 @@ var Identifiers []Identifier
 
 func init() {
 	Identifiers = []Identifier{
-		IdentifierEnvironment{},
-		IdentifierLogicState{},
-		IdentifierDataset{},
-		IdentifierProcess{},
-		IdentifierCommit{},
-		IdentifierGitTag{},
-		IdentifierGitBranch{},
-		IdentifierTestResult{},
-		IdentifierParentDataset{},
-		IdentifierComm{},
-		IdentifierYumPkg{},
+		IdentifierGeneric{},
 	}
 }
 
@@ -157,29 +148,57 @@ func init() {
 // that may be contained within the graph, and finding matches between these
 // types of objects
 type Identifier interface {
-	CanIdentify(data Vertex) bool
-	Matches(a Vertex, b Vertex) bool
+	CanIdentify(data types.Vertex) bool
+	Matches(a types.Vertex, b types.Vertex) bool
 }
 
-// Identifier for Environments
-type IdentifierEnvironment struct{}
+// New generic identifier - temporary!
+type IdentifierGeneric struct{}
 
-func (i IdentifierEnvironment) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexEnvironment)
-	return ok
+func (i IdentifierGeneric) CanIdentify(data types.Vertex) bool {
+	switch data.Typ() {
+	case "environment", "logic-state", "process", "comm", "commit", "git-tag",
+		"git-branch", "test-result", "dataset", "parent-dataset":
+		return true
+	default:
+		return false
+	}
 }
 
-func (i IdentifierEnvironment) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexEnvironment)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexEnvironment)
-	if !ok {
+func (i IdentifierGeneric) Matches(a types.Vertex, b types.Vertex) bool {
+	if a.Typ() != b.Typ() {
 		return false
 	}
 
-	return matchAddress(l.Props(), r.Props())
+	switch a.Typ() {
+	case "environment":
+		return matchAddress(a.Props(), b.Props())
+	case "logic-state":
+		return mapValEq(a.Props(), b.Props(), "path")
+	case "process":
+		return mapValEq(a.Props(), b.Props(), "pid")
+	case "comm":
+		_, haspath := a.Props().Lookup("path")
+		if haspath {
+			return mapValEqAnd(a.Props(), b.Props(), "type", "path")
+		} else {
+			return mapValEqAnd(a.Props(), b.Props(), "type", "port")
+		}
+	case "commit":
+		return mapValEq(a.Props(), b.Props(), "sha1")
+	case "git-tag", "git-branch":
+		return mapValEq(a.Props(), b.Props(), "name")
+	case "test-result":
+		return true // TODO LOLOLOL totally demonstrating how this system is broken
+	case "dataset":
+		return mapValEq(a.Props(), b.Props(), "name")
+	case "parent-dataset":
+		return mapValEqAnd(a.Props(), b.Props(), "name", "path")
+	case "pkg-yum":
+		return mapValEq(a.Props(), b.Props(), "name", "version", "arch", "epoch")
+	default:
+		return false
+	}
 }
 
 // Helper func to match addresses
@@ -202,215 +221,4 @@ func matchAddress(a, b ps.Map) bool {
 // Helper func to match env links
 func matchEnvLink(a, b ps.Map) bool {
 	return mapValEq(a, b, "nick") || matchAddress(a, b)
-}
-
-type IdentifierLogicState struct{}
-
-func (i IdentifierLogicState) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexLogicState)
-	return ok
-}
-
-func (i IdentifierLogicState) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexLogicState)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexLogicState)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "path")
-}
-
-type IdentifierDataset struct{}
-
-func (i IdentifierDataset) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexDataset)
-	return ok
-}
-
-func (i IdentifierDataset) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexDataset)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexDataset)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierCommit struct{}
-
-func (i IdentifierCommit) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexCommit)
-	return ok
-}
-
-func (i IdentifierCommit) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexCommit)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexCommit)
-	if !ok {
-		return false
-	}
-
-	// TODO mapValEq should be able to handle this
-	//lsha, lexists := l.Props().Lookup("sha1")
-	//rsha, rexists := r.Props().Lookup("sha1")
-	//return rexists && lexists && bytes.Equal(lsha.(Property).Value.([]byte), rsha.(Property).Value.([]byte))
-	return mapValEq(l.Props(), r.Props(), "sha1")
-}
-
-type IdentifierProcess struct{}
-
-func (i IdentifierProcess) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexProcess)
-	return ok
-}
-
-func (i IdentifierProcess) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexProcess)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexProcess)
-	if !ok {
-		return false
-	}
-
-	// TODO numeric id within the 2^16 ring buffer that is pids is a horrible way to do this
-	return mapValEq(l.Props(), r.Props(), "pid")
-}
-
-type IdentifierGitTag struct{}
-
-func (i IdentifierGitTag) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexGitTag)
-	return ok
-}
-
-func (i IdentifierGitTag) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexGitTag)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexGitTag)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierGitBranch struct{}
-
-func (i IdentifierGitBranch) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexGitBranch)
-	return ok
-}
-
-func (i IdentifierGitBranch) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexGitBranch)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexGitBranch)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierTestResult struct{}
-
-func (i IdentifierTestResult) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexTestResult)
-	return ok
-}
-
-func (i IdentifierTestResult) Matches(a Vertex, b Vertex) bool {
-	_, ok := a.(vertexTestResult)
-	if !ok {
-		return false
-	}
-	_, ok = b.(vertexTestResult)
-	if !ok {
-		return false
-	}
-
-	return true // TODO LOLOLOL totally demonstrating how this system is broken
-}
-
-type IdentifierParentDataset struct{}
-
-func (i IdentifierParentDataset) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexParentDataset)
-	return ok
-}
-
-func (i IdentifierParentDataset) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexParentDataset)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexParentDataset)
-	if !ok {
-		return false
-	}
-
-	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
-}
-
-type IdentifierComm struct{}
-
-func (i IdentifierComm) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexComm)
-	return ok
-}
-
-func (i IdentifierComm) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexComm)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexComm)
-	if !ok {
-		return false
-	}
-
-	_, haspath := l.Props().Lookup("path")
-	if haspath {
-		return mapValEqAnd(l.Props(), r.Props(), "type", "path")
-	} else {
-		return mapValEqAnd(l.Props(), r.Props(), "type", "port")
-	}
-}
-
-type IdentifierYumPkg struct{}
-
-func (i IdentifierYumPkg) CanIdentify(data Vertex) bool {
-	_, ok := data.(vertexYumPkg)
-	return ok
-}
-
-func (i IdentifierYumPkg) Matches(a Vertex, b Vertex) bool {
-	l, ok := a.(vertexYumPkg)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexYumPkg)
-	if !ok {
-		return false
-	}
-
-	// TODO is this actually the correct matching pattern?
-	return mapValEq(l.Props(), r.Props(), "name", "version", "arch", "epoch")
 }

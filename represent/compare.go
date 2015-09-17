@@ -5,6 +5,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 // Performs simple equality comparison on the provided keys between two persistent maps.
@@ -22,9 +23,9 @@ func mapValEq(l, r ps.Map, keys ...string) bool {
 		}
 
 		// Transparently convert properties into their values
-		if lpv, ok := lv.(Property); ok {
+		if lpv, ok := lv.(types.Property); ok {
 			lv = lpv.Value
-			if rpv, ok := rv.(Property); ok {
+			if rpv, ok := rv.(types.Property); ok {
 				rv = rpv.Value
 			} else {
 				return false
@@ -66,9 +67,9 @@ func mapValEqAnd(l, r ps.Map, keys ...string) bool {
 		}
 
 		// Transparently convert properties into their values
-		if lpv, ok := lv.(Property); ok {
+		if lpv, ok := lv.(types.Property); ok {
 			lv = lpv.Value
-			if rpv, ok := rv.(Property); ok {
+			if rpv, ok := rv.(types.Property); ok {
 				rv = rpv.Value
 			} else {
 				return false

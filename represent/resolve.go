@@ -4,6 +4,7 @@ import (
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 // Attempts to resolve an EdgeSpec into a real edge. This process has two steps:
@@ -52,16 +53,16 @@ func resolveEnvLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.EnvLi
 
 	// Whether we find a match or not, have to merge in the EnvLink
 	if es.Address.Hostname != "" {
-		e.Props = e.Props.Set("hostname", Property{MsgSrc: mid, Value: es.Address.Hostname})
+		e.Props = e.Props.Set("hostname", types.Property{MsgSrc: mid, Value: es.Address.Hostname})
 	}
 	if es.Address.Ipv4 != "" {
-		e.Props = e.Props.Set("ipv4", Property{MsgSrc: mid, Value: es.Address.Ipv4})
+		e.Props = e.Props.Set("ipv4", types.Property{MsgSrc: mid, Value: es.Address.Ipv4})
 	}
 	if es.Address.Ipv6 != "" {
-		e.Props = e.Props.Set("ipv6", Property{MsgSrc: mid, Value: es.Address.Ipv6})
+		e.Props = e.Props.Set("ipv6", types.Property{MsgSrc: mid, Value: es.Address.Ipv6})
 	}
 	if es.Nick != "" {
-		e.Props = e.Props.Set("nick", Property{MsgSrc: mid, Value: es.Nick})
+		e.Props = e.Props.Set("nick", types.Property{MsgSrc: mid, Value: es.Nick})
 	}
 
 	// If we already found the matching edge, bail out now
@@ -69,7 +70,7 @@ func resolveEnvLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.EnvLi
 		return
 	}
 
-	rv := g.VerticesWith(Qbv(VType("environment")))
+	rv := g.VerticesWith(Qbv(types.VType("environment")))
 	for _, vt := range rv {
 		// TODO this'll be cross-package eventually - reorg needed
 		if matchEnvLink(e.Props, vt.v.Props()) {
@@ -93,9 +94,9 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 	if es.Name != "" {
 		// TODO 'name' is a traditional unique key; a change in it inherently denotes a new edge. how to handle this?
 		// FIXME this approach just always updates the mid, which is weird?
-		e.Props = e.Props.Set("name", Property{MsgSrc: mid, Value: es.Name})
+		e.Props = e.Props.Set("name", types.Property{MsgSrc: mid, Value: es.Name})
 
-		re := g.OutWith(src.id, Qbe(EType("datalink"), "name", es.Name))
+		re := g.OutWith(src.id, Qbe(types.EType("datalink"), "name", es.Name))
 		if len(re) == 1 {
 			success = true
 			e = re[0]
@@ -103,36 +104,36 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 	}
 
 	if es.Type != "" {
-		e.Props = e.Props.Set("type", Property{MsgSrc: mid, Value: es.Type})
+		e.Props = e.Props.Set("type", types.Property{MsgSrc: mid, Value: es.Type})
 	}
 	if es.Subset != "" {
-		e.Props = e.Props.Set("subset", Property{MsgSrc: mid, Value: es.Subset})
+		e.Props = e.Props.Set("subset", types.Property{MsgSrc: mid, Value: es.Subset})
 	}
 	if es.Interaction != "" {
-		e.Props = e.Props.Set("interaction", Property{MsgSrc: mid, Value: es.Interaction})
+		e.Props = e.Props.Set("interaction", types.Property{MsgSrc: mid, Value: es.Interaction})
 	}
 
 	// Special bits: if we have ConnUnix data, eliminate ConnNet data, and vice-versa.
 	var isLocal bool
 	if es.ConnUnix.Path != "" {
 		isLocal = true
-		e.Props = e.Props.Set("path", Property{MsgSrc: mid, Value: es.ConnUnix.Path})
+		e.Props = e.Props.Set("path", types.Property{MsgSrc: mid, Value: es.ConnUnix.Path})
 		e.Props = e.Props.Delete("hostname")
 		e.Props = e.Props.Delete("ipv4")
 		e.Props = e.Props.Delete("ipv6")
 		e.Props = e.Props.Delete("port")
 		e.Props = e.Props.Delete("proto")
 	} else {
-		e.Props = e.Props.Set("port", Property{MsgSrc: mid, Value: es.ConnNet.Port})
-		e.Props = e.Props.Set("proto", Property{MsgSrc: mid, Value: es.ConnNet.Proto})
+		e.Props = e.Props.Set("port", types.Property{MsgSrc: mid, Value: es.ConnNet.Port})
+		e.Props = e.Props.Set("proto", types.Property{MsgSrc: mid, Value: es.ConnNet.Proto})
 
 		// can only be one of hostname, ipv4 or ipv6
 		if es.ConnNet.Hostname != "" {
-			e.Props = e.Props.Set("hostname", Property{MsgSrc: mid, Value: es.ConnNet.Hostname})
+			e.Props = e.Props.Set("hostname", types.Property{MsgSrc: mid, Value: es.ConnNet.Hostname})
 		} else if es.ConnNet.Ipv4 != "" {
-			e.Props = e.Props.Set("ipv4", Property{MsgSrc: mid, Value: es.ConnNet.Ipv4})
+			e.Props = e.Props.Set("ipv4", types.Property{MsgSrc: mid, Value: es.ConnNet.Ipv4})
 		} else {
-			e.Props = e.Props.Set("ipv6", Property{MsgSrc: mid, Value: es.ConnNet.Ipv6})
+			e.Props = e.Props.Set("ipv6", types.Property{MsgSrc: mid, Value: es.ConnNet.Ipv6})
 		}
 	}
 
@@ -145,7 +146,7 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 	// If net, must scan; if local, a bit easier.
 	if !isLocal {
 		// First, find the environment vertex
-		rv = g.VerticesWith(Qbv(VType("environment")))
+		rv = g.VerticesWith(Qbv(types.VType("environment")))
 		var envid int
 		for _, vt := range rv {
 			// TODO matchAddress() func will need to be reorged to cross-package eventually - export!
@@ -161,7 +162,7 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 		}
 
 		// Now, walk the environment's edges to find the vertex representing the port
-		rv = g.PredecessorsWith(envid, Qbv(VType("comm"), "type", "port", "port", es.ConnNet.Port).and(Qbe(EType("envlink"))))
+		rv = g.PredecessorsWith(envid, Qbv(types.VType("comm"), "type", "port", "port", es.ConnNet.Port).and(Qbe(types.EType("envlink"))))
 
 		if len(rv) != 1 {
 			return
@@ -169,7 +170,7 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 		sock = rv[0]
 
 		// With sock in hand, now find its proc
-		rv = g.PredecessorsWith(sock.id, Qbe(EType("listening"), "proto", es.ConnNet.Proto).and(Qbv(VType("process"))))
+		rv = g.PredecessorsWith(sock.id, Qbe(types.EType("listening"), "proto", es.ConnNet.Proto).and(Qbv(types.VType("process"))))
 		if len(rv) != 1 {
 			// TODO could/will we ever allow >1?
 			return
@@ -183,21 +184,21 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 		}
 
 		// Walk the graph to find the vertex representing the unix socket
-		rv = g.PredecessorsWith(envid, Qbv(VType("comm"), "path", es.ConnUnix.Path).and(Qbe(EType("envlink"))))
+		rv = g.PredecessorsWith(envid, Qbv(types.VType("comm"), "path", es.ConnUnix.Path).and(Qbe(types.EType("envlink"))))
 		if len(rv) != 1 {
 			return
 		}
 		sock = rv[0]
 
 		// With sock in hand, now find its proc
-		rv = g.PredecessorsWith(sock.id, Qbv(VType("process")).and(Qbe(EType("listening"))))
+		rv = g.PredecessorsWith(sock.id, Qbv(types.VType("process")).and(Qbe(types.EType("listening"))))
 		if len(rv) != 1 {
 			// TODO could/will we ever allow >1?
 			return
 		}
 	}
 
-	rv = g.SuccessorsWith(rv[0].id, Qbv(VType("parent-dataset")))
+	rv = g.SuccessorsWith(rv[0].id, Qbv(types.VType("parent-dataset")))
 	// FIXME this absolutely could be more than 1
 	if len(rv) != 1 {
 		return
@@ -206,7 +207,7 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 
 	// if the spec indicates a subset, find it
 	if es.Subset != "" {
-		rv = g.PredecessorsWith(rv[0].id, Qbv(VType("dataset"), "name", es.Subset).and(Qbe(EType("dataset-hierarchy"))))
+		rv = g.PredecessorsWith(rv[0].id, Qbv(types.VType("dataset"), "name", es.Subset).and(Qbe(types.EType("dataset-hierarchy"))))
 		if len(rv) != 1 {
 			return
 		}
@@ -227,24 +228,24 @@ func resolveSpecCommit(g CoreGraph, mid uint64, src VertexTuple, es SpecCommit) 
 		Props:  ps.NewMap(),
 		EType:  "version",
 	}
-	e.Props = e.Props.Set("sha1", Property{MsgSrc: mid, Value: es.Sha1})
+	e.Props = e.Props.Set("sha1", types.Property{MsgSrc: mid, Value: es.Sha1})
 
-	re := g.OutWith(src.id, Qbe(EType("version")))
+	re := g.OutWith(src.id, Qbe(types.EType("version")))
 	if len(re) > 0 {
 		sha1, _ := re[0].Props.Lookup("sha1")
 		e.id = re[0].id // FIXME setting the id to non-0 AND failing is currently unhandled
-		if sha1.(Property).Value == es.Sha1 {
+		if sha1.(types.Property).Value == es.Sha1 {
 			success = true
 			e.Target = re[0].Target
 		} else {
-			rv := g.VerticesWith(Qbv(VType("commit"), "sha1", es.Sha1))
+			rv := g.VerticesWith(Qbv(types.VType("commit"), "sha1", es.Sha1))
 			if len(rv) == 1 {
 				success = true
 				e.Target = rv[0].id
 			}
 		}
 	} else {
-		rv := g.VerticesWith(Qbv(VType("commit"), "sha1", es.Sha1))
+		rv := g.VerticesWith(Qbv(types.VType("commit"), "sha1", es.Sha1))
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].id
@@ -261,18 +262,18 @@ func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src VertexTuple, es Spe
 		EType:  "parent-commit",
 	}
 
-	re := g.OutWith(src.id, Qbe(EType("parent-commit"), "pnum", es.ParentNum))
+	re := g.OutWith(src.id, Qbe(types.EType("parent-commit"), "pnum", es.ParentNum))
 	if len(re) > 0 {
 		success = true
 		e.Target = re[0].Target
 		e.id = re[0].id
 	} else {
-		rv := g.VerticesWith(Qbv(VType("commit"), "sha1", es.Sha1))
+		rv := g.VerticesWith(Qbv(types.VType("commit"), "sha1", es.Sha1))
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].id
-			e.Props = e.Props.Set("pnum", Property{MsgSrc: mid, Value: es.ParentNum})
-			e.Props = e.Props.Set("sha1", Property{MsgSrc: mid, Value: es.Sha1})
+			e.Props = e.Props.Set("pnum", types.Property{MsgSrc: mid, Value: es.ParentNum})
+			e.Props = e.Props.Set("sha1", types.Property{MsgSrc: mid, Value: es.Sha1})
 		}
 	}
 
@@ -287,7 +288,7 @@ func resolveSpecLocalLogic(g CoreGraph, mid uint64, src VertexTuple, es SpecLoca
 	}
 
 	// search for existing link
-	re := g.OutWith(src.id, Qbe(EType("logic-link"), "path", es.Path))
+	re := g.OutWith(src.id, Qbe(types.EType("logic-link"), "path", es.Path))
 	if len(re) == 1 {
 		// TODO don't set the path prop again, it's the unique id...meh, same question here w/uniqueness as above
 		success = true
@@ -297,7 +298,7 @@ func resolveSpecLocalLogic(g CoreGraph, mid uint64, src VertexTuple, es SpecLoca
 
 	// no existing link found, search for proc directly
 	envid, _, _ := findEnv(g, src)
-	rv := g.PredecessorsWith(envid, Qbv(VType("logic-state"), "path", es.Path))
+	rv := g.PredecessorsWith(envid, Qbv(types.VType("logic-state"), "path", es.Path))
 	if len(rv) == 1 {
 		success = true
 		e.Target = rv[0].id
@@ -308,7 +309,7 @@ func resolveSpecLocalLogic(g CoreGraph, mid uint64, src VertexTuple, es SpecLoca
 
 func resolveNetListener(g CoreGraph, mid uint64, src VertexTuple, es SpecNetListener) (e StandardEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
-	re := g.OutWith(src.id, Qbe(EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
+	re := g.OutWith(src.id, Qbe(types.EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
 	if len(re) == 1 {
 		return re[0], true
 	}
@@ -319,12 +320,12 @@ func resolveNetListener(g CoreGraph, mid uint64, src VertexTuple, es SpecNetList
 		EType:  "listening",
 	}
 
-	e.Props = e.Props.Set("port", Property{MsgSrc: mid, Value: es.Port})
-	e.Props = e.Props.Set("proto", Property{MsgSrc: mid, Value: es.Proto})
+	e.Props = e.Props.Set("port", types.Property{MsgSrc: mid, Value: es.Port})
+	e.Props = e.Props.Set("proto", types.Property{MsgSrc: mid, Value: es.Proto})
 
 	envid, _, hasenv := findEnv(g, src)
 	if hasenv {
-		rv := g.PredecessorsWith(envid, Qbv(VType("comm"), "type", "port", "port", es.Port))
+		rv := g.PredecessorsWith(envid, Qbv(types.VType("comm"), "type", "port", "port", es.Port))
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].id
@@ -336,7 +337,7 @@ func resolveNetListener(g CoreGraph, mid uint64, src VertexTuple, es SpecNetList
 
 func resolveUnixDomainListener(g CoreGraph, mid uint64, src VertexTuple, es SpecUnixDomainListener) (e StandardEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
-	re := g.OutWith(src.id, Qbe(EType("listening"), "type", "unix", "path", es.Path))
+	re := g.OutWith(src.id, Qbe(types.EType("listening"), "type", "unix", "path", es.Path))
 	if len(re) == 1 {
 		return re[0], true
 	}
@@ -347,11 +348,11 @@ func resolveUnixDomainListener(g CoreGraph, mid uint64, src VertexTuple, es Spec
 		EType:  "listening",
 	}
 
-	e.Props = e.Props.Set("path", Property{MsgSrc: mid, Value: es.Path})
+	e.Props = e.Props.Set("path", types.Property{MsgSrc: mid, Value: es.Path})
 
 	envid, _, hasenv := findEnv(g, src)
 	if hasenv {
-		rv := g.PredecessorsWith(envid, Qbv(VType("comm"), "type", "unix", "path", es.Path))
+		rv := g.PredecessorsWith(envid, Qbv(types.VType("comm"), "type", "unix", "path", es.Path))
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].id
@@ -367,21 +368,21 @@ func resolveSpecDatasetHierarchy(g CoreGraph, mid uint64, src VertexTuple, es Sp
 		Props:  ps.NewMap(),
 		EType:  "dataset-hierarchy",
 	}
-	e.Props = e.Props.Set("parent", Property{MsgSrc: mid, Value: es.NamePath[0]})
+	e.Props = e.Props.Set("parent", types.Property{MsgSrc: mid, Value: es.NamePath[0]})
 
 	// check for existing link - there can be only be one
-	re := g.OutWith(src.id, Qbe(EType("dataset-hierarchy")))
+	re := g.OutWith(src.id, Qbe(types.EType("dataset-hierarchy")))
 	if len(re) == 1 {
 		success = true
 		e = re[0]
 		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
-		e.Props = e.Props.Set("parent", Property{MsgSrc: mid, Value: es.NamePath[0]})
+		e.Props = e.Props.Set("parent", types.Property{MsgSrc: mid, Value: es.NamePath[0]})
 		return
 	}
 
 	// no existing link found; search for proc directly
 	envid, _, _ := findEnv(g, src)
-	rv := g.PredecessorsWith(envid, Qbv(VType("parent-dataset"), "name", es.NamePath[0]))
+	rv := g.PredecessorsWith(envid, Qbv(types.VType("parent-dataset"), "name", es.NamePath[0]))
 	if len(rv) != 0 { // >1 shouldn't be possible
 		success = true
 		e.Target = rv[0].id
@@ -396,10 +397,10 @@ func resolveSpecParentDataset(g CoreGraph, mid uint64, src VertexTuple, es SpecP
 		Props:  ps.NewMap(),
 		EType:  "dataset-gateway",
 	}
-	e.Props = e.Props.Set("name", Property{MsgSrc: mid, Value: es.Name})
+	e.Props = e.Props.Set("name", types.Property{MsgSrc: mid, Value: es.Name})
 
 	// check for existing link - there can be only be one
-	re := g.OutWith(src.id, Qbe(EType("dataset-gateway")))
+	re := g.OutWith(src.id, Qbe(types.EType("dataset-gateway")))
 	if len(re) == 1 {
 		success = true
 		e = re[0]
@@ -408,7 +409,7 @@ func resolveSpecParentDataset(g CoreGraph, mid uint64, src VertexTuple, es SpecP
 
 		// no existing link found; search for proc directly
 		envid, _, _ := findEnv(g, src)
-		rv := g.PredecessorsWith(envid, Qbv(VType("parent-dataset"), "name", es.Name))
+		rv := g.PredecessorsWith(envid, Qbv(types.VType("parent-dataset"), "name", es.Name))
 		if len(rv) != 0 { // >1 shouldn't be possible
 			success = true
 			e.Target = rv[0].id
@@ -432,14 +433,14 @@ func resolveDataProvenance(g CoreGraph, mid uint64, src VertexTuple, es interpre
 	}
 	e.Props = assignAddress(mid, es.Address, e.Props, false)
 
-	re := g.OutWith(src.id, Qbe(EType("data-provenance")))
+	re := g.OutWith(src.id, Qbe(types.EType("data-provenance")))
 	if len(re) == 1 {
 		// TODO wasteful, blargh
 		reresolve := mapValEqAnd(e.Props, re[0].Props, "hostname", "ipv4", "ipv6")
 
 		e = re[0]
 		if es.SnapTime != "" {
-			e.Props = e.Props.Set("snap-time", Property{MsgSrc: mid, Value: es.SnapTime})
+			e.Props = e.Props.Set("snap-time", types.Property{MsgSrc: mid, Value: es.SnapTime})
 		}
 
 		if reresolve {
@@ -470,7 +471,7 @@ func resolveDataAlpha(g CoreGraph, mid uint64, src VertexTuple, es interpret.Dat
 		EType:  "data-provenance",
 	}
 
-	re := g.OutWith(src.id, Qbe(EType("data-provenance")))
+	re := g.OutWith(src.id, Qbe(types.EType("data-provenance")))
 	if len(re) == 1 {
 		e = re[0]
 	}
@@ -489,7 +490,7 @@ func findEnv(g CoreGraph, vt VertexTuple) (vid int, edge StandardEdge, success b
 	}
 
 	if vt.id != 0 {
-		re := g.OutWith(vt.id, Qbe(EType("envlink")))
+		re := g.OutWith(vt.id, Qbe(types.EType("envlink")))
 		if len(re) == 1 {
 			vid, edge, success = re[0].Target, re[0], true
 		}
