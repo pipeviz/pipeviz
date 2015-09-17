@@ -8,7 +8,7 @@ import (
 )
 
 type SplitData struct {
-	Vertex    types.Vtx
+	Vertex    types.Vertex
 	EdgeSpecs EdgeSpecs
 }
 

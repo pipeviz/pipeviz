@@ -88,7 +88,7 @@ type PropQ struct {
 
 type VertexTuple struct {
 	id int
-	v  types.Vtx
+	v  types.Vertex
 	ie ps.Map
 	oe ps.Map
 }
@@ -99,7 +99,7 @@ func (vt VertexTuple) Id() int {
 }
 
 // Returns the vertex data of the vertex tuple.
-func (vt VertexTuple) Vertex() types.Vtx {
+func (vt VertexTuple) Vertex() types.Vertex {
 	return vt.v
 }
 

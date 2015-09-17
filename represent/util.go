@@ -47,7 +47,7 @@ type flatEdge struct {
 	Props  map[string]types.Property `json:"properties"`
 }
 
-func vtoflat(v types.Vtx) (flat flatVertex) {
+func vtoflat(v types.Vertex) (flat flatVertex) {
 	flat.VType = v.Typ()
 
 	flat.Props = make(map[string]types.Property)

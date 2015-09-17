@@ -148,14 +148,14 @@ func init() {
 // that may be contained within the graph, and finding matches between these
 // types of objects
 type Identifier interface {
-	CanIdentify(data types.Vtx) bool
-	Matches(a types.Vtx, b types.Vtx) bool
+	CanIdentify(data types.Vertex) bool
+	Matches(a types.Vertex, b types.Vertex) bool
 }
 
 // New generic identifier - temporary!
 type IdentifierGeneric struct{}
 
-func (i IdentifierGeneric) CanIdentify(data types.Vtx) bool {
+func (i IdentifierGeneric) CanIdentify(data types.Vertex) bool {
 	switch data.Typ() {
 	case "environment", "logic-state", "process", "comm", "commit", "git-tag",
 		"git-branch", "test-result", "dataset", "parent-dataset":
@@ -165,7 +165,7 @@ func (i IdentifierGeneric) CanIdentify(data types.Vtx) bool {
 	}
 }
 
-func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
+func (i IdentifierGeneric) Matches(a types.Vertex, b types.Vertex) bool {
 	if a.Typ() != b.Typ() {
 		return false
 	}

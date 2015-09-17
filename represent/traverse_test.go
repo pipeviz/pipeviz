@@ -9,39 +9,20 @@ import (
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
-// just convenient shorthand
-type tprops map[string]interface{}
-
-type dummyVertex struct {
-	msgid uint64
-	typ   string
-	props tprops
-}
-
-func (v dummyVertex) Props() ps.Map {
-	ret := ps.NewMap()
-
-	for k, val := range v.props {
-		ret = ret.Set(k, types.Property{MsgSrc: v.msgid, Value: val})
+func tprops(pairs ...interface{}) []types.PropPair {
+	ret := make([]types.PropPair, 0)
+	for k, v := range pairs {
+		if k%2 != 0 {
+			continue
+		}
+		ret = append(ret, types.PropPair{K: v.(string), V: pairs[k+1]})
 	}
-
 	return ret
-}
-
-// this breaks the rule that it can't change, but shouldn't matter and the whole
-// method should be going away soon anyway
-func (v dummyVertex) Typ() types.VType {
-	return types.VType(v.typ)
-}
-
-// non-functional impl for now b/c this is probably going away
-func (vtx dummyVertex) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	return vtx, nil
 }
 
 // utility func to create a vtTuple. puts edges in the right place by
 // checking source/target ids. panics if they don't line up!
-func mkTuple(vid int, vtx dummyVertex, edges ...StandardEdge) VertexTuple {
+func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) VertexTuple {
 	vt := VertexTuple{
 		id: vid,
 		v:  vtx,
@@ -98,23 +79,23 @@ func getGraphFixture() *coreGraph {
 	edge13 := mkEdge(13, 3, 4, 4, "dummy-edge-type3", "eprop2", "bar", "eprop3", 42)
 
 	// vid 1, type "env". two props - "prop1": "bar", "prop2": 42. msgid 1
-	vt1 := mkTuple(1, dummyVertex{1, "env", tprops{"prop1": "foo", "prop2": 42}}, edge10, edge11) // one in, one out
+	vt1 := mkTuple(1, types.NewVertex("env", 1, tprops("prop1", "foo", "prop2", 42)...), edge10, edge11) // one in, one out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(1), vt1)
 
-	// vid 2, type "env". : "one prop - "prop1": "foo". msgid 2
-	vt2 := mkTuple(2, dummyVertex{2, "env", tprops{"prop1": "bar"}}, edge10) // one in
+	// vid 2, type "env". , "one prop - "prop1", "foo". msgid 2
+	vt2 := mkTuple(2, types.NewVertex("env", 2, tprops("prop1", "bar")...), edge10) // one in
 	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt2)
 
-	// vid 3, type "vt2". two props - "prop1": "bar", "bowser": "moo". msgid 3
-	vt3 := mkTuple(3, dummyVertex{3, "vt2", tprops{"prop1": "bar", "bowser": "moo"}}, edge11, edge12, edge13) // three out
+	// vid 3, type "vt2". two props - "prop1", "bar", "bowser", "moo". msgid 3
+	vt3 := mkTuple(3, types.NewVertex("vt2", 3, tprops("prop1", "bar", "bowser", "moo")...), edge11, edge12, edge13) // three out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt3)
 
-	// vid 4, type "vt3". three props - "prop1": "baz", "prop2": 42, "prop3": "qux". msgid 4
-	vt4 := mkTuple(4, dummyVertex{4, "vt3", tprops{"prop1": "baz", "prop2": 42, "prop3": "qux"}}, edge12, edge13) // two in, same origin
+	// vid 4, type "vt3". three props - "prop1", "baz", "prop2", 42, "prop3", "qux". msgid 4
+	vt4 := mkTuple(4, types.NewVertex("vt3", 4, tprops("prop1", "baz", "prop2", 42, "prop3", "qux")...), edge12, edge13) // two in, same origin
 	g.vtuples = g.vtuples.Set(strconv.Itoa(4), vt4)
 
 	// vid 5, type "vt3". no props, no edges. msgid 5
-	vt5 := mkTuple(5, dummyVertex{5, "vt3", nil}) // none in or out
+	vt5 := mkTuple(5, types.NewVertex("vt3", 5)) // none in or out
 	g.vtuples = g.vtuples.Set(strconv.Itoa(5), vt5)
 	g.vserial = 13
 

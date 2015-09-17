@@ -43,21 +43,6 @@ func fillMapIgnoreZero(msgid uint64, p ...PropPair) ps.Map {
 	return m
 }
 
-type Vtx interface {
-	// Merges another vertex into this vertex. Error is indicated if the
-	// dynamic types do not match.
-	Merge(Vtx) (Vtx, error)
-	// Returns a string representing the object type. Used for namespacing keys, etc.
-	// While this is (currently) implemented as a method, its result must be invariant.
-	// TODO use string-const generator, other tricks to enforce invariance, compact space use
-	Typ() VType
-	// Returns a persistent map with the vertex's properties.
-	// TODO generate more type-restricted versions of the map?
-	Props() ps.Map
-	// Reports the keys of the properties used as the distinguishing identifiers for this vertex.
-	//Ids() []string
-}
-
 type Vertex struct {
 	Type       VType  `json:"type"`
 	Properties ps.Map `json:"properties"`
@@ -87,16 +72,22 @@ func isZero(v interface{}) (bool, error) {
 	return false, errors.New("No static zero value defined for provided type")
 }
 
+// Returns a string representing the object type. Used for namespacing keys, etc.
+// While this is (currently) implemented as a method, its result must be invariant.
+// TODO use string-const generator, other tricks to enforce invariance, compact space use
 func (v Vertex) Typ() VType {
 	return v.Type
 }
 
+// Returns a persistent map with the vertex's properties.
+// TODO generate more type-restricted versions of the map?
 func (v Vertex) Props() ps.Map {
 	return v.Properties
 }
 
-// totally broken, but just for now
-func (v Vertex) Merge(v2 Vtx) (Vtx, error) {
+// Merge merges another vertex into this vertex. Error is indicated if the
+// dynamic types do not match.
+func (v Vertex) Merge(v2 Vertex) (Vertex, error) {
 	var old, nu ps.Map = v.Props(), v2.Props()
 
 	nu.ForEach(func(key string, val ps.Any) {
