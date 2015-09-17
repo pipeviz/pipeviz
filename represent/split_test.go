@@ -737,8 +737,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecDatasetHierarchy{[]string{"parentdata"}},
@@ -761,8 +762,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						SpecDatasetHierarchy{[]string{"parentdata"}},
@@ -787,8 +789,9 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexParentDataset{
-						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					Vertex: types.Vertex{
+						Type:       "parent-dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
@@ -812,16 +815,18 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexParentDataset{
-						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					Vertex: types.Vertex{
+						Type:       "parent-dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
 				},
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
@@ -856,16 +861,18 @@ func init() {
 			},
 			Output: []SplitData{
 				{
-					Vertex: vertexParentDataset{
-						mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
+					Vertex: types.Vertex{
+						Type:       "parent-dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
 					},
 				},
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],
@@ -874,8 +881,9 @@ func init() {
 					},
 				},
 				{
-					Vertex: vertexDataset{
-						mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
+					Vertex: types.Vertex{
+						Type:       "dataset",
+						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
 					EdgeSpecs: []EdgeSpec{
 						M_envlink[0],

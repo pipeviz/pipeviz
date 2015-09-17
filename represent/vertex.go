@@ -70,50 +70,6 @@ func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map 
 	return m
 }
 
-type vertexDataset struct {
-	props ps.Map
-}
-
-func (vtx vertexDataset) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexDataset) Typ() types.VType {
-	return "dataset"
-}
-
-func (vtx vertexDataset) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexDataset); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
-}
-
-type vertexParentDataset struct {
-	props ps.Map
-}
-
-func (vtx vertexParentDataset) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexParentDataset) Typ() types.VType {
-	return "parent-dataset"
-}
-
-func (vtx vertexParentDataset) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexParentDataset); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
-}
-
 type vertexYumPkg struct {
 	props ps.Map
 }

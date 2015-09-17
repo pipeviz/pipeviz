@@ -140,8 +140,6 @@ var Identifiers []Identifier
 
 func init() {
 	Identifiers = []Identifier{
-		IdentifierDataset{},
-		IdentifierParentDataset{},
 		IdentifierYumPkg{},
 		IdentifierGeneric{},
 	}
@@ -160,7 +158,8 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.Vtx) bool {
 	switch data.Typ() {
-	case "environment", "logic-state", "process", "comm", "commit":
+	case "environment", "logic-state", "process", "comm", "commit", "git-tag",
+		"git-branch", "test-result", "dataset", "parent-dataset":
 		return true
 	default:
 		return false
@@ -192,6 +191,10 @@ func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
 		return mapValEq(a.Props(), b.Props(), "name")
 	case "test-result":
 		return true // TODO LOLOLOL totally demonstrating how this system is broken
+	case "dataset":
+		return mapValEq(a.Props(), b.Props(), "name")
+	case "parent-dataset":
+		return mapValEqAnd(a.Props(), b.Props(), "name", "path")
 	default:
 		return false
 	}
@@ -217,46 +220,6 @@ func matchAddress(a, b ps.Map) bool {
 // Helper func to match env links
 func matchEnvLink(a, b ps.Map) bool {
 	return mapValEq(a, b, "nick") || matchAddress(a, b)
-}
-
-type IdentifierDataset struct{}
-
-func (i IdentifierDataset) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexDataset)
-	return ok
-}
-
-func (i IdentifierDataset) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexDataset)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexDataset)
-	if !ok {
-		return false
-	}
-
-	return mapValEq(l.Props(), r.Props(), "name")
-}
-
-type IdentifierParentDataset struct{}
-
-func (i IdentifierParentDataset) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexParentDataset)
-	return ok
-}
-
-func (i IdentifierParentDataset) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexParentDataset)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexParentDataset)
-	if !ok {
-		return false
-	}
-
-	return mapValEqAnd(l.Props(), r.Props(), "name", "path")
 }
 
 type IdentifierYumPkg struct{}

@@ -205,13 +205,11 @@ func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]SplitData, error) {
 }
 
 func splitParentDataset(d interpret.ParentDataset, id uint64) ([]SplitData, error) {
-	v := vertexParentDataset{props: ps.NewMap()}
+	v := types.NewVertex("parent-dataset", id,
+		types.PropPair{K: "name", V: d.Name},
+		types.PropPair{K: "path", V: d.Path},
+	)
 	var edges EdgeSpecs
-
-	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
-	if d.Path != "" {
-		v.props = v.props.Set("path", Property{MsgSrc: id, Value: d.Path})
-	}
 
 	edges = append(edges, d.Environment)
 
@@ -231,16 +229,13 @@ func splitParentDataset(d interpret.ParentDataset, id uint64) ([]SplitData, erro
 }
 
 func splitDataset(d interpret.Dataset, id uint64) ([]SplitData, error) {
-	v := vertexDataset{props: ps.NewMap()}
+	v := types.NewVertex("dataset", id,
+		types.PropPair{K: "name", V: d.Name},
+		// TODO convert input from string to int and force timestamps. javascript apparently likes
+		// ISO 8601, but go doesn't? so, timestamps.
+		types.PropPair{K: "create-time", V: d.CreateTime},
+	)
 	var edges EdgeSpecs
-
-	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
-
-	// TODO convert input from string to int and force timestamps. javascript apparently likes
-	// ISO 8601, but go doesn't? so, timestamps.
-	if d.CreateTime != "" {
-		v.props = v.props.Set("create-time", Property{MsgSrc: id, Value: d.CreateTime})
-	}
 
 	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
 	edges = append(edges, d.Genesis)
