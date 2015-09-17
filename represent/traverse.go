@@ -162,7 +162,7 @@ func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) 
 				return
 			}
 
-			deprop := eprop.(Property)
+			deprop := eprop.(types.Property)
 			switch tv := deprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -230,7 +230,7 @@ func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []Vertex
 				return
 			}
 
-			deprop := eprop.(Property)
+			deprop := eprop.(types.Property)
 			switch tv := deprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -291,7 +291,7 @@ VertexInspector:
 				continue VertexInspector
 			}
 
-			dvprop := vprop.(Property)
+			dvprop := vprop.(types.Property)
 			switch tv := dvprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -331,7 +331,7 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []VertexTuple) {
 				return
 			}
 
-			dvprop := vprop.(Property)
+			dvprop := vprop.(types.Property)
 			switch tv := dvprop.Value.(type) {
 			default:
 				if tv != p.V {

@@ -22,7 +22,7 @@ func (v dummyVertex) Props() ps.Map {
 	ret := ps.NewMap()
 
 	for k, val := range v.props {
-		ret = ret.Set(k, Property{MsgSrc: v.msgid, Value: val})
+		ret = ret.Set(k, types.Property{MsgSrc: v.msgid, Value: val})
 	}
 
 	return ret
@@ -76,7 +76,7 @@ func mkEdge(id, source, target int, msgid uint64, etype string, props ...interfa
 	var v interface{}
 	for len(props) > 1 {
 		k, v, props = props[0].(string), props[1], props[2:]
-		e.Props = e.Props.Set(k, Property{MsgSrc: msgid, Value: v})
+		e.Props = e.Props.Set(k, types.Property{MsgSrc: msgid, Value: v})
 	}
 
 	return e

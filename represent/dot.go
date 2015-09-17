@@ -79,7 +79,7 @@ func GenerateDot(g CoreGraph) []byte {
 				edge.Source, edge.Target, edge.id, edge.EType))
 
 			edge.Props.ForEach(func(k2 string, val2 ps.Any) {
-				prop := val2.(Property)
+				prop := val2.(types.Property)
 				var format string
 				switch pv := prop.Value.(type) {
 				case []byte:
