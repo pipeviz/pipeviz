@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
 	"strconv"
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
@@ -113,7 +115,7 @@ func main() {
 
 	// And finally, kick off the webapp.
 	// TODO let config/params control address
-	go RunWebapp(listenAt + strconv.Itoa(DefaultAppPort))
+	go RunWebapp(listenAt+strconv.Itoa(DefaultAppPort), j.Get)
 
 	// Block on goji's graceful waiter, allowing the http connections to shut down nicely.
 	// FIXME using this should be unnecessary if we're crash-only
@@ -123,8 +125,23 @@ func main() {
 // RunWebapp runs the pipeviz http frontend webapp on the specified address.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func RunWebapp(addr string) {
+func RunWebapp(addr string, f journal.RecordGetter) {
 	mf := webapp.NewMux()
+
+	// A middleware to attach the journal-getting func to the env for later use.
+	mw := func(c *web.C, h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if c.Env == nil {
+				c.Env = make(map[interface{}]interface{})
+			}
+			c.Env["journalGet"] = f
+			h.ServeHTTP(w, r)
+		})
+	}
+
+	mf.Use(mw)
+
+	mf.Compile()
 	graceful.ListenAndServe(addr, mf)
 }
 
