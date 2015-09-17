@@ -1,11 +1,8 @@
 package represent
 
 import (
-	"fmt"
-
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
-	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 func GenericMerge(old, nu ps.Map) ps.Map {
@@ -68,26 +65,4 @@ func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map 
 	}
 
 	return m
-}
-
-type vertexYumPkg struct {
-	props ps.Map
-}
-
-func (vtx vertexYumPkg) Props() ps.Map {
-	return vtx.props
-}
-
-func (vtx vertexYumPkg) Typ() types.VType {
-	return "pkg-yum"
-}
-
-func (vtx vertexYumPkg) Merge(ivtx types.Vtx) (types.Vtx, error) {
-	if _, ok := ivtx.(vertexYumPkg); !ok {
-		// NOTE remember, formatting with types means reflection
-		return nil, fmt.Errorf("Attempted to merge vertex type %T into vertex type %T", ivtx, vtx)
-	}
-
-	vtx.props = GenericMerge(vtx.props, ivtx.Props())
-	return vtx, nil
 }

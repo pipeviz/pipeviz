@@ -905,8 +905,9 @@ func init() {
 			Input:   D_yp,
 			Output: []SplitData{
 				{
-					Vertex: vertexYumPkg{
-						mapPropPairs(D_msgid, p{"name", D_pkgname}, p{"version", D_version}, p{"epoch", 7}, p{"release", "4.el7_1"}, p{"arch", "x86_64"}),
+					Vertex: types.Vertex{
+						Type:       "pkg-yum",
+						Properties: mapPropPairs(D_msgid, p{"name", D_pkgname}, p{"version", D_version}, p{"epoch", 7}, p{"release", "4.el7_1"}, p{"arch", "x86_64"}),
 					},
 					EdgeSpecs: nil,
 				},

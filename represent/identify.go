@@ -140,7 +140,6 @@ var Identifiers []Identifier
 
 func init() {
 	Identifiers = []Identifier{
-		IdentifierYumPkg{},
 		IdentifierGeneric{},
 	}
 }
@@ -195,6 +194,8 @@ func (i IdentifierGeneric) Matches(a types.Vtx, b types.Vtx) bool {
 		return mapValEq(a.Props(), b.Props(), "name")
 	case "parent-dataset":
 		return mapValEqAnd(a.Props(), b.Props(), "name", "path")
+	case "pkg-yum":
+		return mapValEq(a.Props(), b.Props(), "name", "version", "arch", "epoch")
 	default:
 		return false
 	}
@@ -220,25 +221,4 @@ func matchAddress(a, b ps.Map) bool {
 // Helper func to match env links
 func matchEnvLink(a, b ps.Map) bool {
 	return mapValEq(a, b, "nick") || matchAddress(a, b)
-}
-
-type IdentifierYumPkg struct{}
-
-func (i IdentifierYumPkg) CanIdentify(data types.Vtx) bool {
-	_, ok := data.(vertexYumPkg)
-	return ok
-}
-
-func (i IdentifierYumPkg) Matches(a types.Vtx, b types.Vtx) bool {
-	l, ok := a.(vertexYumPkg)
-	if !ok {
-		return false
-	}
-	r, ok := b.(vertexYumPkg)
-	if !ok {
-		return false
-	}
-
-	// TODO is this actually the correct matching pattern?
-	return mapValEq(l.Props(), r.Props(), "name", "version", "arch", "epoch")
 }

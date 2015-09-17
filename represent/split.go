@@ -3,7 +3,6 @@ package represent
 import (
 	"errors"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
@@ -240,18 +239,17 @@ func splitDataset(d interpret.Dataset, id uint64) ([]SplitData, error) {
 	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
 	edges = append(edges, d.Genesis)
 
-	return []SplitData{{v, edges}}, nil
+	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
 func splitYumPkg(d interpret.YumPkg, id uint64) ([]SplitData, error) {
-	v := vertexYumPkg{props: ps.NewMap()}
-	var edges EdgeSpecs
+	v := types.NewVertex("dataset", id,
+		types.PropPair{K: "name", V: d.Name},
+		types.PropPair{K: "version", V: d.Version},
+		types.PropPair{K: "epoch", V: d.Epoch},
+		types.PropPair{K: "release", V: d.Release},
+		types.PropPair{K: "arch", V: d.Arch},
+	)
 
-	v.props = v.props.Set("name", Property{MsgSrc: id, Value: d.Name})
-	v.props = v.props.Set("version", Property{MsgSrc: id, Value: d.Version})
-	v.props = v.props.Set("epoch", Property{MsgSrc: id, Value: d.Epoch})
-	v.props = v.props.Set("release", Property{MsgSrc: id, Value: d.Release})
-	v.props = v.props.Set("arch", Property{MsgSrc: id, Value: d.Arch})
-
-	return []SplitData{{v, edges}}, nil
+	return []SplitData{{Vertex: v}}, nil
 }
