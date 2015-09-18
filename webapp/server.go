@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
-	"text/template"
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
@@ -18,9 +17,7 @@ import (
 )
 
 var (
-	assetDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "assets")
-	jsDir    = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "js")
-	tmplDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp"), "tmpl")
+	publicDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
 )
 
 var (
@@ -63,11 +60,9 @@ func NewMux() *web.Mux {
 	m := web.New()
 
 	m.Use(log.NewHttpLogger("webapp"))
-	m.Get("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetDir))))
-	m.Get("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir(jsDir))))
 	m.Get("/sock", OpenSocket)
 	m.Get("/message/:mid", GetMessage)
-	m.Get("/*", http.StripPrefix("/", http.HandlerFunc(WebRoot)))
+	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
 
 	return m
 }
@@ -86,23 +81,6 @@ func graphToJson(g represent.CoreGraph) ([]byte, error) {
 		Id:       g.MsgId(),
 		Vertices: vertices,
 	})
-}
-
-func WebRoot(w http.ResponseWriter, r *http.Request) {
-	vars := struct {
-		Title string
-	}{
-		Title: "pipeviz",
-	}
-
-	t, err := template.ParseFiles(filepath.Join(tmplDir, "index.html"))
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"system": "webapp",
-			"err":    err,
-		}).Error("Failed to parse index.html template file")
-	}
-	t.Execute(w, vars)
 }
 
 func GetMessage(c web.C, w http.ResponseWriter, r *http.Request) {

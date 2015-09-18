@@ -109,7 +109,7 @@ var Viz = React.createClass({
         if (d.refs.ls.length > 0) {
           var e = query.getEnvironment(props.graph, d.refs.ls[0]);
           if (typeof e.propv("provider") !== 'undefined') {
-            return "assets/" + e.propv("provider") + ".svg";
+            return "/assets/img/" + e.propv("provider") + ".svg";
           }
         }
       });
