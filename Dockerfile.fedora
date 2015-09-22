@@ -1,23 +1,23 @@
 # Fedora Dockerfile 0.1.1
 #
-# Build the docker image 
-# docker  build -f Dockerfile.fedora -t eliza411/pipeviz .
+# Build the docker image:
+#   docker  build -f Dockerfile.fedora -t eliza411/pipeviz .
 #
-# Run the container
-# docker run -ti -p 8008:8008 --rm --name pipeserv  eliza411/pipeviz
+# Run the container:
+#   docker run -ti -p 8008:8008 --rm --name pipeserv  eliza411/pipeviz
 #
-# Import sample data with pvutil
-# docker run -ti --link pipeserv:pipeserv --rm eliza411/pipeviz pvutil fixr fixtures/realistic -pt http://pipeserv:2309
+# Import sample data with pvutil:
+#   docker run -ti --link pipeserv:pipeserv --rm eliza411/pipeviz pvutil fixr fixtures/realistic -pt http://pipeserv:2309
 #
-# Create json from your git repo
-# docker run -v /path/to/repo/on/host/system:/repo  python pvgit2json.py -r /repo  > OUTPUT.json
-#
+# Create json from your git repo:
+#   docker run -v /path/to/repo/on/host/system:/repo  python pvgit2json.py -r /repo  > OUTPUT.json
+
 FROM fedora:latest
 MAINTAINER Melissa Anderson <melissa@happypunch.com>
 
 ENV GO_VERSION 1.4.2
 ENV GOPATH /opt/go
-ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
+ENV PATH /usr/local/go/bin:$GOPATH/bin:/src/github.com/tag1consulting/pipeviz:$PATH
 
 RUN dnf install -y \
     python-pygit2 \
