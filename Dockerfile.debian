@@ -10,9 +10,6 @@
 #
 # In a seperate shell, run a separate container to manually send input to the pipeviz server:
 #   docker run -ti --link pipeserv:pipeserv --rm eliza411/pipeviz pvutil fixr fixtures/realistic/ -t http://pipeserv:2309
-#
-# Create json from your git repo
-#   docker run -v /path/to/repo/on/host/system:/repo  python pvgit2json.py -r repo  > OUTPUT.json
 
 FROM debian:latest
 MAINTAINER Melissa Anderson <melissa@happypunch.com>
