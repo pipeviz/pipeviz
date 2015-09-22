@@ -12,8 +12,7 @@
 # Create json from your git repo
 # docker run -v /path/to/repo/on/host/system:/repo  python pvgit2json.py -r /repo  > OUTPUT.json
 #
-
-FROM fedora:latest 
+FROM fedora:latest
 MAINTAINER Melissa Anderson <melissa@happypunch.com>
 
 ENV GO_VERSION 1.4.2
@@ -30,10 +29,13 @@ RUN dnf install -y \
     tar
 RUN wget https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go1.4.2.linux-amd64.tar.gz
+RUN useradd pipeviz -s /bin/bash
+RUN mkdir /opt/go
 RUN mkdir -p $GOPATH/src/github.com/tag1consulting/pipeviz
 COPY . $GOPATH/src/github.com/tag1consulting/pipeviz
-RUN cd $GOPATH/src/github.com/tag1consulting/pipeviz && \
-    make && \
-    make install
+RUN chown -R pipeviz $GOPATH
+USER pipeviz
 WORKDIR $GOPATH/src/github.com/tag1consulting/pipeviz
+RUN make && \
+    make install
 CMD ["pipeviz", "-b"]
