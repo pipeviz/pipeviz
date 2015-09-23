@@ -7,24 +7,6 @@ import (
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
-type SplitData struct {
-	Vertex    types.Vertex
-	EdgeSpecs EdgeSpecs
-}
-
-// TODO for now, no structure to this. change to queryish form later
-type EdgeSpec interface {
-	// Given a graph and a vtTuple root, searches for an existing edge
-	// that this EdgeSpec would supercede
-	//FindExisting(*CoreGraph, vtTuple) (StandardEdge, bool)
-
-	// Resolves the spec into a real edge, merging as appropriate with
-	// any existing edge (as returned from FindExisting)
-	//Resolve(*CoreGraph, vtTuple, int) (StandardEdge, bool)
-}
-
-type EdgeSpecs []EdgeSpec
-
 type SpecCommit struct {
 	Sha1 interpret.Sha1
 }
@@ -56,10 +38,10 @@ type SpecDatasetHierarchy struct {
 }
 
 // TODO unused until plugging/codegen
-type Splitter func(data interface{}, id uint64) ([]SplitData, error)
+type Splitter func(data interface{}, id uint64) ([]types.SplitData, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id uint64) ([]SplitData, error) {
+func Split(d interface{}, id uint64) ([]types.SplitData, error) {
 	switch v := d.(type) {
 	case interpret.Environment:
 		return splitEnvironment(v, id)
@@ -82,7 +64,7 @@ func Split(d interface{}, id uint64) ([]SplitData, error) {
 	return nil, errors.New("No handler for object type")
 }
 
-func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
+func splitEnvironment(d interpret.Environment, id uint64) ([]types.SplitData, error) {
 	// seven distinct props
 	v := types.NewVertex("environment", id,
 		types.PropPair{K: "os", V: d.OS},
@@ -95,10 +77,10 @@ func splitEnvironment(d interpret.Environment, id uint64) ([]SplitData, error) {
 	)
 
 	// By spec, Environments have no outbound edges
-	return []SplitData{{Vertex: v}}, nil
+	return []types.SplitData{{Vertex: v}}, nil
 }
 
-func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
+func splitLogicState(d interpret.LogicState, id uint64) ([]types.SplitData, error) {
 	v := types.NewVertex("logic-state", id,
 		types.PropPair{K: "path", V: d.Path},
 		types.PropPair{K: "lgroup", V: d.Lgroup},
@@ -108,7 +90,7 @@ func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
 		types.PropPair{K: "semver", V: d.ID.Semver},
 	)
 
-	var edges EdgeSpecs
+	var edges types.EdgeSpecs
 
 	if !d.ID.Commit.IsEmpty() {
 		edges = append(edges, SpecCommit{d.ID.Commit})
@@ -120,11 +102,11 @@ func splitLogicState(d interpret.LogicState, id uint64) ([]SplitData, error) {
 
 	edges = append(edges, d.Environment)
 
-	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
+	return []types.SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
-func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
-	sd := make([]SplitData, 0)
+func splitProcess(d interpret.Process, id uint64) ([]types.SplitData, error) {
+	sd := make([]types.SplitData, 0)
 
 	v := types.NewVertex("process", id,
 		types.PropPair{K: "pid", V: d.Pid},
@@ -133,7 +115,7 @@ func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 		types.PropPair{K: "user", V: d.User},
 	)
 
-	var edges EdgeSpecs
+	var edges types.EdgeSpecs
 	edges = append(edges, d.Environment)
 
 	for _, ls := range d.LogicStates {
@@ -159,13 +141,13 @@ func splitProcess(d interpret.Process, id uint64) ([]SplitData, error) {
 			}
 			v2.Properties = v2.Properties.Set("port", types.Property{MsgSrc: id, Value: listen.Port})
 		}
-		sd = append(sd, SplitData{v2, EdgeSpecs{d.Environment}})
+		sd = append(sd, types.SplitData{v2, types.EdgeSpecs{d.Environment}})
 	}
 
-	return append([]SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
+	return append([]types.SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
 }
 
-func splitCommit(d interpret.Commit, id uint64) ([]SplitData, error) {
+func splitCommit(d interpret.Commit, id uint64) ([]types.SplitData, error) {
 	v := types.NewVertex("commit", id,
 		types.PropPair{K: "sha1", V: d.Sha1},
 		types.PropPair{K: "author", V: d.Author},
@@ -174,45 +156,45 @@ func splitCommit(d interpret.Commit, id uint64) ([]SplitData, error) {
 		types.PropPair{K: "repository", V: d.Repository},
 	)
 
-	var edges EdgeSpecs
+	var edges types.EdgeSpecs
 	for k, parent := range d.Parents {
 		edges = append(edges, SpecGitCommitParent{parent, k + 1})
 	}
 
-	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
+	return []types.SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
-func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]SplitData, error) {
-	sd := make([]SplitData, 0)
+func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]types.SplitData, error) {
+	sd := make([]types.SplitData, 0)
 
 	for _, tag := range d.Tags {
 		v := types.NewVertex("git-tag", id, types.PropPair{"name", tag})
-		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+		sd = append(sd, types.SplitData{Vertex: v, EdgeSpecs: []types.EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	for _, branch := range d.Branches {
 		v := types.NewVertex("git-branch", id, types.PropPair{"name", branch})
-		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+		sd = append(sd, types.SplitData{Vertex: v, EdgeSpecs: []types.EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	if d.TestState != "" {
 		v := types.NewVertex("test-result", id, types.PropPair{"result", d.TestState})
-		sd = append(sd, SplitData{Vertex: v, EdgeSpecs: []EdgeSpec{SpecCommit{d.Sha1}}})
+		sd = append(sd, types.SplitData{Vertex: v, EdgeSpecs: []types.EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	return sd, nil
 }
 
-func splitParentDataset(d interpret.ParentDataset, id uint64) ([]SplitData, error) {
+func splitParentDataset(d interpret.ParentDataset, id uint64) ([]types.SplitData, error) {
 	v := types.NewVertex("parent-dataset", id,
 		types.PropPair{K: "name", V: d.Name},
 		types.PropPair{K: "path", V: d.Path},
 	)
-	var edges EdgeSpecs
+	var edges types.EdgeSpecs
 
 	edges = append(edges, d.Environment)
 
-	ret := []SplitData{{v, edges}}
+	ret := []types.SplitData{{v, edges}}
 
 	for _, sub := range d.Subsets {
 		sub.Parent = d.Name
@@ -220,29 +202,29 @@ func splitParentDataset(d interpret.ParentDataset, id uint64) ([]SplitData, erro
 		// can only be one
 		sd := sds[0]
 		// FIXME having this here is cool, but the schema does allow top-level datasets, which won't pass thru and so are guaranteed orphans
-		sd.EdgeSpecs = append(EdgeSpecs{d.Environment}, sd.EdgeSpecs...)
+		sd.EdgeSpecs = append(types.EdgeSpecs{d.Environment}, sd.EdgeSpecs...)
 		ret = append(ret, sd)
 	}
 
 	return ret, nil
 }
 
-func splitDataset(d interpret.Dataset, id uint64) ([]SplitData, error) {
+func splitDataset(d interpret.Dataset, id uint64) ([]types.SplitData, error) {
 	v := types.NewVertex("dataset", id,
 		types.PropPair{K: "name", V: d.Name},
 		// TODO convert input from string to int and force timestamps. javascript apparently likes
 		// ISO 8601, but go doesn't? so, timestamps.
 		types.PropPair{K: "create-time", V: d.CreateTime},
 	)
-	var edges EdgeSpecs
+	var edges types.EdgeSpecs
 
 	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
 	edges = append(edges, d.Genesis)
 
-	return []SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
+	return []types.SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
-func splitYumPkg(d interpret.YumPkg, id uint64) ([]SplitData, error) {
+func splitYumPkg(d interpret.YumPkg, id uint64) ([]types.SplitData, error) {
 	v := types.NewVertex("dataset", id,
 		types.PropPair{K: "name", V: d.Name},
 		types.PropPair{K: "version", V: d.Version},
@@ -251,5 +233,5 @@ func splitYumPkg(d interpret.YumPkg, id uint64) ([]SplitData, error) {
 		types.PropPair{K: "arch", V: d.Arch},
 	)
 
-	return []SplitData{{Vertex: v}}, nil
+	return []types.SplitData{{Vertex: v}}, nil
 }

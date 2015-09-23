@@ -116,7 +116,7 @@ func (vt VertexTuple) OutEdges() []StandardEdge {
 
 type veProcessingInfo struct {
 	vt    VertexTuple
-	es    EdgeSpecs
+	es    types.EdgeSpecs
 	msgid uint64
 }
 
@@ -189,7 +189,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	for _, orphan := range g.orphans {
 		// vertex ident failed; try again now that new vertices are present
 		if orphan.vt.id == 0 {
-			orphan.vt = g.ensureVertex(orphan.msgid, SplitData{orphan.vt.v, orphan.es})
+			orphan.vt = g.ensureVertex(orphan.msgid, types.SplitData{orphan.vt.v, orphan.es})
 		} else {
 			// ensure we have latest version of vt
 			vt, err := g.Get(orphan.vt.id)
@@ -289,7 +289,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *coreGraph) ensureVertex(msgid uint64, sd SplitData) (final VertexTuple) {
+func (g *coreGraph) ensureVertex(msgid uint64, sd types.SplitData) (final VertexTuple) {
 	logEntry := log.WithFields(log.Fields{
 		"system": "engine",
 		"msgid":  msgid,

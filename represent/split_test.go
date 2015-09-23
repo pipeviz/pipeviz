@@ -102,7 +102,7 @@ var M_envlink []interpret.EnvLink = []interpret.EnvLink{
 type FixtureEnvironmentSplit struct {
 	Summary string
 	Input   interpret.Environment
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
@@ -111,7 +111,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input: interpret.Environment{
 			Address: M_addr[0],
 		},
-		Output: []SplitData{
+		Output: []types.SplitData{
 			{
 				Vertex: types.Vertex{
 					Type:       "environment",
@@ -124,7 +124,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 	{
 		Summary: "Minimal environment with ipv4 and nick",
 		Input:   interpret.Environment{Address: M_addr[1], Nick: D_nick},
-		Output: []SplitData{
+		Output: []types.SplitData{
 			{
 				Vertex: types.Vertex{
 					Type:       "environment",
@@ -137,7 +137,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 	{
 		Summary: "Minimal environment with hostname, ipv4, ipv6, and nick",
 		Input:   interpret.Environment{Address: M_addr[6], Nick: D_nick},
-		Output: []SplitData{
+		Output: []types.SplitData{
 			{
 				Vertex: types.Vertex{
 					Type:       "environment",
@@ -150,7 +150,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 	{
 		Summary: "Environment with all props set, plus hostname and nick",
 		Input:   D_env,
-		Output: []SplitData{
+		Output: []types.SplitData{
 			{
 				Vertex: types.Vertex{
 					Type:       "environment",
@@ -165,7 +165,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 type FixtureLogicStateSplit struct {
 	Summary string
 	Input   interpret.LogicState
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_LogicState []FixtureLogicStateSplit
@@ -173,7 +173,7 @@ var F_LogicState []FixtureLogicStateSplit
 type FixtureProcessSplit struct {
 	Summary string
 	Input   interpret.Process
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_Process []FixtureProcessSplit
@@ -181,7 +181,7 @@ var F_Process []FixtureProcessSplit
 type FixtureCommitSplit struct {
 	Summary string
 	Input   interpret.Commit
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_Commit []FixtureCommitSplit
@@ -189,7 +189,7 @@ var F_Commit []FixtureCommitSplit
 type FixtureCommitMetaSplit struct {
 	Summary string
 	Input   interpret.CommitMeta
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_CommitMeta []FixtureCommitMetaSplit
@@ -197,7 +197,7 @@ var F_CommitMeta []FixtureCommitMetaSplit
 type FixtureDatasetSplit struct {
 	Summary string
 	Input   interpret.Dataset
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_Dataset []FixtureDatasetSplit
@@ -205,7 +205,7 @@ var F_Dataset []FixtureDatasetSplit
 type FixtureParentDatasetSplit struct {
 	Summary string
 	Input   interpret.ParentDataset
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_ParentDataset []FixtureParentDatasetSplit
@@ -213,7 +213,7 @@ var F_ParentDataset []FixtureParentDatasetSplit
 type FixtureYumPkgSplit struct {
 	Summary string
 	Input   interpret.YumPkg
-	Output  []SplitData
+	Output  []types.SplitData
 }
 
 var F_YumPkg []FixtureYumPkgSplit
@@ -267,13 +267,13 @@ func init() {
 		{
 			Summary: "Commit id, path, envlink. No props or datasets.",
 			Input:   interpret.LogicState{ID: lsIds[0], Path: D_ls.Path, Environment: M_envlink[1]},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}),
 					},
-					EdgeSpecs: EdgeSpecs{
+					EdgeSpecs: types.EdgeSpecs{
 						SpecCommit{hexify(D_commit)},
 						M_envlink[1],
 					},
@@ -283,13 +283,13 @@ func init() {
 		{
 			Summary: "Version, path, envlink. No props, datasets.",
 			Input:   interpret.LogicState{ID: lsIds[1], Path: D_ls.Path, Environment: M_envlink[1]},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"version", D_version}),
 					},
-					EdgeSpecs: EdgeSpecs{
+					EdgeSpecs: types.EdgeSpecs{
 						M_envlink[1],
 					},
 				},
@@ -298,13 +298,13 @@ func init() {
 		{
 			Summary: "Semver, path, and envlink. No props or datasets.",
 			Input:   interpret.LogicState{ID: lsIds[2], Path: D_ls.Path, Environment: M_envlink[1]},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
-					EdgeSpecs: EdgeSpecs{
+					EdgeSpecs: types.EdgeSpecs{
 						M_envlink[1],
 					},
 				},
@@ -320,13 +320,13 @@ func init() {
 				Type:        D_ls.Type,
 				Environment: M_envlink[1],
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
-					EdgeSpecs: EdgeSpecs{
+					EdgeSpecs: types.EdgeSpecs{
 						SpecCommit{hexify(D_commit)},
 						M_envlink[1],
 					},
@@ -341,13 +341,13 @@ func init() {
 				Datasets:    datalinks[:2],
 				Environment: M_envlink[0],
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
-					EdgeSpecs: EdgeSpecs{
+					EdgeSpecs: types.EdgeSpecs{
 						datalinks[0],
 						datalinks[1],
 						M_envlink[0],
@@ -363,13 +363,13 @@ func init() {
 				Datasets:    datalinks[2:],
 				Environment: M_envlink[6],
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
-					EdgeSpecs: EdgeSpecs{
+					EdgeSpecs: types.EdgeSpecs{
 						datalinks[2],
 						M_envlink[6],
 					},
@@ -386,13 +386,13 @@ func init() {
 				Environment: M_envlink[0],
 				LogicStates: []string{"/path/to/sth"},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
 					},
@@ -409,13 +409,13 @@ func init() {
 				Group:       "scuba",
 				User:        "pooja",
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[1],
 						SpecLocalLogic{"/path/to/sth"},
 					},
@@ -432,13 +432,13 @@ func init() {
 					{Type: "port", Port: 1025, Proto: []string{"tcp"}},
 				},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
 						SpecLocalLogic{"/usr/local/src/imaginationland"},
@@ -450,7 +450,7 @@ func init() {
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 					},
 				},
@@ -466,13 +466,13 @@ func init() {
 					{Type: "unix", Path: "/var/run/lookitsa.sock"},
 				},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/usr/local/src/imaginationland"},
 						SpecUnixDomainListener{Path: "/var/run/lookitsa.sock"},
@@ -483,7 +483,7 @@ func init() {
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 					},
 				},
@@ -500,13 +500,13 @@ func init() {
 					{Type: "port", Port: 1025, Proto: []string{"tcp", "udp"}},
 				},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 						SpecLocalLogic{"/path/to/sth"},
 						SpecLocalLogic{"/usr/local/src/imaginationland"},
@@ -520,7 +520,7 @@ func init() {
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 					},
 				},
@@ -529,7 +529,7 @@ func init() {
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 					},
 				},
@@ -548,13 +548,13 @@ func init() {
 				Sha1:       D_commithash,
 				Parents:    []interpret.Sha1{hexify("1854930bef6511f688afd99c1018dcb99ae966b0")},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "commit",
 						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},
 					},
 				},
@@ -569,7 +569,7 @@ func init() {
 				Subject:    "Make JSON correct",
 				Sha1:       D_commithash,
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "commit",
@@ -589,13 +589,13 @@ func init() {
 				Sha1:       D_commithash,
 				Parents:    []interpret.Sha1{hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824")},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "commit",
 						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecGitCommitParent{Sha1: hexify("1854930bef6511f688afd99c1018dcb99ae966b0"), ParentNum: 1},
 						SpecGitCommitParent{Sha1: hexify("1076009c0200542e7a3f86a79bdc1c5db1c44824"), ParentNum: 2},
 					},
@@ -611,13 +611,13 @@ func init() {
 				Sha1: D_commithash,
 				Tags: []string{"foo"},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -629,13 +629,13 @@ func init() {
 				Sha1: D_commithash,
 				Tags: []string{"foo", "bar"},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -644,7 +644,7 @@ func init() {
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -657,13 +657,13 @@ func init() {
 				Tags:     []string{"foo", "bar"},
 				Branches: []string{"qux", "zoop"},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -672,7 +672,7 @@ func init() {
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -681,7 +681,7 @@ func init() {
 						Type:       "git-branch",
 						Properties: mapPropPairs(D_msgid, p{"name", "qux"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -690,7 +690,7 @@ func init() {
 						Type:       "git-branch",
 						Properties: mapPropPairs(D_msgid, p{"name", "zoop"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -703,13 +703,13 @@ func init() {
 				Tags:      []string{"foo"},
 				TestState: "passed", // or pending, or failed
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -718,7 +718,7 @@ func init() {
 						Type:       "test-result",
 						Properties: mapPropPairs(D_msgid, p{"result", "passed"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecCommit{D_commithash},
 					},
 				},
@@ -735,13 +735,13 @@ func init() {
 				Parent:     "parentdata",
 				Genesis:    interpret.DataAlpha("α"),
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecDatasetHierarchy{[]string{"parentdata"}},
 						interpret.DataAlpha("α"),
 					},
@@ -760,13 +760,13 @@ func init() {
 					SnapTime: D_datetime,
 				},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						SpecDatasetHierarchy{[]string{"parentdata"}},
 						interpret.DataProvenance{
 							Address:  M_addr[0],
@@ -787,13 +787,13 @@ func init() {
 				Path:        "/var/lib/froofroodata",
 				Name:        "froofroo",
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "parent-dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 					},
 				},
@@ -813,13 +813,13 @@ func init() {
 					},
 				},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "parent-dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 					},
 				},
@@ -828,7 +828,7 @@ func init() {
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 						SpecDatasetHierarchy{[]string{"froofroo"}},
 						interpret.DataAlpha("α"),
@@ -859,13 +859,13 @@ func init() {
 					},
 				},
 			},
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "parent-dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 					},
 				},
@@ -874,7 +874,7 @@ func init() {
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 						SpecDatasetHierarchy{[]string{"froofroo"}},
 						interpret.DataAlpha("α"),
@@ -885,7 +885,7 @@ func init() {
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
-					EdgeSpecs: []EdgeSpec{
+					EdgeSpecs: []types.EdgeSpec{
 						M_envlink[0],
 						SpecDatasetHierarchy{[]string{"froofroo"}},
 						interpret.DataProvenance{
@@ -903,7 +903,7 @@ func init() {
 		{
 			Summary: "Only YumPkg test; direct values passthrough",
 			Input:   D_yp,
-			Output: []SplitData{
+			Output: []types.SplitData{
 				{
 					Vertex: types.Vertex{
 						Type:       "pkg-yum",
@@ -918,7 +918,7 @@ func init() {
 
 // ******** Utility funcs
 
-func compareSplitData(expect, actual []SplitData, t *testing.T) {
+func compareSplitData(expect, actual []types.SplitData, t *testing.T) {
 	//fmt.Printf("%T %#v\n%T %#v\n\n", expect, expect, actual, actual)
 	if len(expect) != len(actual) {
 		t.Errorf("SplitData slices are different lengths; guaranteed not equal. Expected len %v, actual %v", len(expect), len(actual))

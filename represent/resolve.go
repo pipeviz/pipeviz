@@ -14,7 +14,7 @@ import (
 //
 // It is the responsibility of the edge spec's type handler to determine what "if an edge
 // already exists" means, as well as whether to overwrite/merge or duplicate the edge in such a case.
-func Resolve(g CoreGraph, mid uint64, src VertexTuple, d EdgeSpec) (StandardEdge, bool) {
+func Resolve(g CoreGraph, mid uint64, src VertexTuple, d types.EdgeSpec) (StandardEdge, bool) {
 	switch es := d.(type) {
 	case interpret.EnvLink:
 		return resolveEnvLink(g, mid, src, es)
