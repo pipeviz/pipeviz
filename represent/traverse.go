@@ -180,9 +180,9 @@ func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []StandardEdge) 
 	}
 
 	if in {
-		vt.ie.ForEach(fef)
+		vt.InEdges.ForEach(fef)
 	} else {
-		vt.oe.ForEach(fef)
+		vt.OutEdges.ForEach(fef)
 	}
 
 	return
@@ -253,9 +253,9 @@ func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []Vertex
 
 	go func() {
 		if in {
-			vt.ie.ForEach(feef)
+			vt.InEdges.ForEach(feef)
 		} else {
-			vt.oe.ForEach(feef)
+			vt.OutEdges.ForEach(feef)
 		}
 		close(vidchan)
 	}()
@@ -281,12 +281,12 @@ VertexInspector:
 		}
 
 		// FIXME can't rely on Typ() method here, need to store it
-		if vtype != VTypeNone && vtype != adjvt.v.Typ() {
+		if vtype != VTypeNone && vtype != adjvt.Vertex.Typ() {
 			continue
 		}
 
 		for _, p := range vprops {
-			vprop, exists := adjvt.v.Props().Lookup(p.K)
+			vprop, exists := adjvt.Vertex.Props().Lookup(p.K)
 			if !exists {
 				continue VertexInspector
 			}
@@ -321,12 +321,12 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []VertexTuple) {
 	vtype, props := vf.VType(), vf.VProps()
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
 		vt := val.(VertexTuple)
-		if vtype != VTypeNone && vt.v.Typ() != vtype {
+		if vtype != VTypeNone && vt.Vertex.Typ() != vtype {
 			return
 		}
 
 		for _, p := range props {
-			vprop, exists := vt.v.Props().Lookup(p.K)
+			vprop, exists := vt.Vertex.Props().Lookup(p.K)
 			if !exists {
 				return
 			}
@@ -354,8 +354,8 @@ func (g *coreGraph) VerticesWith(vf VFilter) (vs []VertexTuple) {
 func FindEnvironment(g CoreGraph, props ps.Map) (envid int, success bool) {
 	rv := g.VerticesWith(Qbv(types.VType("environment")))
 	for _, vt := range rv {
-		if matchEnvLink(props, vt.v.Props()) {
-			return vt.id, true
+		if matchEnvLink(props, vt.Vertex.Props()) {
+			return vt.ID, true
 		}
 	}
 
@@ -376,7 +376,7 @@ func FindDataset(g CoreGraph, envid int, name []string) (id int, success bool) {
 			return 0, false
 		}
 
-		id = rv[0].id
+		id = rv[0].ID
 	}
 
 	return id, true

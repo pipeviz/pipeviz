@@ -24,17 +24,17 @@ func tprops(pairs ...interface{}) []types.PropPair {
 // checking source/target ids. panics if they don't line up!
 func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) VertexTuple {
 	vt := VertexTuple{
-		id: vid,
-		v:  vtx,
-		ie: ps.NewMap(),
-		oe: ps.NewMap(),
+		ID:       vid,
+		Vertex:   vtx,
+		InEdges:  ps.NewMap(),
+		OutEdges: ps.NewMap(),
 	}
 
 	for _, e := range edges {
 		if e.Source == vid {
-			vt.oe = vt.oe.Set(strconv.Itoa(e.id), e)
+			vt.OutEdges = vt.OutEdges.Set(strconv.Itoa(e.id), e)
 		} else if e.Target == vid {
-			vt.ie = vt.ie.Set(strconv.Itoa(e.id), e)
+			vt.InEdges = vt.InEdges.Set(strconv.Itoa(e.id), e)
 		} else {
 			panic("edge had neither source nor target of vid")
 		}

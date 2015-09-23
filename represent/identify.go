@@ -67,7 +67,7 @@ func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive boo
 
 	filtered := matches[:0] // destructive zero-alloc filtering
 	for _, candidate := range matches {
-		if chk.Matches(sd.Vertex, candidate.v) {
+		if chk.Matches(sd.Vertex, candidate.Vertex) {
 			filtered = append(filtered, candidate)
 		}
 	}
@@ -86,7 +86,7 @@ func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive boo
 	// TODO this is a temporary measure until we move identity edge resolution up into vtx identification process
 	filtered2 := filtered[:0]
 	if hasEl {
-		newvt := VertexTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
+		newvt := VertexTuple{Vertex: sd.Vertex, InEdges: ps.NewMap(), OutEdges: ps.NewMap()}
 		edge, success := Resolve(g, 0, newvt, envlink)
 
 		if !success {
@@ -95,10 +95,10 @@ func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive boo
 		}
 
 		for _, candidate := range filtered {
-			for _, edge2 := range g.OutWith(candidate.id, Qbe(types.EType("envlink"))) {
+			for _, edge2 := range g.OutWith(candidate.ID, Qbe(types.EType("envlink"))) {
 				filtered2 = append(filtered2, candidate)
 				if edge2.Target == edge.Target {
-					return []int{candidate.id}, true
+					return []int{candidate.ID}, true
 				}
 			}
 		}
@@ -108,7 +108,7 @@ func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive boo
 	}
 
 	for _, vt := range filtered2 {
-		ret = append(ret, vt.id)
+		ret = append(ret, vt.ID)
 	}
 
 	return ret, false

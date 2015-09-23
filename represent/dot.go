@@ -23,7 +23,7 @@ func GenerateDot(g CoreGraph) []byte {
 	for _, v := range g.VerticesWith(Qbv()) {
 		lbltype := "label"
 		var props string
-		switch v.v.Typ() {
+		switch v.Vertex.Typ() {
 		case "environment":
 			props = "\tshape=house,style=filled,fillcolor=orange,fontsize=20\n"
 		case "logic-state":
@@ -44,9 +44,9 @@ func GenerateDot(g CoreGraph) []byte {
 
 		buf.WriteString(fmt.Sprintf(
 			"\t\"v%d\" [%s%s=\"id: %d\nvtype: %s",
-			v.id, props, lbltype, v.id, v.v.Typ()))
+			v.ID, props, lbltype, v.ID, v.Vertex.Typ()))
 
-		v.v.Props().ForEach(func(k string, val ps.Any) {
+		v.Vertex.Props().ForEach(func(k string, val ps.Any) {
 			prop := val.(types.Property)
 			var format string
 			switch pv := prop.Value.(type) {
@@ -72,7 +72,7 @@ func GenerateDot(g CoreGraph) []byte {
 
 	// pass through a second time to write all edges
 	for _, v := range g.VerticesWith(Qbv()) {
-		v.oe.ForEach(func(k string, val ps.Any) {
+		v.OutEdges.ForEach(func(k string, val ps.Any) {
 			edge := val.(StandardEdge)
 			buf.WriteString(fmt.Sprintf(
 				"\t\"v%d\" -> \"v%d\" [\n\tlabel=\"id: %d\netype: %s",

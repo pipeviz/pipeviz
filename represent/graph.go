@@ -81,31 +81,10 @@ const (
 )
 
 type VertexTuple struct {
-	id int
-	v  types.Vertex
-	ie ps.Map
-	oe ps.Map
-}
-
-// Returns the numeric id of the vertex tuple.
-func (vt VertexTuple) Id() int {
-	return vt.id
-}
-
-// Returns the vertex data of the vertex tuple.
-func (vt VertexTuple) Vertex() types.Vertex {
-	return vt.v
-}
-
-// Returns the out-edges of the vertex tuple.
-func (vt VertexTuple) OutEdges() []StandardEdge {
-	var ret []StandardEdge
-
-	vt.oe.ForEach(func(k string, v ps.Any) {
-		ret = append(ret, v.(StandardEdge))
-	})
-
-	return ret
+	ID       int
+	Vertex   types.Vertex
+	InEdges  ps.Map
+	OutEdges ps.Map
 }
 
 type veProcessingInfo struct {
@@ -182,14 +161,14 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 	// TODO lots of things very wrong with this approach, but works for first pass
 	for _, orphan := range g.orphans {
 		// vertex ident failed; try again now that new vertices are present
-		if orphan.vt.id == 0 {
-			orphan.vt = g.ensureVertex(orphan.msgid, types.SplitData{orphan.vt.v, orphan.es})
+		if orphan.vt.ID == 0 {
+			orphan.vt = g.ensureVertex(orphan.msgid, types.SplitData{orphan.vt.Vertex, orphan.es})
 		} else {
 			// ensure we have latest version of vt
-			vt, err := g.Get(orphan.vt.id)
+			vt, err := g.Get(orphan.vt.ID)
 			if err != nil {
 				// but if that vid has gone away, forget about it completely
-				logEntry.Infof("Orphan vid %d went away, discarding from orphan list", orphan.vt.id)
+				logEntry.Infof("Orphan vid %d went away, discarding from orphan list", orphan.vt.ID)
 				continue
 			}
 			orphan.vt = vt
@@ -220,8 +199,8 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 		l2.Debug("Beginning edge resolution pass")
 		for infokey, info := range ess {
 			l3 := logEntry.WithFields(log.Fields{
-				"vid":   info.vt.id,
-				"vtype": info.vt.v.Typ(),
+				"vid":   info.vt.ID,
+				"vtype": info.vt.Vertex.Typ(),
 			})
 			specs := info.es
 			info.es = info.es[:0]
@@ -236,7 +215,7 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 
 					l4.Debug("Edge resolved successfully")
 
-					edge.Source = info.vt.id
+					edge.Source = info.vt.ID
 					if edge.id == 0 {
 						// new edge, allocate a new id for it
 						g.vserial++
@@ -246,14 +225,14 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 						l4.WithField("edge-id", edge.id).Debug("Edge will merge over existing edge")
 					}
 
-					info.vt.oe = info.vt.oe.Set(i2a(edge.id), edge)
-					g.vtuples = g.vtuples.Set(i2a(info.vt.id), info.vt)
+					info.vt.OutEdges = info.vt.OutEdges.Set(i2a(edge.id), edge)
+					g.vtuples = g.vtuples.Set(i2a(info.vt.ID), info.vt)
 
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
 
 					tvt := any.(VertexTuple)
-					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
-					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
+					tvt.InEdges = tvt.InEdges.Set(i2a(edge.id), edge)
+					g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
 				} else {
 					l3.Debug("Unsuccessful edge resolution; reattempt on next pass")
 					// FIXME mem leaks if done this way...?
@@ -295,9 +274,9 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.SplitData) (final Vertex
 
 	if vid == 0 {
 		logEntry.Debug("No match on unification, creating new vertex")
-		final = VertexTuple{v: sd.Vertex, ie: ps.NewMap(), oe: ps.NewMap()}
+		final = VertexTuple{Vertex: sd.Vertex, InEdges: ps.NewMap(), OutEdges: ps.NewMap()}
 		g.vserial += 1
-		final.id = g.vserial
+		final.ID = g.vserial
 		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
 		// TODO remove this - temporarily cheat here by promoting EnvLink resolution, since so much relies on it
 		for _, spec := range sd.EdgeSpecs {
@@ -309,14 +288,14 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.SplitData) (final Vertex
 					logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
 					g.vserial += 1
 					edge.id = g.vserial
-					final.oe = final.oe.Set(i2a(edge.id), edge)
+					final.OutEdges = final.OutEdges.Set(i2a(edge.id), edge)
 
 					// set edge in reverse direction, too
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
 					tvt := any.(VertexTuple)
-					tvt.ie = tvt.ie.Set(i2a(edge.id), edge)
-					g.vtuples = g.vtuples.Set(i2a(tvt.id), tvt)
-					g.vtuples = g.vtuples.Set(i2a(final.id), final)
+					tvt.InEdges = tvt.InEdges.Set(i2a(edge.id), edge)
+					g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
+					g.vtuples = g.vtuples.Set(i2a(final.ID), final)
 				} else {
 					logEntry.Debug("Early resolve failed")
 				}
@@ -327,7 +306,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.SplitData) (final Vertex
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
 		vt := ivt.(VertexTuple)
 
-		nu, err := vt.v.Merge(sd.Vertex)
+		nu, err := vt.Vertex.Merge(sd.Vertex)
 		if err != nil {
 			logEntry.WithFields(log.Fields{
 				"vid": vid,
@@ -335,7 +314,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.SplitData) (final Vertex
 			}).Warn("Merge of vertex properties returned an error; vertex will continue update into graph anyway")
 		}
 
-		final = VertexTuple{id: vid, ie: vt.ie, oe: vt.oe, v: nu}
+		final = VertexTuple{ID: vid, InEdges: vt.InEdges, OutEdges: vt.OutEdges, Vertex: nu}
 		g.vtuples = g.vtuples.Set(i2a(vid), final)
 	}
 
