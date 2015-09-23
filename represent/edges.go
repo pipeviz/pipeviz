@@ -6,7 +6,7 @@ import (
 )
 
 type StandardEdge struct {
-	id     int
+	ID     int
 	Source int
 	Target int
 	EType  types.EType

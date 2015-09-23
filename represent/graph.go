@@ -209,22 +209,22 @@ func (og *coreGraph) Merge(msg interpret.Message) CoreGraph {
 					l4.Debug("Edge resolved successfully")
 
 					edge.Source = info.vt.ID
-					if edge.id == 0 {
+					if edge.ID == 0 {
 						// new edge, allocate a new id for it
 						g.vserial++
-						edge.id = g.vserial
-						l4.WithField("edge-id", edge.id).Debug("New edge created")
+						edge.ID = g.vserial
+						l4.WithField("edge-id", edge.ID).Debug("New edge created")
 					} else {
-						l4.WithField("edge-id", edge.id).Debug("Edge will merge over existing edge")
+						l4.WithField("edge-id", edge.ID).Debug("Edge will merge over existing edge")
 					}
 
-					info.vt.OutEdges = info.vt.OutEdges.Set(i2a(edge.id), edge)
+					info.vt.OutEdges = info.vt.OutEdges.Set(i2a(edge.ID), edge)
 					g.vtuples = g.vtuples.Set(i2a(info.vt.ID), info.vt)
 
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
 
 					tvt := any.(types.VertexTuple)
-					tvt.InEdges = tvt.InEdges.Set(i2a(edge.id), edge)
+					tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
 				} else {
 					l3.Debug("Unsuccessful edge resolution; reattempt on next pass")
@@ -280,13 +280,13 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.SplitData) (final types.
 				if success { // could fail if corresponding env not yet declared
 					logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
 					g.vserial += 1
-					edge.id = g.vserial
-					final.OutEdges = final.OutEdges.Set(i2a(edge.id), edge)
+					edge.ID = g.vserial
+					final.OutEdges = final.OutEdges.Set(i2a(edge.ID), edge)
 
 					// set edge in reverse direction, too
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
 					tvt := any.(types.VertexTuple)
-					tvt.InEdges = tvt.InEdges.Set(i2a(edge.id), edge)
+					tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
 					g.vtuples = g.vtuples.Set(i2a(final.ID), final)
 				} else {

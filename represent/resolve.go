@@ -233,7 +233,7 @@ func resolveSpecCommit(g CoreGraph, mid uint64, src types.VertexTuple, es SpecCo
 	re := g.OutWith(src.ID, Qbe(types.EType("version")))
 	if len(re) > 0 {
 		sha1, _ := re[0].Props.Lookup("sha1")
-		e.id = re[0].id // FIXME setting the id to non-0 AND failing is currently unhandled
+		e.ID = re[0].ID // FIXME setting the id to non-0 AND failing is currently unhandled
 		if sha1.(types.Property).Value == es.Sha1 {
 			success = true
 			e.Target = re[0].Target
@@ -266,7 +266,7 @@ func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src types.VertexTuple, 
 	if len(re) > 0 {
 		success = true
 		e.Target = re[0].Target
-		e.id = re[0].id
+		e.ID = re[0].ID
 	} else {
 		rv := g.VerticesWith(Qbv(types.VType("commit"), "sha1", es.Sha1))
 		if len(rv) == 1 {

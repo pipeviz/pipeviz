@@ -76,7 +76,7 @@ func GenerateDot(g CoreGraph) []byte {
 			edge := val.(StandardEdge)
 			buf.WriteString(fmt.Sprintf(
 				"\t\"v%d\" -> \"v%d\" [\n\tlabel=\"id: %d\netype: %s",
-				edge.Source, edge.Target, edge.id, edge.EType))
+				edge.Source, edge.Target, edge.ID, edge.EType))
 
 			edge.Props.ForEach(func(k2 string, val2 ps.Any) {
 				prop := val2.(types.Property)

@@ -32,9 +32,9 @@ func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) types.VertexTuple
 
 	for _, e := range edges {
 		if e.Source == vid {
-			vt.OutEdges = vt.OutEdges.Set(strconv.Itoa(e.id), e)
+			vt.OutEdges = vt.OutEdges.Set(strconv.Itoa(e.ID), e)
 		} else if e.Target == vid {
-			vt.InEdges = vt.InEdges.Set(strconv.Itoa(e.id), e)
+			vt.InEdges = vt.InEdges.Set(strconv.Itoa(e.ID), e)
 		} else {
 			panic("edge had neither source nor target of vid")
 		}
@@ -46,7 +46,7 @@ func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) types.VertexTuple
 // utility func to create a StandardEdge.
 func mkEdge(id, source, target int, msgid uint64, etype string, props ...interface{}) StandardEdge {
 	e := StandardEdge{
-		id:     id,
+		ID:     id,
 		Source: source,
 		Target: target,
 		EType:  types.EType(etype),

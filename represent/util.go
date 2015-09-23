@@ -60,7 +60,7 @@ func vtoflat(v types.Vertex) (flat flatVertex) {
 
 func etoflat(e StandardEdge) (flat flatEdge) {
 	flat = flatEdge{
-		Id:     e.id,
+		Id:     e.ID,
 		Source: e.Source,
 		Target: e.Target,
 		EType:  e.EType,
