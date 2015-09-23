@@ -1,19 +1,17 @@
 # Fedora Dockerfile 0.1.1
 #
-# Build the docker image 
-# docker  build -f Dockerfile.fedora -t eliza411/pipeviz .
+# To use this Dockerfile, do the following:
 #
-# Run the container
-# docker run -ti -p 8008:8008 --rm --name pipeserv  eliza411/pipeviz
+# Build the docker image:
+#   dockerbuild -f Dockerfile.fedora -t eliza411/pipeviz .
 #
-# Import sample data with pvutil
-# docker run -ti --link pipeserv:pipeserv --rm eliza411/pipeviz pvutil fixr fixtures/realistic -pt http://pipeserv:2309
+# Run a docker container names pipeserv using the image you just build:
+#   docker run -ti -p 8008:8008 --rm --name pipeserv  eliza411/pipeviz
 #
-# Create json from your git repo
-# docker run -v /path/to/repo/on/host/system:/repo  python pvgit2json.py -r /repo  > OUTPUT.json
-#
+# In a seperate shell, run a separate container to manually send input to the pipeviz server:
+#   docker run -ti --link pipeserv:pipeserv --rm eliza411/pipeviz pvutil fixr fixtures/realistic -pt http://pipeserv:2309
 
-FROM fedora:latest 
+FROM fedora:latest
 MAINTAINER Melissa Anderson <melissa@happypunch.com>
 
 ENV GO_VERSION 1.4.2
@@ -30,10 +28,12 @@ RUN dnf install -y \
     tar
 RUN wget https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go1.4.2.linux-amd64.tar.gz
+RUN useradd pipeviz
 RUN mkdir -p $GOPATH/src/github.com/tag1consulting/pipeviz
 COPY . $GOPATH/src/github.com/tag1consulting/pipeviz
-RUN cd $GOPATH/src/github.com/tag1consulting/pipeviz && \
-    make && \
-    make install
+RUN chown -R pipeviz $GOPATH
+USER pipeviz
 WORKDIR $GOPATH/src/github.com/tag1consulting/pipeviz
+RUN make && \
+    make install
 CMD ["pipeviz", "-b"]
