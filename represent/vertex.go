@@ -41,29 +41,3 @@ func assignEnvLink(mid uint64, e interpret.EnvLink, m ps.Map, excl bool) ps.Map 
 
 	return m
 }
-
-func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map {
-	if a.Hostname != "" {
-		if excl {
-			m = m.Delete("ipv4")
-			m = m.Delete("ipv6")
-		}
-		m = m.Set("hostname", types.Property{MsgSrc: mid, Value: a.Hostname})
-	}
-	if a.Ipv4 != "" {
-		if excl {
-			m = m.Delete("hostname")
-			m = m.Delete("ipv6")
-		}
-		m = m.Set("ipv4", types.Property{MsgSrc: mid, Value: a.Ipv4})
-	}
-	if a.Ipv6 != "" {
-		if excl {
-			m = m.Delete("hostname")
-			m = m.Delete("ipv4")
-		}
-		m = m.Set("ipv6", types.Property{MsgSrc: mid, Value: a.Ipv6})
-	}
-
-	return m
-}
