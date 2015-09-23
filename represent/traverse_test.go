@@ -22,7 +22,7 @@ func tprops(pairs ...interface{}) []types.PropPair {
 
 // utility func to create a vtTuple. puts edges in the right place by
 // checking source/target ids. panics if they don't line up!
-func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) types.VertexTuple {
+func mkTuple(vid int, vtx types.Vertex, edges ...types.StandardEdge) types.VertexTuple {
 	vt := types.VertexTuple{
 		ID:       vid,
 		Vertex:   vtx,
@@ -44,8 +44,8 @@ func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) types.VertexTuple
 }
 
 // utility func to create a StandardEdge.
-func mkEdge(id, source, target int, msgid uint64, etype string, props ...interface{}) StandardEdge {
-	e := StandardEdge{
+func mkEdge(id, source, target int, msgid uint64, etype string, props ...interface{}) types.StandardEdge {
+	e := types.StandardEdge{
 		ID:     id,
 		Source: source,
 		Target: target,
@@ -195,7 +195,7 @@ func TestVerticesWith(t *testing.T) {
 // Tests arcWith(), which effectively tests both OutWith() and InWith().
 func TestOutInArcWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []StandardEdge
+	var result []types.StandardEdge
 
 	// first test zero-case - vtx 5 has no edges
 	result = g.arcWith(5, Qbe(), false)

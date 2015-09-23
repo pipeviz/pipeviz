@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	publicDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
+	publicDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
 )
 
 var (

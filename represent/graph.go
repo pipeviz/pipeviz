@@ -30,11 +30,11 @@ type CoreGraph interface {
 
 	// Enumerates the outgoing edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).
-	OutWith(egoId int, ef EFilter) (es []StandardEdge)
+	OutWith(egoId int, ef EFilter) (es []types.StandardEdge)
 
 	// Enumerates the incoming edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).
-	InWith(egoId int, ef EFilter) (es []StandardEdge)
+	InWith(egoId int, ef EFilter) (es []types.StandardEdge)
 
 	// Enumerates the successors (targets of outgoing edges) from the ego vertex,
 	// limiting the result set to those that pass the provided edge and vertex
