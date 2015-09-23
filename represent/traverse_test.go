@@ -110,8 +110,8 @@ func TestQbv(t *testing.T) {
 	assert.Equal(t, Qbv(), vertexFilter{vtype: VTypeNone}, "qbv with no args creates equivalent of passing VTypeNone as first arg")
 	assert.Equal(t, Qbv(types.VType("foo")), vertexFilter{vtype: types.VType("foo")}, "qbv with single arg assigns to VType struct prop")
 	assert.Equal(t, Qbv(VTypeNone, "foo"), vertexFilter{vtype: VTypeNone}, "qbv with two args ignores second (unpaired) arg")
-	assert.Equal(t, Qbv(VTypeNone, "foo", "bar"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with three args creates one pair of second (key) and third (value) args")
-	assert.Equal(t, Qbv(VTypeNone, "foo", "bar", "baz"), vertexFilter{vtype: VTypeNone, props: []PropQ{{"foo", "bar"}}}, "qbv with four args creates one pair from 2nd and 3rd args, ignores 4th")
+	assert.Equal(t, Qbv(VTypeNone, "foo", "bar"), vertexFilter{vtype: VTypeNone, props: []types.PropPair{{"foo", "bar"}}}, "qbv with three args creates one pair of second (key) and third (value) args")
+	assert.Equal(t, Qbv(VTypeNone, "foo", "bar", "baz"), vertexFilter{vtype: VTypeNone, props: []types.PropPair{{"foo", "bar"}}}, "qbv with four args creates one pair from 2nd and 3rd args, ignores 4th")
 
 	// ensure that some incorrect things owing to loose typing correctly panic
 	assert.Panics(t, func() {
@@ -135,8 +135,8 @@ func TestQbe(t *testing.T) {
 	assert.Equal(t, Qbe(), edgeFilter{etype: ETypeNone}, "qbe with no args creates equivalent of passing ETypeNone as first arg")
 	assert.Equal(t, Qbe(types.EType("foo")), edgeFilter{etype: types.EType("foo")}, "qbe with single arg assigns to EType struct prop")
 	assert.Equal(t, Qbe(ETypeNone, "foo"), edgeFilter{etype: ETypeNone}, "qbe with two args ignores second (unpaired) arg")
-	assert.Equal(t, Qbe(ETypeNone, "foo", "bar"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with three args creates one pair of second (key) and third (value) args")
-	assert.Equal(t, Qbe(ETypeNone, "foo", "bar", "baz"), edgeFilter{etype: ETypeNone, props: []PropQ{{"foo", "bar"}}}, "qbe with four args creates one pair from 2nd and 3rd args, ignores 4th")
+	assert.Equal(t, Qbe(ETypeNone, "foo", "bar"), edgeFilter{etype: ETypeNone, props: []types.PropPair{{"foo", "bar"}}}, "qbe with three args creates one pair of second (key) and third (value) args")
+	assert.Equal(t, Qbe(ETypeNone, "foo", "bar", "baz"), edgeFilter{etype: ETypeNone, props: []types.PropPair{{"foo", "bar"}}}, "qbe with four args creates one pair from 2nd and 3rd args, ignores 4th")
 
 	// ensure that some incorrect things owing to loose typing correctly panic
 	assert.Panics(t, func() {

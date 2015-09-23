@@ -5,8 +5,8 @@ import (
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
-// Just reuse PropQ
-type p PropQ
+// Just reuse types.PropPair
+type p types.PropPair
 
 // Transform a slice of kv pairs into a map.
 func mapPairs(pairs ...p) (m ps.Map) {

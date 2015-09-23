@@ -10,12 +10,12 @@ import (
 
 type EFilter interface {
 	EType() types.EType
-	EProps() []PropQ
+	EProps() []types.PropPair
 }
 
 type VFilter interface {
 	VType() types.VType
-	VProps() []PropQ
+	VProps() []types.PropPair
 }
 
 type VEFilter interface {
@@ -25,12 +25,12 @@ type VEFilter interface {
 
 type edgeFilter struct {
 	etype types.EType
-	props []PropQ
+	props []types.PropPair
 }
 
 type vertexFilter struct {
 	vtype types.VType
-	props []PropQ
+	props []types.PropPair
 }
 
 type bothFilter struct {
@@ -43,7 +43,7 @@ func (vf vertexFilter) VType() types.VType {
 	return vf.vtype
 }
 
-func (vf vertexFilter) VProps() []PropQ {
+func (vf vertexFilter) VProps() []types.PropPair {
 	return vf.props
 }
 
@@ -51,7 +51,7 @@ func (vf vertexFilter) EType() types.EType {
 	return ETypeNone
 }
 
-func (vf vertexFilter) EProps() []PropQ {
+func (vf vertexFilter) EProps() []types.PropPair {
 	return nil
 }
 
@@ -63,7 +63,7 @@ func (ef edgeFilter) VType() types.VType {
 	return VTypeNone
 }
 
-func (ef edgeFilter) VProps() []PropQ {
+func (ef edgeFilter) VProps() []types.PropPair {
 	return nil
 }
 
@@ -71,7 +71,7 @@ func (ef edgeFilter) EType() types.EType {
 	return ef.etype
 }
 
-func (ef edgeFilter) EProps() []PropQ {
+func (ef edgeFilter) EProps() []types.PropPair {
 	return ef.props
 }
 
@@ -94,7 +94,7 @@ func Qbv(v ...interface{}) vertexFilter {
 		var v2 interface{}
 		for len(v) > 1 {
 			k, v2, v = v[0].(string), v[1], v[2:]
-			vf.props = append(vf.props, PropQ{k, v2})
+			vf.props = append(vf.props, types.PropPair{k, v2})
 		}
 
 		return vf
@@ -116,7 +116,7 @@ func Qbe(v ...interface{}) edgeFilter {
 		var v2 interface{}
 		for len(v) > 1 {
 			k, v2, v = v[0].(string), v[1], v[2:]
-			ef.props = append(ef.props, PropQ{k, v2})
+			ef.props = append(ef.props, types.PropPair{k, v2})
 		}
 
 		return ef

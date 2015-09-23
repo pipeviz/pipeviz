@@ -80,12 +80,6 @@ const (
 	ETypeNone types.EType = ""
 )
 
-// Used in queries to specify property k/v pairs.
-type PropQ struct {
-	K string
-	V interface{}
-}
-
 type VertexTuple struct {
 	id int
 	v  types.Vertex
