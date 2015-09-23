@@ -14,7 +14,7 @@ import (
 //
 // It is the responsibility of the edge spec's type handler to determine what "if an edge
 // already exists" means, as well as whether to overwrite/merge or duplicate the edge in such a case.
-func Resolve(g CoreGraph, mid uint64, src VertexTuple, d types.EdgeSpec) (StandardEdge, bool) {
+func Resolve(g CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeSpec) (StandardEdge, bool) {
 	switch es := d.(type) {
 	case interpret.EnvLink:
 		return resolveEnvLink(g, mid, src, es)
@@ -48,7 +48,7 @@ func Resolve(g CoreGraph, mid uint64, src VertexTuple, d types.EdgeSpec) (Standa
 	return StandardEdge{}, false
 }
 
-func resolveEnvLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.EnvLink) (e StandardEdge, success bool) {
+func resolveEnvLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.EnvLink) (e StandardEdge, success bool) {
 	_, e, success = findEnv(g, src)
 
 	// Whether we find a match or not, have to merge in the EnvLink
@@ -83,7 +83,7 @@ func resolveEnvLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.EnvLi
 	return
 }
 
-func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.DataLink) (e StandardEdge, success bool) {
+func resolveDataLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataLink) (e StandardEdge, success bool) {
 	e = StandardEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -141,8 +141,8 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 		return
 	}
 
-	var sock VertexTuple
-	var rv []VertexTuple // just for reuse
+	var sock types.VertexTuple
+	var rv []types.VertexTuple // just for reuse
 	// If net, must scan; if local, a bit easier.
 	if !isLocal {
 		// First, find the environment vertex
@@ -222,7 +222,7 @@ func resolveDataLink(g CoreGraph, mid uint64, src VertexTuple, es interpret.Data
 	return
 }
 
-func resolveSpecCommit(g CoreGraph, mid uint64, src VertexTuple, es SpecCommit) (e StandardEdge, success bool) {
+func resolveSpecCommit(g CoreGraph, mid uint64, src types.VertexTuple, es SpecCommit) (e StandardEdge, success bool) {
 	e = StandardEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -255,7 +255,7 @@ func resolveSpecCommit(g CoreGraph, mid uint64, src VertexTuple, es SpecCommit) 
 	return
 }
 
-func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src VertexTuple, es SpecGitCommitParent) (e StandardEdge, success bool) {
+func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src types.VertexTuple, es SpecGitCommitParent) (e StandardEdge, success bool) {
 	e = StandardEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -280,7 +280,7 @@ func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src VertexTuple, es Spe
 	return
 }
 
-func resolveSpecLocalLogic(g CoreGraph, mid uint64, src VertexTuple, es SpecLocalLogic) (e StandardEdge, success bool) {
+func resolveSpecLocalLogic(g CoreGraph, mid uint64, src types.VertexTuple, es SpecLocalLogic) (e StandardEdge, success bool) {
 	e = StandardEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -307,7 +307,7 @@ func resolveSpecLocalLogic(g CoreGraph, mid uint64, src VertexTuple, es SpecLoca
 	return
 }
 
-func resolveNetListener(g CoreGraph, mid uint64, src VertexTuple, es SpecNetListener) (e StandardEdge, success bool) {
+func resolveNetListener(g CoreGraph, mid uint64, src types.VertexTuple, es SpecNetListener) (e StandardEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.ID, Qbe(types.EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
 	if len(re) == 1 {
@@ -335,7 +335,7 @@ func resolveNetListener(g CoreGraph, mid uint64, src VertexTuple, es SpecNetList
 	return
 }
 
-func resolveUnixDomainListener(g CoreGraph, mid uint64, src VertexTuple, es SpecUnixDomainListener) (e StandardEdge, success bool) {
+func resolveUnixDomainListener(g CoreGraph, mid uint64, src types.VertexTuple, es SpecUnixDomainListener) (e StandardEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.ID, Qbe(types.EType("listening"), "type", "unix", "path", es.Path))
 	if len(re) == 1 {
@@ -362,7 +362,7 @@ func resolveUnixDomainListener(g CoreGraph, mid uint64, src VertexTuple, es Spec
 	return
 }
 
-func resolveSpecDatasetHierarchy(g CoreGraph, mid uint64, src VertexTuple, es SpecDatasetHierarchy) (e StandardEdge, success bool) {
+func resolveSpecDatasetHierarchy(g CoreGraph, mid uint64, src types.VertexTuple, es SpecDatasetHierarchy) (e StandardEdge, success bool) {
 	e = StandardEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -391,7 +391,7 @@ func resolveSpecDatasetHierarchy(g CoreGraph, mid uint64, src VertexTuple, es Sp
 	return
 }
 
-func resolveSpecParentDataset(g CoreGraph, mid uint64, src VertexTuple, es SpecParentDataset) (e StandardEdge, success bool) {
+func resolveSpecParentDataset(g CoreGraph, mid uint64, src types.VertexTuple, es SpecParentDataset) (e StandardEdge, success bool) {
 	e = StandardEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -419,7 +419,7 @@ func resolveSpecParentDataset(g CoreGraph, mid uint64, src VertexTuple, es SpecP
 	return
 }
 
-func resolveDataProvenance(g CoreGraph, mid uint64, src VertexTuple, es interpret.DataProvenance) (e StandardEdge, success bool) {
+func resolveDataProvenance(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataProvenance) (e StandardEdge, success bool) {
 	// FIXME this presents another weird case where "success" is not binary. We *could*
 	// find an already-existing data-provenance edge, but then have some net-addr params
 	// change which cause it to fail to resolve to an environment. If we call that successful,
@@ -461,7 +461,7 @@ func resolveDataProvenance(g CoreGraph, mid uint64, src VertexTuple, es interpre
 	return
 }
 
-func resolveDataAlpha(g CoreGraph, mid uint64, src VertexTuple, es interpret.DataAlpha) (e StandardEdge, success bool) {
+func resolveDataAlpha(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataAlpha) (e StandardEdge, success bool) {
 	// TODO this makes a loop...are we cool with that?
 	success = true // impossible to fail here
 	e = StandardEdge{
@@ -482,7 +482,7 @@ func resolveDataAlpha(g CoreGraph, mid uint64, src VertexTuple, es interpret.Dat
 // Searches the given vertex's out-edges to find its environment's vertex id.
 //
 // Also conveniently initializes a StandardEdge to the standard zero-state for an envlink.
-func findEnv(g CoreGraph, vt VertexTuple) (vid int, edge StandardEdge, success bool) {
+func findEnv(g CoreGraph, vt types.VertexTuple) (vid int, edge StandardEdge, success bool) {
 	edge = StandardEdge{
 		Source: vt.ID,
 		Props:  ps.NewMap(),

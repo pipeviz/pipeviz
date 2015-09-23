@@ -22,8 +22,8 @@ func tprops(pairs ...interface{}) []types.PropPair {
 
 // utility func to create a vtTuple. puts edges in the right place by
 // checking source/target ids. panics if they don't line up!
-func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) VertexTuple {
-	vt := VertexTuple{
+func mkTuple(vid int, vtx types.Vertex, edges ...StandardEdge) types.VertexTuple {
+	vt := types.VertexTuple{
 		ID:       vid,
 		Vertex:   vtx,
 		InEdges:  ps.NewMap(),
@@ -154,7 +154,7 @@ func TestQbe(t *testing.T) {
 
 func TestVerticesWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []VertexTuple
+	var result []types.VertexTuple
 
 	result = g.VerticesWith(Qbv())
 	if len(result) != 5 {
@@ -312,7 +312,7 @@ func TestOutInArcWith(t *testing.T) {
 // Tests adjacentWith(), which effectively tests SuccessorsWith() and PredecessorsWith()
 func TestAdjacentWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []VertexTuple
+	var result []types.VertexTuple
 
 	// basic, unfiltered tests first to ensure the right data is coming through
 	// vtx 2 has just one in-edge

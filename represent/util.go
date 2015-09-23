@@ -76,24 +76,24 @@ func etoflat(e StandardEdge) (flat flatEdge) {
 
 // flatten the persistent structures in the vtTuple down into conventional ones (typically for easy printing).
 // TODO if this is gonna be exported, it's gotta be cleaned up
-func (vt VertexTuple) Flat() (flat flatVTuple) {
-	flat.Id = vt.ID
-	flat.V = vtoflat(vt.Vertex)
+//func (vt types.VertexTuple) Flat() (flat flatVTuple) {
+//flat.Id = vt.ID
+//flat.V = vtoflat(vt.Vertex)
 
-	vt.InEdges.ForEach(func(k string, v ps.Any) {
-		e := v.(StandardEdge)
-		fe := etoflat(e)
-		flat.InEdges = append(flat.InEdges, fe)
-	})
+//vt.InEdges.ForEach(func(k string, v ps.Any) {
+//e := v.(StandardEdge)
+//fe := etoflat(e)
+//flat.InEdges = append(flat.InEdges, fe)
+//})
 
-	vt.OutEdges.ForEach(func(k string, v ps.Any) {
-		e := v.(StandardEdge)
-		fe := etoflat(e)
-		flat.OutEdges = append(flat.OutEdges, fe)
-	})
+//vt.OutEdges.ForEach(func(k string, v ps.Any) {
+//e := v.(StandardEdge)
+//fe := etoflat(e)
+//flat.OutEdges = append(flat.OutEdges, fe)
+//})
 
-	return flat
-}
+//return flat
+//}
 
 func assignAddress(mid uint64, a interpret.Address, m ps.Map, excl bool) ps.Map {
 	if a.Hostname != "" {

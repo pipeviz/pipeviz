@@ -22,6 +22,13 @@ type PropPair struct {
 	V interface{}
 }
 
+type VertexTuple struct {
+	ID       int
+	Vertex   Vertex
+	InEdges  ps.Map
+	OutEdges ps.Map
+}
+
 // NewVertex creates a new Vertex object, assigning each PropPair to Props
 // using the provided msgid.
 func NewVertex(typ VType, msgid uint64, p ...PropPair) (v Vertex) {
