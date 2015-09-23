@@ -16,7 +16,7 @@ MAINTAINER Melissa Anderson <melissa@happypunch.com>
 
 ENV GO_VERSION 1.4.2
 ENV GOPATH /opt/go
-ENV PATH /usr/local/go/bin:$GOPATH/bin:/src/github.com/tag1consulting/pipeviz:$PATH
+ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
