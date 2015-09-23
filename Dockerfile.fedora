@@ -10,16 +10,13 @@
 #
 # In a seperate shell, run a separate container to manually send input to the pipeviz server:
 #   docker run -ti --link pipeserv:pipeserv --rm eliza411/pipeviz pvutil fixr fixtures/realistic -pt http://pipeserv:2309
-#
-# Create json from your git repo:
-#   docker run -v /path/to/repo/on/host/system:/repo  python pvgit2json.py -r /repo  > OUTPUT.json
 
 FROM fedora:latest
 MAINTAINER Melissa Anderson <melissa@happypunch.com>
 
 ENV GO_VERSION 1.4.2
 ENV GOPATH /opt/go
-ENV PATH /usr/local/go/bin:$GOPATH/bin:/src/github.com/tag1consulting/pipeviz:$PATH
+ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
 
 RUN dnf install -y \
     python-pygit2 \
