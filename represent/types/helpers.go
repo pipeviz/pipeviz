@@ -3,7 +3,7 @@ package types
 import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type SplitData struct {
-	Vertex    Vertex
+	Vertex    StdVertex
 	EdgeSpecs EdgeSpecs
 }
 
@@ -40,7 +40,7 @@ type flatEdge struct {
 	Props  map[string]Property `json:"properties"`
 }
 
-func vtoflat(v Vertex) (flat flatVertex) {
+func vtoflat(v StdVertex) (flat flatVertex) {
 	flat.VType = v.Typ()
 
 	flat.Props = make(map[string]Property)
@@ -50,7 +50,7 @@ func vtoflat(v Vertex) (flat flatVertex) {
 	return
 }
 
-func etoflat(e StandardEdge) (flat flatEdge) {
+func etoflat(e StdEdge) (flat flatEdge) {
 	flat = flatEdge{
 		Id:     e.ID,
 		Source: e.Source,
@@ -73,13 +73,13 @@ func (vt VertexTuple) Flat() (flat flatVTuple) {
 	flat.V = vtoflat(vt.Vertex)
 
 	vt.InEdges.ForEach(func(k string, v ps.Any) {
-		e := v.(StandardEdge)
+		e := v.(StdEdge)
 		fe := etoflat(e)
 		flat.InEdges = append(flat.InEdges, fe)
 	})
 
 	vt.OutEdges.ForEach(func(k string, v ps.Any) {
-		e := v.(StandardEdge)
+		e := v.(StdEdge)
 		fe := etoflat(e)
 		flat.OutEdges = append(flat.OutEdges, fe)
 	})

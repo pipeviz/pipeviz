@@ -14,7 +14,7 @@ import (
 //
 // It is the responsibility of the edge spec's type handler to determine what "if an edge
 // already exists" means, as well as whether to overwrite/merge or duplicate the edge in such a case.
-func Resolve(g CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeSpec) (types.StandardEdge, bool) {
+func Resolve(g CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeSpec) (types.StdEdge, bool) {
 	switch es := d.(type) {
 	case interpret.EnvLink:
 		return resolveEnvLink(g, mid, src, es)
@@ -45,10 +45,10 @@ func Resolve(g CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeSpec) (
 		}).Error("No resolution method for provided EdgeSpec") // TODO is it ok to not halt here?
 	}
 
-	return types.StandardEdge{}, false
+	return types.StdEdge{}, false
 }
 
-func resolveEnvLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.EnvLink) (e types.StandardEdge, success bool) {
+func resolveEnvLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.EnvLink) (e types.StdEdge, success bool) {
 	_, e, success = findEnv(g, src)
 
 	// Whether we find a match or not, have to merge in the EnvLink
@@ -83,8 +83,8 @@ func resolveEnvLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpret
 	return
 }
 
-func resolveDataLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataLink) (e types.StandardEdge, success bool) {
-	e = types.StandardEdge{
+func resolveDataLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataLink) (e types.StdEdge, success bool) {
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "datalink",
@@ -222,8 +222,8 @@ func resolveDataLink(g CoreGraph, mid uint64, src types.VertexTuple, es interpre
 	return
 }
 
-func resolveSpecCommit(g CoreGraph, mid uint64, src types.VertexTuple, es SpecCommit) (e types.StandardEdge, success bool) {
-	e = types.StandardEdge{
+func resolveSpecCommit(g CoreGraph, mid uint64, src types.VertexTuple, es SpecCommit) (e types.StdEdge, success bool) {
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "version",
@@ -255,8 +255,8 @@ func resolveSpecCommit(g CoreGraph, mid uint64, src types.VertexTuple, es SpecCo
 	return
 }
 
-func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src types.VertexTuple, es SpecGitCommitParent) (e types.StandardEdge, success bool) {
-	e = types.StandardEdge{
+func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src types.VertexTuple, es SpecGitCommitParent) (e types.StdEdge, success bool) {
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "parent-commit",
@@ -280,8 +280,8 @@ func resolveSpecGitCommitParent(g CoreGraph, mid uint64, src types.VertexTuple, 
 	return
 }
 
-func resolveSpecLocalLogic(g CoreGraph, mid uint64, src types.VertexTuple, es SpecLocalLogic) (e types.StandardEdge, success bool) {
-	e = types.StandardEdge{
+func resolveSpecLocalLogic(g CoreGraph, mid uint64, src types.VertexTuple, es SpecLocalLogic) (e types.StdEdge, success bool) {
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "logic-link",
@@ -307,14 +307,14 @@ func resolveSpecLocalLogic(g CoreGraph, mid uint64, src types.VertexTuple, es Sp
 	return
 }
 
-func resolveNetListener(g CoreGraph, mid uint64, src types.VertexTuple, es SpecNetListener) (e types.StandardEdge, success bool) {
+func resolveNetListener(g CoreGraph, mid uint64, src types.VertexTuple, es SpecNetListener) (e types.StdEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.ID, Qbe(types.EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
 	if len(re) == 1 {
 		return re[0], true
 	}
 
-	e = types.StandardEdge{
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "listening",
@@ -335,14 +335,14 @@ func resolveNetListener(g CoreGraph, mid uint64, src types.VertexTuple, es SpecN
 	return
 }
 
-func resolveUnixDomainListener(g CoreGraph, mid uint64, src types.VertexTuple, es SpecUnixDomainListener) (e types.StandardEdge, success bool) {
+func resolveUnixDomainListener(g CoreGraph, mid uint64, src types.VertexTuple, es SpecUnixDomainListener) (e types.StdEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.ID, Qbe(types.EType("listening"), "type", "unix", "path", es.Path))
 	if len(re) == 1 {
 		return re[0], true
 	}
 
-	e = types.StandardEdge{
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "listening",
@@ -362,8 +362,8 @@ func resolveUnixDomainListener(g CoreGraph, mid uint64, src types.VertexTuple, e
 	return
 }
 
-func resolveSpecDatasetHierarchy(g CoreGraph, mid uint64, src types.VertexTuple, es SpecDatasetHierarchy) (e types.StandardEdge, success bool) {
-	e = types.StandardEdge{
+func resolveSpecDatasetHierarchy(g CoreGraph, mid uint64, src types.VertexTuple, es SpecDatasetHierarchy) (e types.StdEdge, success bool) {
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "dataset-hierarchy",
@@ -391,8 +391,8 @@ func resolveSpecDatasetHierarchy(g CoreGraph, mid uint64, src types.VertexTuple,
 	return
 }
 
-func resolveSpecParentDataset(g CoreGraph, mid uint64, src types.VertexTuple, es SpecParentDataset) (e types.StandardEdge, success bool) {
-	e = types.StandardEdge{
+func resolveSpecParentDataset(g CoreGraph, mid uint64, src types.VertexTuple, es SpecParentDataset) (e types.StdEdge, success bool) {
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "dataset-gateway",
@@ -419,14 +419,14 @@ func resolveSpecParentDataset(g CoreGraph, mid uint64, src types.VertexTuple, es
 	return
 }
 
-func resolveDataProvenance(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataProvenance) (e types.StandardEdge, success bool) {
+func resolveDataProvenance(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataProvenance) (e types.StdEdge, success bool) {
 	// FIXME this presents another weird case where "success" is not binary. We *could*
 	// find an already-existing data-provenance edge, but then have some net-addr params
 	// change which cause it to fail to resolve to an environment. If we call that successful,
 	// then it won't try to resolve again later...though, hm, just call it unsuccessful and
 	// then try again one more time. Maybe it is fine. THINK IT THROUGH.
 
-	e = types.StandardEdge{
+	e = types.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "data-provenance",
@@ -461,10 +461,10 @@ func resolveDataProvenance(g CoreGraph, mid uint64, src types.VertexTuple, es in
 	return
 }
 
-func resolveDataAlpha(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataAlpha) (e types.StandardEdge, success bool) {
+func resolveDataAlpha(g CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataAlpha) (e types.StdEdge, success bool) {
 	// TODO this makes a loop...are we cool with that?
 	success = true // impossible to fail here
-	e = types.StandardEdge{
+	e = types.StdEdge{
 		Source: src.ID,
 		Target: src.ID,
 		Props:  ps.NewMap(),
@@ -482,8 +482,8 @@ func resolveDataAlpha(g CoreGraph, mid uint64, src types.VertexTuple, es interpr
 // Searches the given vertex's out-edges to find its environment's vertex id.
 //
 // Also conveniently initializes a StandardEdge to the standard zero-state for an envlink.
-func findEnv(g CoreGraph, vt types.VertexTuple) (vid int, edge types.StandardEdge, success bool) {
-	edge = types.StandardEdge{
+func findEnv(g CoreGraph, vt types.VertexTuple) (vid int, edge types.StdEdge, success bool) {
+	edge = types.StdEdge{
 		Source: vt.ID,
 		Props:  ps.NewMap(),
 		EType:  "envlink",

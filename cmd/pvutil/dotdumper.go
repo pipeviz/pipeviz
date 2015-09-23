@@ -160,7 +160,7 @@ func GenerateDot(g represent.CoreGraph) []byte {
 	// pass through a second time to write all edges
 	for _, v := range g.VerticesWith(represent.Qbv()) {
 		v.OutEdges.ForEach(func(k string, val ps.Any) {
-			edge := val.(types.StandardEdge)
+			edge := val.(types.StdEdge)
 			buf.WriteString(fmt.Sprintf(
 				"\t\"v%d\" -> \"v%d\" [\n\tlabel=\"id: %d\netype: %s",
 				edge.Source, edge.Target, edge.ID, edge.EType))

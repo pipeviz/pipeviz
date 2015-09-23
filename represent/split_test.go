@@ -113,7 +113,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		},
 		Output: []types.SplitData{
 			{
-				Vertex: types.Vertex{
+				Vertex: types.StdVertex{
 					Type:       "environment",
 					Properties: mapPropPairs(D_msgid, p{"hostname", D_hostname}),
 				},
@@ -126,7 +126,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   interpret.Environment{Address: M_addr[1], Nick: D_nick},
 		Output: []types.SplitData{
 			{
-				Vertex: types.Vertex{
+				Vertex: types.StdVertex{
 					Type:       "environment",
 					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"ipv4", D_ipv4}),
 				},
@@ -139,7 +139,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   interpret.Environment{Address: M_addr[6], Nick: D_nick},
 		Output: []types.SplitData{
 			{
-				Vertex: types.Vertex{
+				Vertex: types.StdVertex{
 					Type:       "environment",
 					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"ipv4", D_ipv4}, p{"ipv6", D_ipv6}),
 				},
@@ -152,7 +152,7 @@ var F_Environment []FixtureEnvironmentSplit = []FixtureEnvironmentSplit{
 		Input:   D_env,
 		Output: []types.SplitData{
 			{
-				Vertex: types.Vertex{
+				Vertex: types.StdVertex{
 					Type:       "environment",
 					Properties: mapPropPairs(D_msgid, p{"nick", D_nick}, p{"hostname", D_hostname}, p{"os", D_env.OS}, p{"provider", D_env.Provider}, p{"type", D_env.Type}),
 				},
@@ -269,7 +269,7 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[0], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}),
 					},
@@ -285,7 +285,7 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[1], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"version", D_version}),
 					},
@@ -300,7 +300,7 @@ func init() {
 			Input:   interpret.LogicState{ID: lsIds[2], Path: D_ls.Path, Environment: M_envlink[1]},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
@@ -322,7 +322,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"type", D_ls.Type}, p{"lgroup", D_ls.Lgroup}, p{"nick", D_nick}),
 					},
@@ -343,7 +343,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
@@ -365,7 +365,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "logic-state",
 						Properties: mapPropPairs(D_msgid, p{"path", D_ls.Path}, p{"semver", D_semver}),
 					},
@@ -388,7 +388,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
@@ -411,7 +411,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}, p{"cwd", "/usr/local/src"}, p{"user", "pooja"}, p{"group", "scuba"}),
 					},
@@ -434,7 +434,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
@@ -446,7 +446,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
 					},
@@ -468,7 +468,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
@@ -479,7 +479,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
 					},
@@ -502,7 +502,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "process",
 						Properties: mapPropPairs(D_msgid, p{"pid", 42}),
 					},
@@ -516,7 +516,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"path", "/var/run/lookitsa.sock"}, p{"type", "unix"}),
 					},
@@ -525,7 +525,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "comm",
 						Properties: mapPropPairs(D_msgid, p{"port", 1025}, p{"type", "port"}),
 					},
@@ -550,7 +550,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "commit",
 						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
@@ -571,7 +571,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "commit",
 						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
@@ -591,7 +591,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "commit",
 						Properties: mapPropPairs(D_msgid, p{"sha1", D_commithash}, p{"repository", "https://github.com/tag1consulting/pipeviz"}, p{"date", "Fri Jan 9 15:00:08 2015 -0500"}, p{"author", "Sam Boyer <tech@samboyer.org>"}, p{"subject", "Make JSON correct"}),
 					},
@@ -613,7 +613,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
@@ -631,7 +631,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
@@ -640,7 +640,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
 					},
@@ -659,7 +659,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
@@ -668,7 +668,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "bar"}),
 					},
@@ -677,7 +677,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-branch",
 						Properties: mapPropPairs(D_msgid, p{"name", "qux"}),
 					},
@@ -686,7 +686,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-branch",
 						Properties: mapPropPairs(D_msgid, p{"name", "zoop"}),
 					},
@@ -705,7 +705,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "git-tag",
 						Properties: mapPropPairs(D_msgid, p{"name", "foo"}),
 					},
@@ -714,7 +714,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "test-result",
 						Properties: mapPropPairs(D_msgid, p{"result", "passed"}),
 					},
@@ -737,7 +737,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
@@ -762,7 +762,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
@@ -789,7 +789,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "parent-dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
@@ -815,7 +815,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "parent-dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
@@ -824,7 +824,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
@@ -861,7 +861,7 @@ func init() {
 			},
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "parent-dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "froofroo"}, p{"path", "/var/lib/froofroodata"}),
 					},
@@ -870,7 +870,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-foo"}, p{"create-time", D_datetime}),
 					},
@@ -881,7 +881,7 @@ func init() {
 					},
 				},
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "dataset",
 						Properties: mapPropPairs(D_msgid, p{"name", "dataset-bar"}, p{"create-time", D_datetime}),
 					},
@@ -905,7 +905,7 @@ func init() {
 			Input:   D_yp,
 			Output: []types.SplitData{
 				{
-					Vertex: types.Vertex{
+					Vertex: types.StdVertex{
 						Type:       "pkg-yum",
 						Properties: mapPropPairs(D_msgid, p{"name", D_pkgname}, p{"version", D_version}, p{"epoch", 7}, p{"release", "4.el7_1"}, p{"arch", "x86_64"}),
 					},

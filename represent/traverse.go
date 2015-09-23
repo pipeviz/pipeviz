@@ -127,7 +127,7 @@ func Qbe(v ...interface{}) edgeFilter {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) OutWith(egoId int, ef EFilter) (es []types.StandardEdge) {
+func (g *coreGraph) OutWith(egoId int, ef EFilter) (es []types.StdEdge) {
 	return g.arcWith(egoId, ef, false)
 }
 
@@ -135,11 +135,11 @@ func (g *coreGraph) OutWith(egoId int, ef EFilter) (es []types.StandardEdge) {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) InWith(egoId int, ef EFilter) (es []types.StandardEdge) {
+func (g *coreGraph) InWith(egoId int, ef EFilter) (es []types.StdEdge) {
 	return g.arcWith(egoId, ef, true)
 }
 
-func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []types.StandardEdge) {
+func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []types.StdEdge) {
 	etype, props := ef.EType(), ef.EProps()
 	vt, err := g.Get(egoId)
 	if err != nil {
@@ -150,7 +150,7 @@ func (g *coreGraph) arcWith(egoId int, ef EFilter, in bool) (es []types.Standard
 	var fef func(k string, v ps.Any)
 	// TODO specialize the func for zero-cases
 	fef = func(k string, v ps.Any) {
-		edge := v.(types.StandardEdge)
+		edge := v.(types.StdEdge)
 		if etype != ETypeNone && etype != edge.EType {
 			// etype doesn't match
 			return
@@ -218,7 +218,7 @@ func (g *coreGraph) adjacentWith(egoId int, vef VEFilter, in bool) (vts []types.
 	var feef func(k string, v ps.Any)
 	// TODO specialize the func for zero-cases
 	feef = func(k string, v ps.Any) {
-		edge := v.(types.StandardEdge)
+		edge := v.(types.StdEdge)
 		if etype != ETypeNone && etype != edge.EType {
 			// etype doesn't match
 			return
