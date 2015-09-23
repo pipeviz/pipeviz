@@ -30,24 +30,24 @@ type CoreGraph interface {
 
 	// Enumerates the outgoing edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).
-	OutWith(egoId int, ef EFilter) (es []types.StdEdge)
+	OutWith(egoId int, ef types.EFilter) (es []types.StdEdge)
 
 	// Enumerates the incoming edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).
-	InWith(egoId int, ef EFilter) (es []types.StdEdge)
+	InWith(egoId int, ef types.EFilter) (es []types.StdEdge)
 
 	// Enumerates the successors (targets of outgoing edges) from the ego vertex,
 	// limiting the result set to those that pass the provided edge and vertex
 	// filters (if any).
-	SuccessorsWith(egoId int, vef VEFilter) (vts []types.VertexTuple)
+	SuccessorsWith(egoId int, vef types.VEFilter) (vts []types.VertexTuple)
 
 	// Enumerates the predecessors (sources of incoming edges) from the ego vertex,
 	// limiting the result set to those that pass the provided edge and vertex
 	// filters (if any).
-	PredecessorsWith(egoId int, vef VEFilter) (vts []types.VertexTuple)
+	PredecessorsWith(egoId int, vef types.VEFilter) (vts []types.VertexTuple)
 
 	// Enumerates the vertices that pass the provided vertex filter (if any).
-	VerticesWith(vf VFilter) (vs []types.VertexTuple)
+	VerticesWith(vf types.VFilter) (vs []types.VertexTuple)
 
 	// Gets the vertex tuple associated with a given id.
 	Get(id int) (types.VertexTuple, error)

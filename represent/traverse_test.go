@@ -104,7 +104,7 @@ func getGraphFixture() *coreGraph {
 
 func TestQbv(t *testing.T) {
 	// ensure implement both VFilter and EFilter interfaces
-	var _ VEFilter = vertexFilter{}
+	var _ types.VEFilter = vertexFilter{}
 
 	assert.Equal(t, Qbv(), vertexFilter{}, "qbv with no args creates an empty vertexFilter")
 	assert.Equal(t, Qbv(), vertexFilter{vtype: VTypeNone}, "qbv with no args creates equivalent of passing VTypeNone as first arg")
@@ -129,7 +129,7 @@ func TestQbv(t *testing.T) {
 
 func TestQbe(t *testing.T) {
 	// ensure implement both VFilter and EFilter interfaces
-	var _ VEFilter = edgeFilter{}
+	var _ types.VEFilter = edgeFilter{}
 
 	assert.Equal(t, Qbe(), edgeFilter{}, "qbe with no args creates an empty edgeFilter")
 	assert.Equal(t, Qbe(), edgeFilter{etype: ETypeNone}, "qbe with no args creates equivalent of passing ETypeNone as first arg")
