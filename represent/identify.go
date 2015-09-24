@@ -35,7 +35,7 @@ func Identify(g CoreGraph, sd types.SplitData) int {
 	panic("Vertex identification failed")
 }
 
-// Peforms a generalized search for vertex identification, with a particular head-nod to
+// Performs a generalized search for vertex identification, with a particular head-nod to
 // those many vertices that need an EnvLink to fully resolve their identity.
 //
 // Returns a slice of candidate ids, and a bool indicating whether, if there is only one

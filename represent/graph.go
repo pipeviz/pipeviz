@@ -75,11 +75,6 @@ func NewGraph() CoreGraph {
 	return &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 }
 
-const (
-	VTypeNone types.VType = ""
-	ETypeNone types.EType = ""
-)
-
 type veProcessingInfo struct {
 	vt    types.VertexTuple
 	es    types.EdgeSpecs

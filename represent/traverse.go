@@ -33,7 +33,7 @@ func (vf vertexFilter) VProps() []types.PropPair {
 }
 
 func (vf vertexFilter) EType() types.EType {
-	return ETypeNone
+	return types.ETypeNone
 }
 
 func (vf vertexFilter) EProps() []types.PropPair {
@@ -45,7 +45,7 @@ func (vf vertexFilter) and(ef types.EFilter) types.VEFilter {
 }
 
 func (ef edgeFilter) VType() types.VType {
-	return VTypeNone
+	return types.VTypeNone
 }
 
 func (ef edgeFilter) VProps() []types.PropPair {
@@ -68,7 +68,7 @@ func (ef edgeFilter) and(vf types.VFilter) types.VEFilter {
 func Qbv(v ...interface{}) vertexFilter {
 	switch len(v) {
 	case 0:
-		return vertexFilter{VTypeNone, nil}
+		return vertexFilter{types.VTypeNone, nil}
 	case 1, 2:
 		return vertexFilter{v[0].(types.VType), nil}
 	default:
@@ -90,7 +90,7 @@ func Qbv(v ...interface{}) vertexFilter {
 func Qbe(v ...interface{}) edgeFilter {
 	switch len(v) {
 	case 0:
-		return edgeFilter{ETypeNone, nil}
+		return edgeFilter{types.ETypeNone, nil}
 	case 1, 2:
 		return edgeFilter{v[0].(types.EType), nil}
 	default:
@@ -136,7 +136,7 @@ func (g *coreGraph) arcWith(egoId int, ef types.EFilter, in bool) (es []types.St
 	// TODO specialize the func for zero-cases
 	fef = func(k string, v ps.Any) {
 		edge := v.(types.StdEdge)
-		if etype != ETypeNone && etype != edge.EType {
+		if etype != types.ETypeNone && etype != edge.EType {
 			// etype doesn't match
 			return
 		}
@@ -204,7 +204,7 @@ func (g *coreGraph) adjacentWith(egoId int, vef types.VEFilter, in bool) (vts []
 	// TODO specialize the func for zero-cases
 	feef = func(k string, v ps.Any) {
 		edge := v.(types.StdEdge)
-		if etype != ETypeNone && etype != edge.EType {
+		if etype != types.ETypeNone && etype != edge.EType {
 			// etype doesn't match
 			return
 		}
@@ -266,7 +266,7 @@ VertexInspector:
 		}
 
 		// FIXME can't rely on Typ() method here, need to store it
-		if vtype != VTypeNone && vtype != adjvt.Vertex.Typ() {
+		if vtype != types.VTypeNone && vtype != adjvt.Vertex.Typ() {
 			continue
 		}
 
@@ -306,7 +306,7 @@ func (g *coreGraph) VerticesWith(vf types.VFilter) (vs []types.VertexTuple) {
 	vtype, props := vf.VType(), vf.VProps()
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
 		vt := val.(types.VertexTuple)
-		if vtype != VTypeNone && vt.Vertex.Typ() != vtype {
+		if vtype != types.VTypeNone && vt.Vertex.Typ() != vtype {
 			return
 		}
 

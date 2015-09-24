@@ -12,6 +12,11 @@ type VType string
 // A value indicating an edge's type. For now, done as a string.
 type EType string
 
+const (
+	VTypeNone VType = ""
+	ETypeNone EType = ""
+)
+
 type Property struct {
 	MsgSrc uint64      `json:"msgsrc"`
 	Value  interface{} `json:"value"`
