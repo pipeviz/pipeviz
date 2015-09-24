@@ -15,6 +15,7 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
 	"github.com/tag1consulting/pipeviz/schema"
 )
@@ -107,7 +108,7 @@ func GenerateDot(g represent.CoreGraph) []byte {
 	buf.WriteString("fontsize=16")
 
 	// first, write all vertices
-	for _, v := range g.VerticesWith(represent.Qbv()) {
+	for _, v := range g.VerticesWith(helpers.Qbv()) {
 		lbltype := "label"
 		var props string
 		switch v.Vertex.Typ() {
@@ -158,7 +159,7 @@ func GenerateDot(g represent.CoreGraph) []byte {
 	}
 
 	// pass through a second time to write all edges
-	for _, v := range g.VerticesWith(represent.Qbv()) {
+	for _, v := range g.VerticesWith(helpers.Qbv()) {
 		v.OutEdges.ForEach(func(k string, val ps.Any) {
 			edge := val.(types.StdEdge)
 			buf.WriteString(fmt.Sprintf(

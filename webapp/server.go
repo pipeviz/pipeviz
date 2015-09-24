@@ -14,6 +14,7 @@ import (
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
@@ -70,7 +71,7 @@ func NewMux() *web.Mux {
 
 func graphToJson(g represent.CoreGraph) ([]byte, error) {
 	var vertices []interface{}
-	for _, v := range g.VerticesWith(represent.Qbv(types.VTypeNone)) {
+	for _, v := range g.VerticesWith(helpers.Qbv(types.VTypeNone)) {
 		vertices = append(vertices, v.Flat())
 	}
 

@@ -4,6 +4,7 @@ import (
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
@@ -43,7 +44,7 @@ func Identify(g CoreGraph, sd types.SplitData) int {
 //
 // FIXME the responsibility murkiness is making this a horrible snarl, fix this shit ASAP
 func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive bool) {
-	matches := g.VerticesWith(Qbv(sd.Vertex.Typ()))
+	matches := g.VerticesWith(helpers.Qbv(sd.Vertex.Typ()))
 	if len(matches) == 0 {
 		// no vertices of this type, safe to bail early
 		return nil, false
@@ -95,7 +96,7 @@ func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive boo
 		}
 
 		for _, candidate := range filtered {
-			for _, edge2 := range g.OutWith(candidate.ID, Qbe(types.EType("envlink"))) {
+			for _, edge2 := range g.OutWith(candidate.ID, helpers.Qbe(types.EType("envlink"))) {
 				filtered2 = append(filtered2, candidate)
 				if edge2.Target == edge.Target {
 					return []int{candidate.ID}, true
@@ -121,7 +122,7 @@ func identifyByGitHashSpec(g CoreGraph, sd types.SplitData, matches []int) int {
 		if spec, ok := es.(SpecCommit); ok {
 			// then search otherwise-matching vertices for a corresponding sha1 edge
 			for _, matchvid := range matches {
-				if len(g.OutWith(matchvid, Qbe(types.EType("version"), "sha1", spec.Sha1))) == 1 {
+				if len(g.OutWith(matchvid, helpers.Qbe(types.EType("version"), "sha1", spec.Sha1))) == 1 {
 					return matchvid
 				}
 			}
