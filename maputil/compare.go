@@ -62,6 +62,8 @@ func AnyMatch(l, r ps.Map, keys ...string) bool {
 // types.Properties values are transformed into their contained Value in the
 // same manner as in AnyMatch.
 func AllMatch(l, r ps.Map, keys ...string) bool {
+	// keep track of our both-missing count
+	var nep int
 	for _, key := range keys {
 		lv, lexists := l.Lookup(key)
 		rv, rexists := r.Lookup(key)
@@ -72,6 +74,7 @@ func AllMatch(l, r ps.Map, keys ...string) bool {
 		}
 		// if neither exist, skip
 		if !lexists {
+			nep++
 			continue
 		}
 
@@ -97,5 +100,5 @@ func AllMatch(l, r ps.Map, keys ...string) bool {
 		}
 	}
 
-	return len(keys) > 0
+	return len(keys) > nep
 }
