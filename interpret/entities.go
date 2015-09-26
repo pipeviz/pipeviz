@@ -5,17 +5,6 @@ import (
 	"encoding/hex"
 )
 
-type Environment struct {
-	Address     Address         `json:"address,omitempty"`
-	OS          string          `json:"os,omitempty"`
-	Provider    string          `json:"provider,omitempty"`
-	Type        string          `json:"type,omitempty"`
-	Nick        string          `json:"nick,omitempty"`
-	LogicStates []LogicState    `json:"logic-states,omitempty"`
-	Datasets    []ParentDataset `json:"datasets,omitempty"`
-	Processes   []Process       `json:"processes,omitempty"`
-}
-
 type EnvLink struct {
 	Address Address `json:"address,omitempty"`
 	Nick    string  `json:"nick,omitempty"`

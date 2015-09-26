@@ -7,6 +7,16 @@ type SplitData struct {
 	EdgeSpecs EdgeSpecs
 }
 
+type UnifyInstructionForm interface {
+	Vertex() StdVertex
+	EdgeSpecs() []EdgeSpec
+}
+
+type blah interface {
+	//Unify(CoreGraph, SplitData) int
+	//Resolve
+}
+
 // TODO for now, no structure to this. change to queryish form later
 type EdgeSpec interface {
 	// Given a graph and a vtTuple root, searches for an existing edge
