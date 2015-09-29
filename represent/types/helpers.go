@@ -1,9 +1,6 @@
 package types
 
-import (
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/interpret"
-)
+import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type SplitData struct {
 	Vertex    StdVertex
@@ -23,7 +20,7 @@ work together to facilitate the creation of larger traversals/queries.
 type CoreGraph interface {
 	// Merge a message into the graph, returning a pointer to the new graph
 	// that contains the resulting updates.
-	Merge(msg interpret.Message) CoreGraph
+	Merge(Message) CoreGraph
 
 	// Enumerates the outgoing edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).
@@ -53,6 +50,11 @@ type CoreGraph interface {
 	// contents are guaranteed to represent the state resulting from a correct
 	// in-order interpretation of the messages up to the id, inclusive.
 	MsgId() uint64
+}
+
+type Message interface {
+	ID() uint64
+	Each(func(vertex interface{}))
 }
 
 type UnifyInstructionForm interface {

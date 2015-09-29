@@ -57,24 +57,25 @@ func (g *coreGraph) MsgId() uint64 {
 }
 
 // the method to merge a message into the graph
-func (og *coreGraph) Merge(msg interpret.Message) types.CoreGraph {
+func (og *coreGraph) Merge(msg types.Message) types.CoreGraph {
 	// TODO use a buffering pool to minimize allocs
 	var ess edgeSpecSet
+	var msgid = msg.ID()
 
 	logEntry := log.WithFields(log.Fields{
 		"system": "engine",
-		"msgid":  msg.Id,
+		"msgid":  msgid,
 	})
 
-	logEntry.Infof("Merging message %d into graph", msg.Id)
+	logEntry.Infof("Merging message %d into graph", msgid)
 
 	g := og.clone()
-	g.msgid = msg.Id
+	g.msgid = msgid
 
 	// Process incoming elements from the message
 	msg.Each(func(d interface{}) {
 		// Split each input element into vertex and edge specs
-		sds, err := Split(d, msg.Id)
+		sds, err := Split(d, msgid)
 
 		if err != nil {
 			logEntry.WithField("err", err).Warnf("Error while splitting input element of type %T; discarding", d)
@@ -84,7 +85,7 @@ func (og *coreGraph) Merge(msg interpret.Message) types.CoreGraph {
 		// Ensure vertices are present
 		var tuples []types.VertexTuple
 		for _, sd := range sds {
-			tuples = append(tuples, g.ensureVertex(msg.Id, sd))
+			tuples = append(tuples, g.ensureVertex(msgid, sd))
 		}
 
 		// Collect edge specs for later processing
@@ -92,7 +93,7 @@ func (og *coreGraph) Merge(msg interpret.Message) types.CoreGraph {
 			ess = append(ess, &veProcessingInfo{
 				vt:    tuple,
 				es:    sds[k].EdgeSpecs,
-				msgid: msg.Id,
+				msgid: msgid,
 			})
 		}
 	})
@@ -149,7 +150,7 @@ func (og *coreGraph) Merge(msg interpret.Message) types.CoreGraph {
 			info.es = info.es[:0]
 			for _, spec := range specs {
 				l3.Debugf("Resolving EdgeSpec of type %T", spec)
-				edge, success := Resolve(g, msg.Id, info.vt, spec)
+				edge, success := Resolve(g, msgid, info.vt, spec)
 				if success {
 					l4 := l3.WithFields(log.Fields{
 						"target-vid": edge.Target,

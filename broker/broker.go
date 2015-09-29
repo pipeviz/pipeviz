@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 // TODO switch to doing this all with DI instead, i think
@@ -27,8 +27,8 @@ func Get() *GraphBroker {
 	return singletonBroker
 }
 
-type GraphSender chan<- represent.CoreGraph
-type GraphReceiver <-chan represent.CoreGraph
+type GraphSender chan<- types.CoreGraph
+type GraphReceiver <-chan types.CoreGraph
 
 type GraphBroker struct {
 	// synchronizes access to the channel list
@@ -88,7 +88,7 @@ func (gb *GraphBroker) Subscribe() GraphReceiver {
 
 	// Unbuffered. Listeners must be careful not to do too much in their receiving
 	// goroutine, lest they create a pileup!
-	c := make(chan represent.CoreGraph, 0)
+	c := make(chan types.CoreGraph, 0)
 	gb.subs[c] = c
 
 	gb.lock.Unlock()

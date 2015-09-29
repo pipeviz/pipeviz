@@ -8,6 +8,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 var msgs []interpret.Message
