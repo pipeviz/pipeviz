@@ -237,7 +237,7 @@ func (g *coreGraph) VerticesWith(vf types.VFilter) (vs []types.VertexTuple) {
 	return vs
 }
 
-func FindEnvironment(g CoreGraph, props ps.Map) (envid int, success bool) {
+func FindEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) {
 	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
 	for _, vt := range rv {
 		if matchEnvLink(props, vt.Vertex.Props()) {
@@ -248,7 +248,7 @@ func FindEnvironment(g CoreGraph, props ps.Map) (envid int, success bool) {
 	return
 }
 
-func FindDataset(g CoreGraph, envid int, name []string) (id int, success bool) {
+func FindDataset(g types.CoreGraph, envid int, name []string) (id int, success bool) {
 	// first time through use the parent type
 	vtype := types.VType("parent-dataset")
 

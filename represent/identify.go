@@ -8,7 +8,7 @@ import (
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
-func Identify(g CoreGraph, sd types.SplitData) int {
+func Identify(g types.CoreGraph, sd types.SplitData) int {
 	ids, definitive := identifyDefault(g, sd)
 	// default one didn't do it, use specialists to narrow further
 
@@ -43,7 +43,7 @@ func Identify(g CoreGraph, sd types.SplitData) int {
 // result, that result should be considered a definitive match.
 //
 // FIXME the responsibility murkiness is making this a horrible snarl, fix this shit ASAP
-func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive bool) {
+func identifyDefault(g types.CoreGraph, sd types.SplitData) (ret []int, definitive bool) {
 	matches := g.VerticesWith(helpers.Qbv(sd.Vertex.Typ()))
 	if len(matches) == 0 {
 		// no vertices of this type, safe to bail early
@@ -116,7 +116,7 @@ func identifyDefault(g CoreGraph, sd types.SplitData) (ret []int, definitive boo
 }
 
 // Narrow a match list by looking for alignment on a git commit sha1
-func identifyByGitHashSpec(g CoreGraph, sd types.SplitData, matches []int) int {
+func identifyByGitHashSpec(g types.CoreGraph, sd types.SplitData, matches []int) int {
 	for _, es := range sd.EdgeSpecs {
 		// first find the commit spec
 		if spec, ok := es.(SpecCommit); ok {
