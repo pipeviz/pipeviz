@@ -8,4 +8,7 @@ relevant components can safely import.
 
 A separate package - this one - is used because it helps make clearer what the
 shared pieces are, which is boon for architectural clarity.
+
+Most of what's here is interfaces. The concrete real types are mostly inert,
+or have straightforward helper methods.
 */
