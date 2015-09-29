@@ -143,7 +143,7 @@ func resolveDataLink(g types.CoreGraph, mid uint64, src types.VertexTuple, es in
 	}
 
 	var sock types.VertexTuple
-	var rv []types.VertexTuple // just for reuse
+	var rv types.VertexTupleVector // just for reuse
 	// If net, must scan; if local, a bit easier.
 	if !isLocal {
 		// First, find the environment vertex

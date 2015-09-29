@@ -83,7 +83,7 @@ func (og *coreGraph) Merge(msg types.Message) types.CoreGraph {
 		}
 
 		// Ensure vertices are present
-		var tuples []types.VertexTuple
+		var tuples types.VertexTupleVector
 		for _, sd := range sds {
 			tuples = append(tuples, g.ensureVertex(msgid, sd))
 		}

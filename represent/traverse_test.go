@@ -104,7 +104,7 @@ func getGraphFixture() *coreGraph {
 
 func TestVerticesWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []types.VertexTuple
+	var result types.VertexTupleVector
 
 	result = g.VerticesWith(helpers.Qbv())
 	if len(result) != 5 {
@@ -145,7 +145,7 @@ func TestVerticesWith(t *testing.T) {
 // Tests arcWith(), which effectively tests both OutWith() and InWith().
 func TestOutInArcWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []types.StdEdge
+	var result types.EdgeVector
 
 	// first test zero-case - vtx 5 has no edges
 	result = g.arcWith(5, helpers.Qbe(), false)
@@ -262,7 +262,7 @@ func TestOutInArcWith(t *testing.T) {
 // Tests adjacentWith(), which effectively tests SuccessorsWith() and PredecessorsWith()
 func TestAdjacentWith(t *testing.T) {
 	g := getGraphFixture()
-	var result []types.VertexTuple
+	var result types.VertexTupleVector
 
 	// basic, unfiltered tests first to ensure the right data is coming through
 	// vtx 2 has just one in-edge
