@@ -42,9 +42,17 @@ type Splitter func(data interface{}, id uint64) ([]types.SplitData, error)
 
 // TODO hardcoded for now, till code generation
 func Split(d interface{}, id uint64) ([]types.SplitData, error) {
+	// Temporary shim while converting types to UIF
+	if u, ok := d.(types.Unifier); ok {
+		var sds []types.SplitData = make([]types.SplitData, 0)
+		for _, uif := range u.UnificationForm(id) {
+			sds = append(sds, types.SplitData{Vertex: uif.Vertex(), EdgeSpecs: append(uif.ScopingSpecs(), uif.EdgeSpecs()...)})
+		}
+
+		return sds, nil
+	}
+
 	switch v := d.(type) {
-	case interpret.Environment:
-		return splitEnvironment(v, id)
 	case interpret.LogicState:
 		return splitLogicState(v, id)
 	case interpret.Process:
