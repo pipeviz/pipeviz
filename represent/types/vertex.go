@@ -6,32 +6,11 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 )
 
-// A value indicating a vertex's type. For now, done as a string.
-type VType string
-
-// A value indicating an edge's type. For now, done as a string.
-type EType string
-
-const (
-	VTypeNone VType = ""
-	ETypeNone EType = ""
-)
-
-type Property struct {
-	MsgSrc uint64      `json:"msgsrc"`
-	Value  interface{} `json:"value"`
-}
-
-type PropPair struct {
-	K string
-	V interface{}
-}
-
-type VertexTuple struct {
-	ID       int
-	Vertex   StdVertex
-	InEdges  ps.Map
-	OutEdges ps.Map
+// StdVertex is used to represent a vertex object by the graph engine. They exist
+// within VertexTuples.
+type StdVertex struct {
+	Type       VType  `json:"type"`
+	Properties ps.Map `json:"properties"`
 }
 
 // NewVertex creates a new Vertex object, assigning each PropPair to Props
@@ -53,15 +32,6 @@ func fillMapIgnoreZero(msgid uint64, p ...PropPair) ps.Map {
 	}
 
 	return m
-}
-
-type StdVertex struct {
-	Type       VType  `json:"type"`
-	Properties ps.Map `json:"properties"`
-}
-
-type emptyChecker interface {
-	IsEmpty() bool
 }
 
 func isZero(v interface{}) (bool, error) {

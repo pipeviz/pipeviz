@@ -2,84 +2,10 @@ package types
 
 import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
-type SplitData struct {
-	Vertex    StdVertex
-	EdgeSpecs EdgeSpecs
-}
-
-/*
-CoreGraph is the interface provided by pipeviz' main graph object.
-
-It is a persistent/immutable datastructure: only the Merge() method is able
-to change the graph, but that method returns a pointer to a new graph rather
-than updating in-place. (These copies typically share structure for efficiency)
-
-All other methods are read-only, and generally provide composable parts that
-work together to facilitate the creation of larger traversals/queries.
-*/
-type CoreGraph interface {
-	// Merge a message into the graph, returning a pointer to the new graph
-	// that contains the resulting updates.
-	Merge(Message) CoreGraph
-
-	// Enumerates the outgoing edges from the ego vertex, limiting the result set
-	// to those that pass the provided filter (if any).
-	OutWith(egoId int, ef EFilter) (es []StdEdge)
-
-	// Enumerates the incoming edges from the ego vertex, limiting the result set
-	// to those that pass the provided filter (if any).
-	InWith(egoId int, ef EFilter) (es []StdEdge)
-
-	// Enumerates the successors (targets of outgoing edges) from the ego vertex,
-	// limiting the result set to those that pass the provided edge and vertex
-	// filters (if any).
-	SuccessorsWith(egoId int, vef VEFilter) (vts []VertexTuple)
-
-	// Enumerates the predecessors (sources of incoming edges) from the ego vertex,
-	// limiting the result set to those that pass the provided edge and vertex
-	// filters (if any).
-	PredecessorsWith(egoId int, vef VEFilter) (vts []VertexTuple)
-
-	// Enumerates the vertices that pass the provided vertex filter (if any).
-	VerticesWith(vf VFilter) (vs []VertexTuple)
-
-	// Gets the vertex tuple associated with a given id.
-	Get(id int) (VertexTuple, error)
-
-	// Returns the message id for the current version of the graph. The graph's
-	// contents are guaranteed to represent the state resulting from a correct
-	// in-order interpretation of the messages up to the id, inclusive.
-	MsgId() uint64
-}
-
 type Message interface {
 	ID() uint64
 	Each(func(vertex interface{}))
 }
-
-type Unifier interface {
-	UnificationForm(uint64) []UnifyInstructionForm
-}
-
-type UnifyInstructionForm interface {
-	Vertex() StdVertex
-	Unify(CoreGraph, UnifyInstructionForm) int
-	EdgeSpecs() []EdgeSpec
-	ScopingSpecs() []EdgeSpec
-}
-
-// TODO for now, no structure to this. change to queryish form later
-type EdgeSpec interface {
-	// Given a graph and a vtTuple root, searches for an existing edge
-	// that this EdgeSpec would supercede
-	//FindExisting(*CoreGraph, vtTuple) (StandardEdge, bool)
-
-	// Resolves the spec into a real edge, merging as appropriate with
-	// any existing edge (as returned from FindExisting)
-	//Resolve(*CoreGraph, vtTuple, int) (StandardEdge, bool)
-}
-
-type EdgeSpecs []EdgeSpec
 
 type flatVTuple struct {
 	Id       int        `json:"id"`
