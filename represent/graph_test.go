@@ -48,7 +48,7 @@ func TestClone(t *testing.T) {
 func BenchmarkMergeMessageOne(b *testing.B) {
 	var g types.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 	for i := 0; i < b.N; i++ {
-		g.Merge(msgs[0])
+		g.Merge(&msgs[0])
 	}
 }
 
@@ -56,7 +56,7 @@ func BenchmarkMergeMessageOneAndTwo(b *testing.B) {
 	var g types.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 
 	for i := 0; i < b.N; i++ {
-		g.Merge(msgs[0])
-		g.Merge(msgs[1])
+		g.Merge(&msgs[0])
+		g.Merge(&msgs[1])
 	}
 }

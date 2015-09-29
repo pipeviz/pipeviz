@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 // Make sure brokers are initialized correctly
@@ -20,12 +21,12 @@ func TestBroker(t *testing.T) {
 	g := represent.NewGraph()
 	br := New()
 
-	input := make(chan represent.CoreGraph, 0)
+	input := make(chan types.CoreGraph, 0)
 
-	tallyChan := make(chan represent.CoreGraph, 0)
+	tallyChan := make(chan types.CoreGraph, 0)
 	var tally int
 
-	lstn := func(c <-chan represent.CoreGraph) {
+	lstn := func(c <-chan types.CoreGraph) {
 		for g := range c {
 			tallyChan <- g
 		}
@@ -67,7 +68,7 @@ func TestBroker(t *testing.T) {
 	}
 
 	// Kick off second fanout goroutine
-	input2 := make(chan represent.CoreGraph, 0)
+	input2 := make(chan types.CoreGraph, 0)
 	br.Fanout(input2)
 	input <- g
 	input2 <- g

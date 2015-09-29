@@ -25,7 +25,7 @@ var (
 var (
 	// TODO crappily hardcoded, for now
 	brokerListen broker.GraphReceiver
-	latestGraph  represent.CoreGraph
+	latestGraph  types.CoreGraph
 )
 
 const (
@@ -69,7 +69,7 @@ func NewMux() *web.Mux {
 	return m
 }
 
-func graphToJson(g represent.CoreGraph) ([]byte, error) {
+func graphToJson(g types.CoreGraph) ([]byte, error) {
 	var vertices []interface{}
 	for _, v := range g.VerticesWith(helpers.Qbv(types.VTypeNone)) {
 		vertices = append(vertices, v.Flat())
@@ -159,7 +159,7 @@ func wsWriter(ws *websocket.Conn) {
 
 	// write the current graph state first, before entering loop
 	graphToSock(ws, latestGraph)
-	var g represent.CoreGraph
+	var g types.CoreGraph
 	for {
 		select {
 		case <-pingTicker.C:
@@ -174,7 +174,7 @@ func wsWriter(ws *websocket.Conn) {
 	}
 }
 
-func graphToSock(ws *websocket.Conn, g represent.CoreGraph) {
+func graphToSock(ws *websocket.Conn, g types.CoreGraph) {
 	j, err := graphToJson(g)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{

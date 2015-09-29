@@ -24,6 +24,10 @@ type message struct {
 	Yp  []YumPkg     `json:"yum-pkg"`
 }
 
+func (m *Message) ID() uint64 {
+	return m.Id
+}
+
 // UnmarshalJSON implements the json.Unmarshaler interface. It translates a
 // JSON message into a series of discrete objects that can then be merged
 // into the graph.

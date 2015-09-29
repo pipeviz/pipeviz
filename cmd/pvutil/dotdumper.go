@@ -83,7 +83,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 					m := interpret.Message{Id: k}
 					json.Unmarshal(src, &m)
 
-					g = g.Merge(m)
+					g = g.Merge(&m)
 					fmt.Printf("Merged message %v/%v into graph\n", dir, f.Name())
 				}
 			}
@@ -100,7 +100,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 
 // Generates a .dot-format representation of the given CoreGraph, suitable for
 // rendering into output by graphviz (or other utilities).
-func GenerateDot(g represent.CoreGraph) []byte {
+func GenerateDot(g types.CoreGraph) []byte {
 	buf := new(bytes.Buffer)
 
 	// begin the graph

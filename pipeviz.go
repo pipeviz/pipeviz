@@ -15,6 +15,7 @@ import (
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/journal/boltdb"
 	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent/types"
 	"github.com/tag1consulting/pipeviz/schema"
 	"github.com/tag1consulting/pipeviz/webapp"
 )
@@ -93,7 +94,7 @@ func main() {
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
-	brokerChan := make(chan represent.CoreGraph, 0)
+	brokerChan := make(chan types.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
 	brokerChan <- g
 
@@ -146,7 +147,7 @@ func RunWebapp(addr string, f journal.RecordGetter) {
 }
 
 // Rebuilds the graph from the extant entries in a journal.
-func restoreGraph(j journal.JournalStore) (represent.CoreGraph, error) {
+func restoreGraph(j journal.JournalStore) (types.CoreGraph, error) {
 	g := represent.NewGraph()
 
 	var item *journal.Record
@@ -163,8 +164,8 @@ func restoreGraph(j journal.JournalStore) (represent.CoreGraph, error) {
 				// TODO returning out here could end us up somwehere weird
 				return g, err
 			}
-			msg := interpret.Message{Id: item.Index}
-			json.Unmarshal(item.Message, &msg)
+			msg := &interpret.Message{Id: item.Index}
+			json.Unmarshal(item.Message, msg)
 			g = g.Merge(msg)
 		}
 	}

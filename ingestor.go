@@ -14,14 +14,14 @@ import (
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
-	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 type Ingestor struct {
 	journal       journal.JournalStore
 	schema        *gjs.Schema
 	interpretChan chan *journal.Record
-	brokerChan    chan represent.CoreGraph
+	brokerChan    chan types.CoreGraph
 }
 
 // RunHttpIngestor sets up and runs the http listener that receives messages, validates
@@ -122,12 +122,12 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 //
 // When the interpret channel is closed (and emptied), this function also closes
 // the broker channel.
-func (s *Ingestor) Interpret(g represent.CoreGraph) {
+func (s *Ingestor) Interpret(g types.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
 		im := interpret.Message{Id: m.Index}
 		json.Unmarshal(m.Message, &im)
-		g = g.Merge(im)
+		g = g.Merge(&im)
 
 		s.brokerChan <- g
 	}
