@@ -59,12 +59,9 @@ type Message interface {
 
 type UnifyInstructionForm interface {
 	Vertex() StdVertex
+	Unify(CoreGraph, UnifyInstructionForm) int
 	EdgeSpecs() []EdgeSpec
-}
-
-type blah interface {
-	//Unify(CoreGraph, SplitData) int
-	//Resolve
+	ScopingSpecs() []EdgeSpec
 }
 
 // TODO for now, no structure to this. change to queryish form later
