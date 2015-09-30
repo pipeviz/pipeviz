@@ -38,7 +38,9 @@ func isZero(v interface{}) (bool, error) {
 	switch v.(type) {
 	case bool:
 		return v == false, nil
-	case uint, uint8, uint16, uint32, uint64, int, int8, int16, int32, int64:
+	case uint, uint8, uint16, uint32, uint64, uintptr:
+		return v == 0, nil
+	case int, int8, int16, int32, int64:
 		return v == 0, nil
 	case float32, float64:
 		return v == 0.0, nil
