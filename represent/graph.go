@@ -84,17 +84,37 @@ func (og *coreGraph) Merge(msg types.Message) types.CoreGraph {
 
 		// Ensure vertices are present
 		var tuples types.VertexTupleVector
-		for _, sd := range sds {
-			tuples = append(tuples, g.ensureVertex(msgid, sd))
-		}
+		switch sdt := sds.(type) {
+		case []types.SplitData:
+			for _, sd := range sdt {
+				tuples = append(tuples, g.ensureVertex(msgid, sd))
+			}
 
-		// Collect edge specs for later processing
-		for k, tuple := range tuples {
-			ess = append(ess, &veProcessingInfo{
-				vt:    tuple,
-				es:    sds[k].EdgeSpecs,
-				msgid: msgid,
-			})
+			// Collect edge specs for later processing
+			for k, tuple := range tuples {
+				ess = append(ess, &veProcessingInfo{
+					vt:    tuple,
+					es:    sdt[k].EdgeSpecs,
+					msgid: msgid,
+				})
+			}
+
+		case []types.UnifyInstructionForm:
+			for _, sd := range sdt {
+				tuples = append(tuples, g.ensureVertexNew(msgid, sd))
+			}
+
+			// Collect edge specs for later processing
+			for k, tuple := range tuples {
+				ess = append(ess, &veProcessingInfo{
+					vt:    tuple,
+					es:    sdt[k].EdgeSpecs(),
+					msgid: msgid,
+				})
+			}
+
+		default:
+			logEntry.Panicf("Invalid type %T returned from Split", sds)
 		}
 	})
 	logEntry.Infof("Splitting all message elements produced %d edge spec sets", len(ess))
@@ -251,6 +271,63 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.SplitData) (final types.
 		vt := ivt.(types.VertexTuple)
 
 		nu, err := vt.Vertex.Merge(sd.Vertex)
+		if err != nil {
+			logEntry.WithFields(log.Fields{
+				"vid": vid,
+				"err": err,
+			}).Warn("Merge of vertex properties returned an error; vertex will continue update into graph anyway")
+		}
+
+		final = types.VertexTuple{ID: vid, InEdges: vt.InEdges, OutEdges: vt.OutEdges, Vertex: nu}
+		g.vtuples = g.vtuples.Set(i2a(vid), final)
+	}
+
+	return
+}
+
+func (g *coreGraph) ensureVertexNew(msgid uint64, sd types.UnifyInstructionForm) (final types.VertexTuple) {
+	logEntry := log.WithFields(log.Fields{
+		"system": "engine",
+		"msgid":  msgid,
+		"vtype":  sd.Vertex().Type,
+	})
+
+	logEntry.Debug("Performing new-style vertex unification")
+	vid := sd.Unify(g, sd)
+
+	if vid == 0 {
+		logEntry.Debug("No match on unification, creating new vertex")
+		final = types.VertexTuple{Vertex: sd.Vertex(), InEdges: ps.NewMap(), OutEdges: ps.NewMap()}
+		g.vserial += 1
+		final.ID = g.vserial
+		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
+
+		// Resolve scoping edge specs early, here
+		for _, spec := range sd.ScopingSpecs() {
+			logEntry.Debugf("Doing early resolve on EdgeSpec of type %T", spec)
+			edge, success := Resolve(g, msgid, final, spec)
+			if success { // could fail if corresponding env not yet declared
+				logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
+				g.vserial += 1
+				edge.ID = g.vserial
+				final.OutEdges = final.OutEdges.Set(i2a(edge.ID), edge)
+
+				// set edge in reverse direction, too
+				any, _ := g.vtuples.Lookup(i2a(edge.Target))
+				tvt := any.(types.VertexTuple)
+				tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
+				g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
+				g.vtuples = g.vtuples.Set(i2a(final.ID), final)
+			} else {
+				logEntry.Debug("Early resolve failed")
+			}
+		}
+	} else {
+		logEntry.WithField("vid", vid).Debug("Unification resulted in match")
+		ivt, _ := g.vtuples.Lookup(i2a(vid))
+		vt := ivt.(types.VertexTuple)
+
+		nu, err := vt.Vertex.Merge(sd.Vertex())
 		if err != nil {
 			logEntry.WithFields(log.Fields{
 				"vid": vid,

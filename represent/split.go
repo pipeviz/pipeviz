@@ -41,15 +41,10 @@ type SpecDatasetHierarchy struct {
 type Splitter func(data interface{}, id uint64) ([]types.SplitData, error)
 
 // TODO hardcoded for now, till code generation
-func Split(d interface{}, id uint64) ([]types.SplitData, error) {
+func Split(d interface{}, id uint64) (interface{}, error) {
 	// Temporary shim while converting types to UIF
 	if u, ok := d.(types.Unifier); ok {
-		var sds []types.SplitData = make([]types.SplitData, 0)
-		for _, uif := range u.UnificationForm(id) {
-			sds = append(sds, types.SplitData{Vertex: uif.Vertex(), EdgeSpecs: append(uif.ScopingSpecs(), uif.EdgeSpecs()...)})
-		}
-
-		return sds, nil
+		return u.UnificationForm(id), nil
 	}
 
 	switch v := d.(type) {
@@ -206,8 +201,9 @@ func splitParentDataset(d interpret.ParentDataset, id uint64) ([]types.SplitData
 
 	for _, sub := range d.Subsets {
 		sub.Parent = d.Name
-		sds, _ := Split(sub, id)
+		sdsi, _ := Split(sub, id)
 		// can only be one
+		sds := sdsi.([]types.SplitData)
 		sd := sds[0]
 		// FIXME having this here is cool, but the schema does allow top-level datasets, which won't pass thru and so are guaranteed orphans
 		sd.EdgeSpecs = append(types.EdgeSpecs{d.Environment}, sd.EdgeSpecs...)
