@@ -62,7 +62,7 @@ func lsUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 
 	vp := u.Vertex().Properties
 	path, _ := vp.Lookup("path")
-	lss := g.VerticesWith(helpers.Qbv(types.VType("logic-state"), "path", path))
+	lss := g.VerticesWith(helpers.Qbv(types.VType("logic-state"), "path", path.(types.Property).Value))
 
 	for _, candidate := range lss {
 		for _, edge2 := range g.OutWith(candidate.ID, helpers.Qbe(types.EType("envlink"))) {

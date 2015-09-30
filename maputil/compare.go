@@ -21,12 +21,8 @@ func AnyMatch(l, r ps.Map, keys ...string) bool {
 		lv, lexists := l.Lookup(key)
 		rv, rexists := r.Lookup(key)
 
-		// bail out if one exists and the other doesn't
-		if lexists != rexists {
-			continue
-		}
-		// if neither exist, skip
-		if !lexists {
+		// skip if either or both don't exist
+		if !lexists || !rexists {
 			continue
 		}
 
