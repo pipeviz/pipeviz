@@ -198,33 +198,3 @@ func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
 
 	return err
 }
-
-func findEnv(envs []Environment, el EnvLink) (Environment, bool) {
-	if el.Nick != "" {
-		for _, e := range envs {
-			if e.Nick == el.Nick {
-				return e, true
-			}
-		}
-	} else if el.Address.Hostname != "" {
-		for _, e := range envs {
-			if e.Address.Hostname == el.Address.Hostname {
-				return e, true
-			}
-		}
-	} else if el.Address.Ipv4 != "" {
-		for _, e := range envs {
-			if e.Address.Ipv4 == el.Address.Ipv4 {
-				return e, true
-			}
-		}
-	} else if el.Address.Ipv6 != "" {
-		for _, e := range envs {
-			if e.Address.Ipv6 == el.Address.Ipv6 {
-				return e, true
-			}
-		}
-	}
-
-	return Environment{}, false
-}

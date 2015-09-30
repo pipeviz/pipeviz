@@ -11,30 +11,6 @@ type Address struct {
 	Ipv6     string `json:"ipv6,omitempty"`
 }
 
-type LogicState struct {
-	Datasets    []DataLink `json:"datasets,omitempty"`
-	Environment EnvLink    `json:"environment,omitempty"`
-	ID          struct {
-		Commit    Sha1   `json:"-"`
-		CommitStr string `json:"commit,omitempty"`
-		Version   string `json:"version,omitempty"`
-		Semver    string `json:"semver,omitempty"`
-	} `json:"id,omitempty"`
-	Lgroup string `json:"lgroup,omitempty"`
-	Nick   string `json:"nick,omitempty"`
-	Path   string `json:"path,omitempty"`
-	Type   string `json:"type,omitempty"`
-}
-
-type DataLink struct {
-	Name        string   `json:"name,omitempty"`
-	Type        string   `json:"type,omitempty"`
-	Subset      string   `json:"subset,omitempty"`
-	Interaction string   `json:"interaction,omitempty"`
-	ConnUnix    ConnUnix `json:"connUnix,omitempty"`
-	ConnNet     ConnNet  `json:"connNet,omitempty"`
-}
-
 type ConnNet struct {
 	Hostname string `json:"hostname,omitempty"`
 	Ipv4     string `json:"ipv4,omitempty"`
