@@ -8,6 +8,10 @@ import (
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
+type resolver interface {
+	Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool)
+}
+
 // Attempts to resolve an EdgeSpec into a real edge. This process has two steps:
 //
 // 1. Finding the target node.
@@ -16,9 +20,11 @@ import (
 // It is the responsibility of the edge spec's type handler to determine what "if an edge
 // already exists" means, as well as whether to overwrite/merge or duplicate the edge in such a case.
 func Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeSpec) (types.StdEdge, bool) {
+	if r, ok := d.(resolver); ok {
+		return r.Resolve(g, mid, src)
+	}
+
 	switch es := d.(type) {
-	case interpret.EnvLink:
-		return resolveEnvLink(g, mid, src, es)
 	case interpret.DataLink:
 		return resolveDataLink(g, mid, src, es)
 	case SpecCommit:
@@ -47,41 +53,6 @@ func Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeS
 	}
 
 	return types.StdEdge{}, false
-}
-
-func resolveEnvLink(g types.CoreGraph, mid uint64, src types.VertexTuple, es interpret.EnvLink) (e types.StdEdge, success bool) {
-	_, e, success = findEnv(g, src)
-
-	// Whether we find a match or not, have to merge in the EnvLink
-	if es.Address.Hostname != "" {
-		e.Props = e.Props.Set("hostname", types.Property{MsgSrc: mid, Value: es.Address.Hostname})
-	}
-	if es.Address.Ipv4 != "" {
-		e.Props = e.Props.Set("ipv4", types.Property{MsgSrc: mid, Value: es.Address.Ipv4})
-	}
-	if es.Address.Ipv6 != "" {
-		e.Props = e.Props.Set("ipv6", types.Property{MsgSrc: mid, Value: es.Address.Ipv6})
-	}
-	if es.Nick != "" {
-		e.Props = e.Props.Set("nick", types.Property{MsgSrc: mid, Value: es.Nick})
-	}
-
-	// If we already found the matching edge, bail out now
-	if success {
-		return
-	}
-
-	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
-	for _, vt := range rv {
-		// TODO this'll be cross-package eventually - reorg needed
-		if matchEnvLink(e.Props, vt.Vertex.Props()) {
-			success = true
-			e.Target = vt.ID
-			break
-		}
-	}
-
-	return
 }
 
 func resolveDataLink(g types.CoreGraph, mid uint64, src types.VertexTuple, es interpret.DataLink) (e types.StdEdge, success bool) {

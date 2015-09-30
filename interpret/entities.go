@@ -5,11 +5,6 @@ import (
 	"encoding/hex"
 )
 
-type EnvLink struct {
-	Address Address `json:"address,omitempty"`
-	Nick    string  `json:"nick,omitempty"`
-}
-
 type Address struct {
 	Hostname string `json:"hostname,omitempty"`
 	Ipv4     string `json:"ipv4,omitempty"`

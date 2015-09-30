@@ -383,3 +383,18 @@ func TestAdjacentWith(t *testing.T) {
 		t.Errorf("Vertex 4 has one unique successor of type \"vt3\" with \"prop1\" at \"baz\" along an out-edge with \"eprop2\" at \"bar\"; however, got %v vertices", len(result))
 	}
 }
+
+// A general test for the VertexTupleVector and EdgeVector walk methods.
+//
+// These methods do not merit individual unit tests, as their implementations
+// qualify under Hoare's "so simple that there are obviously no deficiencies."
+//func TestVectorWalks(t *testing.T) {
+//g := getGraphFixture()
+//var vbase, vresult types.VertexTupleVector
+//var ebase, eresult types.EdgeVector
+
+//ebase = g.OutWith(3, helpers.Qbv())
+//if len(ebase) != 3 {
+//t.Errorf("Vertex 3 should have three out-edges, got %v", len(ebase))
+//}
+//}

@@ -45,5 +45,39 @@ func envUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 	return 0
 }
 
+type EnvLink struct {
+	Address Address `json:"address,omitempty"`
+	Nick    string  `json:"nick,omitempty"`
+}
+
+func (spec EnvLink) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
+	_, e, success = findEnv(g, src)
+
+	// Whether we find a match or not, have to merge in the EnvLink
+	e.Props = maputil.FillPropMap(mid, false,
+		pp("hostname", spec.Address.Hostname),
+		pp("ipv4", spec.Address.Ipv4),
+		pp("ipv6", spec.Address.Ipv6),
+		pp("nick", spec.Nick),
+	)
+
+	// If we already found the matching edge, bail out now
+	if success {
+		return
+	}
+
+	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
+	for _, vt := range rv {
+		// TODO this'll be cross-package eventually - reorg needed
+		if maputil.AnyMatch(e.Props, vt.Vertex.Properties, "nick", "hostname", "ipv4", "ipv6") {
+			success = true
+			e.Target = vt.ID
+			break
+		}
+	}
+
+	return
+}
+
 //func (_ environmentUIF) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeSpec) (e types.StdEdge, success bool) {
 //}
