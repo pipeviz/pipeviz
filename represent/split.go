@@ -48,8 +48,6 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 	}
 
 	switch v := d.(type) {
-	case interpret.LogicState:
-		return splitLogicState(v, id)
 	case interpret.Process:
 		return splitProcess(v, id)
 	case interpret.Commit:
@@ -65,47 +63,6 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 	}
 
 	return nil, errors.New("No handler for object type")
-}
-
-func splitEnvironment(d interpret.Environment, id uint64) ([]types.SplitData, error) {
-	// seven distinct props
-	v := types.NewVertex("environment", id,
-		types.PropPair{K: "os", V: d.OS},
-		types.PropPair{K: "provider", V: d.Provider},
-		types.PropPair{K: "type", V: d.Type},
-		types.PropPair{K: "nick", V: d.Nick},
-		types.PropPair{K: "hostname", V: d.Address.Hostname},
-		types.PropPair{K: "ipv4", V: d.Address.Ipv4},
-		types.PropPair{K: "ipv6", V: d.Address.Ipv6},
-	)
-
-	// By spec, Environments have no outbound edges
-	return []types.SplitData{{Vertex: v}}, nil
-}
-
-func splitLogicState(d interpret.LogicState, id uint64) ([]types.SplitData, error) {
-	v := types.NewVertex("logic-state", id,
-		types.PropPair{K: "path", V: d.Path},
-		types.PropPair{K: "lgroup", V: d.Lgroup},
-		types.PropPair{K: "nick", V: d.Nick},
-		types.PropPair{K: "type", V: d.Type},
-		types.PropPair{K: "version", V: d.ID.Version},
-		types.PropPair{K: "semver", V: d.ID.Semver},
-	)
-
-	var edges types.EdgeSpecs
-
-	if !d.ID.Commit.IsEmpty() {
-		edges = append(edges, SpecCommit{d.ID.Commit})
-	}
-
-	for _, dl := range d.Datasets {
-		edges = append(edges, dl)
-	}
-
-	edges = append(edges, d.Environment)
-
-	return []types.SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
 func splitProcess(d interpret.Process, id uint64) ([]types.SplitData, error) {

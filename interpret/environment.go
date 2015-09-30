@@ -17,6 +17,12 @@ type Environment struct {
 	Processes   []Process       `json:"processes,omitempty"`
 }
 
+type Address struct {
+	Hostname string `json:"hostname,omitempty"`
+	Ipv4     string `json:"ipv4,omitempty"`
+	Ipv6     string `json:"ipv6,omitempty"`
+}
+
 func (d Environment) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	// seven distinct props
 	v := types.NewVertex("environment", id,

@@ -5,12 +5,6 @@ import (
 	"encoding/hex"
 )
 
-type Address struct {
-	Hostname string `json:"hostname,omitempty"`
-	Ipv4     string `json:"ipv4,omitempty"`
-	Ipv6     string `json:"ipv6,omitempty"`
-}
-
 type ConnNet struct {
 	Hostname string `json:"hostname,omitempty"`
 	Ipv4     string `json:"ipv4,omitempty"`

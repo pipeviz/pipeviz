@@ -13,7 +13,7 @@ func Identify(g types.CoreGraph, sd types.SplitData) int {
 	// default one didn't do it, use specialists to narrow further
 
 	switch sd.Vertex.Typ() {
-	case "logic-state", "comm", "parent-dataset", "dataset":
+	case "comm", "parent-dataset", "dataset":
 		// TODO vertexDataset needs special disambiguation; it has a second structural edge (poor idea anyway)
 		if len(ids) == 1 && definitive {
 			return ids[0]
@@ -172,10 +172,6 @@ func (i IdentifierGeneric) Matches(a types.StdVertex, b types.StdVertex) bool {
 	}
 
 	switch a.Typ() {
-	case "environment":
-		return matchAddress(a.Props(), b.Props())
-	case "logic-state":
-		return mapValEq(a.Props(), b.Props(), "path")
 	case "process":
 		return mapValEq(a.Props(), b.Props(), "pid")
 	case "comm":
