@@ -19,8 +19,6 @@ func Identify(g types.CoreGraph, sd types.SplitData) int {
 			return ids[0]
 		}
 		return 0
-	case "test-result":
-		return identifyByGitHashSpec(g, sd, ids)
 	}
 
 	if ids == nil {
@@ -115,28 +113,6 @@ func identifyDefault(g types.CoreGraph, sd types.SplitData) (ret []int, definiti
 	return ret, false
 }
 
-// Narrow a match list by looking for alignment on a git commit sha1
-func identifyByGitHashSpec(g types.CoreGraph, sd types.SplitData, matches []int) int {
-	for _, es := range sd.EdgeSpecs {
-		// first find the commit spec
-		if spec, ok := es.(SpecCommit); ok {
-			// then search otherwise-matching vertices for a corresponding sha1 edge
-			for _, matchvid := range matches {
-				if len(g.OutWith(matchvid, helpers.Qbe(types.EType("version"), "sha1", spec.Sha1))) == 1 {
-					return matchvid
-				}
-			}
-
-			break // there *should* be one and only one
-		}
-	}
-
-	// no match, it's a newbie
-	return 0
-}
-
-// older stuff below
-
 var Identifiers []Identifier
 
 func init() {
@@ -158,7 +134,7 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.StdVertex) bool {
 	switch data.Typ() {
-	case "git-tag", "git-branch", "test-result", "dataset", "parent-dataset":
+	case "dataset", "parent-dataset", "pkg-yum":
 		return true
 	default:
 		return false
@@ -171,10 +147,6 @@ func (i IdentifierGeneric) Matches(a types.StdVertex, b types.StdVertex) bool {
 	}
 
 	switch a.Typ() {
-	case "git-tag", "git-branch":
-		return mapValEq(a.Props(), b.Props(), "name")
-	case "test-result":
-		return true // TODO LOLOLOL totally demonstrating how this system is broken
 	case "dataset":
 		return mapValEq(a.Props(), b.Props(), "name")
 	case "parent-dataset":

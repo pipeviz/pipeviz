@@ -48,8 +48,6 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 	}
 
 	switch v := d.(type) {
-	case interpret.CommitMeta:
-		return splitCommitMeta(v, id)
 	case interpret.ParentDataset:
 		return splitParentDataset(v, id)
 	case interpret.Dataset:
@@ -59,27 +57,6 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 	}
 
 	return nil, errors.New("No handler for object type")
-}
-
-func splitCommitMeta(d interpret.CommitMeta, id uint64) ([]types.SplitData, error) {
-	sd := make([]types.SplitData, 0)
-
-	for _, tag := range d.Tags {
-		v := types.NewVertex("git-tag", id, types.PropPair{"name", tag})
-		sd = append(sd, types.SplitData{Vertex: v, EdgeSpecs: []types.EdgeSpec{SpecCommit{d.Sha1}}})
-	}
-
-	for _, branch := range d.Branches {
-		v := types.NewVertex("git-branch", id, types.PropPair{"name", branch})
-		sd = append(sd, types.SplitData{Vertex: v, EdgeSpecs: []types.EdgeSpec{SpecCommit{d.Sha1}}})
-	}
-
-	if d.TestState != "" {
-		v := types.NewVertex("test-result", id, types.PropPair{"result", d.TestState})
-		sd = append(sd, types.SplitData{Vertex: v, EdgeSpecs: []types.EdgeSpec{SpecCommit{d.Sha1}}})
-	}
-
-	return sd, nil
 }
 
 func splitParentDataset(d interpret.ParentDataset, id uint64) ([]types.SplitData, error) {

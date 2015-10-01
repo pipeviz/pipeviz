@@ -1,13 +1,5 @@
 package interpret
 
-type CommitMeta struct {
-	Sha1      Sha1
-	Sha1Str   string   `json:"sha1,omitempty"`
-	Tags      []string `json:"tags,omitempty"`
-	Branches  []string `json:"branches,omitempty"`
-	TestState string   `json:"testState,omitempty"`
-}
-
 // FIXME this metaset/set design is not recursive, but it will need to be
 type ParentDataset struct {
 	Environment EnvLink   `json:"environment,omitempty"`

@@ -27,8 +27,6 @@ func Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeS
 	switch es := d.(type) {
 	case interpret.DataLink:
 		return resolveDataLink(g, mid, src, es)
-	case SpecCommit:
-		return resolveSpecCommit(g, mid, src, es)
 	case SpecDatasetHierarchy:
 		return resolveSpecDatasetHierarchy(g, mid, src, es)
 	case interpret.DataProvenance:
@@ -181,39 +179,6 @@ func resolveDataLink(g types.CoreGraph, mid uint64, src types.VertexTuple, es in
 	// Aaaand we found our target.
 	success = true
 	e.Target = dataset.ID
-	return
-}
-
-func resolveSpecCommit(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecCommit) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "version",
-	}
-	e.Props = e.Props.Set("sha1", types.Property{MsgSrc: mid, Value: es.Sha1})
-
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("version")))
-	if len(re) > 0 {
-		sha1, _ := re[0].Props.Lookup("sha1")
-		e.ID = re[0].ID // FIXME setting the id to non-0 AND failing is currently unhandled
-		if sha1.(types.Property).Value == es.Sha1 {
-			success = true
-			e.Target = re[0].Target
-		} else {
-			rv := g.VerticesWith(helpers.Qbv(types.VType("commit"), "sha1", es.Sha1))
-			if len(rv) == 1 {
-				success = true
-				e.Target = rv[0].ID
-			}
-		}
-	} else {
-		rv := g.VerticesWith(helpers.Qbv(types.VType("commit"), "sha1", es.Sha1))
-		if len(rv) == 1 {
-			success = true
-			e.Target = rv[0].ID
-		}
-	}
-
 	return
 }
 
