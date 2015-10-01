@@ -30,6 +30,18 @@ type DataLink struct {
 	ConnNet     ConnNet  `json:"connNet,omitempty"`
 }
 
+type ConnNet struct {
+	Hostname string `json:"hostname,omitempty"`
+	Ipv4     string `json:"ipv4,omitempty"`
+	Ipv6     string `json:"ipv6,omitempty"`
+	Port     int    `json:"port,omitempty"`
+	Proto    string `json:"proto,omitempty"`
+}
+
+type ConnUnix struct {
+	Path string `json:"path,omitempty"`
+}
+
 func (d LogicState) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	v := types.NewVertex("logic-state", id,
 		pp("path", d.Path),

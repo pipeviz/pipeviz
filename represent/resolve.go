@@ -29,8 +29,6 @@ func Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeS
 		return resolveDataLink(g, mid, src, es)
 	case SpecCommit:
 		return resolveSpecCommit(g, mid, src, es)
-	case SpecGitCommitParent:
-		return resolveSpecGitCommitParent(g, mid, src, es)
 	case SpecDatasetHierarchy:
 		return resolveSpecDatasetHierarchy(g, mid, src, es)
 	case interpret.DataProvenance:
@@ -213,31 +211,6 @@ func resolveSpecCommit(g types.CoreGraph, mid uint64, src types.VertexTuple, es 
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].ID
-		}
-	}
-
-	return
-}
-
-func resolveSpecGitCommitParent(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecGitCommitParent) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "parent-commit",
-	}
-
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("parent-commit"), "pnum", es.ParentNum))
-	if len(re) > 0 {
-		success = true
-		e.Target = re[0].Target
-		e.ID = re[0].ID
-	} else {
-		rv := g.VerticesWith(helpers.Qbv(types.VType("commit"), "sha1", es.Sha1))
-		if len(rv) == 1 {
-			success = true
-			e.Target = rv[0].ID
-			e.Props = e.Props.Set("pnum", types.Property{MsgSrc: mid, Value: es.ParentNum})
-			e.Props = e.Props.Set("sha1", types.Property{MsgSrc: mid, Value: es.Sha1})
 		}
 	}
 

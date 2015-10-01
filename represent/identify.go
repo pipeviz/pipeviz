@@ -13,7 +13,7 @@ func Identify(g types.CoreGraph, sd types.SplitData) int {
 	// default one didn't do it, use specialists to narrow further
 
 	switch sd.Vertex.Typ() {
-	case "comm", "parent-dataset", "dataset":
+	case "parent-dataset", "dataset":
 		// TODO vertexDataset needs special disambiguation; it has a second structural edge (poor idea anyway)
 		if len(ids) == 1 && definitive {
 			return ids[0]
@@ -158,7 +158,7 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.StdVertex) bool {
 	switch data.Typ() {
-	case "commit", "git-tag", "git-branch", "test-result", "dataset", "parent-dataset":
+	case "git-tag", "git-branch", "test-result", "dataset", "parent-dataset":
 		return true
 	default:
 		return false
@@ -171,8 +171,6 @@ func (i IdentifierGeneric) Matches(a types.StdVertex, b types.StdVertex) bool {
 	}
 
 	switch a.Typ() {
-	case "commit":
-		return mapValEq(a.Props(), b.Props(), "sha1")
 	case "git-tag", "git-branch":
 		return mapValEq(a.Props(), b.Props(), "name")
 	case "test-result":
