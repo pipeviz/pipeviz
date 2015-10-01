@@ -17,17 +17,17 @@ func (d CommitMeta) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	ret := make([]types.UnifyInstructionForm, 0)
 
 	for _, tag := range d.Tags {
-		v := types.NewVertex("git-tag", id, types.PropPair{"name", tag})
+		v := types.NewVertex("git-tag", id, pp("name", tag))
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	for _, branch := range d.Branches {
-		v := types.NewVertex("git-branch", id, types.PropPair{"name", branch})
+		v := types.NewVertex("git-branch", id, pp("name", branch))
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
 	if d.TestState != "" {
-		v := types.NewVertex("test-result", id, types.PropPair{"result", d.TestState})
+		v := types.NewVertex("test-result", id, pp("result", d.TestState))
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{d.Sha1}}})
 	}
 
