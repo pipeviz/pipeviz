@@ -48,55 +48,11 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 	}
 
 	switch v := d.(type) {
-	case interpret.ParentDataset:
-		return splitParentDataset(v, id)
-	case interpret.Dataset:
-		return splitDataset(v, id)
 	case interpret.YumPkg:
 		return splitYumPkg(v, id)
 	}
 
 	return nil, errors.New("No handler for object type")
-}
-
-func splitParentDataset(d interpret.ParentDataset, id uint64) ([]types.SplitData, error) {
-	v := types.NewVertex("parent-dataset", id,
-		types.PropPair{K: "name", V: d.Name},
-		types.PropPair{K: "path", V: d.Path},
-	)
-	var edges types.EdgeSpecs
-
-	edges = append(edges, d.Environment)
-
-	ret := []types.SplitData{{v, edges}}
-
-	for _, sub := range d.Subsets {
-		sub.Parent = d.Name
-		sdsi, _ := Split(sub, id)
-		// can only be one
-		sds := sdsi.([]types.SplitData)
-		sd := sds[0]
-		// FIXME having this here is cool, but the schema does allow top-level datasets, which won't pass thru and so are guaranteed orphans
-		sd.EdgeSpecs = append(types.EdgeSpecs{d.Environment}, sd.EdgeSpecs...)
-		ret = append(ret, sd)
-	}
-
-	return ret, nil
-}
-
-func splitDataset(d interpret.Dataset, id uint64) ([]types.SplitData, error) {
-	v := types.NewVertex("dataset", id,
-		types.PropPair{K: "name", V: d.Name},
-		// TODO convert input from string to int and force timestamps. javascript apparently likes
-		// ISO 8601, but go doesn't? so, timestamps.
-		types.PropPair{K: "create-time", V: d.CreateTime},
-	)
-	var edges types.EdgeSpecs
-
-	edges = append(edges, SpecDatasetHierarchy{[]string{d.Parent}})
-	edges = append(edges, d.Genesis)
-
-	return []types.SplitData{{Vertex: v, EdgeSpecs: edges}}, nil
 }
 
 func splitYumPkg(d interpret.YumPkg, id uint64) ([]types.SplitData, error) {

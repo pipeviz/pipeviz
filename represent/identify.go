@@ -134,7 +134,7 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.StdVertex) bool {
 	switch data.Typ() {
-	case "dataset", "parent-dataset", "pkg-yum":
+	case "pkg-yum":
 		return true
 	default:
 		return false
@@ -147,10 +147,6 @@ func (i IdentifierGeneric) Matches(a types.StdVertex, b types.StdVertex) bool {
 	}
 
 	switch a.Typ() {
-	case "dataset":
-		return mapValEq(a.Props(), b.Props(), "name")
-	case "parent-dataset":
-		return mapValEqAnd(a.Props(), b.Props(), "name", "path")
 	case "pkg-yum":
 		return mapValEq(a.Props(), b.Props(), "name", "version", "arch", "epoch")
 	default:

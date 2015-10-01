@@ -27,8 +27,6 @@ func Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeS
 	switch es := d.(type) {
 	case interpret.DataLink:
 		return resolveDataLink(g, mid, src, es)
-	case SpecDatasetHierarchy:
-		return resolveSpecDatasetHierarchy(g, mid, src, es)
 	case interpret.DataProvenance:
 		return resolveDataProvenance(g, mid, src, es)
 	case interpret.DataAlpha:
@@ -179,35 +177,6 @@ func resolveDataLink(g types.CoreGraph, mid uint64, src types.VertexTuple, es in
 	// Aaaand we found our target.
 	success = true
 	e.Target = dataset.ID
-	return
-}
-
-func resolveSpecDatasetHierarchy(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecDatasetHierarchy) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "dataset-hierarchy",
-	}
-	e.Props = e.Props.Set("parent", types.Property{MsgSrc: mid, Value: es.NamePath[0]})
-
-	// check for existing link - there can be only be one
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("dataset-hierarchy")))
-	if len(re) == 1 {
-		success = true
-		e = re[0]
-		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
-		e.Props = e.Props.Set("parent", types.Property{MsgSrc: mid, Value: es.NamePath[0]})
-		return
-	}
-
-	// no existing link found; search for proc directly
-	envid, _, _ := findEnv(g, src)
-	rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("parent-dataset"), "name", es.NamePath[0]))
-	if len(rv) != 0 { // >1 shouldn't be possible
-		success = true
-		e.Target = rv[0].ID
-	}
-
 	return
 }
 
