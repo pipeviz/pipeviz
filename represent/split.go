@@ -47,22 +47,5 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 		return u.UnificationForm(id), nil
 	}
 
-	switch v := d.(type) {
-	case interpret.YumPkg:
-		return splitYumPkg(v, id)
-	}
-
 	return nil, errors.New("No handler for object type")
-}
-
-func splitYumPkg(d interpret.YumPkg, id uint64) ([]types.SplitData, error) {
-	v := types.NewVertex("dataset", id,
-		types.PropPair{K: "name", V: d.Name},
-		types.PropPair{K: "version", V: d.Version},
-		types.PropPair{K: "epoch", V: d.Epoch},
-		types.PropPair{K: "release", V: d.Release},
-		types.PropPair{K: "arch", V: d.Arch},
-	)
-
-	return []types.SplitData{{Vertex: v}}, nil
 }

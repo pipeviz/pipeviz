@@ -134,8 +134,6 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.StdVertex) bool {
 	switch data.Typ() {
-	case "pkg-yum":
-		return true
 	default:
 		return false
 	}
@@ -147,8 +145,6 @@ func (i IdentifierGeneric) Matches(a types.StdVertex, b types.StdVertex) bool {
 	}
 
 	switch a.Typ() {
-	case "pkg-yum":
-		return mapValEq(a.Props(), b.Props(), "name", "version", "arch", "epoch")
 	default:
 		return false
 	}

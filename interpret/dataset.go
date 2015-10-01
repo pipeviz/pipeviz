@@ -71,14 +71,9 @@ func datasetUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 
 	spec := u.ScopingSpecs()[0].(SpecDatasetHierarchy)
 	el, success := spec.Environment.Resolve(g, 0, emptyVT(u.Vertex()))
-	//pretty.Println(spec, el, success)
 	// FIXME scoping edge resolution failure does not mean no match - there could be an orphan
 	if success {
 		for _, vt := range vtv {
-			//pretty.Println(vt.Flat())
-			//for _, tmp := range g.SuccessorsWith(vt.ID, helpers.Qbe(types.EType("dataset-hierarchy"))) {
-			//pretty.Println(tmp.Flat())
-			//}
 			if id := hasMatchingEnv(g, el, g.SuccessorsWith(vt.ID, helpers.Qbe(types.EType("dataset-hierarchy")))); id != 0 {
 				return vt.ID
 			}

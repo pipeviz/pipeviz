@@ -182,7 +182,6 @@ func (spec DataLink) Resolve(g types.CoreGraph, mid uint64, src types.VertexTupl
 		rv = g.VerticesWith(helpers.Qbv(types.VType("environment")))
 		var envid int
 		for _, vt := range rv {
-			// TODO matchAddress() func will need to be reorged to cross-package eventually - export!
 			if maputil.AnyMatch(e.Props, vt.Vertex.Properties, "hostname", "ipv4", "ipv6") {
 				envid = vt.ID
 				break
