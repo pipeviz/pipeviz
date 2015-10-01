@@ -64,3 +64,15 @@ func emptyVT(v types.StdVertex) types.VertexTuple {
 		OutEdges: ps.NewMap(),
 	}
 }
+
+func hasMatchingEnv(g types.CoreGraph, edge types.StdEdge, vtv types.VertexTupleVector) int {
+	for _, candidate := range vtv {
+		for _, edge2 := range g.OutWith(candidate.ID, helpers.Qbe(types.EType("envlink"))) {
+			if edge2.Target == edge.Target {
+				return candidate.ID
+			}
+		}
+	}
+
+	return 0
+}

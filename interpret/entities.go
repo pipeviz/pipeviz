@@ -102,24 +102,6 @@ type DataAlpha string
 func (d DataAlpha) _dg()      {}
 func (d DataProvenance) _dg() {}
 
-type Process struct {
-	Pid         int          `json:"pid,omitempty"`
-	Cwd         string       `json:"cwd,omitempty"`
-	Dataset     string       `json:"dataset,omitempty"`
-	Environment EnvLink      `json:"environment,omitempty"`
-	Group       string       `json:"group,omitempty"`
-	Listen      []ListenAddr `json:"listen,omitempty"`
-	LogicStates []string     `json:"logic-states,omitempty"`
-	User        string       `json:"user,omitempty"`
-}
-
-type ListenAddr struct {
-	Port  int      `json:"port,omitempty"`
-	Proto []string `json:"proto,omitempty"`
-	Type  string   `json:"type,omitempty"`
-	Path  string   `json:"path,omitempty"`
-}
-
 type YumPkg struct {
 	Name       string `json:"name,omitempty"`
 	Repository string `json:"repository,omitempty"`

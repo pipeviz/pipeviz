@@ -57,23 +57,13 @@ func lsUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
+		// FIXME scoping edge resolution failure does not mean no match - there could be an orphan
 		return 0
 	}
 
 	vp := u.Vertex().Properties
 	path, _ := vp.Lookup("path")
-	lss := g.VerticesWith(helpers.Qbv(types.VType("logic-state"), "path", path.(types.Property).Value))
-
-	for _, candidate := range lss {
-		for _, edge2 := range g.OutWith(candidate.ID, helpers.Qbe(types.EType("envlink"))) {
-			if edge2.Target == edge.Target {
-				return candidate.ID
-			}
-		}
-	}
-
-	// no match
-	return 0
+	return hasMatchingEnv(g, edge, g.VerticesWith(helpers.Qbv(types.VType("logic-state"), "path", path.(types.Property).Value)))
 }
 
 type SpecCommit struct {

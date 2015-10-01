@@ -31,16 +31,8 @@ func Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeS
 		return resolveSpecCommit(g, mid, src, es)
 	case SpecGitCommitParent:
 		return resolveSpecGitCommitParent(g, mid, src, es)
-	case SpecLocalLogic:
-		return resolveSpecLocalLogic(g, mid, src, es)
-	case SpecNetListener:
-		return resolveNetListener(g, mid, src, es)
-	case SpecUnixDomainListener:
-		return resolveUnixDomainListener(g, mid, src, es)
 	case SpecDatasetHierarchy:
 		return resolveSpecDatasetHierarchy(g, mid, src, es)
-	case SpecParentDataset:
-		return resolveSpecParentDataset(g, mid, src, es)
 	case interpret.DataProvenance:
 		return resolveDataProvenance(g, mid, src, es)
 	case interpret.DataAlpha:
@@ -252,88 +244,6 @@ func resolveSpecGitCommitParent(g types.CoreGraph, mid uint64, src types.VertexT
 	return
 }
 
-func resolveSpecLocalLogic(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecLocalLogic) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "logic-link",
-	}
-
-	// search for existing link
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("logic-link"), "path", es.Path))
-	if len(re) == 1 {
-		// TODO don't set the path prop again, it's the unique id...meh, same question here w/uniqueness as above
-		success = true
-		e = re[0]
-		return
-	}
-
-	// no existing link found, search for proc directly
-	envid, _, _ := findEnv(g, src)
-	rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("logic-state"), "path", es.Path))
-	if len(rv) == 1 {
-		success = true
-		e.Target = rv[0].ID
-	}
-
-	return
-}
-
-func resolveNetListener(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecNetListener) (e types.StdEdge, success bool) {
-	// check for existing edge; this one is quite straightforward
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("listening"), "type", "port", "port", es.Port, "proto", es.Proto))
-	if len(re) == 1 {
-		return re[0], true
-	}
-
-	e = types.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "listening",
-	}
-
-	e.Props = e.Props.Set("port", types.Property{MsgSrc: mid, Value: es.Port})
-	e.Props = e.Props.Set("proto", types.Property{MsgSrc: mid, Value: es.Proto})
-
-	envid, _, hasenv := findEnv(g, src)
-	if hasenv {
-		rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("comm"), "type", "port", "port", es.Port))
-		if len(rv) == 1 {
-			success = true
-			e.Target = rv[0].ID
-		}
-	}
-
-	return
-}
-
-func resolveUnixDomainListener(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecUnixDomainListener) (e types.StdEdge, success bool) {
-	// check for existing edge; this one is quite straightforward
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("listening"), "type", "unix", "path", es.Path))
-	if len(re) == 1 {
-		return re[0], true
-	}
-
-	e = types.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "listening",
-	}
-
-	e.Props = e.Props.Set("path", types.Property{MsgSrc: mid, Value: es.Path})
-
-	envid, _, hasenv := findEnv(g, src)
-	if hasenv {
-		rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("comm"), "type", "unix", "path", es.Path))
-		if len(rv) == 1 {
-			success = true
-			e.Target = rv[0].ID
-		}
-	}
-
-	return
-}
-
 func resolveSpecDatasetHierarchy(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecDatasetHierarchy) (e types.StdEdge, success bool) {
 	e = types.StdEdge{
 		Source: src.ID,
@@ -358,34 +268,6 @@ func resolveSpecDatasetHierarchy(g types.CoreGraph, mid uint64, src types.Vertex
 	if len(rv) != 0 { // >1 shouldn't be possible
 		success = true
 		e.Target = rv[0].ID
-	}
-
-	return
-}
-
-func resolveSpecParentDataset(g types.CoreGraph, mid uint64, src types.VertexTuple, es SpecParentDataset) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "dataset-gateway",
-	}
-	e.Props = e.Props.Set("name", types.Property{MsgSrc: mid, Value: es.Name})
-
-	// check for existing link - there can be only be one
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("dataset-gateway")))
-	if len(re) == 1 {
-		success = true
-		e = re[0]
-		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
-	} else {
-
-		// no existing link found; search for proc directly
-		envid, _, _ := findEnv(g, src)
-		rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("parent-dataset"), "name", es.Name))
-		if len(rv) != 0 { // >1 shouldn't be possible
-			success = true
-			e.Target = rv[0].ID
-		}
 	}
 
 	return

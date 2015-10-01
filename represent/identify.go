@@ -158,8 +158,7 @@ type IdentifierGeneric struct{}
 
 func (i IdentifierGeneric) CanIdentify(data types.StdVertex) bool {
 	switch data.Typ() {
-	case "environment", "logic-state", "process", "comm", "commit", "git-tag",
-		"git-branch", "test-result", "dataset", "parent-dataset":
+	case "commit", "git-tag", "git-branch", "test-result", "dataset", "parent-dataset":
 		return true
 	default:
 		return false
@@ -172,15 +171,6 @@ func (i IdentifierGeneric) Matches(a types.StdVertex, b types.StdVertex) bool {
 	}
 
 	switch a.Typ() {
-	case "process":
-		return mapValEq(a.Props(), b.Props(), "pid")
-	case "comm":
-		_, haspath := a.Props().Lookup("path")
-		if haspath {
-			return mapValEqAnd(a.Props(), b.Props(), "type", "path")
-		} else {
-			return mapValEqAnd(a.Props(), b.Props(), "type", "port")
-		}
 	case "commit":
 		return mapValEq(a.Props(), b.Props(), "sha1")
 	case "git-tag", "git-branch":

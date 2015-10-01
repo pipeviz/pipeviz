@@ -48,8 +48,6 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 	}
 
 	switch v := d.(type) {
-	case interpret.Process:
-		return splitProcess(v, id)
 	case interpret.Commit:
 		return splitCommit(v, id)
 	case interpret.CommitMeta:
@@ -63,48 +61,6 @@ func Split(d interface{}, id uint64) (interface{}, error) {
 	}
 
 	return nil, errors.New("No handler for object type")
-}
-
-func splitProcess(d interpret.Process, id uint64) ([]types.SplitData, error) {
-	sd := make([]types.SplitData, 0)
-
-	v := types.NewVertex("process", id,
-		types.PropPair{K: "pid", V: d.Pid},
-		types.PropPair{K: "cwd", V: d.Cwd},
-		types.PropPair{K: "group", V: d.Group},
-		types.PropPair{K: "user", V: d.User},
-	)
-
-	var edges types.EdgeSpecs
-	edges = append(edges, d.Environment)
-
-	for _, ls := range d.LogicStates {
-		edges = append(edges, SpecLocalLogic{ls})
-	}
-
-	if d.Dataset != "" {
-		edges = append(edges, SpecParentDataset{Name: d.Dataset})
-	}
-
-	for _, listen := range d.Listen {
-		// TODO change this to use diff vtx types for unix domain sock and network sock
-		v2 := types.NewVertex("comm", id,
-			types.PropPair{K: "type", V: listen.Type},
-		)
-
-		if listen.Type == "unix" {
-			edges = append(edges, SpecUnixDomainListener{Path: listen.Path})
-			v2.Properties = v2.Properties.Set("path", types.Property{MsgSrc: id, Value: listen.Path})
-		} else {
-			for _, proto := range listen.Proto {
-				edges = append(edges, SpecNetListener{Port: listen.Port, Proto: proto})
-			}
-			v2.Properties = v2.Properties.Set("port", types.Property{MsgSrc: id, Value: listen.Port})
-		}
-		sd = append(sd, types.SplitData{v2, types.EdgeSpecs{d.Environment}})
-	}
-
-	return append([]types.SplitData{{Vertex: v, EdgeSpecs: edges}}, sd...), nil
 }
 
 func splitCommit(d interpret.Commit, id uint64) ([]types.SplitData, error) {
