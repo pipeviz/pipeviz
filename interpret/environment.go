@@ -84,6 +84,3 @@ func (spec EnvLink) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple
 
 	return
 }
-
-//func (_ environmentUIF) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple, d types.EdgeSpec) (e types.StdEdge, success bool) {
-//}
