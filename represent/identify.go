@@ -153,25 +153,3 @@ func (i IdentifierGeneric) Matches(a types.StdVertex, b types.StdVertex) bool {
 		return false
 	}
 }
-
-// Helper func to match addresses
-func matchAddress(a, b ps.Map) bool {
-	// For now, match if *any* non-empty of hostname, ipv4, or ipv6 match
-	// TODO this needs moar thinksies
-	if mapValEq(a, b, "hostname") {
-		return true
-	}
-	if mapValEq(a, b, "ipv4") {
-		return true
-	}
-	if mapValEq(a, b, "ipv6") {
-		return true
-	}
-
-	return false
-}
-
-// Helper func to match env links
-func matchEnvLink(a, b ps.Map) bool {
-	return mapValEq(a, b, "nick") || matchAddress(a, b)
-}

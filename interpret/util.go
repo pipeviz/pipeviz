@@ -2,6 +2,7 @@ package interpret
 
 import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/maputil"
 	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
@@ -75,4 +76,62 @@ func hasMatchingEnv(g types.CoreGraph, edge types.StdEdge, vtv types.VertexTuple
 	}
 
 	return 0
+}
+
+func assignAddress(mid uint64, a Address, m ps.Map, excl bool) ps.Map {
+	if a.Hostname != "" {
+		if excl {
+			m = m.Delete("ipv4")
+			m = m.Delete("ipv6")
+		}
+		m = m.Set("hostname", types.Property{MsgSrc: mid, Value: a.Hostname})
+	}
+	if a.Ipv4 != "" {
+		if excl {
+			m = m.Delete("hostname")
+			m = m.Delete("ipv6")
+		}
+		m = m.Set("ipv4", types.Property{MsgSrc: mid, Value: a.Ipv4})
+	}
+	if a.Ipv6 != "" {
+		if excl {
+			m = m.Delete("hostname")
+			m = m.Delete("ipv4")
+		}
+		m = m.Set("ipv6", types.Property{MsgSrc: mid, Value: a.Ipv6})
+	}
+
+	return m
+}
+
+func FindEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) {
+	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
+	for _, vt := range rv {
+		if maputil.AnyMatch(props, vt.Vertex.Props(), "hostname", "ipv4", "ipv6", "nick") {
+			return vt.ID, true
+		}
+	}
+
+	return
+}
+
+func FindDataset(g types.CoreGraph, envid int, name []string) (id int, success bool) {
+	// first time through use the parent type
+	vtype := types.VType("parent-dataset")
+	id = envid
+
+	var n string
+	for len(name) > 0 {
+		n, name = name[0], name[1:]
+		rv := g.PredecessorsWith(id, helpers.Qbv(vtype, "name", n))
+		vtype = "dataset"
+
+		if len(rv) != 1 {
+			return 0, false
+		}
+
+		id = rv[0].ID
+	}
+
+	return id, true
 }

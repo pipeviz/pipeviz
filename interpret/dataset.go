@@ -2,6 +2,7 @@ package interpret
 
 import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/maputil"
 	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
@@ -120,23 +121,6 @@ func parentDatasetUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 		"path", path.(types.Property).Value,
 		"name", name.(types.Property).Value,
 	)))
-
-	//path, _ := u.Vertex().Properties.Lookup("path")
-	//name, _ := u.Vertex().Properties.Lookup("name")
-	//vtv := g.VerticesWith(helpers.Qbv(types.VType("parent-dataset"),
-	//"path", path.(types.Property).Value,
-	//"name", name.(types.Property).Value,
-	//))
-	//pretty.Println(path, name, edge)
-	//for _, vt := range vtv {
-	//pretty.Println(vt.Flat())
-	//}
-	//id := hasMatchingEnv(g, edge, g.VerticesWith(helpers.Qbv(types.VType("parent-dataset"),
-	//"path", path.(types.Property).Value,
-	//"name", name.(types.Property).Value,
-	//)))
-	//fmt.Println("RETURNING ID:", id)
-	//return id
 }
 
 type SpecDatasetHierarchy struct {
@@ -170,6 +154,65 @@ func (spec SpecDatasetHierarchy) Resolve(g types.CoreGraph, mid uint64, src type
 			success = true
 			e.Target = rv[0].ID
 		}
+	}
+
+	return
+}
+
+func (spec DataProvenance) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
+	// FIXME this presents another weird case where "success" is not binary. We *could*
+	// find an already-existing data-provenance edge, but then have some net-addr params
+	// change which cause it to fail to resolve to an environment. If we call that successful,
+	// then it won't try to resolve again later...though, hm, just call it unsuccessful and
+	// then try again one more time. Maybe it is fine. THINK IT THROUGH.
+
+	e = types.StdEdge{
+		Source: src.ID,
+		Props:  ps.NewMap(),
+		EType:  "data-provenance",
+	}
+	e.Props = assignAddress(mid, spec.Address, e.Props, false)
+
+	re := g.OutWith(src.ID, helpers.Qbe(types.EType("data-provenance")))
+	if len(re) == 1 {
+		reresolve := maputil.AnyMatch(e.Props, re[0].Props, "hostname", "ipv4", "ipv6")
+
+		e = re[0]
+		if spec.SnapTime != "" {
+			e.Props = e.Props.Set("snap-time", types.Property{MsgSrc: mid, Value: spec.SnapTime})
+		}
+
+		if reresolve {
+			e.Props = assignAddress(mid, spec.Address, e.Props, true)
+		} else {
+			return e, true
+		}
+	}
+
+	envid, found := FindEnvironment(g, e.Props)
+	if !found {
+		// TODO returning this already-modified edge necessitates that the core system
+		// disregard 'failed' edges. which should be fine, that should be a guarantee
+		return e, false
+	}
+
+	e.Target, success = FindDataset(g, envid, spec.Dataset)
+	return
+}
+
+func (spec DataAlpha) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
+	// TODO this makes a loop...are we cool with that?
+	success = true // impossible to fail here
+	e = types.StdEdge{
+		Source: src.ID,
+		Target: src.ID,
+		Props:  ps.NewMap(),
+		EType:  "data-provenance",
+	}
+
+	re := g.OutWith(src.ID, helpers.Qbe(types.EType("data-provenance")))
+	if len(re) == 1 {
+		e = re[0]
 	}
 
 	return

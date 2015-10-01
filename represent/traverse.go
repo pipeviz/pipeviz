@@ -5,7 +5,6 @@ import (
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
@@ -235,35 +234,4 @@ func (g *coreGraph) VerticesWith(vf types.VFilter) (vs types.VertexTupleVector) 
 	})
 
 	return vs
-}
-
-func FindEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) {
-	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
-	for _, vt := range rv {
-		if matchEnvLink(props, vt.Vertex.Props()) {
-			return vt.ID, true
-		}
-	}
-
-	return
-}
-
-func FindDataset(g types.CoreGraph, envid int, name []string) (id int, success bool) {
-	// first time through use the parent type
-	vtype := types.VType("parent-dataset")
-
-	var n string
-	for len(name) > 0 {
-		n, name = name[0], name[1:]
-		rv := g.PredecessorsWith(envid, helpers.Qbv(vtype, "name", n))
-		vtype = "dataset"
-
-		if len(rv) != 1 {
-			return 0, false
-		}
-
-		id = rv[0].ID
-	}
-
-	return id, true
 }
