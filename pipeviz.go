@@ -44,6 +44,9 @@ func init() {
 }
 
 func main() {
+	// If built with debug tag, turns on the http-based profiler. Otherwise, nop.
+	runProfiler()
+
 	src, err := schema.Master()
 	if err != nil {
 		log.WithFields(log.Fields{
