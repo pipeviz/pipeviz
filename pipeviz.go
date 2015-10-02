@@ -167,9 +167,9 @@ func restoreGraph(j journal.JournalStore) (types.CoreGraph, error) {
 				// TODO returning out here could end us up somwehere weird
 				return g, err
 			}
-			msg := &interpret.Message{Id: item.Index}
+			msg := &interpret.Message{}
 			json.Unmarshal(item.Message, msg)
-			g = g.Merge(msg)
+			g = g.Merge(item.Index, msg.UnificationForm(item.Index))
 		}
 	}
 

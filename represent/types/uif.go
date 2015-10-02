@@ -1,9 +1,5 @@
 package types
 
-type Unifier interface {
-	UnificationForm(uint64) []UnifyInstructionForm
-}
-
 type UnifyInstructionForm interface {
 	Vertex() StdVertex
 	Unify(CoreGraph, UnifyInstructionForm) int

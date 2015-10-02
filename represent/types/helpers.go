@@ -2,11 +2,6 @@ package types
 
 import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
-type Message interface {
-	ID() uint64
-	Each(func(vertex Unifier))
-}
-
 type flatVTuple struct {
 	Id       int        `json:"id"`
 	V        flatVertex `json:"vertex"`

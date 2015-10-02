@@ -9,9 +9,13 @@ import (
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
+// Not actually used right now, but this interface must be satisfied by all types
+type unifier interface {
+	UnificationForm(uint64) []types.UnifyInstructionForm
+}
+
 type Message struct {
-	Id uint64
-	m  *message
+	m *message
 }
 
 type message struct {
@@ -25,17 +29,12 @@ type message struct {
 	Yp  []PkgYum     `json:"yum-pkg"`
 }
 
-func (m *Message) ID() uint64 {
-	return m.Id
-}
-
 // UnmarshalJSON implements the json.Unmarshaler interface. It translates a
 // JSON message into a series of discrete objects that can then be merged
 // into the graph.
 func (m *Message) UnmarshalJSON(data []byte) error {
 	logEntry := log.WithFields(log.Fields{
 		"system": "interpet",
-		"msgid":  m.Id,
 	})
 
 	m.m = new(message)
@@ -77,18 +76,19 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Each takes an injected iteration function, traverses all the objects
-// translated from the JSON, and passes them into the function. Iteration
-// cannot be prematurely terminated by the injected function.
-func (m *Message) Each(f func(vertex types.Unifier)) {
+// UnificationForm translates all data in the message into the standard
+// UnifyInstructionForm, suitable for merging into the dataset.
+func (m Message) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	logEntry := log.WithFields(log.Fields{
 		"system": "interpet",
-		"msgid":  m.Id,
+		"msgid":  id,
 	})
 
+	ret := make([]types.UnifyInstructionForm, 0)
+
 	for _, e := range m.m.Env {
-		logEntry.WithField("vtype", "environment").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "environment").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
 	for _, e := range m.m.Ls {
 		if e.ID.CommitStr != "" {
@@ -103,20 +103,20 @@ func (m *Message) Each(f func(vertex types.Unifier)) {
 			e.ID.CommitStr = ""
 		}
 
-		logEntry.WithField("vtype", "logic state").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "logic state").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
 	for _, e := range m.m.Pds {
-		logEntry.WithField("vtype", "parent dataset").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "parent dataset").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
 	for _, e := range m.m.Ds {
-		logEntry.WithField("vtype", "dataset").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "dataset").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
 	for _, e := range m.m.P {
-		logEntry.WithField("vtype", "process").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "process").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
 	for _, e := range m.m.C {
 		byts, err := hex.DecodeString(e.Sha1Str)
@@ -145,8 +145,8 @@ func (m *Message) Each(f func(vertex types.Unifier)) {
 		}
 		e.ParentsStr = nil
 
-		logEntry.WithField("vtype", "git commit").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "git commit").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
 	for _, e := range m.m.Cm {
 		byts, err := hex.DecodeString(e.Sha1Str)
@@ -160,14 +160,16 @@ func (m *Message) Each(f func(vertex types.Unifier)) {
 		copy(e.Sha1[:], byts[0:20])
 		e.Sha1Str = ""
 
-		logEntry.WithField("vtype", "commit meta").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "commit meta").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
 
 	for _, e := range m.m.Yp {
-		logEntry.WithField("vtype", "yum-pkg").Debug("Preparing to emit object from Message.Each")
-		f(e)
+		logEntry.WithField("vtype", "yum-pkg").Debug("Preparing to translate into UnifyInstructionForm")
+		ret = append(ret, e.UnificationForm(id)...)
 	}
+
+	return ret
 }
 
 // Unmarshalers for variant subtypes

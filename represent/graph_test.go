@@ -15,7 +15,7 @@ var msgs []interpret.Message
 
 func init() {
 	for i := range make([]struct{}, 8) {
-		m := interpret.Message{Id: uint64(i + 1)}
+		m := interpret.Message{}
 
 		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
 		f, err := ioutil.ReadFile(path)
@@ -48,7 +48,7 @@ func TestClone(t *testing.T) {
 func BenchmarkMergeMessageOne(b *testing.B) {
 	var g types.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 	for i := 0; i < b.N; i++ {
-		g.Merge(&msgs[0])
+		g.Merge(0, msgs[0].UnificationForm(0))
 	}
 }
 
@@ -56,7 +56,7 @@ func BenchmarkMergeMessageOneAndTwo(b *testing.B) {
 	var g types.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 
 	for i := 0; i < b.N; i++ {
-		g.Merge(&msgs[0])
-		g.Merge(&msgs[1])
+		g.Merge(0, msgs[0].UnificationForm(0))
+		g.Merge(0, msgs[1].UnificationForm(0))
 	}
 }

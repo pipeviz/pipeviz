@@ -13,7 +13,7 @@ work together to facilitate the creation of larger traversals/queries.
 type CoreGraph interface {
 	// Merge a message into the graph, returning a pointer to the new graph
 	// that contains the resulting updates.
-	Merge(Message) CoreGraph
+	Merge(uint64, []UnifyInstructionForm) CoreGraph
 
 	// Enumerates the outgoing edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).

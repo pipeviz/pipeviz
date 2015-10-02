@@ -56,10 +56,9 @@ func (g *coreGraph) MsgId() uint64 {
 }
 
 // the method to merge a message into the graph
-func (og *coreGraph) Merge(msg types.Message) types.CoreGraph {
+func (og *coreGraph) Merge(msgid uint64, uifs []types.UnifyInstructionForm) types.CoreGraph {
 	// TODO use a buffering pool to minimize allocs
 	var ess edgeSpecSet
-	var msgid = msg.ID()
 
 	logEntry := log.WithFields(log.Fields{
 		"system": "engine",
@@ -71,24 +70,16 @@ func (og *coreGraph) Merge(msg types.Message) types.CoreGraph {
 	g := og.clone()
 	g.msgid = msgid
 
-	uifs := make([]types.UnifyInstructionForm, 0)
-
-	// Process incoming elements from the message
-	msg.Each(func(d types.Unifier) {
-		uifs = d.UnificationForm(msgid)
-
-		// Ensure vertices, then record into intermediate container
-		for _, uif := range uifs {
-			ess = append(ess, &veProcessingInfo{
-				vt:  g.ensureVertex(msgid, uif),
-				uif: uif,
-				// copy out the edges for later bookkeeping
-				e:     append(uif.ScopingSpecs(), uif.EdgeSpecs()...),
-				msgid: msgid,
-			})
-		}
-	})
-	logEntry.Infof("Splitting all message elements produced %d edge spec sets", len(ess))
+	// Ensure vertices, then record into intermediate, orphan-enabling container
+	for _, uif := range uifs {
+		ess = append(ess, &veProcessingInfo{
+			vt:  g.ensureVertex(msgid, uif),
+			uif: uif,
+			// copy out the edges for later bookkeeping
+			e:     append(uif.ScopingSpecs(), uif.EdgeSpecs()...),
+			msgid: msgid,
+		})
+	}
 
 	logEntry.Infof("Adding %d orphan edge spec sets from previous merges", len(g.orphans))
 	// Reinclude the held-over set of orphans for edge (re-)resolutions

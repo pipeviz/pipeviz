@@ -125,9 +125,9 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 func (s *Ingestor) Interpret(g types.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
-		im := interpret.Message{Id: m.Index}
+		im := interpret.Message{}
 		json.Unmarshal(m.Message, &im)
-		g = g.Merge(&im)
+		g = g.Merge(m.Index, im.UnificationForm(m.Index))
 
 		s.brokerChan <- g
 	}
