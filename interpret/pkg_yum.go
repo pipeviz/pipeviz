@@ -5,7 +5,7 @@ import (
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
-type YumPkg struct {
+type PkgYum struct {
 	Name       string `json:"name,omitempty"`
 	Repository string `json:"repository,omitempty"`
 	Version    string `json:"version,omitempty"`
@@ -14,7 +14,7 @@ type YumPkg struct {
 	Arch       string `json:"arch,omitempty"`
 }
 
-func (d YumPkg) UnificationForm(id uint64) []types.UnifyInstructionForm {
+func (d PkgYum) UnificationForm(id uint64) []types.UnifyInstructionForm {
 
 	return []types.UnifyInstructionForm{uif{
 		v: types.NewVertex("dataset", id,

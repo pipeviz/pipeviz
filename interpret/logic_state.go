@@ -76,7 +76,7 @@ func lsUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 
 	vp := u.Vertex().Properties
 	path, _ := vp.Lookup("path")
-	return hasMatchingEnv(g, edge, g.VerticesWith(helpers.Qbv(types.VType("logic-state"), "path", path.(types.Property).Value)))
+	return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("logic-state"), "path", path.(types.Property).Value)))
 }
 
 type SpecCommit struct {

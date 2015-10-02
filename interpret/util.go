@@ -66,7 +66,7 @@ func emptyVT(v types.StdVertex) types.VertexTuple {
 	}
 }
 
-func hasMatchingEnv(g types.CoreGraph, edge types.StdEdge, vtv types.VertexTupleVector) int {
+func findMatchingEnvId(g types.CoreGraph, edge types.StdEdge, vtv types.VertexTupleVector) int {
 	for _, candidate := range vtv {
 		for _, edge2 := range g.OutWith(candidate.ID, helpers.Qbe(types.EType("envlink"))) {
 			if edge2.Target == edge.Target {
@@ -104,7 +104,7 @@ func assignAddress(mid uint64, a Address, m ps.Map, excl bool) ps.Map {
 	return m
 }
 
-func FindEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) {
+func findEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) {
 	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
 	for _, vt := range rv {
 		if maputil.AnyMatch(props, vt.Vertex.Props(), "hostname", "ipv4", "ipv6", "nick") {
@@ -115,7 +115,7 @@ func FindEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) 
 	return
 }
 
-func FindDataset(g types.CoreGraph, envid int, name []string) (id int, success bool) {
+func findDataset(g types.CoreGraph, envid int, name []string) (id int, success bool) {
 	// first time through use the parent type
 	vtype := types.VType("parent-dataset")
 	id = envid

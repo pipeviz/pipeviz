@@ -74,7 +74,7 @@ func datasetUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 	// FIXME scoping edge resolution failure does not mean no match - there could be an orphan
 	if success {
 		for _, vt := range vtv {
-			if id := hasMatchingEnv(g, el, g.SuccessorsWith(vt.ID, helpers.Qbe(types.EType("dataset-hierarchy")))); id != 0 {
+			if id := findMatchingEnvId(g, el, g.SuccessorsWith(vt.ID, helpers.Qbe(types.EType("dataset-hierarchy")))); id != 0 {
 				return vt.ID
 			}
 		}
@@ -112,7 +112,7 @@ func parentDatasetUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 
 	path, _ := u.Vertex().Properties.Lookup("path")
 	name, _ := u.Vertex().Properties.Lookup("name")
-	return hasMatchingEnv(g, edge, g.VerticesWith(helpers.Qbv(types.VType("parent-dataset"),
+	return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("parent-dataset"),
 		"path", path.(types.Property).Value,
 		"name", name.(types.Property).Value,
 	)))
@@ -184,14 +184,14 @@ func (spec DataProvenance) Resolve(g types.CoreGraph, mid uint64, src types.Vert
 		}
 	}
 
-	envid, found := FindEnvironment(g, e.Props)
+	envid, found := findEnvironment(g, e.Props)
 	if !found {
 		// TODO returning this already-modified edge necessitates that the core system
 		// disregard 'failed' edges. which should be fine, that should be a guarantee
 		return e, false
 	}
 
-	e.Target, success = FindDataset(g, envid, spec.Dataset)
+	e.Target, success = findDataset(g, envid, spec.Dataset)
 	return
 }
 

@@ -21,7 +21,7 @@ type message struct {
 	P   []Process    `json:"processes"`
 	C   []Commit     `json:"commits"`
 	Cm  []CommitMeta `json:"commit-meta"`
-	Yp  []YumPkg     `json:"yum-pkg"`
+	Yp  []PkgYum     `json:"yum-pkg"`
 }
 
 func (m *Message) ID() uint64 {

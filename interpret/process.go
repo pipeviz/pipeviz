@@ -79,7 +79,7 @@ func processUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 	}
 
 	pid, _ := u.Vertex().Properties.Lookup("pid")
-	return hasMatchingEnv(g, edge, g.VerticesWith(helpers.Qbv(types.VType("process"), "pid", pid.(types.Property).Value)))
+	return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("process"), "pid", pid.(types.Property).Value)))
 }
 
 func commUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
@@ -94,12 +94,12 @@ func commUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 	typ, _ := vp.Lookup("type")
 	path, haspath := vp.Lookup("path")
 	if haspath {
-		return hasMatchingEnv(g, edge, g.VerticesWith(helpers.Qbv(types.VType("comm"),
+		return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("comm"),
 			"type", typ.(types.Property).Value,
 			"path", path.(types.Property).Value)))
 	} else {
 		port, _ := vp.Lookup("port")
-		return hasMatchingEnv(g, edge, g.VerticesWith(helpers.Qbv(types.VType("comm"),
+		return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("comm"),
 			"type", typ.(types.Property).Value,
 			"port", port.(types.Property).Value)))
 	}
