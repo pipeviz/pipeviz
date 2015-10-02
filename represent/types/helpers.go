@@ -4,7 +4,7 @@ import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndri
 
 type Message interface {
 	ID() uint64
-	Each(func(vertex interface{}))
+	Each(func(vertex Unifier))
 }
 
 type flatVTuple struct {

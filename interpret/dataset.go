@@ -24,6 +24,7 @@ type Dataset struct {
 }
 
 type DataGenesis interface {
+	types.EdgeSpec
 	_dg() // dummy method, avoid propagating the interface
 }
 

@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 type Message struct {
@@ -79,7 +80,7 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 // Each takes an injected iteration function, traverses all the objects
 // translated from the JSON, and passes them into the function. Iteration
 // cannot be prematurely terminated by the injected function.
-func (m *Message) Each(f func(vertex interface{})) {
+func (m *Message) Each(f func(vertex types.Unifier)) {
 	logEntry := log.WithFields(log.Fields{
 		"system": "interpet",
 		"msgid":  m.Id,
