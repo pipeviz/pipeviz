@@ -11,6 +11,7 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/journal/boltdb"
@@ -101,12 +102,7 @@ func main() {
 	broker.Get().Fanout(brokerChan)
 	brokerChan <- g
 
-	srv := &Ingestor{
-		journal:       j,
-		schema:        masterSchema,
-		interpretChan: interpretChan,
-		brokerChan:    brokerChan,
-	}
+	srv := ingest.New(j, masterSchema, interpretChan, brokerChan, MaxMessageSize)
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
