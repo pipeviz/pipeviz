@@ -1,12 +1,13 @@
 package interpret
 
 import (
+	"encoding/hex"
+
 	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
 type CommitMeta struct {
-	Sha1      Sha1
 	Sha1Str   string   `json:"sha1,omitempty"`
 	Tags      []string `json:"tags,omitempty"`
 	Branches  []string `json:"branches,omitempty"`
@@ -16,19 +17,26 @@ type CommitMeta struct {
 func (d CommitMeta) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	ret := make([]types.UnifyInstructionForm, 0)
 
+	var commit Sha1
+	byts, err := hex.DecodeString(d.Sha1Str)
+	if err != nil {
+		return nil
+	}
+	copy(commit[:], byts[0:20])
+
 	for _, tag := range d.Tags {
 		v := types.NewVertex("git-tag", id, pp("name", tag))
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{d.Sha1}}})
+		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{commit}}})
 	}
 
 	for _, branch := range d.Branches {
 		v := types.NewVertex("git-branch", id, pp("name", branch))
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{d.Sha1}}})
+		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{commit}}})
 	}
 
 	if d.TestState != "" {
 		v := types.NewVertex("test-result", id, pp("result", d.TestState))
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{d.Sha1}}})
+		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []types.EdgeSpec{SpecCommit{commit}}})
 	}
 
 	return ret

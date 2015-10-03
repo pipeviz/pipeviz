@@ -25,18 +25,45 @@ type Address struct {
 
 func (d Environment) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	// seven distinct props
-	v := types.NewVertex("environment", id,
-		pp("os", d.OS),
-		pp("provider", d.Provider),
-		pp("type", d.Type),
-		pp("nick", d.Nick),
-		pp("hostname", d.Address.Hostname),
-		pp("ipv4", d.Address.Ipv4),
-		pp("ipv6", d.Address.Ipv6),
-	)
+	ret := []types.UnifyInstructionForm{uif{
+		v: types.NewVertex("environment", id,
+			pp("os", d.OS),
+			pp("provider", d.Provider),
+			pp("type", d.Type),
+			pp("nick", d.Nick),
+			pp("hostname", d.Address.Hostname),
+			pp("ipv4", d.Address.Ipv4),
+			pp("ipv6", d.Address.Ipv6),
+		),
+		u: envUnify,
+	}}
 
-	// By spec, Environments have no outbound edges
-	return []types.UnifyInstructionForm{uif{v: v, u: envUnify}}
+	envlink := EnvLink{Address: Address{}}
+	// Create an envlink for any nested items, preferring nick, then hostname, ipv4, ipv6.
+	if d.Nick != "" {
+		envlink.Nick = d.Nick
+	} else if d.Address.Hostname != "" {
+		envlink.Address.Hostname = d.Address.Hostname
+	} else if d.Address.Ipv4 != "" {
+		envlink.Address.Ipv4 = d.Address.Ipv4
+	} else if d.Address.Ipv6 != "" {
+		envlink.Address.Ipv6 = d.Address.Ipv6
+	}
+
+	for _, ls := range d.LogicStates {
+		ls.Environment = envlink
+		ret = append(ret, ls.UnificationForm(id)...)
+	}
+	for _, p := range d.Processes {
+		p.Environment = envlink
+		ret = append(ret, p.UnificationForm(id)...)
+	}
+	for _, pds := range d.Datasets {
+		pds.Environment = envlink
+		ret = append(ret, pds.UnificationForm(id)...)
+	}
+
+	return ret
 }
 
 func envUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {

@@ -10,9 +10,8 @@ import (
 )
 
 type Commit struct {
-	Author     string `json:"author,omitempty"`
-	Date       string `json:"date,omitempty"`
-	Parents    []Sha1
+	Author     string   `json:"author,omitempty"`
+	Date       string   `json:"date,omitempty"`
 	ParentsStr []string `json:"parents,omitempty"`
 	Sha1       Sha1
 	Sha1Str    string `json:"sha1,omitempty"`
@@ -55,6 +54,12 @@ func (s Sha1) String() string {
 }
 
 func (d Commit) UnificationForm(id uint64) []types.UnifyInstructionForm {
+	byts, err := hex.DecodeString(d.Sha1Str)
+	if err != nil {
+		return nil
+	}
+	copy(d.Sha1[:], byts[0:20])
+
 	v := types.NewVertex("commit", id,
 		types.PropPair{K: "sha1", V: d.Sha1},
 		types.PropPair{K: "author", V: d.Author},
@@ -64,8 +69,16 @@ func (d Commit) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	)
 
 	var edges types.EdgeSpecs
-	for k, parent := range d.Parents {
-		edges = append(edges, SpecGitCommitParent{parent, k + 1})
+
+	for k, pstr := range d.ParentsStr {
+		byts, err := hex.DecodeString(pstr)
+		if err != nil {
+			continue
+		}
+
+		var sha1 Sha1
+		copy(sha1[:], byts[0:20])
+		edges = append(edges, SpecGitCommitParent{Sha1: sha1, ParentNum: k + 1})
 	}
 
 	return []types.UnifyInstructionForm{uif{v: v, u: commitUnify, e: edges}}

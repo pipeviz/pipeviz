@@ -1,6 +1,8 @@
 package interpret
 
 import (
+	"encoding/hex"
+
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/maputil"
 	"github.com/tag1consulting/pipeviz/represent/helpers"
@@ -11,7 +13,6 @@ type LogicState struct {
 	Datasets    []DataLink `json:"datasets,omitempty"`
 	Environment EnvLink    `json:"environment,omitempty"`
 	ID          struct {
-		Commit    Sha1   `json:"-"`
 		CommitStr string `json:"commit,omitempty"`
 		Version   string `json:"version,omitempty"`
 		Semver    string `json:"semver,omitempty"`
@@ -55,8 +56,13 @@ func (d LogicState) UnificationForm(id uint64) []types.UnifyInstructionForm {
 
 	var edges types.EdgeSpecs
 
-	if !d.ID.Commit.IsEmpty() {
-		edges = append(edges, SpecCommit{d.ID.Commit})
+	if d.ID.CommitStr != "" {
+		var commit Sha1
+		byts, err := hex.DecodeString(d.ID.CommitStr)
+		if err == nil {
+			copy(commit[:], byts[0:20])
+			edges = append(edges, SpecCommit{commit})
+		}
 	}
 
 	for _, dl := range d.Datasets {
