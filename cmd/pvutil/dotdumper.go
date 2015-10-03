@@ -13,7 +13,7 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
-	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/represent/helpers"
 	"github.com/tag1consulting/pipeviz/represent/types"
@@ -80,7 +80,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 					}
 				} else {
 					k++
-					m := interpret.Message{}
+					m := ingest.Message{}
 					json.Unmarshal(src, &m)
 
 					g = g.Merge(k, m.UnificationForm(k))

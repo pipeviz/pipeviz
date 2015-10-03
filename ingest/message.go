@@ -1,9 +1,10 @@
-package interpret
+package ingest
 
 import (
 	"encoding/json"
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
@@ -17,14 +18,14 @@ type Message struct {
 }
 
 type message struct {
-	Env []Environment   `json:"environments"`
-	Ls  []LogicState    `json:"logic-states"`
-	Pds []ParentDataset `json:"datasets"`
-	Ds  []Dataset
-	P   []Process    `json:"processes"`
-	C   []Commit     `json:"commits"`
-	Cm  []CommitMeta `json:"commit-meta"`
-	Yp  []PkgYum     `json:"yum-pkg"`
+	Env []interpret.Environment   `json:"environments"`
+	Ls  []interpret.LogicState    `json:"logic-states"`
+	Pds []interpret.ParentDataset `json:"datasets"`
+	Ds  []interpret.Dataset
+	P   []interpret.Process    `json:"processes"`
+	C   []interpret.Commit     `json:"commits"`
+	Cm  []interpret.CommitMeta `json:"commit-meta"`
+	Yp  []interpret.PkgYum     `json:"yum-pkg"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface. It translates a

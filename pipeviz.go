@@ -12,7 +12,6 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
 	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/journal/boltdb"
 	"github.com/tag1consulting/pipeviz/represent"
@@ -163,7 +162,7 @@ func restoreGraph(j journal.JournalStore) (types.CoreGraph, error) {
 				// TODO returning out here could end us up somwehere weird
 				return g, err
 			}
-			msg := &interpret.Message{}
+			msg := &ingest.Message{}
 			json.Unmarshal(item.Message, msg)
 			g = g.Merge(item.Index, msg.UnificationForm(item.Index))
 		}

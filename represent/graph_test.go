@@ -7,15 +7,15 @@ import (
 	"testing"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/represent/types"
 )
 
-var msgs []interpret.Message
+var msgs []ingest.Message
 
 func init() {
 	for i := range make([]struct{}, 8) {
-		m := interpret.Message{}
+		m := ingest.Message{}
 
 		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
 		f, err := ioutil.ReadFile(path)

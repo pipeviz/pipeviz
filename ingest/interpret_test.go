@@ -1,4 +1,4 @@
-package interpret_test
+package ingest_test
 
 import (
 	"encoding/json"
@@ -9,17 +9,17 @@ import (
 
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/fixtures"
-	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/schema"
 )
 
 var masterSchema *gjs.Schema
 
-var Msgs []*interpret.Message
+var Msgs []*ingest.Message
 
 func init() {
 	for i := range make([]struct{}, 8) {
-		m := &interpret.Message{}
+		m := &ingest.Message{}
 
 		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
 		f, err := ioutil.ReadFile(path)
@@ -80,7 +80,7 @@ func BenchmarkUnmarshalMessageOne(b *testing.B) {
 	d, _ := fixtures.Asset("1.json")
 
 	for i := 0; i < b.N; i++ {
-		m := &interpret.Message{}
+		m := &ingest.Message{}
 		json.Unmarshal(d, m)
 	}
 }
@@ -89,7 +89,7 @@ func BenchmarkUnmarshalMessageTwo(b *testing.B) {
 	d, _ := fixtures.Asset("2.json")
 
 	for i := 0; i < b.N; i++ {
-		m := &interpret.Message{}
+		m := &ingest.Message{}
 		json.Unmarshal(d, m)
 	}
 }
@@ -99,10 +99,10 @@ func BenchmarkUnmarshalMessageOneAndTwo(b *testing.B) {
 	d2, _ := fixtures.Asset("2.json")
 
 	for i := 0; i < b.N; i++ {
-		m1 := &interpret.Message{}
+		m1 := &ingest.Message{}
 		json.Unmarshal(d1, m1)
 
-		m2 := &interpret.Message{}
+		m2 := &ingest.Message{}
 		json.Unmarshal(d2, m2)
 	}
 }

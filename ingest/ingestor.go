@@ -11,7 +11,6 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
-	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/represent/types"
@@ -137,7 +136,7 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 func (s *Ingestor) Interpret(g types.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
-		im := interpret.Message{}
+		im := Message{}
 		json.Unmarshal(m.Message, &im)
 		g = g.Merge(m.Index, im.UnificationForm(m.Index))
 
