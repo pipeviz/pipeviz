@@ -25,17 +25,17 @@ func (d CommitMeta) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	copy(commit[:], byts[0:20])
 
 	for _, tag := range d.Tags {
-		v := system.NewVertex("git-tag", id, pp("name", tag))
+		v := pv{typ: "git-tag", props: map[string]interface{}{"name": tag}}
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	for _, branch := range d.Branches {
-		v := system.NewVertex("git-branch", id, pp("name", branch))
+		v := pv{typ: "git-branch", props: map[string]interface{}{"name": branch}}
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	if d.TestState != "" {
-		v := system.NewVertex("test-result", id, pp("result", d.TestState))
+		v := pv{typ: "git-result", props: map[string]interface{}{"result": d.TestState}}
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
@@ -51,17 +51,16 @@ func commitMetaUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 		return 0
 	}
 
-	switch u.Vertex().Type {
+	switch u.Vertex().Type() {
 	case "git-tag", "git-branch":
-		name, _ := u.Vertex().Properties.Lookup("name")
-		vtv := g.VerticesWith(q.Qbv(system.VType(u.Vertex().Type), "name", name.(system.Property).Value))
+		vtv := g.VerticesWith(q.Qbv(system.VType(u.Vertex().Type()), "name", u.Vertex().Properties()["name"]))
 		if len(vtv) > 0 {
 			return vtv[0].ID
 		}
 
 	case "test-result":
 		// TODO no additional matching with test result...meaning that it's locked in to one result per commit
-		for _, vt := range g.VerticesWith(q.Qbv(system.VType(u.Vertex().Type))) {
+		for _, vt := range g.VerticesWith(q.Qbv(system.VType(u.Vertex().Type()))) {
 			if len(g.OutWith(vt.ID, q.Qbe(system.EType("version"), "sha1", spec.Sha1))) == 1 {
 				return vt.ID
 			}

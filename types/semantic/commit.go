@@ -60,13 +60,13 @@ func (d Commit) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	}
 	copy(d.Sha1[:], byts[0:20])
 
-	v := system.NewVertex("commit", id,
-		system.PropPair{K: "sha1", V: d.Sha1},
-		system.PropPair{K: "author", V: d.Author},
-		system.PropPair{K: "date", V: d.Date},
-		system.PropPair{K: "subject", V: d.Subject},
-		system.PropPair{K: "repository", V: d.Repository},
-	)
+	v := pv{typ: "commit", props: map[string]interface{}{
+		"sha1":       d.Sha1,
+		"author":     d.Author,
+		"date":       d.Date,
+		"subject":    d.Subject,
+		"repository": d.Repository,
+	}}
 
 	var edges system.EdgeSpecs
 
@@ -85,8 +85,7 @@ func (d Commit) UnificationForm(id uint64) []system.UnifyInstructionForm {
 }
 
 func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
-	sha1, _ := u.Vertex().Properties.Lookup("sha1")
-	candidates := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", sha1.(system.Property).Value))
+	candidates := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", u.Vertex().Properties()["sha1"]))
 
 	if len(candidates) > 0 { // there can be only one
 		return candidates[0].ID

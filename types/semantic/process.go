@@ -27,12 +27,15 @@ type ListenAddr struct {
 func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	ret := make([]system.UnifyInstructionForm, 0)
 
-	v := system.NewVertex("process", id,
-		system.PropPair{K: "pid", V: d.Pid},
-		system.PropPair{K: "cwd", V: d.Cwd},
-		system.PropPair{K: "group", V: d.Group},
-		system.PropPair{K: "user", V: d.User},
-	)
+	v := pv{
+		typ: "process",
+		props: map[string]interface{}{
+			"pid":   d.Pid,
+			"cwd":   d.Cwd,
+			"group": d.Group,
+			"user":  d.User,
+		},
+	}
 
 	var edges system.EdgeSpecs
 
@@ -46,18 +49,18 @@ func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 	for _, listen := range d.Listen {
 		// TODO change this to use diff vtx types for unix domain sock and network sock
-		v2 := system.NewVertex("comm", id,
-			system.PropPair{K: "type", V: listen.Type},
-		)
+		v2 := pv{typ: "comm", props: map[string]interface{}{
+			"type": listen.Type,
+		}}
 
 		if listen.Type == "unix" {
 			edges = append(edges, specUnixDomainListener{Path: listen.Path})
-			v2.Properties = v2.Properties.Set("path", system.Property{MsgSrc: id, Value: listen.Path})
+			v2.props["path"] = listen.Path
 		} else {
 			for _, proto := range listen.Proto {
 				edges = append(edges, specNetListener{Port: listen.Port, Proto: proto})
 			}
-			v2.Properties = v2.Properties.Set("port", system.Property{MsgSrc: id, Value: listen.Port})
+			v2.props["port"] = listen.Port
 		}
 		ret = append(ret, uif{v: v2, u: commUnify, se: system.EdgeSpecs{d.Environment}})
 	}
@@ -78,8 +81,7 @@ func processUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 		return 0
 	}
 
-	pid, _ := u.Vertex().Properties.Lookup("pid")
-	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("process"), "pid", pid.(system.Property).Value)))
+	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("process"), "pid", u.Vertex().Properties()["pid"])))
 }
 
 func commUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
@@ -90,18 +92,18 @@ func commUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 		return 0
 	}
 
-	vp := u.Vertex().Properties
-	typ, _ := vp.Lookup("type")
-	path, haspath := vp.Lookup("path")
+	vp := u.Vertex().Properties()
+	typ, _ := vp["type"]
+	path, haspath := vp["path"]
 	if haspath {
 		return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("comm"),
-			"type", typ.(system.Property).Value,
-			"path", path.(system.Property).Value)))
+			"type", typ,
+			"path", path)))
 	} else {
-		port, _ := vp.Lookup("port")
+		port, _ := vp["port"]
 		return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("comm"),
-			"type", typ.(system.Property).Value,
-			"port", port.(system.Property).Value)))
+			"type", typ,
+			"port", port)))
 	}
 }
 

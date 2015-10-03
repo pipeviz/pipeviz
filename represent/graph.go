@@ -7,6 +7,7 @@ import (
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/tag1consulting/pipeviz/maputil"
 	"github.com/tag1consulting/pipeviz/types/system"
 )
 
@@ -204,7 +205,16 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 
 	if vid == 0 {
 		logEntry.Debug("No match on unification, creating new vertex")
-		final = system.VertexTuple{Vertex: sd.Vertex(), InEdges: ps.NewMap(), OutEdges: ps.NewMap()}
+
+		final = system.VertexTuple{
+			Vertex: system.StdVertex{
+				Type:       sd.Vertex().Type(),
+				Properties: maputil.RawMapToPropPMap(msgid, false, sd.Vertex().Properties()),
+			},
+			InEdges:  ps.NewMap(),
+			OutEdges: ps.NewMap(),
+		}
+
 		g.vserial += 1
 		final.ID = g.vserial
 		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
@@ -223,6 +233,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 				any, _ := g.vtuples.Lookup(i2a(edge.Target))
 				tvt := any.(system.VertexTuple)
 				tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
+
 				g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
 				g.vtuples = g.vtuples.Set(i2a(final.ID), final)
 			} else {
@@ -234,7 +245,12 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
 		vt := ivt.(system.VertexTuple)
 
-		nu, err := vt.Vertex.Merge(sd.Vertex())
+		// TODO ugh, pointless stupid duplicating/copy
+		nu, err := vt.Vertex.Merge(system.StdVertex{
+			Type:       sd.Vertex().Type(),
+			Properties: maputil.RawMapToPropPMap(msgid, false, sd.Vertex().Properties()),
+		})
+
 		if err != nil {
 			logEntry.WithFields(log.Fields{
 				"vid": vid,

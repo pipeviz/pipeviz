@@ -15,13 +15,13 @@ func pp(k string, v interface{}) system.PropPair {
 
 // uif is a standard struct that expresses a types.UnifyInstructionForm
 type uif struct {
-	v  system.StdVertex
+	v  system.ProtoVertex
 	u  func(system.CoreGraph, system.UnifyInstructionForm) int
 	e  []system.EdgeSpec
 	se []system.EdgeSpec
 }
 
-func (u uif) Vertex() system.StdVertex {
+func (u uif) Vertex() system.ProtoVertex {
 	return u.v
 }
 
@@ -36,6 +36,20 @@ func (u uif) EdgeSpecs() []system.EdgeSpec {
 
 func (u uif) ScopingSpecs() []system.EdgeSpec {
 	return u.se
+}
+
+// pv is a shared/common type to implement system.ProtoVertex
+type pv struct {
+	typ   system.VType
+	props map[string]interface{}
+}
+
+func (p pv) Type() system.VType {
+	return p.typ
+}
+
+func (p pv) Properties() map[string]interface{} {
+	return p.props
 }
 
 // Searches the given vertex's out-edges to find its environment's vertex id.
@@ -58,9 +72,15 @@ func findEnv(g system.CoreGraph, vt system.VertexTuple) (vid int, edge system.St
 	return
 }
 
-func emptyVT(v system.StdVertex) system.VertexTuple {
+// TODO it would be better to not have to have this here, at all.
+func emptyVT(v system.ProtoVertex) system.VertexTuple {
+	var props []system.PropPair
+	for k, v := range v.Properties() {
+		props = append(props, pp(k, v))
+	}
+
 	return system.VertexTuple{
-		Vertex:   v,
+		Vertex:   system.NewVertex(v.Type(), 0, props...),
 		InEdges:  ps.NewMap(),
 		OutEdges: ps.NewMap(),
 	}

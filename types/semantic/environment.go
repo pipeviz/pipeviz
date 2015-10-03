@@ -26,15 +26,15 @@ type Address struct {
 func (d Environment) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	// seven distinct props
 	ret := []system.UnifyInstructionForm{uif{
-		v: system.NewVertex("environment", id,
-			pp("os", d.OS),
-			pp("provider", d.Provider),
-			pp("type", d.Type),
-			pp("nick", d.Nick),
-			pp("hostname", d.Address.Hostname),
-			pp("ipv4", d.Address.Ipv4),
-			pp("ipv6", d.Address.Ipv6),
-		),
+		v: pv{typ: "environment", props: map[string]interface{}{
+			"os":       d.OS,
+			"provider": d.Provider,
+			"type":     d.Type,
+			"nick":     d.Nick,
+			"hostname": d.Address.Hostname,
+			"ipv4":     d.Address.Ipv4,
+			"ipv6":     d.Address.Ipv6,
+		}},
 		u: envUnify,
 	}}
 
@@ -70,7 +70,7 @@ func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	matches := g.VerticesWith(q.Qbv(system.VType("environment")))
 
 	for _, e := range matches {
-		if maputil.AnyMatch(e.Vertex.Properties, u.Vertex().Properties, "hostname", "ipv4", "ipv6") {
+		if maputil.AnyMatch(e.Vertex.Properties, u.Vertex().Properties(), "hostname", "ipv4", "ipv6") {
 			return e.ID
 		}
 	}

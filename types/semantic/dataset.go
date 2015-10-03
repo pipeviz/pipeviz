@@ -45,12 +45,10 @@ func (d DataAlpha) _dg()      {}
 func (d DataProvenance) _dg() {}
 
 func (d Dataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
-	v := system.NewVertex("dataset", id,
-		system.PropPair{K: "name", V: d.Name},
-		// TODO convert input from string to int and force timestamps. javascript apparently likes
-		// ISO 8601, but go doesn't? so, timestamps.
-		system.PropPair{K: "create-time", V: d.CreateTime},
-	)
+	v := pv{typ: "dataset", props: map[string]interface{}{
+		"name":        d.Name,
+		"create-time": d.CreateTime,
+	}}
 	var edges system.EdgeSpecs
 
 	edges = append(edges, d.Genesis)
@@ -95,8 +93,7 @@ func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
 }
 
 func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
-	name, _ := u.Vertex().Properties.Lookup("name")
-	vtv := g.VerticesWith(q.Qbv(system.VType("dataset"), "name", name.(system.Property).Value))
+	vtv := g.VerticesWith(q.Qbv(system.VType("dataset"), "name", u.Vertex().Properties()["name"]))
 	if len(vtv) == 0 {
 		return 0
 	}
@@ -117,10 +114,10 @@ func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 
 func (d ParentDataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	ret := []system.UnifyInstructionForm{uif{
-		v: system.NewVertex("parent-dataset", id,
-			system.PropPair{K: "name", V: d.Name},
-			system.PropPair{K: "path", V: d.Path},
-		),
+		v: pv{typ: "parent-dataset", props: map[string]interface{}{
+			"name": d.Name,
+			"path": d.Path,
+		}},
 		u:  parentDatasetUnify,
 		se: []system.EdgeSpec{d.Environment},
 	}}
@@ -142,12 +139,8 @@ func parentDatasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 		return 0
 	}
 
-	path, _ := u.Vertex().Properties.Lookup("path")
-	name, _ := u.Vertex().Properties.Lookup("name")
-	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("parent-dataset"),
-		"path", path.(system.Property).Value,
-		"name", name.(system.Property).Value,
-	)))
+	props := u.Vertex().Properties()
+	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("parent-dataset"), "path", props["path"], "name", props["name"])))
 }
 
 type specDatasetHierarchy struct {
@@ -174,7 +167,7 @@ func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src sys
 	}
 
 	// no existing link found; search for proc directly
-	envlink, success := spec.Environment.Resolve(g, 0, emptyVT(src.Vertex))
+	envlink, success := spec.Environment.Resolve(g, 0, src)
 	if success {
 		rv := g.PredecessorsWith(envlink.Target, q.Qbv(system.VType("parent-dataset"), "name", spec.NamePath[0]))
 		if len(rv) != 0 { // >1 shouldn't be possible

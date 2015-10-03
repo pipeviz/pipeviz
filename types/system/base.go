@@ -16,6 +16,13 @@ const (
 	ETypeNone EType = ""
 )
 
+type ProtoVertex interface {
+	Type() VType
+	Properties() map[string]interface{}
+	// The CoreGraph, and the defined scoping edge specs (if any)
+	//Unify(g CoreGraph, se []EdgeSpec) int
+}
+
 // VertexTuple is the base storage object used by the graph engine.
 type VertexTuple struct {
 	ID       int

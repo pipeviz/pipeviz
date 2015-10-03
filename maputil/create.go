@@ -31,6 +31,30 @@ func FillPropMap(msgid uint64, allowEmpty bool, p ...system.PropPair) ps.Map {
 	return m
 }
 
+// RawMapToPropPMap fills a ps.Map with k/v pairs from the provided native Go map,
+// wrapping values in a types.Property struct using the provided msgid.
+//
+// If allowEmpty is false, only non-empty values will be included in the created map.
+func RawMapToPropPMap(msgid uint64, allowEmpty bool, in map[string]interface{}) ps.Map {
+	m := ps.NewMap()
+	var empty bool
+	var err error
+
+	if allowEmpty {
+		for k, v := range in {
+			m = m.Set(k, system.Property{MsgSrc: msgid, Value: v})
+		}
+	} else {
+		for k, v := range in {
+			if empty, err = isEmptyValue(v); !empty && err == nil {
+				m = m.Set(k, system.Property{MsgSrc: msgid, Value: v})
+			}
+		}
+	}
+
+	return m
+}
+
 func isEmptyValue(v interface{}) (bool, error) {
 	switch v.(type) {
 	case bool:

@@ -45,14 +45,14 @@ type ConnUnix struct {
 }
 
 func (d LogicState) UnificationForm(id uint64) []system.UnifyInstructionForm {
-	v := system.NewVertex("logic-state", id,
-		pp("path", d.Path),
-		pp("lgroup", d.Lgroup),
-		pp("nick", d.Nick),
-		pp("type", d.Type),
-		pp("version", d.ID.Version),
-		pp("semver", d.ID.Semver),
-	)
+	v := pv{typ: "logic-state", props: map[string]interface{}{
+		"path":    d.Path,
+		"lgroup":  d.Lgroup,
+		"nick":    d.Nick,
+		"type":    d.Type,
+		"version": d.ID.Version,
+		"semver":  d.ID.Semver,
+	}}
 
 	var edges system.EdgeSpecs
 
@@ -80,9 +80,7 @@ func lsUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 		return 0
 	}
 
-	vp := u.Vertex().Properties
-	path, _ := vp.Lookup("path")
-	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("logic-state"), "path", path.(system.Property).Value)))
+	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("logic-state"), "path", u.Vertex().Properties()["path"])))
 }
 
 type specCommit struct {

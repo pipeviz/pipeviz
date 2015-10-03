@@ -1,7 +1,7 @@
 package system
 
 type UnifyInstructionForm interface {
-	Vertex() StdVertex
+	Vertex() ProtoVertex
 	Unify(CoreGraph, UnifyInstructionForm) int
 	EdgeSpecs() []EdgeSpec
 	ScopingSpecs() []EdgeSpec
