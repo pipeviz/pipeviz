@@ -18,7 +18,7 @@ const (
 
 type ProtoVertex interface {
 	Type() VType
-	Properties() map[string]interface{}
+	Properties() RawProps
 	// The CoreGraph, and the defined scoping edge specs (if any)
 	//Unify(g CoreGraph, se []EdgeSpec) int
 }

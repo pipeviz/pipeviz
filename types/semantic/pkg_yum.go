@@ -17,7 +17,7 @@ type PkgYum struct {
 func (d PkgYum) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 	return []system.UnifyInstructionForm{uif{
-		v: pv{typ: "dataset", props: map[string]interface{}{
+		v: pv{typ: "dataset", props: system.RawProps{
 			"name":    d.Name,
 			"version": d.Version,
 			"epoch":   d.Epoch,

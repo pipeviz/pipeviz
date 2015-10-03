@@ -45,7 +45,7 @@ func (d DataAlpha) _dg()      {}
 func (d DataProvenance) _dg() {}
 
 func (d Dataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
-	v := pv{typ: "dataset", props: map[string]interface{}{
+	v := pv{typ: "dataset", props: system.RawProps{
 		"name":        d.Name,
 		"create-time": d.CreateTime,
 	}}
@@ -114,7 +114,7 @@ func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 
 func (d ParentDataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	ret := []system.UnifyInstructionForm{uif{
-		v: pv{typ: "parent-dataset", props: map[string]interface{}{
+		v: pv{typ: "parent-dataset", props: system.RawProps{
 			"name": d.Name,
 			"path": d.Path,
 		}},

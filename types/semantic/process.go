@@ -29,7 +29,7 @@ func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 	v := pv{
 		typ: "process",
-		props: map[string]interface{}{
+		props: system.RawProps{
 			"pid":   d.Pid,
 			"cwd":   d.Cwd,
 			"group": d.Group,
@@ -49,7 +49,7 @@ func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 	for _, listen := range d.Listen {
 		// TODO change this to use diff vtx types for unix domain sock and network sock
-		v2 := pv{typ: "comm", props: map[string]interface{}{
+		v2 := pv{typ: "comm", props: system.RawProps{
 			"type": listen.Type,
 		}}
 

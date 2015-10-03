@@ -16,44 +16,24 @@ import (
 // case, it is the Property.Value that is compared, not the whole Property.
 // However, if a non-Property value is found at a provided key, then it is used
 // directly in the equality check.
-func AnyMatch(l, r interface{}, keys ...string) bool {
+func AnyMatch(l, r ps.Map, keys ...string) bool {
 	var lv, rv interface{}
 	var lexists, rexists bool
 
-	var lpm, rpm ps.Map
-	var lm, rm map[string]interface{}
-
-	switch ml := l.(type) {
-	case map[string]interface{}:
-		lm = ml
-	case ps.Map:
-		lpm = ml
-	default:
-		// bad type, just bail out
-		return false
-	}
-
-	switch mr := r.(type) {
-	case map[string]interface{}:
-		rm = mr
-	case ps.Map:
-		rpm = mr
-	default:
-		// bad type, just bail out
-		return false
-	}
+	lm, lrm := l.(system.RawProps)
+	rm, rrm := r.(system.RawProps)
 
 	for _, key := range keys {
-		if lm == nil {
-			lv, lexists = lpm.Lookup(key)
-		} else {
+		if lrm {
 			lv, lexists = lm[key]
+		} else {
+			lv, lexists = l.Lookup(key)
 		}
 
-		if rm == nil {
-			rv, rexists = rpm.Lookup(key)
-		} else {
+		if rrm {
 			rv, rexists = rm[key]
+		} else {
+			rv, rexists = r.Lookup(key)
 		}
 
 		// skip if either or both don't exist
@@ -92,47 +72,27 @@ func AnyMatch(l, r interface{}, keys ...string) bool {
 //
 // types.Properties values are transformed into their contained Value in the
 // same manner as in AnyMatch.
-func AllMatch(l, r interface{}, keys ...string) bool {
+func AllMatch(l, r ps.Map, keys ...string) bool {
 	// keep track of our both-missing count
 	var nep int
 
 	var lv, rv interface{}
 	var lexists, rexists bool
 
-	var lpm, rpm ps.Map
-	var lm, rm map[string]interface{}
-
-	switch ml := l.(type) {
-	case map[string]interface{}:
-		lm = ml
-	case ps.Map:
-		lpm = ml
-	default:
-		// bad type, just bail out
-		return false
-	}
-
-	switch mr := r.(type) {
-	case map[string]interface{}:
-		rm = mr
-	case ps.Map:
-		rpm = mr
-	default:
-		// bad type, just bail out
-		return false
-	}
+	lm, lrm := l.(system.RawProps)
+	rm, rrm := r.(system.RawProps)
 
 	for _, key := range keys {
-		if lm == nil {
-			lv, lexists = lpm.Lookup(key)
-		} else {
+		if lrm {
 			lv, lexists = lm[key]
+		} else {
+			lv, lexists = l.Lookup(key)
 		}
 
-		if rm == nil {
-			rv, rexists = rpm.Lookup(key)
-		} else {
+		if rrm {
 			rv, rexists = rm[key]
+		} else {
+			rv, rexists = r.Lookup(key)
 		}
 
 		// bail out if one exists and the other doesn't

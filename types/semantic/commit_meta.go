@@ -25,17 +25,17 @@ func (d CommitMeta) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	copy(commit[:], byts[0:20])
 
 	for _, tag := range d.Tags {
-		v := pv{typ: "git-tag", props: map[string]interface{}{"name": tag}}
+		v := pv{typ: "git-tag", props: system.RawProps{"name": tag}}
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	for _, branch := range d.Branches {
-		v := pv{typ: "git-branch", props: map[string]interface{}{"name": branch}}
+		v := pv{typ: "git-branch", props: system.RawProps{"name": branch}}
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	if d.TestState != "" {
-		v := pv{typ: "git-result", props: map[string]interface{}{"result": d.TestState}}
+		v := pv{typ: "git-result", props: system.RawProps{"result": d.TestState}}
 		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 

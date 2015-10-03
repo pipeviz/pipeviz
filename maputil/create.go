@@ -35,7 +35,7 @@ func FillPropMap(msgid uint64, allowEmpty bool, p ...system.PropPair) ps.Map {
 // wrapping values in a types.Property struct using the provided msgid.
 //
 // If allowEmpty is false, only non-empty values will be included in the created map.
-func RawMapToPropPMap(msgid uint64, allowEmpty bool, in map[string]interface{}) ps.Map {
+func RawMapToPropPMap(msgid uint64, allowEmpty bool, in system.RawProps) ps.Map {
 	m := ps.NewMap()
 	var empty bool
 	var err error

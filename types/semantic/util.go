@@ -41,14 +41,14 @@ func (u uif) ScopingSpecs() []system.EdgeSpec {
 // pv is a shared/common type to implement system.ProtoVertex
 type pv struct {
 	typ   system.VType
-	props map[string]interface{}
+	props system.RawProps
 }
 
 func (p pv) Type() system.VType {
 	return p.typ
 }
 
-func (p pv) Properties() map[string]interface{} {
+func (p pv) Properties() system.RawProps {
 	return p.props
 }
 

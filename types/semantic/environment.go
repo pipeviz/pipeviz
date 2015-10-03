@@ -26,7 +26,7 @@ type Address struct {
 func (d Environment) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	// seven distinct props
 	ret := []system.UnifyInstructionForm{uif{
-		v: pv{typ: "environment", props: map[string]interface{}{
+		v: pv{typ: "environment", props: system.RawProps{
 			"os":       d.OS,
 			"provider": d.Provider,
 			"type":     d.Type,

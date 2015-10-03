@@ -60,7 +60,7 @@ func (d Commit) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	}
 	copy(d.Sha1[:], byts[0:20])
 
-	v := pv{typ: "commit", props: map[string]interface{}{
+	v := pv{typ: "commit", props: system.RawProps{
 		"sha1":       d.Sha1,
 		"author":     d.Author,
 		"date":       d.Date,

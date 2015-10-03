@@ -45,7 +45,7 @@ type ConnUnix struct {
 }
 
 func (d LogicState) UnificationForm(id uint64) []system.UnifyInstructionForm {
-	v := pv{typ: "logic-state", props: map[string]interface{}{
+	v := pv{typ: "logic-state", props: system.RawProps{
 		"path":    d.Path,
 		"lgroup":  d.Lgroup,
 		"nick":    d.Nick,
