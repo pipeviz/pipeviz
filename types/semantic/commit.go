@@ -78,7 +78,7 @@ func (d Commit) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 		var sha1 Sha1
 		copy(sha1[:], byts[0:20])
-		edges = append(edges, SpecGitCommitParent{Sha1: sha1, ParentNum: k + 1})
+		edges = append(edges, specGitCommitParent{Sha1: sha1, ParentNum: k + 1})
 	}
 
 	return []system.UnifyInstructionForm{uif{v: v, u: commitUnify, e: edges}}
@@ -95,12 +95,12 @@ func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	return 0
 }
 
-type SpecGitCommitParent struct {
+type specGitCommitParent struct {
 	Sha1      Sha1
 	ParentNum int
 }
 
-func (spec SpecGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+func (spec specGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),

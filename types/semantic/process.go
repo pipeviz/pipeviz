@@ -37,11 +37,11 @@ func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	var edges system.EdgeSpecs
 
 	for _, ls := range d.LogicStates {
-		edges = append(edges, SpecLocalLogic{ls})
+		edges = append(edges, specLocalLogic{ls})
 	}
 
 	if d.Dataset != "" {
-		edges = append(edges, SpecParentDataset{Name: d.Dataset})
+		edges = append(edges, specParentDataset{Name: d.Dataset})
 	}
 
 	for _, listen := range d.Listen {
@@ -51,11 +51,11 @@ func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 		)
 
 		if listen.Type == "unix" {
-			edges = append(edges, SpecUnixDomainListener{Path: listen.Path})
+			edges = append(edges, specUnixDomainListener{Path: listen.Path})
 			v2.Properties = v2.Properties.Set("path", system.Property{MsgSrc: id, Value: listen.Path})
 		} else {
 			for _, proto := range listen.Proto {
-				edges = append(edges, SpecNetListener{Port: listen.Port, Proto: proto})
+				edges = append(edges, specNetListener{Port: listen.Port, Proto: proto})
 			}
 			v2.Properties = v2.Properties.Set("port", system.Property{MsgSrc: id, Value: listen.Port})
 		}
@@ -105,11 +105,11 @@ func commUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	}
 }
 
-type SpecLocalLogic struct {
+type specLocalLogic struct {
 	Path string
 }
 
-func (spec SpecLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+func (spec specLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -136,11 +136,11 @@ func (spec SpecLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	return
 }
 
-type SpecParentDataset struct {
+type specParentDataset struct {
 	Name string
 }
 
-func (spec SpecParentDataset) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
@@ -168,12 +168,12 @@ func (spec SpecParentDataset) Resolve(g system.CoreGraph, mid uint64, src system
 	return
 }
 
-type SpecNetListener struct {
+type specNetListener struct {
 	Port  int
 	Proto string
 }
 
-func (spec SpecNetListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.ID, q.Qbe(system.EType("listening"), "type", "port", "port", spec.Port, "proto", spec.Proto))
 	if len(re) == 1 {
@@ -201,11 +201,11 @@ func (spec SpecNetListener) Resolve(g system.CoreGraph, mid uint64, src system.V
 	return
 }
 
-type SpecUnixDomainListener struct {
+type specUnixDomainListener struct {
 	Path string
 }
 
-func (spec SpecUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+func (spec specUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
 	re := g.OutWith(src.ID, q.Qbe(system.EType("listening"), "type", "unix", "path", spec.Path))
 	if len(re) == 1 {

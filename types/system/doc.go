@@ -1,5 +1,3 @@
-package system
-
 /*
 This package contains types that are used across multiple pipeviz subcomponents.
 To avoid import cycles, these types would either have to live in the earliest
@@ -12,3 +10,4 @@ shared pieces are, which is boon for architectural clarity.
 Most of what's here is interfaces. The concrete real types are mostly inert,
 or have straightforward helper methods.
 */
+package system

@@ -61,7 +61,7 @@ func (d LogicState) UnificationForm(id uint64) []system.UnifyInstructionForm {
 		byts, err := hex.DecodeString(d.ID.CommitStr)
 		if err == nil {
 			copy(commit[:], byts[0:20])
-			edges = append(edges, SpecCommit{commit})
+			edges = append(edges, specCommit{commit})
 		}
 	}
 
@@ -85,11 +85,11 @@ func lsUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("logic-state"), "path", path.(system.Property).Value)))
 }
 
-type SpecCommit struct {
+type specCommit struct {
 	Sha1 Sha1
 }
 
-func (spec SpecCommit) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),

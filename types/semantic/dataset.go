@@ -58,7 +58,7 @@ func (d Dataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	return []system.UnifyInstructionForm{uif{
 		v: v,
 		u: datasetUnify,
-		se: system.EdgeSpecs{SpecDatasetHierarchy{
+		se: system.EdgeSpecs{specDatasetHierarchy{
 			Environment: d.Environment,
 			NamePath:    []string{d.Parent},
 		}},
@@ -101,7 +101,7 @@ func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 		return 0
 	}
 
-	spec := u.ScopingSpecs()[0].(SpecDatasetHierarchy)
+	spec := u.ScopingSpecs()[0].(specDatasetHierarchy)
 	el, success := spec.Environment.Resolve(g, 0, emptyVT(u.Vertex()))
 	// FIXME scoping edge resolution failure does not mean no match - there could be an orphan
 	if success {
@@ -150,12 +150,12 @@ func parentDatasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	)))
 }
 
-type SpecDatasetHierarchy struct {
+type specDatasetHierarchy struct {
 	Environment EnvLink
 	NamePath    []string // path through the series of names that arrives at the final dataset
 }
 
-func (spec SpecDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),

@@ -26,17 +26,17 @@ func (d CommitMeta) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 	for _, tag := range d.Tags {
 		v := system.NewVertex("git-tag", id, pp("name", tag))
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{SpecCommit{commit}}})
+		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	for _, branch := range d.Branches {
 		v := system.NewVertex("git-branch", id, pp("name", branch))
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{SpecCommit{commit}}})
+		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	if d.TestState != "" {
 		v := system.NewVertex("test-result", id, pp("result", d.TestState))
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{SpecCommit{commit}}})
+		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	return ret
@@ -44,7 +44,7 @@ func (d CommitMeta) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 func commitMetaUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	// the commit is the only scoping edge
-	spec := u.ScopingSpecs()[0].(SpecCommit)
+	spec := u.ScopingSpecs()[0].(specCommit)
 	_, success := spec.Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
 		// FIXME scoping edge resolution failure does not mean no match - there could be an orphan
