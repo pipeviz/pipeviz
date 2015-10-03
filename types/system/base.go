@@ -1,4 +1,4 @@
-package types
+package system
 
 import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 

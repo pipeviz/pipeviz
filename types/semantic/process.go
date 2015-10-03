@@ -1,9 +1,9 @@
-package interpret
+package semantic
 
 import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/helpers"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/represent/q"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 type Process struct {
@@ -24,17 +24,17 @@ type ListenAddr struct {
 	Path  string   `json:"path,omitempty"`
 }
 
-func (d Process) UnificationForm(id uint64) []types.UnifyInstructionForm {
-	ret := make([]types.UnifyInstructionForm, 0)
+func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
+	ret := make([]system.UnifyInstructionForm, 0)
 
-	v := types.NewVertex("process", id,
-		types.PropPair{K: "pid", V: d.Pid},
-		types.PropPair{K: "cwd", V: d.Cwd},
-		types.PropPair{K: "group", V: d.Group},
-		types.PropPair{K: "user", V: d.User},
+	v := system.NewVertex("process", id,
+		system.PropPair{K: "pid", V: d.Pid},
+		system.PropPair{K: "cwd", V: d.Cwd},
+		system.PropPair{K: "group", V: d.Group},
+		system.PropPair{K: "user", V: d.User},
 	)
 
-	var edges types.EdgeSpecs
+	var edges system.EdgeSpecs
 
 	for _, ls := range d.LogicStates {
 		edges = append(edges, SpecLocalLogic{ls})
@@ -46,31 +46,31 @@ func (d Process) UnificationForm(id uint64) []types.UnifyInstructionForm {
 
 	for _, listen := range d.Listen {
 		// TODO change this to use diff vtx types for unix domain sock and network sock
-		v2 := types.NewVertex("comm", id,
-			types.PropPair{K: "type", V: listen.Type},
+		v2 := system.NewVertex("comm", id,
+			system.PropPair{K: "type", V: listen.Type},
 		)
 
 		if listen.Type == "unix" {
 			edges = append(edges, SpecUnixDomainListener{Path: listen.Path})
-			v2.Properties = v2.Properties.Set("path", types.Property{MsgSrc: id, Value: listen.Path})
+			v2.Properties = v2.Properties.Set("path", system.Property{MsgSrc: id, Value: listen.Path})
 		} else {
 			for _, proto := range listen.Proto {
 				edges = append(edges, SpecNetListener{Port: listen.Port, Proto: proto})
 			}
-			v2.Properties = v2.Properties.Set("port", types.Property{MsgSrc: id, Value: listen.Port})
+			v2.Properties = v2.Properties.Set("port", system.Property{MsgSrc: id, Value: listen.Port})
 		}
-		ret = append(ret, uif{v: v2, u: commUnify, se: types.EdgeSpecs{d.Environment}})
+		ret = append(ret, uif{v: v2, u: commUnify, se: system.EdgeSpecs{d.Environment}})
 	}
 
-	return append([]types.UnifyInstructionForm{uif{
+	return append([]system.UnifyInstructionForm{uif{
 		v:  v,
 		u:  processUnify,
 		e:  edges,
-		se: []types.EdgeSpec{d.Environment},
+		se: []system.EdgeSpec{d.Environment},
 	}}, ret...)
 }
 
-func processUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
+func processUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
@@ -79,10 +79,10 @@ func processUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 	}
 
 	pid, _ := u.Vertex().Properties.Lookup("pid")
-	return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("process"), "pid", pid.(types.Property).Value)))
+	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("process"), "pid", pid.(system.Property).Value)))
 }
 
-func commUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
+func commUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
@@ -94,14 +94,14 @@ func commUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
 	typ, _ := vp.Lookup("type")
 	path, haspath := vp.Lookup("path")
 	if haspath {
-		return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("comm"),
-			"type", typ.(types.Property).Value,
-			"path", path.(types.Property).Value)))
+		return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("comm"),
+			"type", typ.(system.Property).Value,
+			"path", path.(system.Property).Value)))
 	} else {
 		port, _ := vp.Lookup("port")
-		return findMatchingEnvId(g, edge, g.VerticesWith(helpers.Qbv(types.VType("comm"),
-			"type", typ.(types.Property).Value,
-			"port", port.(types.Property).Value)))
+		return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("comm"),
+			"type", typ.(system.Property).Value,
+			"port", port.(system.Property).Value)))
 	}
 }
 
@@ -109,15 +109,15 @@ type SpecLocalLogic struct {
 	Path string
 }
 
-func (spec SpecLocalLogic) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
+func (spec SpecLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "logic-link",
 	}
 
 	// search for existing link
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("logic-link"), "path", spec.Path))
+	re := g.OutWith(src.ID, q.Qbe(system.EType("logic-link"), "path", spec.Path))
 	if len(re) == 1 {
 		// TODO don't set the path prop again, it's the unique id...meh, same question here w/uniqueness as above
 		success = true
@@ -127,7 +127,7 @@ func (spec SpecLocalLogic) Resolve(g types.CoreGraph, mid uint64, src types.Vert
 
 	// no existing link found, search for proc directly
 	envid, _, _ := findEnv(g, src)
-	rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("logic-state"), "path", spec.Path))
+	rv := g.PredecessorsWith(envid, q.Qbv(system.VType("logic-state"), "path", spec.Path))
 	if len(rv) == 1 {
 		success = true
 		e.Target = rv[0].ID
@@ -140,16 +140,16 @@ type SpecParentDataset struct {
 	Name string
 }
 
-func (spec SpecParentDataset) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
+func (spec SpecParentDataset) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "dataset-gateway",
 	}
-	e.Props = e.Props.Set("name", types.Property{MsgSrc: mid, Value: spec.Name})
+	e.Props = e.Props.Set("name", system.Property{MsgSrc: mid, Value: spec.Name})
 
 	// check for existing link - there can be only be one
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("dataset-gateway")))
+	re := g.OutWith(src.ID, q.Qbe(system.EType("dataset-gateway")))
 	if len(re) == 1 {
 		success = true
 		e = re[0]
@@ -158,7 +158,7 @@ func (spec SpecParentDataset) Resolve(g types.CoreGraph, mid uint64, src types.V
 
 		// no existing link found; search for proc directly
 		envid, _, _ := findEnv(g, src)
-		rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("parent-dataset"), "name", spec.Name))
+		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("parent-dataset"), "name", spec.Name))
 		if len(rv) != 0 { // >1 shouldn't be possible
 			success = true
 			e.Target = rv[0].ID
@@ -173,25 +173,25 @@ type SpecNetListener struct {
 	Proto string
 }
 
-func (spec SpecNetListener) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
+func (spec SpecNetListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("listening"), "type", "port", "port", spec.Port, "proto", spec.Proto))
+	re := g.OutWith(src.ID, q.Qbe(system.EType("listening"), "type", "port", "port", spec.Port, "proto", spec.Proto))
 	if len(re) == 1 {
 		return re[0], true
 	}
 
-	e = types.StdEdge{
+	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "listening",
 	}
 
-	e.Props = e.Props.Set("port", types.Property{MsgSrc: mid, Value: spec.Port})
-	e.Props = e.Props.Set("proto", types.Property{MsgSrc: mid, Value: spec.Proto})
+	e.Props = e.Props.Set("port", system.Property{MsgSrc: mid, Value: spec.Port})
+	e.Props = e.Props.Set("proto", system.Property{MsgSrc: mid, Value: spec.Proto})
 
 	envid, _, hasenv := findEnv(g, src)
 	if hasenv {
-		rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("comm"), "type", "port", "port", spec.Port))
+		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("comm"), "type", "port", "port", spec.Port))
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].ID
@@ -205,24 +205,24 @@ type SpecUnixDomainListener struct {
 	Path string
 }
 
-func (spec SpecUnixDomainListener) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
+func (spec SpecUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	// check for existing edge; this one is quite straightforward
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("listening"), "type", "unix", "path", spec.Path))
+	re := g.OutWith(src.ID, q.Qbe(system.EType("listening"), "type", "unix", "path", spec.Path))
 	if len(re) == 1 {
 		return re[0], true
 	}
 
-	e = types.StdEdge{
+	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "listening",
 	}
 
-	e.Props = e.Props.Set("path", types.Property{MsgSrc: mid, Value: spec.Path})
+	e.Props = e.Props.Set("path", system.Property{MsgSrc: mid, Value: spec.Path})
 
 	envid, _, hasenv := findEnv(g, src)
 	if hasenv {
-		rv := g.PredecessorsWith(envid, helpers.Qbv(types.VType("comm"), "type", "unix", "path", spec.Path))
+		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("comm"), "type", "unix", "path", spec.Path))
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].ID

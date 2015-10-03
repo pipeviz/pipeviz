@@ -1,4 +1,4 @@
-package types
+package system
 
 type Property struct {
 	MsgSrc uint64      `json:"msgsrc"`

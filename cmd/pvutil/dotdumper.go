@@ -15,9 +15,9 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/represent"
-	"github.com/tag1consulting/pipeviz/represent/helpers"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/represent/q"
 	"github.com/tag1consulting/pipeviz/schema"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 func dotDumperCommand() *cobra.Command {
@@ -100,7 +100,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 
 // Generates a .dot-format representation of the given CoreGraph, suitable for
 // rendering into output by graphviz (or other utilities).
-func GenerateDot(g types.CoreGraph) []byte {
+func GenerateDot(g system.CoreGraph) []byte {
 	buf := new(bytes.Buffer)
 
 	// begin the graph
@@ -108,7 +108,7 @@ func GenerateDot(g types.CoreGraph) []byte {
 	buf.WriteString("fontsize=16")
 
 	// first, write all vertices
-	for _, v := range g.VerticesWith(helpers.Qbv()) {
+	for _, v := range g.VerticesWith(q.Qbv()) {
 		lbltype := "label"
 		var props string
 		switch v.Vertex.Typ() {
@@ -135,7 +135,7 @@ func GenerateDot(g types.CoreGraph) []byte {
 			v.ID, props, lbltype, v.ID, v.Vertex.Typ()))
 
 		v.Vertex.Props().ForEach(func(k string, val ps.Any) {
-			prop := val.(types.Property)
+			prop := val.(system.Property)
 			var format string
 			switch pv := prop.Value.(type) {
 			case []byte, [20]byte:
@@ -159,15 +159,15 @@ func GenerateDot(g types.CoreGraph) []byte {
 	}
 
 	// pass through a second time to write all edges
-	for _, v := range g.VerticesWith(helpers.Qbv()) {
+	for _, v := range g.VerticesWith(q.Qbv()) {
 		v.OutEdges.ForEach(func(k string, val ps.Any) {
-			edge := val.(types.StdEdge)
+			edge := val.(system.StdEdge)
 			buf.WriteString(fmt.Sprintf(
 				"\t\"v%d\" -> \"v%d\" [\n\tlabel=\"id: %d\netype: %s",
 				edge.Source, edge.Target, edge.ID, edge.EType))
 
 			edge.Props.ForEach(func(k2 string, val2 ps.Any) {
-				prop := val2.(types.Property)
+				prop := val2.(system.Property)
 				var format string
 				switch pv := prop.Value.(type) {
 				case []byte:

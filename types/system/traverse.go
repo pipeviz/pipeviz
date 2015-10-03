@@ -1,4 +1,4 @@
-package types
+package system
 
 // EFilter describes an Edge Filter, used by the traversal/query
 // system to govern traversals ad limit results.

@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 // AnyMatch performs simple equality comparisons between two persistent maps on
@@ -27,10 +27,10 @@ func AnyMatch(l, r ps.Map, keys ...string) bool {
 		}
 
 		// Transparently convert properties into their values
-		if lpv, ok := lv.(types.Property); ok {
+		if lpv, ok := lv.(system.Property); ok {
 			lv = lpv.Value
 		}
-		if rpv, ok := rv.(types.Property); ok {
+		if rpv, ok := rv.(system.Property); ok {
 			rv = rpv.Value
 		}
 
@@ -75,10 +75,10 @@ func AllMatch(l, r ps.Map, keys ...string) bool {
 		}
 
 		// Transparently convert properties into their values
-		if lpv, ok := lv.(types.Property); ok {
+		if lpv, ok := lv.(system.Property); ok {
 			lv = lpv.Value
 		}
-		if rpv, ok := rv.(types.Property); ok {
+		if rpv, ok := rv.(system.Property); ok {
 			rv = rpv.Value
 		}
 

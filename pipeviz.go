@@ -15,8 +15,8 @@ import (
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/journal/boltdb"
 	"github.com/tag1consulting/pipeviz/represent"
-	"github.com/tag1consulting/pipeviz/represent/types"
 	"github.com/tag1consulting/pipeviz/schema"
+	"github.com/tag1consulting/pipeviz/types/system"
 	"github.com/tag1consulting/pipeviz/webapp"
 )
 
@@ -97,7 +97,7 @@ func main() {
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
-	brokerChan := make(chan types.CoreGraph, 0)
+	brokerChan := make(chan system.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
 	brokerChan <- g
 
@@ -145,7 +145,7 @@ func RunWebapp(addr string, f journal.RecordGetter) {
 }
 
 // Rebuilds the graph from the extant entries in a journal.
-func restoreGraph(j journal.JournalStore) (types.CoreGraph, error) {
+func restoreGraph(j journal.JournalStore) (system.CoreGraph, error) {
 	g := represent.NewGraph()
 
 	var item *journal.Record

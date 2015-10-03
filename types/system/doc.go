@@ -1,4 +1,4 @@
-package types
+package system
 
 /*
 This package contains types that are used across multiple pipeviz subcomponents.

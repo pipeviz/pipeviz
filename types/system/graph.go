@@ -1,4 +1,4 @@
-package types
+package system
 
 /*
 CoreGraph is the interface provided by pipeviz' main graph object.

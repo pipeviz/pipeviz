@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/interpret"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 // Not actually used right now, but this interface must be satisfied by all types
 type unifier interface {
-	UnificationForm(uint64) []types.UnifyInstructionForm
+	UnificationForm(uint64) []system.UnifyInstructionForm
 }
 
 type Message struct {
@@ -18,14 +18,14 @@ type Message struct {
 }
 
 type message struct {
-	Env []interpret.Environment   `json:"environments"`
-	Ls  []interpret.LogicState    `json:"logic-states"`
-	Pds []interpret.ParentDataset `json:"datasets"`
-	Ds  []interpret.Dataset
-	P   []interpret.Process    `json:"processes"`
-	C   []interpret.Commit     `json:"commits"`
-	Cm  []interpret.CommitMeta `json:"commit-meta"`
-	Yp  []interpret.PkgYum     `json:"yum-pkg"`
+	Env []semantic.Environment   `json:"environments"`
+	Ls  []semantic.LogicState    `json:"logic-states"`
+	Pds []semantic.ParentDataset `json:"datasets"`
+	Ds  []semantic.Dataset
+	P   []semantic.Process    `json:"processes"`
+	C   []semantic.Commit     `json:"commits"`
+	Cm  []semantic.CommitMeta `json:"commit-meta"`
+	Yp  []semantic.PkgYum     `json:"yum-pkg"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface. It translates a
@@ -46,13 +46,13 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 
 // UnificationForm translates all data in the message into the standard
 // UnifyInstructionForm, suitable for merging into the dataset.
-func (m Message) UnificationForm(id uint64) []types.UnifyInstructionForm {
+func (m Message) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	logEntry := log.WithFields(log.Fields{
 		"system": "interpet",
 		"msgid":  id,
 	})
 
-	ret := make([]types.UnifyInstructionForm, 0)
+	ret := make([]system.UnifyInstructionForm, 0)
 
 	for _, e := range m.m.Env {
 		logEntry.WithField("vtype", "environment").Debug("Preparing to translate into UnifyInstructionForm")

@@ -1,4 +1,4 @@
-package types
+package system
 
 type UnifyInstructionForm interface {
 	Vertex() StdVertex

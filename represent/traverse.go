@@ -5,14 +5,14 @@ import (
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 // Inspects the indicated vertex's set of out-edges, returning a slice of
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) OutWith(egoId int, ef types.EFilter) (es types.EdgeVector) {
+func (g *coreGraph) OutWith(egoId int, ef system.EFilter) (es system.EdgeVector) {
 	return g.arcWith(egoId, ef, false)
 }
 
@@ -20,11 +20,11 @@ func (g *coreGraph) OutWith(egoId int, ef types.EFilter) (es types.EdgeVector) {
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) InWith(egoId int, ef types.EFilter) (es types.EdgeVector) {
+func (g *coreGraph) InWith(egoId int, ef system.EFilter) (es system.EdgeVector) {
 	return g.arcWith(egoId, ef, true)
 }
 
-func (g *coreGraph) arcWith(egoId int, ef types.EFilter, in bool) (es types.EdgeVector) {
+func (g *coreGraph) arcWith(egoId int, ef system.EFilter, in bool) (es system.EdgeVector) {
 	etype, props := ef.EType(), ef.EProps()
 	vt, err := g.Get(egoId)
 	if err != nil {
@@ -35,8 +35,8 @@ func (g *coreGraph) arcWith(egoId int, ef types.EFilter, in bool) (es types.Edge
 	var fef func(k string, v ps.Any)
 	// TODO specialize the func for zero-cases
 	fef = func(k string, v ps.Any) {
-		edge := v.(types.StdEdge)
-		if etype != types.ETypeNone && etype != edge.EType {
+		edge := v.(system.StdEdge)
+		if etype != system.ETypeNone && etype != edge.EType {
 			// etype doesn't match
 			return
 		}
@@ -47,7 +47,7 @@ func (g *coreGraph) arcWith(egoId int, ef types.EFilter, in bool) (es types.Edge
 				return
 			}
 
-			deprop := eprop.(types.Property)
+			deprop := eprop.(system.Property)
 			switch tv := deprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -76,18 +76,18 @@ func (g *coreGraph) arcWith(egoId int, ef types.EFilter, in bool) (es types.Edge
 // Return a slice of vtTuples that are successors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the successor
 // vertices pass the VertexFilter.
-func (g *coreGraph) SuccessorsWith(egoId int, vef types.VEFilter) (vts types.VertexTupleVector) {
+func (g *coreGraph) SuccessorsWith(egoId int, vef system.VEFilter) (vts system.VertexTupleVector) {
 	return g.adjacentWith(egoId, vef, false)
 }
 
 // Return a slice of vtTuples that are predecessors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the predecessor
 // vertices pass the VertexFilter.
-func (g *coreGraph) PredecessorsWith(egoId int, vef types.VEFilter) (vts types.VertexTupleVector) {
+func (g *coreGraph) PredecessorsWith(egoId int, vef system.VEFilter) (vts system.VertexTupleVector) {
 	return g.adjacentWith(egoId, vef, true)
 }
 
-func (g *coreGraph) adjacentWith(egoId int, vef types.VEFilter, in bool) (vts types.VertexTupleVector) {
+func (g *coreGraph) adjacentWith(egoId int, vef system.VEFilter, in bool) (vts system.VertexTupleVector) {
 	etype, eprops := vef.EType(), vef.EProps()
 	vtype, vprops := vef.VType(), vef.VProps()
 	vt, err := g.Get(egoId)
@@ -103,8 +103,8 @@ func (g *coreGraph) adjacentWith(egoId int, vef types.VEFilter, in bool) (vts ty
 	var feef func(k string, v ps.Any)
 	// TODO specialize the func for zero-cases
 	feef = func(k string, v ps.Any) {
-		edge := v.(types.StdEdge)
-		if etype != types.ETypeNone && etype != edge.EType {
+		edge := v.(system.StdEdge)
+		if etype != system.ETypeNone && etype != edge.EType {
 			// etype doesn't match
 			return
 		}
@@ -115,7 +115,7 @@ func (g *coreGraph) adjacentWith(egoId int, vef types.VEFilter, in bool) (vts ty
 				return
 			}
 
-			deprop := eprop.(types.Property)
+			deprop := eprop.(system.Property)
 			switch tv := deprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -166,7 +166,7 @@ VertexInspector:
 		}
 
 		// FIXME can't rely on Typ() method here, need to store it
-		if vtype != types.VTypeNone && vtype != adjvt.Vertex.Typ() {
+		if vtype != system.VTypeNone && vtype != adjvt.Vertex.Typ() {
 			continue
 		}
 
@@ -176,7 +176,7 @@ VertexInspector:
 				continue VertexInspector
 			}
 
-			dvprop := vprop.(types.Property)
+			dvprop := vprop.(system.Property)
 			switch tv := dvprop.Value.(type) {
 			default:
 				if tv != p.V {
@@ -202,11 +202,11 @@ VertexInspector:
 // will bypass the filter.
 //
 // The second parameter allows filtering on a k/v property pair.
-func (g *coreGraph) VerticesWith(vf types.VFilter) (vs types.VertexTupleVector) {
+func (g *coreGraph) VerticesWith(vf system.VFilter) (vs system.VertexTupleVector) {
 	vtype, props := vf.VType(), vf.VProps()
 	g.vtuples.ForEach(func(_ string, val ps.Any) {
-		vt := val.(types.VertexTuple)
-		if vtype != types.VTypeNone && vt.Vertex.Typ() != vtype {
+		vt := val.(system.VertexTuple)
+		if vtype != system.VTypeNone && vt.Vertex.Typ() != vtype {
 			return
 		}
 
@@ -216,7 +216,7 @@ func (g *coreGraph) VerticesWith(vf types.VFilter) (vs types.VertexTupleVector) 
 				return
 			}
 
-			dvprop := vprop.(types.Property)
+			dvprop := vprop.(system.Property)
 			switch tv := dvprop.Value.(type) {
 			default:
 				if tv != p.V {

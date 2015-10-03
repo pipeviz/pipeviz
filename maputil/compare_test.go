@@ -5,7 +5,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/maputil"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 func TestAnyMatch(t *testing.T) {
@@ -46,15 +46,15 @@ func TestAnyMatch(t *testing.T) {
 		t.Error("Should have found a match even if there's some key asymmetry")
 	}
 
-	if !maputil.AnyMatch(l.Set("foo", types.Property{MsgSrc: 0, Value: 1}), r, "foo", "bar") {
+	if !maputil.AnyMatch(l.Set("foo", system.Property{MsgSrc: 0, Value: 1}), r, "foo", "bar") {
 		t.Error("Should have matched thanks to auto-transform of Property")
 	}
 
-	if !maputil.AnyMatch(l, r.Set("foo", types.Property{MsgSrc: 0, Value: 1}), "foo", "bar") {
+	if !maputil.AnyMatch(l, r.Set("foo", system.Property{MsgSrc: 0, Value: 1}), "foo", "bar") {
 		t.Error("Property transform works on left or right")
 	}
 
-	if !maputil.AnyMatch(l.Set("foo", types.Property{MsgSrc: 0, Value: 1}), r.Set("foo", types.Property{MsgSrc: 0, Value: 1}), "foo", "bar") {
+	if !maputil.AnyMatch(l.Set("foo", system.Property{MsgSrc: 0, Value: 1}), r.Set("foo", system.Property{MsgSrc: 0, Value: 1}), "foo", "bar") {
 		t.Error("Property eq works when both are Properties")
 	}
 }
@@ -80,7 +80,7 @@ func TestAllMatch(t *testing.T) {
 		t.Error("Should have matched on 'foo' key's value")
 	}
 
-	if !maputil.AllMatch(l, r.Set("baz", types.Property{MsgSrc: 0, Value: 4}), "foo", "baz") {
+	if !maputil.AllMatch(l, r.Set("baz", system.Property{MsgSrc: 0, Value: 4}), "foo", "baz") {
 		t.Error("Should have matched on 'foo' key's value")
 	}
 
@@ -96,7 +96,7 @@ func TestAllMatch(t *testing.T) {
 		t.Error("Should not have found a match when there is any key asymmetry")
 	}
 
-	if !maputil.AllMatch(l.Set("baz", types.Property{MsgSrc: 0, Value: 1}), r.Set("baz", types.Property{MsgSrc: 0, Value: 1}), "foo", "baz") {
+	if !maputil.AllMatch(l.Set("baz", system.Property{MsgSrc: 0, Value: 1}), r.Set("baz", system.Property{MsgSrc: 0, Value: 1}), "foo", "baz") {
 		t.Error("Property eq works when both are Properties")
 	}
 }

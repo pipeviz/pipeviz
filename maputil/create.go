@@ -4,26 +4,26 @@ import (
 	"errors"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 // FillPropMap fills a ps.Map with the provided value pairs, wrapping values in a
 // types.Property struct using the provided msgid.
 //
 // If allowEmpty is false, only non-empty values will be included in the created map.
-func FillPropMap(msgid uint64, allowEmpty bool, p ...types.PropPair) ps.Map {
+func FillPropMap(msgid uint64, allowEmpty bool, p ...system.PropPair) ps.Map {
 	m := ps.NewMap()
 	var empty bool
 	var err error
 
 	if allowEmpty {
 		for _, pair := range p {
-			m = m.Set(pair.K, types.Property{MsgSrc: msgid, Value: pair.V})
+			m = m.Set(pair.K, system.Property{MsgSrc: msgid, Value: pair.V})
 		}
 	} else {
 		for _, pair := range p {
 			if empty, err = isEmptyValue(pair.V); !empty && err == nil {
-				m = m.Set(pair.K, types.Property{MsgSrc: msgid, Value: pair.V})
+				m = m.Set(pair.K, system.Property{MsgSrc: msgid, Value: pair.V})
 			}
 		}
 	}

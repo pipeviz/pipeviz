@@ -8,7 +8,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 var msgs []ingest.Message
@@ -46,14 +46,14 @@ func TestClone(t *testing.T) {
 }
 
 func BenchmarkMergeMessageOne(b *testing.B) {
-	var g types.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
+	var g system.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 	for i := 0; i < b.N; i++ {
 		g.Merge(0, msgs[0].UnificationForm(0))
 	}
 }
 
 func BenchmarkMergeMessageOneAndTwo(b *testing.B) {
-	var g types.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
+	var g system.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 
 	for i := 0; i < b.N; i++ {
 		g.Merge(0, msgs[0].UnificationForm(0))

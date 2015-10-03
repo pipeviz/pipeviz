@@ -1,9 +1,9 @@
-package interpret
+package semantic
 
 import (
 	"github.com/tag1consulting/pipeviz/maputil"
-	"github.com/tag1consulting/pipeviz/represent/helpers"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/represent/q"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 type Environment struct {
@@ -23,10 +23,10 @@ type Address struct {
 	Ipv6     string `json:"ipv6,omitempty"`
 }
 
-func (d Environment) UnificationForm(id uint64) []types.UnifyInstructionForm {
+func (d Environment) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	// seven distinct props
-	ret := []types.UnifyInstructionForm{uif{
-		v: types.NewVertex("environment", id,
+	ret := []system.UnifyInstructionForm{uif{
+		v: system.NewVertex("environment", id,
 			pp("os", d.OS),
 			pp("provider", d.Provider),
 			pp("type", d.Type),
@@ -66,8 +66,8 @@ func (d Environment) UnificationForm(id uint64) []types.UnifyInstructionForm {
 	return ret
 }
 
-func envUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
-	matches := g.VerticesWith(helpers.Qbv(types.VType("environment")))
+func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+	matches := g.VerticesWith(q.Qbv(system.VType("environment")))
 
 	for _, e := range matches {
 		if maputil.AnyMatch(e.Vertex.Properties, u.Vertex().Properties, "hostname", "ipv4", "ipv6") {
@@ -83,7 +83,7 @@ type EnvLink struct {
 	Nick    string  `json:"nick,omitempty"`
 }
 
-func (spec EnvLink) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
+func (spec EnvLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	_, e, success = findEnv(g, src)
 
 	// Whether we find a match or not, have to merge in the EnvLink
@@ -99,7 +99,7 @@ func (spec EnvLink) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple
 		return
 	}
 
-	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
+	rv := g.VerticesWith(q.Qbv(system.VType("environment")))
 	for _, vt := range rv {
 		// TODO this'll be cross-package eventually - reorg needed
 		if maputil.AnyMatch(e.Props, vt.Vertex.Properties, "nick", "hostname", "ipv4", "ipv6") {

@@ -1,12 +1,12 @@
-package interpret
+package semantic
 
 import (
 	"bytes"
 	"encoding/hex"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/helpers"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/represent/q"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 type Commit struct {
@@ -53,22 +53,22 @@ func (s Sha1) String() string {
 	return hex.EncodeToString(s[:])
 }
 
-func (d Commit) UnificationForm(id uint64) []types.UnifyInstructionForm {
+func (d Commit) UnificationForm(id uint64) []system.UnifyInstructionForm {
 	byts, err := hex.DecodeString(d.Sha1Str)
 	if err != nil {
 		return nil
 	}
 	copy(d.Sha1[:], byts[0:20])
 
-	v := types.NewVertex("commit", id,
-		types.PropPair{K: "sha1", V: d.Sha1},
-		types.PropPair{K: "author", V: d.Author},
-		types.PropPair{K: "date", V: d.Date},
-		types.PropPair{K: "subject", V: d.Subject},
-		types.PropPair{K: "repository", V: d.Repository},
+	v := system.NewVertex("commit", id,
+		system.PropPair{K: "sha1", V: d.Sha1},
+		system.PropPair{K: "author", V: d.Author},
+		system.PropPair{K: "date", V: d.Date},
+		system.PropPair{K: "subject", V: d.Subject},
+		system.PropPair{K: "repository", V: d.Repository},
 	)
 
-	var edges types.EdgeSpecs
+	var edges system.EdgeSpecs
 
 	for k, pstr := range d.ParentsStr {
 		byts, err := hex.DecodeString(pstr)
@@ -81,12 +81,12 @@ func (d Commit) UnificationForm(id uint64) []types.UnifyInstructionForm {
 		edges = append(edges, SpecGitCommitParent{Sha1: sha1, ParentNum: k + 1})
 	}
 
-	return []types.UnifyInstructionForm{uif{v: v, u: commitUnify, e: edges}}
+	return []system.UnifyInstructionForm{uif{v: v, u: commitUnify, e: edges}}
 }
 
-func commitUnify(g types.CoreGraph, u types.UnifyInstructionForm) int {
+func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	sha1, _ := u.Vertex().Properties.Lookup("sha1")
-	candidates := g.VerticesWith(helpers.Qbv(types.VType("commit"), "sha1", sha1.(types.Property).Value))
+	candidates := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", sha1.(system.Property).Value))
 
 	if len(candidates) > 0 { // there can be only one
 		return candidates[0].ID
@@ -100,25 +100,25 @@ type SpecGitCommitParent struct {
 	ParentNum int
 }
 
-func (spec SpecGitCommitParent) Resolve(g types.CoreGraph, mid uint64, src types.VertexTuple) (e types.StdEdge, success bool) {
-	e = types.StdEdge{
+func (spec SpecGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
+	e = system.StdEdge{
 		Source: src.ID,
 		Props:  ps.NewMap(),
 		EType:  "parent-commit",
 	}
 
-	re := g.OutWith(src.ID, helpers.Qbe(types.EType("parent-commit"), "pnum", spec.ParentNum))
+	re := g.OutWith(src.ID, q.Qbe(system.EType("parent-commit"), "pnum", spec.ParentNum))
 	if len(re) > 0 {
 		success = true
 		e.Target = re[0].Target
 		e.ID = re[0].ID
 	} else {
-		rv := g.VerticesWith(helpers.Qbv(types.VType("commit"), "sha1", spec.Sha1))
+		rv := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", spec.Sha1))
 		if len(rv) == 1 {
 			success = true
 			e.Target = rv[0].ID
-			e.Props = e.Props.Set("pnum", types.Property{MsgSrc: mid, Value: spec.ParentNum})
-			e.Props = e.Props.Set("sha1", types.Property{MsgSrc: mid, Value: spec.Sha1})
+			e.Props = e.Props.Set("pnum", system.Property{MsgSrc: mid, Value: spec.ParentNum})
+			e.Props = e.Props.Set("sha1", system.Property{MsgSrc: mid, Value: spec.Sha1})
 		}
 	}
 

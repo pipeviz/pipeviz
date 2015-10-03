@@ -13,19 +13,19 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 type Ingestor struct {
 	journal        journal.JournalStore
 	schema         *gjs.Schema
 	interpretChan  chan *journal.Record
-	brokerChan     chan types.CoreGraph
+	brokerChan     chan system.CoreGraph
 	maxMessageSize int64
 }
 
 // New creates a new pipeviz ingestor mux, ready to be kicked off.
-func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan types.CoreGraph, max int64) *Ingestor {
+func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan system.CoreGraph, max int64) *Ingestor {
 	return &Ingestor{
 		journal:        j,
 		schema:         s,
@@ -133,7 +133,7 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 //
 // When the interpret channel is closed (and emptied), this function also closes
 // the broker channel.
-func (s *Ingestor) Interpret(g types.CoreGraph) {
+func (s *Ingestor) Interpret(g system.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
 		im := Message{}

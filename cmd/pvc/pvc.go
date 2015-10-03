@@ -9,7 +9,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
-	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/types/semantic"
 )
 
 type menuLevel interface {
@@ -44,10 +44,10 @@ func wrapForJSON(v interface{}) map[string]interface{} {
 	m := make(map[string]interface{})
 
 	switch obj := v.(type) {
-	case interpret.Environment:
-		m["environments"] = []interpret.Environment{obj}
-	case interpret.LogicState:
-		m["logic-states"] = []interpret.LogicState{obj}
+	case semantic.Environment:
+		m["environments"] = []semantic.Environment{obj}
+	case semantic.LogicState:
+		m["logic-states"] = []semantic.LogicState{obj}
 	}
 
 	return m

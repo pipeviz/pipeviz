@@ -7,7 +7,7 @@ import (
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 var i2a = strconv.Itoa
@@ -20,7 +20,7 @@ type coreGraph struct {
 	orphans edgeSpecSet // FIXME breaks immut
 }
 
-func NewGraph() types.CoreGraph {
+func NewGraph() system.CoreGraph {
 	log.WithFields(log.Fields{
 		"system": "engine",
 	}).Debug("New coreGraph created")
@@ -29,9 +29,9 @@ func NewGraph() types.CoreGraph {
 }
 
 type veProcessingInfo struct {
-	vt    types.VertexTuple
-	uif   types.UnifyInstructionForm
-	e     []types.EdgeSpec
+	vt    system.VertexTuple
+	uif   system.UnifyInstructionForm
+	e     []system.EdgeSpec
 	msgid uint64
 }
 
@@ -56,7 +56,7 @@ func (g *coreGraph) MsgId() uint64 {
 }
 
 // the method to merge a message into the graph
-func (og *coreGraph) Merge(msgid uint64, uifs []types.UnifyInstructionForm) types.CoreGraph {
+func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) system.CoreGraph {
 	// TODO use a buffering pool to minimize allocs
 	var ess edgeSpecSet
 
@@ -114,7 +114,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []types.UnifyInstructionForm) type
 	// dependencies between edges work themselves out. It has provably incorrect
 	// cases, however, and will need to be replaced.
 	var ec, lec, pass int
-	var specs []types.EdgeSpec
+	var specs []system.EdgeSpec
 	for ec = ess.EdgeCount(); ec != 0 && ec != lec; ec = ess.EdgeCount() {
 		pass += 1
 		lec = ec
@@ -159,7 +159,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []types.UnifyInstructionForm) type
 					g.vtuples = g.vtuples.Set(i2a(info.vt.ID), info.vt)
 
 					any, _ := g.vtuples.Lookup(i2a(edge.Target))
-					tvt := any.(types.VertexTuple)
+					tvt := any.(system.VertexTuple)
 
 					tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
 					g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
@@ -192,7 +192,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []types.UnifyInstructionForm) type
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *coreGraph) ensureVertex(msgid uint64, sd types.UnifyInstructionForm) (final types.VertexTuple) {
+func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (final system.VertexTuple) {
 	logEntry := log.WithFields(log.Fields{
 		"system": "engine",
 		"msgid":  msgid,
@@ -204,7 +204,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.UnifyInstructionForm) (f
 
 	if vid == 0 {
 		logEntry.Debug("No match on unification, creating new vertex")
-		final = types.VertexTuple{Vertex: sd.Vertex(), InEdges: ps.NewMap(), OutEdges: ps.NewMap()}
+		final = system.VertexTuple{Vertex: sd.Vertex(), InEdges: ps.NewMap(), OutEdges: ps.NewMap()}
 		g.vserial += 1
 		final.ID = g.vserial
 		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
@@ -221,7 +221,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.UnifyInstructionForm) (f
 
 				// set edge in reverse direction, too
 				any, _ := g.vtuples.Lookup(i2a(edge.Target))
-				tvt := any.(types.VertexTuple)
+				tvt := any.(system.VertexTuple)
 				tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
 				g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
 				g.vtuples = g.vtuples.Set(i2a(final.ID), final)
@@ -232,7 +232,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.UnifyInstructionForm) (f
 	} else {
 		logEntry.WithField("vid", vid).Debug("Unification resulted in match")
 		ivt, _ := g.vtuples.Lookup(i2a(vid))
-		vt := ivt.(types.VertexTuple)
+		vt := ivt.(system.VertexTuple)
 
 		nu, err := vt.Vertex.Merge(sd.Vertex())
 		if err != nil {
@@ -242,7 +242,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.UnifyInstructionForm) (f
 			}).Warn("Merge of vertex properties returned an error; vertex will continue update into graph anyway")
 		}
 
-		final = types.VertexTuple{ID: vid, InEdges: vt.InEdges, OutEdges: vt.OutEdges, Vertex: nu}
+		final = system.VertexTuple{ID: vid, InEdges: vt.InEdges, OutEdges: vt.OutEdges, Vertex: nu}
 		g.vtuples = g.vtuples.Set(i2a(vid), final)
 	}
 
@@ -250,15 +250,15 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd types.UnifyInstructionForm) (f
 }
 
 // Gets the vtTuple for a given vertex id.
-func (g *coreGraph) Get(id int) (types.VertexTuple, error) {
+func (g *coreGraph) Get(id int) (system.VertexTuple, error) {
 	if id > g.vserial {
-		return types.VertexTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
+		return system.VertexTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
 	}
 
 	vtx, exists := g.vtuples.Lookup(i2a(id))
 	if exists {
-		return vtx.(types.VertexTuple), nil
+		return vtx.(system.VertexTuple), nil
 	} else {
-		return types.VertexTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
+		return system.VertexTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
 	}
 }

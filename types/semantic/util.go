@@ -1,55 +1,55 @@
-package interpret
+package semantic
 
 import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/tag1consulting/pipeviz/maputil"
-	"github.com/tag1consulting/pipeviz/represent/helpers"
-	"github.com/tag1consulting/pipeviz/represent/types"
+	"github.com/tag1consulting/pipeviz/represent/q"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 // pp is a convenience function to create a types.PropPair. The compiler
 // always inlines it, so there's no cost.
-func pp(k string, v interface{}) types.PropPair {
-	return types.PropPair{K: k, V: v}
+func pp(k string, v interface{}) system.PropPair {
+	return system.PropPair{K: k, V: v}
 }
 
 // uif is a standard struct that expresses a types.UnifyInstructionForm
 type uif struct {
-	v  types.StdVertex
-	u  func(types.CoreGraph, types.UnifyInstructionForm) int
-	e  []types.EdgeSpec
-	se []types.EdgeSpec
+	v  system.StdVertex
+	u  func(system.CoreGraph, system.UnifyInstructionForm) int
+	e  []system.EdgeSpec
+	se []system.EdgeSpec
 }
 
-func (u uif) Vertex() types.StdVertex {
+func (u uif) Vertex() system.StdVertex {
 	return u.v
 }
 
-func (u uif) Unify(g types.CoreGraph, u2 types.UnifyInstructionForm) int {
+func (u uif) Unify(g system.CoreGraph, u2 system.UnifyInstructionForm) int {
 	// TODO u2 should be redundant, should always be same as u
 	return u.u(g, u2)
 }
 
-func (u uif) EdgeSpecs() []types.EdgeSpec {
+func (u uif) EdgeSpecs() []system.EdgeSpec {
 	return u.e
 }
 
-func (u uif) ScopingSpecs() []types.EdgeSpec {
+func (u uif) ScopingSpecs() []system.EdgeSpec {
 	return u.se
 }
 
 // Searches the given vertex's out-edges to find its environment's vertex id.
 //
 // Also conveniently initializes a StandardEdge to the standard zero-state for an envlink.
-func findEnv(g types.CoreGraph, vt types.VertexTuple) (vid int, edge types.StdEdge, success bool) {
-	edge = types.StdEdge{
+func findEnv(g system.CoreGraph, vt system.VertexTuple) (vid int, edge system.StdEdge, success bool) {
+	edge = system.StdEdge{
 		Source: vt.ID,
 		Props:  ps.NewMap(),
 		EType:  "envlink",
 	}
 
 	if vt.ID != 0 {
-		re := g.OutWith(vt.ID, helpers.Qbe(types.EType("envlink")))
+		re := g.OutWith(vt.ID, q.Qbe(system.EType("envlink")))
 		if len(re) == 1 {
 			vid, edge, success = re[0].Target, re[0], true
 		}
@@ -58,17 +58,17 @@ func findEnv(g types.CoreGraph, vt types.VertexTuple) (vid int, edge types.StdEd
 	return
 }
 
-func emptyVT(v types.StdVertex) types.VertexTuple {
-	return types.VertexTuple{
+func emptyVT(v system.StdVertex) system.VertexTuple {
+	return system.VertexTuple{
 		Vertex:   v,
 		InEdges:  ps.NewMap(),
 		OutEdges: ps.NewMap(),
 	}
 }
 
-func findMatchingEnvId(g types.CoreGraph, edge types.StdEdge, vtv types.VertexTupleVector) int {
+func findMatchingEnvId(g system.CoreGraph, edge system.StdEdge, vtv system.VertexTupleVector) int {
 	for _, candidate := range vtv {
-		for _, edge2 := range g.OutWith(candidate.ID, helpers.Qbe(types.EType("envlink"))) {
+		for _, edge2 := range g.OutWith(candidate.ID, q.Qbe(system.EType("envlink"))) {
 			if edge2.Target == edge.Target {
 				return candidate.ID
 			}
@@ -84,28 +84,28 @@ func assignAddress(mid uint64, a Address, m ps.Map, excl bool) ps.Map {
 			m = m.Delete("ipv4")
 			m = m.Delete("ipv6")
 		}
-		m = m.Set("hostname", types.Property{MsgSrc: mid, Value: a.Hostname})
+		m = m.Set("hostname", system.Property{MsgSrc: mid, Value: a.Hostname})
 	}
 	if a.Ipv4 != "" {
 		if excl {
 			m = m.Delete("hostname")
 			m = m.Delete("ipv6")
 		}
-		m = m.Set("ipv4", types.Property{MsgSrc: mid, Value: a.Ipv4})
+		m = m.Set("ipv4", system.Property{MsgSrc: mid, Value: a.Ipv4})
 	}
 	if a.Ipv6 != "" {
 		if excl {
 			m = m.Delete("hostname")
 			m = m.Delete("ipv4")
 		}
-		m = m.Set("ipv6", types.Property{MsgSrc: mid, Value: a.Ipv6})
+		m = m.Set("ipv6", system.Property{MsgSrc: mid, Value: a.Ipv6})
 	}
 
 	return m
 }
 
-func findEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) {
-	rv := g.VerticesWith(helpers.Qbv(types.VType("environment")))
+func findEnvironment(g system.CoreGraph, props ps.Map) (envid int, success bool) {
+	rv := g.VerticesWith(q.Qbv(system.VType("environment")))
 	for _, vt := range rv {
 		if maputil.AnyMatch(props, vt.Vertex.Props(), "hostname", "ipv4", "ipv6", "nick") {
 			return vt.ID, true
@@ -115,15 +115,15 @@ func findEnvironment(g types.CoreGraph, props ps.Map) (envid int, success bool) 
 	return
 }
 
-func findDataset(g types.CoreGraph, envid int, name []string) (id int, success bool) {
+func findDataset(g system.CoreGraph, envid int, name []string) (id int, success bool) {
 	// first time through use the parent type
-	vtype := types.VType("parent-dataset")
+	vtype := system.VType("parent-dataset")
 	id = envid
 
 	var n string
 	for len(name) > 0 {
 		n, name = name[0], name[1:]
-		rv := g.PredecessorsWith(id, helpers.Qbv(vtype, "name", n))
+		rv := g.PredecessorsWith(id, q.Qbv(vtype, "name", n))
 		vtype = "dataset"
 
 		if len(rv) != 1 {

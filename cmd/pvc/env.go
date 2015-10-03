@@ -17,8 +17,8 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
-	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/schema"
+	"github.com/tag1consulting/pipeviz/types/semantic"
 )
 
 var schemaMaster *gjs.Schema
@@ -44,7 +44,7 @@ func envCommand() *cobra.Command {
 // runGenEnv is the main entry point for running the environment-generating
 // env subcommand.
 func (ec envCmd) runGenEnv(cmd *cobra.Command, args []string) {
-	e := &interpret.Environment{}
+	e := &semantic.Environment{}
 
 	if !cmd.Flags().Lookup("no-detect").Changed {
 		*e = detectEnvDefaults()
@@ -155,7 +155,7 @@ MenuLoop:
 	}
 }
 
-func collectFQDN(w io.Writer, r io.Reader, e *interpret.Environment) {
+func collectFQDN(w io.Writer, r io.Reader, e *semantic.Environment) {
 	fmt.Fprintf(w, "\n\nEditing FQDN\nCurrent Value: %q\n", e.Address.Hostname)
 	fmt.Fprint(w, "New value: ")
 
@@ -164,7 +164,7 @@ func collectFQDN(w io.Writer, r io.Reader, e *interpret.Environment) {
 	e.Address.Hostname = scn.Text()
 }
 
-func collectIpv4(w io.Writer, r io.Reader, e *interpret.Environment) {
+func collectIpv4(w io.Writer, r io.Reader, e *semantic.Environment) {
 	fmt.Fprintf(w, "\n\nEditing IPv4\nCurrent Value: %q\n", e.Address.Ipv4)
 	fmt.Fprint(w, "New value: ")
 
@@ -189,7 +189,7 @@ func collectIpv4(w io.Writer, r io.Reader, e *interpret.Environment) {
 	}
 }
 
-func collectIpv6(w io.Writer, r io.Reader, e *interpret.Environment) {
+func collectIpv6(w io.Writer, r io.Reader, e *semantic.Environment) {
 	fmt.Fprintf(w, "\n\nEditing IPv6\nCurrent Value: %q\n", e.Address.Ipv6)
 	fmt.Fprint(w, "New value: ")
 
@@ -214,7 +214,7 @@ func collectIpv6(w io.Writer, r io.Reader, e *interpret.Environment) {
 	}
 }
 
-func collectOS(w io.Writer, r io.Reader, e *interpret.Environment) {
+func collectOS(w io.Writer, r io.Reader, e *semantic.Environment) {
 	fmt.Fprintf(w, "\n\nEditing OS\nCurrent Value: %q\n", e.OS)
 	fmt.Fprint(w, "New value: ")
 
@@ -223,7 +223,7 @@ func collectOS(w io.Writer, r io.Reader, e *interpret.Environment) {
 	e.OS = scn.Text()
 }
 
-func collectNick(w io.Writer, r io.Reader, e *interpret.Environment) {
+func collectNick(w io.Writer, r io.Reader, e *semantic.Environment) {
 	fmt.Fprintf(w, "\n\nEditing Nick\nCurrent Value: %q\n", e.Nick)
 	fmt.Fprint(w, "New value: ")
 
@@ -232,7 +232,7 @@ func collectNick(w io.Writer, r io.Reader, e *interpret.Environment) {
 	e.Nick = scn.Text()
 }
 
-func collectProvider(w io.Writer, r io.Reader, e *interpret.Environment) {
+func collectProvider(w io.Writer, r io.Reader, e *semantic.Environment) {
 	fmt.Fprintf(w, "\n\nEditing Provider\nCurrent Value: %q\n", e.Provider)
 	fmt.Fprint(w, "New value: ")
 
@@ -242,7 +242,7 @@ func collectProvider(w io.Writer, r io.Reader, e *interpret.Environment) {
 }
 
 // Inspects the currently running system to fill in some default values.
-func detectEnvDefaults() (e interpret.Environment) {
+func detectEnvDefaults() (e semantic.Environment) {
 	var err error
 	e.Address.Hostname, err = os.Hostname()
 	if err != nil {
@@ -256,7 +256,7 @@ func detectEnvDefaults() (e interpret.Environment) {
 
 // printMenu prints to stdout a menu showing the current data in the
 // message to be generated.
-func (ec envCmd) printCurrentState(w io.Writer, e interpret.Environment) {
+func (ec envCmd) printCurrentState(w io.Writer, e semantic.Environment) {
 	fmt.Fprintln(w, "Environment data:")
 	var n int
 
