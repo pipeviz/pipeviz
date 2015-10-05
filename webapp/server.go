@@ -14,16 +14,18 @@ import (
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/represent/q"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 var (
-	publicDir  = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
+	publicDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
 )
 
 var (
 	// TODO crappily hardcoded, for now
 	brokerListen broker.GraphReceiver
-	latestGraph  represent.CoreGraph
+	latestGraph  system.CoreGraph
 )
 
 const (
@@ -67,9 +69,9 @@ func NewMux() *web.Mux {
 	return m
 }
 
-func graphToJson(g represent.CoreGraph) ([]byte, error) {
+func graphToJson(g system.CoreGraph) ([]byte, error) {
 	var vertices []interface{}
-	for _, v := range g.VerticesWith(represent.Qbv(represent.VTypeNone)) {
+	for _, v := range g.VerticesWith(q.Qbv(system.VTypeNone)) {
 		vertices = append(vertices, v.Flat())
 	}
 
@@ -157,7 +159,7 @@ func wsWriter(ws *websocket.Conn) {
 
 	// write the current graph state first, before entering loop
 	graphToSock(ws, latestGraph)
-	var g represent.CoreGraph
+	var g system.CoreGraph
 	for {
 		select {
 		case <-pingTicker.C:
@@ -172,7 +174,7 @@ func wsWriter(ws *websocket.Conn) {
 	}
 }
 
-func graphToSock(ws *websocket.Conn, g represent.CoreGraph) {
+func graphToSock(ws *websocket.Conn, g system.CoreGraph) {
 	j, err := graphToJson(g)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{

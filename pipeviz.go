@@ -11,11 +11,12 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
-	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/journal/boltdb"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/schema"
+	"github.com/tag1consulting/pipeviz/types/system"
 	"github.com/tag1consulting/pipeviz/webapp"
 )
 
@@ -43,6 +44,9 @@ func init() {
 }
 
 func main() {
+	// If built with debug tag, turns on the http-based profiler. Otherwise, nop.
+	runProfiler()
+
 	src, err := schema.Master()
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -93,16 +97,11 @@ func main() {
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
 	// the state machine and the listeners interested in the machine's state.
-	brokerChan := make(chan represent.CoreGraph, 0)
+	brokerChan := make(chan system.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
 	brokerChan <- g
 
-	srv := &Ingestor{
-		journal:       j,
-		schema:        masterSchema,
-		interpretChan: interpretChan,
-		brokerChan:    brokerChan,
-	}
+	srv := ingest.New(j, masterSchema, interpretChan, brokerChan, MaxMessageSize)
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
@@ -146,7 +145,7 @@ func RunWebapp(addr string, f journal.RecordGetter) {
 }
 
 // Rebuilds the graph from the extant entries in a journal.
-func restoreGraph(j journal.JournalStore) (represent.CoreGraph, error) {
+func restoreGraph(j journal.JournalStore) (system.CoreGraph, error) {
 	g := represent.NewGraph()
 
 	var item *journal.Record
@@ -163,9 +162,9 @@ func restoreGraph(j journal.JournalStore) (represent.CoreGraph, error) {
 				// TODO returning out here could end us up somwehere weird
 				return g, err
 			}
-			msg := interpret.Message{Id: item.Index}
-			json.Unmarshal(item.Message, &msg)
-			g = g.Merge(msg)
+			msg := &ingest.Message{}
+			json.Unmarshal(item.Message, msg)
+			g = g.Merge(item.Index, msg.UnificationForm())
 		}
 	}
 

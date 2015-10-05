@@ -7,14 +7,15 @@ import (
 	"testing"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/interpret"
+	"github.com/tag1consulting/pipeviz/ingest"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
-var msgs []interpret.Message
+var msgs []ingest.Message
 
 func init() {
 	for i := range make([]struct{}, 8) {
-		m := interpret.Message{Id: uint64(i + 1)}
+		m := ingest.Message{}
 
 		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
 		f, err := ioutil.ReadFile(path)
@@ -45,17 +46,17 @@ func TestClone(t *testing.T) {
 }
 
 func BenchmarkMergeMessageOne(b *testing.B) {
-	var g CoreGraph = &coreGraph{vtuples: ps.NewMap()}
+	var g system.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 	for i := 0; i < b.N; i++ {
-		g.Merge(msgs[0])
+		g.Merge(0, msgs[0].UnificationForm(0))
 	}
 }
 
 func BenchmarkMergeMessageOneAndTwo(b *testing.B) {
-	var g CoreGraph = &coreGraph{vtuples: ps.NewMap()}
+	var g system.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 
 	for i := 0; i < b.N; i++ {
-		g.Merge(msgs[0])
-		g.Merge(msgs[1])
+		g.Merge(0, msgs[0].UnificationForm(0))
+		g.Merge(0, msgs[1].UnificationForm(0))
 	}
 }

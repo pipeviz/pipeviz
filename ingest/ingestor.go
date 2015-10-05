@@ -1,4 +1,4 @@
-package main
+package ingest
 
 import (
 	"encoding/json"
@@ -11,17 +11,28 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
-	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
-	"github.com/tag1consulting/pipeviz/represent"
+	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 type Ingestor struct {
-	journal       journal.JournalStore
-	schema        *gjs.Schema
-	interpretChan chan *journal.Record
-	brokerChan    chan represent.CoreGraph
+	journal        journal.JournalStore
+	schema         *gjs.Schema
+	interpretChan  chan *journal.Record
+	brokerChan     chan system.CoreGraph
+	maxMessageSize int64
+}
+
+// New creates a new pipeviz ingestor mux, ready to be kicked off.
+func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan system.CoreGraph, max int64) *Ingestor {
+	return &Ingestor{
+		journal:        j,
+		schema:         s,
+		interpretChan:  ic,
+		brokerChan:     bc,
+		maxMessageSize: max,
+	}
 }
 
 // RunHttpIngestor sets up and runs the http listener that receives messages, validates
@@ -52,7 +63,7 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 	// Add middleware limiting body length to MaxMessageSize
 	mb.Use(func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			r.Body = http.MaxBytesReader(w, r.Body, MaxMessageSize)
+			r.Body = http.MaxBytesReader(w, r.Body, s.maxMessageSize)
 			h.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
@@ -122,12 +133,12 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 //
 // When the interpret channel is closed (and emptied), this function also closes
 // the broker channel.
-func (s *Ingestor) Interpret(g represent.CoreGraph) {
+func (s *Ingestor) Interpret(g system.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
-		im := interpret.Message{Id: m.Index}
+		im := Message{}
 		json.Unmarshal(m.Message, &im)
-		g = g.Merge(im)
+		g = g.Merge(m.Index, im.UnificationForm())
 
 		s.brokerChan <- g
 	}

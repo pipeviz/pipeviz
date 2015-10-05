@@ -1,4 +1,4 @@
-package types
+package system
 
 import (
 	"errors"
@@ -6,25 +6,16 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 )
 
-// A value indicating a vertex's type. For now, done as a string.
-type VType string
-
-// A value indicating an edge's type. For now, done as a string.
-type EType string
-
-type Property struct {
-	MsgSrc uint64      `json:"msgsrc"`
-	Value  interface{} `json:"value"`
-}
-
-type PropPair struct {
-	K string
-	V interface{}
+// StdVertex is used to represent a vertex object by the graph engine. They exist
+// within VertexTuples.
+type StdVertex struct {
+	Type       VType  `json:"type"`
+	Properties ps.Map `json:"properties"`
 }
 
 // NewVertex creates a new Vertex object, assigning each PropPair to Props
 // using the provided msgid.
-func NewVertex(typ VType, msgid uint64, p ...PropPair) (v Vertex) {
+func NewVertex(typ VType, msgid uint64, p ...PropPair) (v StdVertex) {
 	v.Type, v.Properties = typ, fillMapIgnoreZero(msgid, p...)
 	return v
 }
@@ -43,20 +34,13 @@ func fillMapIgnoreZero(msgid uint64, p ...PropPair) ps.Map {
 	return m
 }
 
-type Vertex struct {
-	Type       VType  `json:"type"`
-	Properties ps.Map `json:"properties"`
-}
-
-type emptyChecker interface {
-	IsEmpty() bool
-}
-
 func isZero(v interface{}) (bool, error) {
 	switch v.(type) {
 	case bool:
 		return v == false, nil
-	case uint, uint8, uint16, uint32, uint64, int, int8, int16, int32, int64:
+	case uint, uint8, uint16, uint32, uint64, uintptr:
+		return v == 0, nil
+	case int, int8, int16, int32, int64:
 		return v == 0, nil
 	case float32, float64:
 		return v == 0.0, nil
@@ -75,19 +59,19 @@ func isZero(v interface{}) (bool, error) {
 // Returns a string representing the object type. Used for namespacing keys, etc.
 // While this is (currently) implemented as a method, its result must be invariant.
 // TODO use string-const generator, other tricks to enforce invariance, compact space use
-func (v Vertex) Typ() VType {
+func (v StdVertex) Typ() VType {
 	return v.Type
 }
 
 // Returns a persistent map with the vertex's properties.
 // TODO generate more type-restricted versions of the map?
-func (v Vertex) Props() ps.Map {
+func (v StdVertex) Props() ps.Map {
 	return v.Properties
 }
 
 // Merge merges another vertex into this vertex. Error is indicated if the
 // dynamic types do not match.
-func (v Vertex) Merge(v2 Vertex) (Vertex, error) {
+func (v StdVertex) Merge(v2 StdVertex) (StdVertex, error) {
 	var old, nu ps.Map = v.Props(), v2.Props()
 
 	nu.ForEach(func(key string, val ps.Any) {

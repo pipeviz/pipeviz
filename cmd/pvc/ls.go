@@ -18,8 +18,8 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
-	"github.com/tag1consulting/pipeviz/interpret"
 	"github.com/tag1consulting/pipeviz/schema"
+	"github.com/tag1consulting/pipeviz/types/semantic"
 )
 
 // TODO we just use this as a way to namespace common names
@@ -43,7 +43,7 @@ func lsCommand() *cobra.Command {
 // runGenLS is the main entry point for running the logic state-generating
 // ls subcommand.
 func (lsc lsCmd) runGenLS(cmd *cobra.Command, args []string) {
-	ls := &interpret.LogicState{}
+	ls := &semantic.LogicState{}
 
 	if !cmd.Flags().Lookup("no-detect").Changed {
 		*ls = lsc.detectDefaults()
@@ -160,7 +160,7 @@ MenuLoop:
 	}
 }
 
-func (lsc lsCmd) collectPath(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectPath(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Path\nCurrent Value: %q\n", ls.Path)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -189,7 +189,7 @@ func (lsc lsCmd) collectPath(w io.Writer, r io.Reader, ls *interpret.LogicState)
 	}
 }
 
-func (lsc lsCmd) collectHostFQDN(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectHostFQDN(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Host FQDN\nCurrent Value: %q\n", ls.Environment.Address.Hostname)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -198,7 +198,7 @@ func (lsc lsCmd) collectHostFQDN(w io.Writer, r io.Reader, ls *interpret.LogicSt
 	ls.Environment.Address.Hostname = scn.Text()
 }
 
-func (lsc lsCmd) collectHostNick(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectHostNick(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Host Nick\nCurrent Value: %q\n", ls.Environment.Nick)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -207,7 +207,7 @@ func (lsc lsCmd) collectHostNick(w io.Writer, r io.Reader, ls *interpret.LogicSt
 	ls.Environment.Nick = scn.Text()
 }
 
-func (lsc lsCmd) collectCommit(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectCommit(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Git commit\nCurrent Value: %q\n", ls.ID.CommitStr)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -226,7 +226,7 @@ func (lsc lsCmd) collectCommit(w io.Writer, r io.Reader, ls *interpret.LogicStat
 	}
 }
 
-func (lsc lsCmd) collectVersion(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectVersion(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Version\nCurrent Value: %q\n", ls.ID.Version)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -235,7 +235,7 @@ func (lsc lsCmd) collectVersion(w io.Writer, r io.Reader, ls *interpret.LogicSta
 	ls.ID.Version = scn.Text()
 }
 
-func (lsc lsCmd) collectSemver(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectSemver(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Semver\nCurrent Value: %q\n", ls.ID.Semver)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -244,7 +244,7 @@ func (lsc lsCmd) collectSemver(w io.Writer, r io.Reader, ls *interpret.LogicStat
 	ls.ID.Semver = scn.Text()
 }
 
-func (lsc lsCmd) collectLgroup(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectLgroup(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Logical group\nCurrent Value: %q\n", ls.Lgroup)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -253,7 +253,7 @@ func (lsc lsCmd) collectLgroup(w io.Writer, r io.Reader, ls *interpret.LogicStat
 	ls.Lgroup = scn.Text()
 }
 
-func (lsc lsCmd) collectNick(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectNick(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Logical group\nCurrent Value: %q\n", ls.Nick)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -262,7 +262,7 @@ func (lsc lsCmd) collectNick(w io.Writer, r io.Reader, ls *interpret.LogicState)
 	ls.Nick = scn.Text()
 }
 
-func (lsc lsCmd) collectType(w io.Writer, r io.Reader, ls *interpret.LogicState) {
+func (lsc lsCmd) collectType(w io.Writer, r io.Reader, ls *semantic.LogicState) {
 	fmt.Fprintf(w, "\n\nEditing Logical group\nCurrent Value: %q\n", ls.Type)
 	fmt.Fprint(w, "\nNew value: ")
 
@@ -271,7 +271,7 @@ func (lsc lsCmd) collectType(w io.Writer, r io.Reader, ls *interpret.LogicState)
 	ls.Type = scn.Text()
 }
 
-func (lsc lsCmd) detectDefaults() (ls interpret.LogicState) {
+func (lsc lsCmd) detectDefaults() (ls semantic.LogicState) {
 	var err error
 	ls.Environment.Address.Hostname, err = os.Hostname()
 	if err != nil {
@@ -283,7 +283,7 @@ func (lsc lsCmd) detectDefaults() (ls interpret.LogicState) {
 
 // printMenu prints to stdout a menu showing the current data in the
 // message to be generated.
-func (lsc lsCmd) printCurrentState(w io.Writer, e interpret.LogicState) {
+func (lsc lsCmd) printCurrentState(w io.Writer, e semantic.LogicState) {
 	fmt.Fprintln(w, "Logic state data:")
 	var n int
 
