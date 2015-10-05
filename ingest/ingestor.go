@@ -138,7 +138,7 @@ func (s *Ingestor) Interpret(g system.CoreGraph) {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
 		im := Message{}
 		json.Unmarshal(m.Message, &im)
-		g = g.Merge(m.Index, im.UnificationForm(m.Index))
+		g = g.Merge(m.Index, im.UnificationForm())
 
 		s.brokerChan <- g
 	}

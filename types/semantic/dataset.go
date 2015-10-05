@@ -44,7 +44,7 @@ type DataAlpha string
 func (d DataAlpha) _dg()      {}
 func (d DataProvenance) _dg() {}
 
-func (d Dataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d Dataset) UnificationForm() []system.UnifyInstructionForm {
 	v := pv{typ: "dataset", props: system.RawProps{
 		"name":        d.Name,
 		"create-time": d.CreateTime,
@@ -112,7 +112,7 @@ func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	return 0
 }
 
-func (d ParentDataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d ParentDataset) UnificationForm() []system.UnifyInstructionForm {
 	ret := []system.UnifyInstructionForm{uif{
 		v: pv{typ: "parent-dataset", props: system.RawProps{
 			"name": d.Name,
@@ -126,7 +126,7 @@ func (d ParentDataset) UnificationForm(id uint64) []system.UnifyInstructionForm 
 	for _, sub := range d.Subsets {
 		sub.Parent = d.Name
 		sub.Environment = d.Environment
-		ret = append(ret, sub.UnificationForm(id)...)
+		ret = append(ret, sub.UnificationForm()...)
 	}
 
 	return ret

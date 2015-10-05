@@ -23,7 +23,7 @@ type Address struct {
 	Ipv6     string `json:"ipv6,omitempty"`
 }
 
-func (d Environment) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d Environment) UnificationForm() []system.UnifyInstructionForm {
 	// seven distinct props
 	ret := []system.UnifyInstructionForm{uif{
 		v: pv{typ: "environment", props: system.RawProps{
@@ -52,15 +52,15 @@ func (d Environment) UnificationForm(id uint64) []system.UnifyInstructionForm {
 
 	for _, ls := range d.LogicStates {
 		ls.Environment = envlink
-		ret = append(ret, ls.UnificationForm(id)...)
+		ret = append(ret, ls.UnificationForm()...)
 	}
 	for _, p := range d.Processes {
 		p.Environment = envlink
-		ret = append(ret, p.UnificationForm(id)...)
+		ret = append(ret, p.UnificationForm()...)
 	}
 	for _, pds := range d.Datasets {
 		pds.Environment = envlink
-		ret = append(ret, pds.UnificationForm(id)...)
+		ret = append(ret, pds.UnificationForm()...)
 	}
 
 	return ret

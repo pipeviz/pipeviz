@@ -83,7 +83,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 					m := ingest.Message{}
 					json.Unmarshal(src, &m)
 
-					g = g.Merge(k, m.UnificationForm(k))
+					g = g.Merge(k, m.UnificationForm())
 					fmt.Printf("Merged message %v/%v into graph\n", dir, f.Name())
 				}
 			}

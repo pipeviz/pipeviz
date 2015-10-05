@@ -44,7 +44,7 @@ type ConnUnix struct {
 	Path string `json:"path,omitempty"`
 }
 
-func (d LogicState) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d LogicState) UnificationForm() []system.UnifyInstructionForm {
 	v := pv{typ: "logic-state", props: system.RawProps{
 		"path":    d.Path,
 		"lgroup":  d.Lgroup,

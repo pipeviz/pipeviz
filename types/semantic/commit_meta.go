@@ -14,7 +14,7 @@ type CommitMeta struct {
 	TestState string   `json:"testState,omitempty"`
 }
 
-func (d CommitMeta) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d CommitMeta) UnificationForm() []system.UnifyInstructionForm {
 	ret := make([]system.UnifyInstructionForm, 0)
 
 	var commit Sha1

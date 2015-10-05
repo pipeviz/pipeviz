@@ -164,7 +164,7 @@ func restoreGraph(j journal.JournalStore) (system.CoreGraph, error) {
 			}
 			msg := &ingest.Message{}
 			json.Unmarshal(item.Message, msg)
-			g = g.Merge(item.Index, msg.UnificationForm(item.Index))
+			g = g.Merge(item.Index, msg.UnificationForm())
 		}
 	}
 

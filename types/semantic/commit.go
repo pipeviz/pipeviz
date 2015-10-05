@@ -53,7 +53,7 @@ func (s Sha1) String() string {
 	return hex.EncodeToString(s[:])
 }
 
-func (d Commit) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d Commit) UnificationForm() []system.UnifyInstructionForm {
 	byts, err := hex.DecodeString(d.Sha1Str)
 	if err != nil {
 		return nil

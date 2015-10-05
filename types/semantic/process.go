@@ -24,7 +24,7 @@ type ListenAddr struct {
 	Path  string   `json:"path,omitempty"`
 }
 
-func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d Process) UnificationForm() []system.UnifyInstructionForm {
 	ret := make([]system.UnifyInstructionForm, 0)
 
 	v := pv{

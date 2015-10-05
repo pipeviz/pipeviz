@@ -9,10 +9,6 @@ import (
 )
 
 // Not actually used right now, but this interface must be satisfied by all types
-type unifier interface {
-	UnificationForm(uint64) []system.UnifyInstructionForm
-}
-
 type Message struct {
 	m *message
 }
@@ -46,46 +42,45 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 
 // UnificationForm translates all data in the message into the standard
 // UnifyInstructionForm, suitable for merging into the dataset.
-func (m Message) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (m Message) UnificationForm() []system.UnifyInstructionForm {
 	logEntry := log.WithFields(log.Fields{
 		"system": "interpet",
-		"msgid":  id,
 	})
 
 	ret := make([]system.UnifyInstructionForm, 0)
 
 	for _, e := range m.m.Env {
 		logEntry.WithField("vtype", "environment").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 	for _, e := range m.m.Ls {
 		logEntry.WithField("vtype", "logic state").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 	for _, e := range m.m.Pds {
 		logEntry.WithField("vtype", "parent dataset").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 	for _, e := range m.m.Ds {
 		logEntry.WithField("vtype", "dataset").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 	for _, e := range m.m.P {
 		logEntry.WithField("vtype", "process").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 	for _, e := range m.m.C {
 		logEntry.WithField("vtype", "git commit").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 	for _, e := range m.m.Cm {
 		logEntry.WithField("vtype", "commit meta").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 
 	for _, e := range m.m.Yp {
 		logEntry.WithField("vtype", "yum-pkg").Debug("Preparing to translate into UnifyInstructionForm")
-		ret = append(ret, e.UnificationForm(id)...)
+		ret = append(ret, e.UnificationForm()...)
 	}
 
 	return ret

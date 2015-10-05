@@ -14,7 +14,7 @@ type PkgYum struct {
 	Arch       string `json:"arch,omitempty"`
 }
 
-func (d PkgYum) UnificationForm(id uint64) []system.UnifyInstructionForm {
+func (d PkgYum) UnificationForm() []system.UnifyInstructionForm {
 
 	return []system.UnifyInstructionForm{uif{
 		v: pv{typ: "dataset", props: system.RawProps{
