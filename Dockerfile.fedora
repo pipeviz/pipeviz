@@ -3,7 +3,7 @@
 # To use this Dockerfile, do the following:
 #
 # Build the docker image:
-#   dockerbuild -f Dockerfile.fedora -t eliza411/pipeviz .
+#   docker build -f Dockerfile.fedora -t eliza411/pipeviz .
 #
 # Run a docker container names pipeserv using the image you just build:
 #   docker run -ti -p 8008:8008 --rm --name pipeserv  eliza411/pipeviz
