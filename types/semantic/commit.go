@@ -68,7 +68,7 @@ func (d Commit) UnificationForm(id uint64) []system.UnifyInstructionForm {
 		"repository": d.Repository,
 	}}
 
-	var edges system.EdgeSpecs
+	var edges []system.EdgeSpec
 
 	for k, pstr := range d.ParentsStr {
 		byts, err := hex.DecodeString(pstr)

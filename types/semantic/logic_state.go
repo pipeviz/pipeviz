@@ -54,7 +54,7 @@ func (d LogicState) UnificationForm(id uint64) []system.UnifyInstructionForm {
 		"semver":  d.ID.Semver,
 	}}
 
-	var edges system.EdgeSpecs
+	var edges []system.EdgeSpec
 
 	if d.ID.CommitStr != "" {
 		var commit Sha1
@@ -69,7 +69,7 @@ func (d LogicState) UnificationForm(id uint64) []system.UnifyInstructionForm {
 		edges = append(edges, dl)
 	}
 
-	return []system.UnifyInstructionForm{uif{v: v, u: lsUnify, e: edges, se: system.EdgeSpecs{d.Environment}}}
+	return []system.UnifyInstructionForm{uif{v: v, u: lsUnify, e: edges, se: []system.EdgeSpec{d.Environment}}}
 }
 
 func lsUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {

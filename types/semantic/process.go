@@ -37,7 +37,7 @@ func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 		},
 	}
 
-	var edges system.EdgeSpecs
+	var edges []system.EdgeSpec
 
 	for _, ls := range d.LogicStates {
 		edges = append(edges, specLocalLogic{ls})
@@ -62,7 +62,7 @@ func (d Process) UnificationForm(id uint64) []system.UnifyInstructionForm {
 			}
 			v2.props["port"] = listen.Port
 		}
-		ret = append(ret, uif{v: v2, u: commUnify, se: system.EdgeSpecs{d.Environment}})
+		ret = append(ret, uif{v: v2, u: commUnify, se: []system.EdgeSpec{d.Environment}})
 	}
 
 	return append([]system.UnifyInstructionForm{uif{

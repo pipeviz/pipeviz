@@ -13,10 +13,3 @@ type EdgeSpec interface {
 	// any existing edge (as returned from FindExisting)
 	Resolve(CoreGraph, uint64, VertexTuple) (StdEdge, bool)
 }
-
-type EdgeSpecs []EdgeSpec
-
-type SplitData struct {
-	Vertex    StdVertex
-	EdgeSpecs EdgeSpecs
-}

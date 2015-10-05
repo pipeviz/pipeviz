@@ -49,14 +49,14 @@ func (d Dataset) UnificationForm(id uint64) []system.UnifyInstructionForm {
 		"name":        d.Name,
 		"create-time": d.CreateTime,
 	}}
-	var edges system.EdgeSpecs
+	var edges []system.EdgeSpec
 
 	edges = append(edges, d.Genesis)
 
 	return []system.UnifyInstructionForm{uif{
 		v: v,
 		u: datasetUnify,
-		se: system.EdgeSpecs{specDatasetHierarchy{
+		se: []system.EdgeSpec{specDatasetHierarchy{
 			Environment: d.Environment,
 			NamePath:    []string{d.Parent},
 		}},
