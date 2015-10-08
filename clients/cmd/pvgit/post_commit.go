@@ -15,8 +15,6 @@ import (
 	"gopkg.in/libgit2/git2go.v22"
 )
 
-const gitRFC2822 = "Mon Jan 2 2006 15:04:05 -0700"
-
 func postCommitHookCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "post-commit",
@@ -63,7 +61,7 @@ func runPostCommit(cmd *cobra.Command, args []string) {
 	cmt := semantic.Commit{
 		Sha1Str: hex.EncodeToString(commit.Id()[:]),
 		Author:  authsig.Name + "<" + authsig.Email + ">",
-		Date:    authsig.When.Format(gitRFC2822),
+		Date:    authsig.When.Format(githelp.GitDateFormat),
 		Subject: commit.Summary(),
 	}
 

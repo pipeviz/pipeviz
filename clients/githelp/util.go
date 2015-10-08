@@ -11,6 +11,10 @@ import (
 	"gopkg.in/libgit2/git2go.v22"
 )
 
+// The (version of?) the RFC2822 format git uses to format its date output,
+// for use as a layout to pass to Go's time.Format and time.Parse
+const GitDateFormat = "Mon Jan 2 2006 15:04:05 -0700"
+
 // GetTargetAddr gets the address for the target pipeviz instance registered
 // in a git repository's config file.
 func GetTargetAddr(repo *git.Repository) (string, error) {
