@@ -8,5 +8,5 @@ install:
 	go install
 	go install ./cmd/...
 
-clients:
+client:
 	go install ./clients/cmd/...
