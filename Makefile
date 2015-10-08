@@ -7,3 +7,6 @@ install:
 	go generate -x ./schema
 	go install
 	go install ./cmd/...
+
+clients:
+	go install ./clients/cmd/...
