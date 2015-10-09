@@ -51,39 +51,33 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		path = args[0]
 	} else if path, err = os.Getwd(); err != nil {
-		fmt.Println("Error getting cwd:", err)
-		os.Exit(1)
+		log.Fatalln("Error getting cwd:", err)
 	}
 
 	repostr, err := git.Discover(path, false, []string{"/"})
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	repo, err := git.OpenRepository(repostr)
 	if err != nil {
 		fmt.Printf("Error opening repo at %s: %s", repostr+"/.git", err)
-		os.Exit(1)
 	}
 
 	if ic.target == "" {
 		ic.target, err = githelp.GetTargetAddr(repo)
 		if err != nil {
 			fmt.Printf("No pipeviz server target provided, and one is not already registered in git's config.")
-			os.Exit(1)
 		}
 	} else {
 		cfg, err := repo.Config()
 		if err != nil {
-			fmt.Println("Error attempting to retrieve git config", err)
-			os.Exit(1)
+			log.Fatalln("Error attempting to retrieve git config", err)
 		}
 
 		err = cfg.SetString("pipeviz.target", ic.target)
 		if err != nil {
-			fmt.Println("Error while writing pipeviz target to config", err)
-			os.Exit(1)
+			log.Fatalln("Error while writing pipeviz target to config", err)
 		}
 		fmt.Println("Set target pipeviz server to ", ic.target)
 	}
@@ -92,13 +86,11 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 	if !ic.ncom {
 		f, err := os.Create(repo.Path() + "/hooks/post-commit")
 		if err != nil {
-			fmt.Println("Error while attempting to open post-commit hook for writing:", err)
-			os.Exit(1)
+			log.Fatalln("Error while attempting to open post-commit hook for writing:", err)
 		}
 		_, err = f.WriteString(strings.Replace(postCommit, "{{ GoBin }}", os.Args[0], -1))
 		if err != nil {
-			fmt.Println("Error while writing to post-commit hook file:", err)
-			os.Exit(1)
+			log.Fatalln("Error while writing to post-commit hook file:", err)
 		}
 		f.Chmod(0755)
 		fmt.Println("Wrote post-commit hook.")
@@ -108,13 +100,11 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 	if !ic.ncheck {
 		f, err := os.Create(repo.Path() + "/hooks/post-checkout")
 		if err != nil {
-			fmt.Println("Error while attempting to open post-commit hook for writing:", err)
-			os.Exit(1)
+			log.Fatalln("Error while attempting to open post-commit hook for writing:", err)
 		}
 		_, err = f.WriteString(strings.Replace(postCheckout, "{{ GoBin }}", os.Args[0], -1))
 		if err != nil {
-			fmt.Println("Error while writing to post-checkout hook file:", err)
-			os.Exit(1)
+			log.Fatalln("Error while writing to post-checkout hook file:", err)
 		}
 		f.Chmod(0755)
 		fmt.Println("Wrote post-checkout hook.")

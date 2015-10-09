@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -29,32 +29,27 @@ func runPostCommit(cmd *cobra.Command, args []string) {
 	//tgt := cmd.Flags().Lookup("target").Value.String()
 	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Error getting cwd:", err)
-		os.Exit(1)
+		log.Fatalln("Error getting cwd:", err)
 	}
 
 	repostr, err := git.Discover(cwd, false, []string{"/"})
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	repo, err := git.OpenRepository(repostr)
 	if err != nil {
-		fmt.Printf("Error opening repo at %s: %s", cwd+"/.git", err)
-		os.Exit(1)
+		log.Fatalf("Error opening repo at %s: %s", cwd+"/.git", err)
 	}
 
 	head, err := repo.Head()
 	if err != nil {
-		fmt.Printf("Could not get repo HEAD")
-		os.Exit(1)
+		log.Fatalf("Could not get repo HEAD")
 	}
 
 	commit, err := repo.LookupCommit(head.Target())
 	if err != nil {
-		fmt.Printf("Could not find commit pointed at by HEAD")
-		os.Exit(1)
+		log.Fatalf("Could not find commit pointed at by HEAD")
 	}
 
 	authsig := commit.Author()
@@ -67,8 +62,7 @@ func runPostCommit(cmd *cobra.Command, args []string) {
 
 	ident, err := githelp.GetRepoIdent(repo)
 	if err != nil {
-		fmt.Println("Failed to retrieve identifier for repository")
-		os.Exit(1)
+		log.Fatalln("Failed to retrieve identifier for repository")
 	}
 	cmt.Repository = ident
 
@@ -83,26 +77,23 @@ func runPostCommit(cmd *cobra.Command, args []string) {
 	addr, err := githelp.GetTargetAddr(repo)
 	// Find the target pipeviz instance from the git config
 	if err != nil {
-		fmt.Println("Could not find target address in config:", err)
-		os.Exit(1)
+		log.Fatalln("Could not find target address in config:", err)
 	}
 
 	msg, err := json.Marshal(map[string]interface{}{
 		"commits": []semantic.Commit{cmt},
 	})
 	if err != nil {
-		fmt.Println("JSON encoding failed with err:", err)
+		log.Fatalln("JSON encoding failed with err:", err)
 	}
 
 	client := http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Post(addr, "application/json", bytes.NewReader(msg))
 	if err != nil {
-		fmt.Println("Error on sending to server:", err)
-		os.Exit(2)
+		log.Fatalln("Error on sending to server:", err)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		fmt.Println("Message rejected by pipeviz server")
-		os.Exit(2)
+		log.Fatalln("Message rejected by pipeviz server")
 	}
 }
