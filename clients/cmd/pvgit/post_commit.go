@@ -17,7 +17,7 @@ import (
 
 func postCommitHookCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "post-commit",
+		Use:   "hook-post-commit",
 		Short: "Processes a git post-commit hook event.",
 		Run:   runPostCommit,
 	}
