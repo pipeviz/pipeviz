@@ -48,7 +48,7 @@ func TestClone(t *testing.T) {
 func BenchmarkMergeMessageOne(b *testing.B) {
 	var g system.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 	for i := 0; i < b.N; i++ {
-		g.Merge(0, msgs[0].UnificationForm(0))
+		g.Merge(0, msgs[0].UnificationForm())
 	}
 }
 
@@ -56,7 +56,7 @@ func BenchmarkMergeMessageOneAndTwo(b *testing.B) {
 	var g system.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
 
 	for i := 0; i < b.N; i++ {
-		g.Merge(0, msgs[0].UnificationForm(0))
-		g.Merge(0, msgs[1].UnificationForm(0))
+		g.Merge(0, msgs[0].UnificationForm())
+		g.Merge(0, msgs[1].UnificationForm())
 	}
 }
