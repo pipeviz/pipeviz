@@ -9,12 +9,11 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/kardianos/osext"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/clients/githelp"
-	"gopkg.in/libgit2/git2go.v22"
 )
 
 type instrumentCmd struct {
-	ncom, ncheck, history, refs bool
-	target                      string
+	ncom, ncheck bool
+	target       string
 }
 
 func instrumentCommand() *cobra.Command {
@@ -28,8 +27,6 @@ func instrumentCommand() *cobra.Command {
 
 	cmd.Flags().BoolVar(&ic.ncom, "no-post-commit", false, "Do not configure a post-commit hook.")
 	cmd.Flags().BoolVar(&ic.ncheck, "no-post-checkout", false, "Do not configure a post-checkout hook.")
-	cmd.Flags().BoolVar(&ic.history, "history", false, "Send all known history from the repository to the server. Encompasses --refs.")
-	cmd.Flags().BoolVar(&ic.refs, "refs", false, "Sends the position of all local refs to the server.")
 	cmd.Flags().StringVarP(&ic.target, "target", "t", "", "Address of the target pipeviz daemon. Required if an address is not already set in git config.")
 
 	return cmd
@@ -45,24 +42,8 @@ const (
 )
 
 func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
-	var path string
 	var err error
-
-	if len(args) > 0 {
-		path = args[0]
-	} else if path, err = os.Getwd(); err != nil {
-		log.Fatalln("Error getting cwd:", err)
-	}
-
-	repostr, err := git.Discover(path, false, []string{"/"})
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	repo, err := git.OpenRepository(repostr)
-	if err != nil {
-		log.Fatalf("Error opening repo at %s: %s", repostr+"/.git", err)
-	}
+	repo := getRepoOrExit(args...)
 
 	if ic.target == "" {
 		ic.target, err = githelp.GetTargetAddr(repo)
@@ -121,6 +102,4 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 		f.Chmod(0755)
 		fmt.Println("Wrote post-checkout hook.")
 	}
-
-	// TODO history and refs
 }

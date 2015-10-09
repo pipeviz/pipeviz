@@ -2,17 +2,14 @@ package main
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/clients/githelp"
 	"github.com/tag1consulting/pipeviz/types/semantic"
-	"gopkg.in/libgit2/git2go.v22"
 )
 
 func postCommitHookCommand() *cobra.Command {
@@ -26,21 +23,7 @@ func postCommitHookCommand() *cobra.Command {
 }
 
 func runPostCommit(cmd *cobra.Command, args []string) {
-	//tgt := cmd.Flags().Lookup("target").Value.String()
-	cwd, err := os.Getwd()
-	if err != nil {
-		log.Fatalln("Error getting cwd:", err)
-	}
-
-	repostr, err := git.Discover(cwd, false, []string{"/"})
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	repo, err := git.OpenRepository(repostr)
-	if err != nil {
-		log.Fatalf("Error opening repo at %s: %s", cwd+"/.git", err)
-	}
+	repo := getRepoOrExit()
 
 	head, err := repo.Head()
 	if err != nil {
@@ -52,24 +35,12 @@ func runPostCommit(cmd *cobra.Command, args []string) {
 		log.Fatalf("Could not find commit pointed at by HEAD")
 	}
 
-	authsig := commit.Author()
-	cmt := semantic.Commit{
-		Sha1Str: hex.EncodeToString(commit.Id()[:]),
-		Author:  authsig.Name + "<" + authsig.Email + ">",
-		Date:    authsig.When.Format(githelp.GitDateFormat),
-		Subject: commit.Summary(),
-	}
-
 	ident, err := githelp.GetRepoIdent(repo)
 	if err != nil {
 		log.Fatalln("Failed to retrieve identifier for repository")
 	}
-	cmt.Repository = ident
 
-	// Parent list is base 0, though 0 is really "first parent"
-	for i := uint(0); i < commit.ParentCount(); i++ {
-		cmt.ParentsStr = append(cmt.ParentsStr, hex.EncodeToString(commit.ParentId(i)[:]))
-	}
+	cmt := commitToSemanticForm(commit, ident)
 
 	// TODO if on a branch, include update to branch pointer
 	// TODO if we're not operating on a bare repository (no idea how that could happen), then report the working copy change
