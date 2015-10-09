@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
-	"strings"
+	"text/template"
 
+	"github.com/kardianos/osext"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/clients/githelp"
 	"gopkg.in/libgit2/git2go.v22"
@@ -34,13 +36,11 @@ func instrumentCommand() *cobra.Command {
 }
 
 const (
-	postCommit = `
-#!/bin/sh
-{{ GoBin }} hook-post-commit
+	postCommit = `#!/bin/sh
+{{ binpath }} hook-post-commit
 `
-	postCheckout = `
-#!/bin/sh
-{{ GoBin }} hook-post-checkout
+	postCheckout = `#!/bin/sh
+{{ binpath }} hook-post-checkout
 `
 )
 
@@ -88,7 +88,13 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatalln("Error while attempting to open post-commit hook for writing:", err)
 		}
-		_, err = f.WriteString(strings.Replace(postCommit, "{{ GoBin }}", os.Args[0], -1))
+
+		tmpl, err := template.New("post-commit").Funcs(template.FuncMap{"binpath": osext.Executable}).Parse(postCommit)
+		if err != nil {
+			log.Fatalln("Error while parsing script template:", err)
+		}
+
+		err = tmpl.Execute(f, nil)
 		if err != nil {
 			log.Fatalln("Error while writing to post-commit hook file:", err)
 		}
@@ -102,7 +108,13 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatalln("Error while attempting to open post-commit hook for writing:", err)
 		}
-		_, err = f.WriteString(strings.Replace(postCheckout, "{{ GoBin }}", os.Args[0], -1))
+
+		tmpl, err := template.New("post-commit").Funcs(template.FuncMap{"binpath": osext.Executable}).Parse(postCheckout)
+		if err != nil {
+			log.Fatalln("Error while parsing script template:", err)
+		}
+
+		err = tmpl.Execute(f, nil)
 		if err != nil {
 			log.Fatalln("Error while writing to post-checkout hook file:", err)
 		}
