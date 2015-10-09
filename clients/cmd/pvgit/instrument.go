@@ -6,7 +6,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/kardianos/osext"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/kardianos/osext"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/clients/githelp"
 	"gopkg.in/libgit2/git2go.v22"
@@ -61,13 +61,13 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 
 	repo, err := git.OpenRepository(repostr)
 	if err != nil {
-		fmt.Printf("Error opening repo at %s: %s", repostr+"/.git", err)
+		log.Fatalf("Error opening repo at %s: %s", repostr+"/.git", err)
 	}
 
 	if ic.target == "" {
 		ic.target, err = githelp.GetTargetAddr(repo)
 		if err != nil {
-			fmt.Printf("No pipeviz server target provided, and one is not already registered in git's config.")
+			log.Fatalf("No pipeviz server target provided, and one is not already registered in git's config.")
 		}
 	} else {
 		cfg, err := repo.Config()
