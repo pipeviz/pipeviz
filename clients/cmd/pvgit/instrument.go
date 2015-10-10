@@ -17,7 +17,7 @@ type instrumentCmd struct {
 }
 
 func instrumentCommand() *cobra.Command {
-	ic := instrumentCmd{}
+	ic := &instrumentCmd{}
 	cmd := &cobra.Command{
 		Use:   "instrument [--no-post-commit] [--no-post-checkout] ([--history] | [--refs]) [-t|--target=<addr>] <repository>",
 		Short: "Instruments a git repository to talk with a pipeviz server.",
@@ -41,7 +41,7 @@ const (
 `
 )
 
-func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
+func (ic *instrumentCmd) run(cmd *cobra.Command, args []string) {
 	var err error
 	repo := getRepoOrExit(args...)
 
