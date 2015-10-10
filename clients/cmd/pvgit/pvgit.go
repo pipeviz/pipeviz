@@ -5,6 +5,7 @@ import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13
 func main() {
 	root := &cobra.Command{Use: "pvgit"}
 	root.AddCommand(postCommitHookCommand())
+	root.AddCommand(syncCommand())
 	root.AddCommand(instrumentCommand())
 
 	//var target string
