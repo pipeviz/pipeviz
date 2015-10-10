@@ -45,6 +45,12 @@ func (ic instrumentCmd) run(cmd *cobra.Command, args []string) {
 	var err error
 	repo := getRepoOrExit(args...)
 
+	// If we can't get an ident, error out
+	_, err = githelp.GetRepoIdent(repo)
+	if err != nil {
+		log.Fatalf("Failed to retrieve a stable identifier for this repository; hooks will not work correctly. Aborting.")
+	}
+
 	if ic.target == "" {
 		ic.target, err = githelp.GetTargetAddr(repo)
 		if err != nil {
