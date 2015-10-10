@@ -68,7 +68,7 @@ func (ic *instrumentCmd) run(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatalln("Error while writing pipeviz target to config", err)
 		}
-		fmt.Println("Set target pipeviz server to ", ic.target)
+		fmt.Println("Set target pipeviz server to", ic.target)
 	}
 
 	// Write the post-commit hook, unless user said no
@@ -121,5 +121,5 @@ func (ic *instrumentCmd) run(cmd *cobra.Command, args []string) {
 		syncHistory(repo, ic.history)
 	}
 
-	repo.Free()
+	//repo.Free()
 }

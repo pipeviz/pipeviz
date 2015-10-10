@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -68,8 +67,6 @@ func sendMapToPipeviz(m map[string]interface{}, r *git.Repository) {
 	if err != nil {
 		log.Fatalln("JSON encoding failed with err:", err)
 	}
-	dump, _ := json.MarshalIndent(m, "", "    ")
-	fmt.Println(string(dump))
 
 	client := http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Post(addr, "application/json", bytes.NewReader(msg))

@@ -63,22 +63,16 @@ func syncHistory(repo *git.Repository, all bool) {
 	}
 
 	w.Sorting(git.SortTopological)
-	defer w.Free()
+	//defer w.Free()
 
 	for ref, err := iter.Next(); err == nil; ref, err = iter.Next() {
 		// in func for easy defer of Free()
 		func(r *git.Reference, m map[string]interface{}) {
-			defer r.Free()
+			//defer r.Free()
 			oid := r.Target()
 			if !r.IsBranch() && !r.IsTag() {
 				return
 			}
-
-			commit, err := repo.LookupCommit(oid)
-			if err != nil {
-				log.Fatalln("Failed to look up commit underlying ref target, err:", err.(git.GitError).Message)
-			}
-			defer commit.Free()
 
 			// shorthand
 			cms := m["commit-meta"].([]semantic.CommitMeta)
@@ -124,7 +118,7 @@ func syncHistory(repo *git.Repository, all bool) {
 			m["commit-meta"] = cms
 		}(ref, msgmap)
 	}
-	iter.Free()
+	//iter.Free()
 
 	if err != nil {
 		if !git.IsErrorCode(err, git.ErrIterOver) {
@@ -138,7 +132,7 @@ func syncHistory(repo *git.Repository, all bool) {
 		commits := msgmap["commits"].([]semantic.Commit)
 
 		w.Iterate(func(c *git.Commit) bool {
-			defer c.Free()
+			//defer c.Free()
 			if _, exists := cvisited[*c.Id()]; exists {
 				return false
 			}
