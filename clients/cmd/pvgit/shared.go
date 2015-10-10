@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -41,11 +43,13 @@ func getRepoOrExit(paths ...string) *git.Repository {
 func commitToSemanticForm(in *git.Commit, ident string) (out semantic.Commit) {
 	authsig := in.Author()
 	out = semantic.Commit{
-		Sha1Str:    hex.EncodeToString(in.Id()[:]),
-		Author:     authsig.Name + "<" + authsig.Email + ">",
+		Sha1Str: hex.EncodeToString(in.Id()[:]),
+		// FIXME JSON marshaling seems to encode <> weirdly
+		Author:     fmt.Sprintf("%q <%s>", authsig.Name, authsig.Email),
 		Date:       authsig.When.Format(githelp.GitDateFormat),
 		Subject:    in.Summary(),
 		Repository: ident,
+		ParentsStr: make([]string, 0),
 	}
 
 	// Parent list is base 0, though 0 is really "first parent"
@@ -75,6 +79,12 @@ func sendMapToPipeviz(m map[string]interface{}, r *git.Repository) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		log.Fatalln("Message rejected by pipeviz server")
+		bod, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+
+		log.Fatalln("Message rejected by pipeviz server: %v", string(bod))
 	}
 }
