@@ -12,21 +12,23 @@ import (
 )
 
 type instrumentCmd struct {
-	ncom, ncheck bool
-	target       string
+	ncom, ncheck, refs, history bool
+	target                      string
 }
 
 func instrumentCommand() *cobra.Command {
 	ic := &instrumentCmd{}
 	cmd := &cobra.Command{
-		Use:   "instrument [--no-post-commit] [--no-post-checkout] ([--history] | [--refs]) [-t|--target=<addr>] <repository>",
+		Use:   "instrument <repository>",
 		Short: "Instruments a git repository to talk with a pipeviz server.",
 		Long:  "Instruments a git repository by setting up hook scripts to emit data about the state of the local repository to a pipeviz server. If no path to a repository is provided, it will search for one from the working directory.",
 		Run:   ic.run,
 	}
 
-	cmd.Flags().BoolVar(&ic.ncom, "no-post-commit", false, "Do not configure a post-commit hook.")
-	cmd.Flags().BoolVar(&ic.ncheck, "no-post-checkout", false, "Do not configure a post-checkout hook.")
+	cmd.Flags().BoolVar(&ic.ncom, "no-post-commit", false, "Do not set up a post-commit hook.")
+	cmd.Flags().BoolVar(&ic.ncheck, "no-post-checkout", false, "Do not set up a post-checkout hook.")
+	cmd.Flags().BoolVar(&ic.history, "send-history", false, "Send all known history from the repository to the server. Encompasses --refs.")
+	cmd.Flags().BoolVar(&ic.refs, "send-refs", false, "Sends the position of all local refs to the server.")
 	cmd.Flags().StringVarP(&ic.target, "target", "t", "", "Address of the target pipeviz daemon. Required if an address is not already set in git config.")
 
 	return cmd
@@ -76,7 +78,10 @@ func (ic *instrumentCmd) run(cmd *cobra.Command, args []string) {
 			log.Fatalln("Error while attempting to open post-commit hook for writing:", err)
 		}
 
-		tmpl, err := template.New("post-commit").Funcs(template.FuncMap{"binpath": osext.Executable}).Parse(postCommit)
+		tmpl, err := template.New("post-commit").Funcs(template.FuncMap{
+			"binpath": osext.Executable,
+		}).Parse(postCommit)
+
 		if err != nil {
 			log.Fatalln("Error while parsing script template:", err)
 		}
@@ -96,7 +101,10 @@ func (ic *instrumentCmd) run(cmd *cobra.Command, args []string) {
 			log.Fatalln("Error while attempting to open post-commit hook for writing:", err)
 		}
 
-		tmpl, err := template.New("post-commit").Funcs(template.FuncMap{"binpath": osext.Executable}).Parse(postCheckout)
+		tmpl, err := template.New("post-checkout").Funcs(template.FuncMap{
+			"binpath": osext.Executable,
+		}).Parse(postCheckout)
+
 		if err != nil {
 			log.Fatalln("Error while parsing script template:", err)
 		}
@@ -108,4 +116,10 @@ func (ic *instrumentCmd) run(cmd *cobra.Command, args []string) {
 		f.Chmod(0755)
 		fmt.Println("Wrote post-checkout hook.")
 	}
+
+	if ic.refs || ic.history {
+		syncHistory(repo, ic.history)
+	}
+
+	repo.Free()
 }
