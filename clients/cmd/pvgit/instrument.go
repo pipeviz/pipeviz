@@ -39,7 +39,7 @@ const (
 {{ binpath }} hook-post-commit
 `
 	postCheckout = `#!/bin/sh
-{{ binpath }} hook-post-checkout
+{{ binpath }} hook-post-checkout $*
 `
 )
 

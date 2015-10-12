@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/tag1consulting/pipeviz/clients/githelp"
@@ -60,6 +62,62 @@ func commitToSemanticForm(in *git.Commit, ident string) (out semantic.Commit) {
 	return
 }
 
+func recordHead(msgmap map[string]interface{}, repo *git.Repository) {
+	head, err := repo.Head()
+	if err != nil {
+		log.Fatalf("Could not get repo HEAD")
+	}
+	oid := head.Target()
+
+	hn, err := os.Hostname()
+	if err != nil {
+		log.Fatalln("Could not determine hostname for environment")
+	}
+
+	// be extra safe about cleaning the path wrt trailing slashes
+	p := repo.Path()
+	if strings.LastIndex(p, string(os.PathSeparator)) == len(p)-1 {
+		p = path.Dir(path.Dir(p))
+	} else {
+		p = path.Dir(p)
+	}
+
+	lss := []semantic.LogicState{
+		semantic.LogicState{
+			Environment: semantic.EnvLink{
+				Address: semantic.Address{
+					Hostname: hn,
+				},
+			},
+			Path: p,
+			ID: semantic.LogicIdentiifer{
+				CommitStr: hex.EncodeToString(oid[:]),
+			},
+		},
+	}
+
+	if mls, exists := msgmap["logic-states"]; exists {
+		msgmap["logic-states"] = append(mls.([]semantic.LogicState), lss...)
+	} else {
+		msgmap["logic-states"] = lss
+	}
+
+	if head.IsBranch() {
+		cms := []semantic.CommitMeta{
+			semantic.CommitMeta{
+				Sha1Str:  hex.EncodeToString(oid[:]),
+				Tags:     make([]string, 0),
+				Branches: []string{head.Name()},
+			},
+		}
+		if mcm, exists := msgmap["commit-meta"]; exists {
+			msgmap["commit-meta"] = append(mcm.([]semantic.CommitMeta), cms...)
+		} else {
+			msgmap["commit-meta"] = cms
+		}
+	}
+}
+
 func sendMapToPipeviz(m map[string]interface{}, r *git.Repository) {
 	addr, err := githelp.GetTargetAddr(r)
 	// Find the target pipeviz instance from the git config
@@ -71,6 +129,8 @@ func sendMapToPipeviz(m map[string]interface{}, r *git.Repository) {
 	if err != nil {
 		log.Fatalln("JSON encoding failed with err:", err)
 	}
+	//dump, _ := json.MarshalIndent(m, "", "    ")
+	//fmt.Println(string(dump))
 
 	client := http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Post(addr, "application/json", bytes.NewReader(msg))
