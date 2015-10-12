@@ -40,8 +40,6 @@ func runPostCommit(cmd *cobra.Command, args []string) {
 		"commits": []semantic.Commit{commitToSemanticForm(commit, ident)},
 	}
 
+	recordHead(m, repo)
 	sendMapToPipeviz(m, repo)
-
-	// TODO if on a branch, include update to branch pointer
-	// TODO if we're not operating on a bare repository (no idea how that could happen), then report the working copy change
 }
