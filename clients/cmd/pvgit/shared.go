@@ -103,11 +103,14 @@ func recordHead(msgmap map[string]interface{}, repo *git.Repository) {
 	}
 
 	if head.IsBranch() {
+		b := head.Branch()
+		bn, _ := b.Name()
+
 		cms := []semantic.CommitMeta{
 			semantic.CommitMeta{
 				Sha1Str:  hex.EncodeToString(oid[:]),
 				Tags:     make([]string, 0),
-				Branches: []string{head.Name()},
+				Branches: []string{bn},
 			},
 		}
 		if mcm, exists := msgmap["commit-meta"]; exists {

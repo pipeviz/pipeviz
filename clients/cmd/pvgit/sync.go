@@ -98,16 +98,20 @@ func syncHistory(repo *git.Repository, all bool) {
 				rvisited[*oid] = struct{}{}
 
 				if r.IsBranch() {
+					b := r.Branch()
+					bn, _ := b.Name()
+
 					w.Push(oid)
 					cms = append(cms, semantic.CommitMeta{
 						Sha1Str:  hex.EncodeToString(oid[:]),
 						Tags:     make([]string, 0),
-						Branches: []string{r.Name()},
+						Branches: []string{bn},
 					})
 				} else if r.IsTag() {
 					w.Push(oid)
 					cms = append(cms, semantic.CommitMeta{
-						Sha1Str:  hex.EncodeToString(oid[:]),
+						Sha1Str: hex.EncodeToString(oid[:]),
+						// TODO this still emits the refs/tags/<name> form, ugh
 						Tags:     []string{r.Name()},
 						Branches: make([]string, 0),
 					})
