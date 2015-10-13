@@ -6,6 +6,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/clients/githelp"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/types/semantic"
 	"gopkg.in/libgit2/git2go.v22"
 )
@@ -35,20 +36,15 @@ func syncHistory(repo *git.Repository, all bool) {
 	var err error
 	var ident string
 
-	msgmap := map[string]interface{}{
-		"commit-meta": make([]semantic.CommitMeta, 0),
-	}
+	msg := new(ingest.Message)
 
 	if all {
-		msgmap["commits"] = make([]semantic.Commit, 0)
-
 		ident, err = githelp.GetRepoIdent(repo)
 		if err != nil {
 			log.Fatalf("Failed to retrieve a stable identifier for this repository; cannot formulate commits correctly. Aborting.")
 		}
 	}
 
-	rvisited := make(map[git.Oid]struct{})
 	cvisited := make(map[git.Oid]struct{})
 
 	iter, err := repo.NewReferenceIterator()
@@ -67,60 +63,33 @@ func syncHistory(repo *git.Repository, all bool) {
 
 	for ref, err := iter.Next(); err == nil; ref, err = iter.Next() {
 		// in func for easy defer of Free()
-		func(r *git.Reference, m map[string]interface{}) {
+		func(r *git.Reference, m *ingest.Message) {
 			//defer r.Free()
 			oid := r.Target()
 			if !r.IsBranch() && !r.IsTag() {
 				return
 			}
+			if r.IsBranch() {
+				bn, _ := r.Branch().Name()
 
-			// shorthand
-			cms := m["commit-meta"].([]semantic.CommitMeta)
-
-			// If we've already seen this commit, we need to add to the existing record
-			if _, exists := rvisited[*oid]; exists {
-				for k, cm := range cms {
-					if cm.Sha1Str != hex.EncodeToString(oid[:]) {
-						continue
-					}
-
-					if r.IsBranch() {
-						cms[k].Branches = append(cms[k].Branches, r.Name())
-					} else if r.IsTag() {
-						cms[k].Tags = append(cms[k].Tags, r.Name())
-					} else {
-						log.Fatalf("Ref %s is neither branch nor tag - wtf\n", r.Name())
-					}
-					break
-				}
+				w.Push(oid)
+				m.Add(semantic.CommitMeta{
+					Sha1Str:  hex.EncodeToString(oid[:]),
+					Tags:     make([]string, 0),
+					Branches: []string{bn},
+				})
+			} else if r.IsTag() {
+				w.Push(oid)
+				m.Add(semantic.CommitMeta{
+					Sha1Str: hex.EncodeToString(oid[:]),
+					// TODO this still emits the refs/tags/<name> form, ugh
+					Tags:     []string{r.Name()},
+					Branches: make([]string, 0),
+				})
 			} else {
-				// First time seeing a ref on this commit, add a new entry to commit-meta
-				rvisited[*oid] = struct{}{}
-
-				if r.IsBranch() {
-					b := r.Branch()
-					bn, _ := b.Name()
-
-					w.Push(oid)
-					cms = append(cms, semantic.CommitMeta{
-						Sha1Str:  hex.EncodeToString(oid[:]),
-						Tags:     make([]string, 0),
-						Branches: []string{bn},
-					})
-				} else if r.IsTag() {
-					w.Push(oid)
-					cms = append(cms, semantic.CommitMeta{
-						Sha1Str: hex.EncodeToString(oid[:]),
-						// TODO this still emits the refs/tags/<name> form, ugh
-						Tags:     []string{r.Name()},
-						Branches: make([]string, 0),
-					})
-				} else {
-					log.Fatalf("Ref %s is neither branch nor tag - wtf\n", r.Name())
-				}
+				log.Fatalf("Ref %s is neither branch nor tag - wtf\n", r.Name())
 			}
-			m["commit-meta"] = cms
-		}(ref, msgmap)
+		}(ref, msg)
 	}
 	//iter.Free()
 
@@ -133,8 +102,6 @@ func syncHistory(repo *git.Repository, all bool) {
 	}
 
 	if all {
-		commits := msgmap["commits"].([]semantic.Commit)
-
 		w.Iterate(func(c *git.Commit) bool {
 			//defer c.Free()
 			if _, exists := cvisited[*c.Id()]; exists {
@@ -142,12 +109,11 @@ func syncHistory(repo *git.Repository, all bool) {
 			}
 
 			cvisited[*c.Id()] = struct{}{}
-			commits = append(commits, commitToSemanticForm(c, ident))
+			msg.Add(commitToSemanticForm(c, ident))
 			return true
 		})
-		msgmap["commits"] = commits
 	}
 	//w.Free()
 
-	sendMapToPipeviz(msgmap, repo)
+	sendMapToPipeviz(msg, repo)
 }

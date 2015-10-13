@@ -10,14 +10,14 @@ import (
 
 // Not actually used right now, but this interface must be satisfied by all types
 type Message struct {
-	Env []semantic.Environment   `json:"environments"`
-	Ls  []semantic.LogicState    `json:"logic-states"`
-	Pds []semantic.ParentDataset `json:"datasets"`
-	Ds  []semantic.Dataset
-	P   []semantic.Process    `json:"processes"`
-	C   []semantic.Commit     `json:"commits"`
-	Cm  []semantic.CommitMeta `json:"commit-meta"`
-	Yp  []semantic.PkgYum     `json:"yum-pkg"`
+	Env []semantic.Environment   `json:"environments,omitempty"`
+	Ls  []semantic.LogicState    `json:"logic-states,omitempty"`
+	Pds []semantic.ParentDataset `json:"datasets,omitempty"`
+	Ds  []semantic.Dataset       `json:"-"`
+	P   []semantic.Process       `json:"processes,omitempty"`
+	C   []semantic.Commit        `json:"commits,omitempty"`
+	Cm  []semantic.CommitMeta    `json:"commit-meta,omitempty"`
+	Yp  []semantic.PkgYum        `json:"yum-pkg,omitempty"`
 }
 
 // UnificationForm translates all data in the message into the standard
@@ -105,16 +105,37 @@ func (m *Message) Add(d system.Unifier) error {
 		}
 		m.C = append(m.C, obj)
 	case semantic.CommitMeta:
+		// These share an ident - dedupe them if possible
 		if m.Cm == nil {
 			m.Cm = make([]semantic.CommitMeta, 0)
 		}
+
+		// O(n), but hundreds at most so who cares
+		for k, cm := range m.Cm {
+			if cm.Sha1Str == obj.Sha1Str {
+				if len(obj.Tags) > 0 {
+					cm.Tags = append(cm.Tags, obj.Tags...)
+				}
+				if len(obj.Branches) > 0 {
+					cm.Branches = append(cm.Branches, obj.Branches...)
+				}
+				if obj.TestState != "" {
+					cm.TestState = obj.TestState
+				}
+				m.Cm[k] = cm
+				return nil
+			}
+		}
+
 		m.Cm = append(m.Cm, obj)
 	case semantic.PkgYum:
 		if m.Yp == nil {
 			m.Yp = make([]semantic.PkgYum, 0)
 		}
 		m.Yp = append(m.Yp, obj)
+	default:
+		return errors.New("type not supported")
 	}
 
-	return errors.New("type not supported")
+	return nil
 }

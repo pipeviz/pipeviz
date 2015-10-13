@@ -1,6 +1,9 @@
 package main
 
-import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+import (
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/tag1consulting/pipeviz/ingest"
+)
 
 func postCheckoutHookCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -19,7 +22,7 @@ func runPostCheckout(cmd *cobra.Command, args []string) {
 	}
 
 	repo := getRepoOrExit()
-	msgmap := make(map[string]interface{})
-	recordHead(msgmap, repo)
-	sendMapToPipeviz(msgmap, repo)
+	m := new(ingest.Message)
+	recordHead(m, repo)
+	sendMapToPipeviz(m, repo)
 }

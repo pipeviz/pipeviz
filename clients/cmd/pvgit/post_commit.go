@@ -5,7 +5,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/clients/githelp"
-	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/tag1consulting/pipeviz/ingest"
 )
 
 func postCommitHookCommand() *cobra.Command {
@@ -36,9 +36,8 @@ func runPostCommit(cmd *cobra.Command, args []string) {
 		log.Fatalln("Failed to retrieve identifier for repository")
 	}
 
-	m := map[string]interface{}{
-		"commits": []semantic.Commit{commitToSemanticForm(commit, ident)},
-	}
+	m := new(ingest.Message)
+	m.Add(commitToSemanticForm(commit, ident))
 
 	recordHead(m, repo)
 	sendMapToPipeviz(m, repo)

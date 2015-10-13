@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/clients/githelp"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/types/semantic"
 
 	"gopkg.in/libgit2/git2go.v22"
@@ -62,7 +63,7 @@ func commitToSemanticForm(in *git.Commit, ident string) (out semantic.Commit) {
 	return
 }
 
-func recordHead(msgmap map[string]interface{}, repo *git.Repository) {
+func recordHead(m *ingest.Message, repo *git.Repository) {
 	head, err := repo.Head()
 	if err != nil {
 		log.Fatalf("Could not get repo HEAD")
@@ -82,46 +83,31 @@ func recordHead(msgmap map[string]interface{}, repo *git.Repository) {
 		p = path.Dir(p)
 	}
 
-	lss := []semantic.LogicState{
-		semantic.LogicState{
-			Environment: semantic.EnvLink{
-				Address: semantic.Address{
-					Hostname: hn,
-				},
-			},
-			Path: p,
-			ID: semantic.LogicIdentiifer{
-				CommitStr: hex.EncodeToString(oid[:]),
+	m.Add(semantic.LogicState{
+		Environment: semantic.EnvLink{
+			Address: semantic.Address{
+				Hostname: hn,
 			},
 		},
-	}
-
-	if mls, exists := msgmap["logic-states"]; exists {
-		msgmap["logic-states"] = append(mls.([]semantic.LogicState), lss...)
-	} else {
-		msgmap["logic-states"] = lss
-	}
+		Path: p,
+		ID: semantic.LogicIdentiifer{
+			CommitStr: hex.EncodeToString(oid[:]),
+		},
+	})
 
 	if head.IsBranch() {
 		b := head.Branch()
 		bn, _ := b.Name()
 
-		cms := []semantic.CommitMeta{
-			semantic.CommitMeta{
-				Sha1Str:  hex.EncodeToString(oid[:]),
-				Tags:     make([]string, 0),
-				Branches: []string{bn},
-			},
-		}
-		if mcm, exists := msgmap["commit-meta"]; exists {
-			msgmap["commit-meta"] = append(mcm.([]semantic.CommitMeta), cms...)
-		} else {
-			msgmap["commit-meta"] = cms
-		}
+		m.Add(semantic.CommitMeta{
+			Sha1Str:  hex.EncodeToString(oid[:]),
+			Tags:     make([]string, 0),
+			Branches: []string{bn},
+		})
 	}
 }
 
-func sendMapToPipeviz(m map[string]interface{}, r *git.Repository) {
+func sendMapToPipeviz(m *ingest.Message, r *git.Repository) {
 	addr, err := githelp.GetTargetAddr(r)
 	// Find the target pipeviz instance from the git config
 	if err != nil {

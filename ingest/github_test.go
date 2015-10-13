@@ -202,22 +202,13 @@ const ghPushPayload = `{
 func TestPushToMessageMap(t *testing.T) {
 	gpe := githubPushEvent{}
 	json.Unmarshal([]byte(ghPushPayload), &gpe)
-	m := gpe.ToMsgMap()
+	m := gpe.ToMessage()
 
-	if len(m) != 2 {
-		t.Errorf("Should be two top-level keys in map, got %d\n", len(m))
+	if len(m.C) != 2 {
+		t.Errorf("Commits array should have two elements, got %d\n", len(m.C))
 	}
 
-	commits, ok := m["commits"].([]semantic.Commit)
-	if !ok {
-		t.Errorf("Wrong type for commits array, should be []semantic.Commit, got %T\n", commits)
-	}
-
-	if len(commits) != 2 {
-		t.Errorf("Commits array should have two elements, got %d\n", len(commits))
-	}
-
-	if !reflect.DeepEqual(commits[0], semantic.Commit{
+	if !reflect.DeepEqual(m.C[0], semantic.Commit{
 		Sha1Str:    "b75da01c073384926e782a4371195c851f45b20f",
 		Subject:    "one commit, will it show?",
 		Author:     "\"Sam Boyer\" <notareal@email.com>",
@@ -230,7 +221,7 @@ func TestPushToMessageMap(t *testing.T) {
 		t.Error("First commit not as expected")
 	}
 
-	if !reflect.DeepEqual(commits[1], semantic.Commit{
+	if !reflect.DeepEqual(m.C[1], semantic.Commit{
 		Sha1Str:    "4d59fb584b15a94d7401e356d2875c472d76ef45",
 		Subject:    "second commit, should show both",
 		Author:     "\"Sam Boyer\" <notareal@email.com>",
@@ -243,13 +234,11 @@ func TestPushToMessageMap(t *testing.T) {
 		t.Error("Second commit not as expected")
 	}
 
-	meta, ok := m["commit-meta"].([]semantic.CommitMeta)
-
-	if len(meta) != 1 {
-		t.Errorf("Should be one item in commit meta, found %d\n", len(meta))
+	if len(m.Cm) != 1 {
+		t.Errorf("Should be one item in commit meta, found %d\n", len(m.Cm))
 	}
 
-	if !reflect.DeepEqual(meta[0], semantic.CommitMeta{
+	if !reflect.DeepEqual(m.Cm[0], semantic.CommitMeta{
 		Sha1Str:  "4d59fb584b15a94d7401e356d2875c472d76ef45",
 		Branches: []string{"master"},
 	}) {

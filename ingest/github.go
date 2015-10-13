@@ -57,7 +57,7 @@ func githubIngestor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m := gpe.ToMsgMap()
+	m := gpe.ToMessage()
 	tf, err := json.Marshal(m)
 
 	client := http.Client{Timeout: 2 * time.Second}
@@ -68,10 +68,8 @@ func githubIngestor(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(202)
 }
 
-func (gpe githubPushEvent) ToMsgMap() map[string]interface{} {
-	msgmap := make(map[string]interface{})
-
-	commits := make([]semantic.Commit, 0)
+func (gpe githubPushEvent) ToMessage() *Message {
+	msg := new(Message)
 	client := http.Client{Timeout: 2 * time.Second}
 
 	for _, c := range gpe.Commits {
@@ -119,7 +117,7 @@ func (gpe githubPushEvent) ToMsgMap() map[string]interface{} {
 			parents = append(parents, parent["sha"].(string))
 		}
 
-		commits = append(commits, semantic.Commit{
+		msg.Add(semantic.Commit{
 			Sha1Str: c.Sha,
 			Subject: c.Message[:subjlen],
 			Author:  fmt.Sprintf("%q <%s>", c.Author.Name, c.Author.Email),
@@ -129,21 +127,18 @@ func (gpe githubPushEvent) ToMsgMap() map[string]interface{} {
 			ParentsStr: parents,
 		})
 	}
-	if len(commits) > 0 {
-		msgmap["commits"] = commits
-	}
 
 	if gpe.Ref[:11] == "refs/heads/" {
-		msgmap["commit-meta"] = []semantic.CommitMeta{{
+		msg.Add(semantic.CommitMeta{
 			Sha1Str:  gpe.HeadCommit.Sha,
 			Branches: []string{gpe.Ref[11:]},
-		}}
+		})
 	} else if gpe.Ref[:10] == "refs/tags/" {
-		msgmap["commit-meta"] = []semantic.CommitMeta{{
+		msg.Add(semantic.CommitMeta{
 			Sha1Str: gpe.HeadCommit.Sha,
 			Tags:    []string{gpe.Ref[10:]},
-		}}
+		})
 	}
 
-	return msgmap
+	return msg
 }
