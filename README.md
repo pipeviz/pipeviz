@@ -12,7 +12,7 @@ Pipeviz requires that you either have a working Go 1.4 environment, or that you 
 
 ### Local Go: Server
 
-For a local Go environment, setting it up oughtn't be too difficult. [These instructions](http://www.golangbootcamp.com/book/get_setup) should get you there. Make sure you set your `$GOPATH` and update your `$PATH` with the `$GOPATH/bin` directory, as it recommends! You'll also need Go 1.4, as the pipeviz build process relies on code generation via `go generate`, which was added to the toolchain in 1.4. Note that 
+Setting up a local Go environment oughtn't be too difficult. [These instructions](http://www.golangbootcamp.com/book/get_setup) should get you there. Make sure you set your `$GOPATH` and update your `$PATH` with the `$GOPATH/bin` directory, as it recommends! You'll also need Go 1.4, as the pipeviz build process relies on code generation via `go generate`, which was added to the toolchain in 1.4. Note that 
 
 Once you have a working environment, you'll start by getting the package. Because pipeviz is currently a private repository, this can be little tricky. If you have a Github authentication token (for HTTPS cloning) already set up, then this will work:
 
