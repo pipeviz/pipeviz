@@ -9,8 +9,5 @@ func main() {
 	root.AddCommand(syncCommand())
 	root.AddCommand(instrumentCommand())
 
-	//var target string
-	//root.PersistentFlags().StringVarP(&target, "target", "t", "http://localhost:2309", "Address of the target pipeviz daemon.")
-
 	root.Execute()
 }
