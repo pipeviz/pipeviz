@@ -12,11 +12,11 @@ import (
 type Commit struct {
 	Author     string   `json:"author,omitempty"`
 	Date       string   `json:"date,omitempty"`
-	ParentsStr []string `json:"parents,omitempty"`
-	Sha1       Sha1
-	Sha1Str    string `json:"sha1,omitempty"`
-	Subject    string `json:"subject,omitempty"`
-	Repository string `json:"repository,omitempty"`
+	ParentsStr []string `json:"parents"`
+	Sha1       Sha1     `json:"-"`
+	Sha1Str    string   `json:"sha1,omitempty"`
+	Subject    string   `json:"subject,omitempty"`
+	Repository string   `json:"repository,omitempty"`
 }
 
 type Sha1 [20]byte
