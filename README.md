@@ -4,6 +4,8 @@ Pipeviz is a system for visualizing what you need to know as a software-driven o
 
 ## Installation
 
+### Server
+
 Pipeviz requires that you either have a working Go 1.4 environment, or that you use the provided Dockerfiles to do it for you. There are three basic cases:
 
 * Hacking on pipeviz (frontend or backend): local Go environment.
@@ -32,6 +34,19 @@ cd $GOPATH/src/github.com/tag1consulting/pipeviz
 make install
 ```
 
-This will install several binaries into your `$GOPATH/bin` directory: `pvc`, `pvutil`, and `pipeviz` itself.
+This will install two binaries into your `$GOPATH/bin` directory: `pvutil`, and `pipeviz` itself.
 
 You're done! You can just run `pipeviz` with no arguments, and it will bind (on loopback only) to port 8008 for the webapp, and 2309 for message ingestion.
+
+### Message Producers
+
+Pipeviz operates sort of like a log aggregation system: by receiving small bits of input (called “messages”) from a variety of sources. These sources are known collectively as “message producers.”
+
+These are the message producers we currently have:
+
+* `pvc` (PipeViz Cli) - a general-purpose, interactive command line tool for reporting information to pipeviz. Typically used by running it from the machine about which you want to report information.
+* `pvgit` - a tool for instrumenting and reporting from (local, non-bare) git repositories. Instrumentation makes the repository report automatically as a developer goes about their daily work.
+
+Running `make client-deps` should be sufficient to gather all necessary dependencies. `pvgit`, however, requires libgit2 v0.22; see the instructions from [git2go](https://github.com/libgit2/git2go#installing).
+
+Each of the (Go-based) message producers is located in a subdirectory under `clients/cmd`. To build them, simply `cd` into the respective directory and run `go install`.
