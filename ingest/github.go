@@ -1,10 +1,12 @@
 package ingest
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/tag1consulting/pipeviz/types/semantic"
 )
@@ -33,6 +35,8 @@ type githubCommitObj struct {
 }
 
 func githubIngestor(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	// TODO this is all pretty sloppy
 	bod, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -50,19 +54,24 @@ func githubIngestor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	m := gpe.ToMsgMap()
+	tf, err := json.Marshal(m)
+
+	client := http.Client{Timeout: 2 * time.Second}
+	client.Post("http://localhost:2309", "application/json", bytes.NewReader(tf))
+
+	// tell github it's all OK
+	w.WriteHeader(202)
 }
 
 func (gpe githubPushEvent) ToMsgMap() map[string]interface{} {
 	msgmap := make(map[string]interface{})
 
-	//if jmap["distinct_size"].(int) > 0 {
-	//commits := make([]semantic.Commit, jmap["distinct_size"].(int))
 	commits := make([]semantic.Commit, 0)
 
-	//for _, ci := range jmap["commits"].([]interface{}) {
+	// for reuse in all commits...ugh
+	emptyparents := make([]string, 0)
 	for _, c := range gpe.Commits {
-		//c := ci.(map[string]interface{})
-		//sha := c["sha"].(string)
 		// don't include commits we know not to be new - make that someone else's job
 		if !c.Distinct {
 			continue
@@ -75,15 +84,14 @@ func (gpe githubPushEvent) ToMsgMap() map[string]interface{} {
 		}
 
 		commits = append(commits, semantic.Commit{
-			//Sha1Str: sha,
 			Sha1Str: c.Sha,
-			//Subject: c["message"].(string)[:50],
 			Subject: c.Message[:subjlen],
 			Author:  fmt.Sprintf("%q <%s>", c.Author.Name, c.Author.Email),
 			// TODO fix this once other branch is merged in - reuse date fmt
 			Date:       c.Timestamp,
 			Repository: gpe.Repository.Ident,
 			// FIXME soooo github doesn't include the parents list in the push payload. wtf to do
+			ParentsStr: emptyparents,
 		})
 	}
 	if len(commits) > 0 {

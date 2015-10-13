@@ -121,6 +121,8 @@ func (s *Ingestor) buildIngestorMux() *web.Mux {
 		}
 	})
 
+	mb.Post("/tf/github/push", githubIngestor)
+
 	return mb
 }
 
