@@ -11,14 +11,15 @@ import (
 	"github.com/tag1consulting/pipeviz/types/system"
 )
 
-var i2a = strconv.Itoa
+var i2a = func(i uint64) string {
+	return strconv.FormatUint(i, 10)
+}
 
 // the main graph construct
 type coreGraph struct {
-	msgid   uint64
-	vserial int
-	vtuples ps.Map
-	orphans edgeSpecSet // FIXME breaks immut
+	msgid, vserial uint64
+	vtuples        ps.Map
+	orphans        edgeSpecSet // FIXME breaks immut
 }
 
 func NewGraph() system.CoreGraph {
@@ -266,7 +267,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 }
 
 // Gets the vtTuple for a given vertex id.
-func (g *coreGraph) Get(id int) (system.VertexTuple, error) {
+func (g *coreGraph) Get(id uint64) (system.VertexTuple, error) {
 	if id > g.vserial {
 		return system.VertexTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
 	}

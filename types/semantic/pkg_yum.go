@@ -28,7 +28,7 @@ func (d PkgYum) UnificationForm() []system.UnifyInstructionForm {
 	}}
 }
 
-func pkgYumUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func pkgYumUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	props := u.Vertex().Properties()
 	vtv := g.VerticesWith(q.Qbv(system.VType("pkg-yum"),
 		"name", props["name"],

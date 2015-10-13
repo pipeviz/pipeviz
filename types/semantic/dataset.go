@@ -92,7 +92,7 @@ func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
 	return err
 }
 
-func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	vtv := g.VerticesWith(q.Qbv(system.VType("dataset"), "name", u.Vertex().Properties()["name"]))
 	if len(vtv) == 0 {
 		return 0
@@ -132,7 +132,7 @@ func (d ParentDataset) UnificationForm() []system.UnifyInstructionForm {
 	return ret
 }
 
-func parentDatasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func parentDatasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
 		// FIXME scoping edge resolution failure does not mean no match - there could be an orphan

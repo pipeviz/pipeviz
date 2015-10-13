@@ -84,7 +84,7 @@ func (d Commit) UnificationForm() []system.UnifyInstructionForm {
 	return []system.UnifyInstructionForm{uif{v: v, u: commitUnify, e: edges}}
 }
 
-func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	candidates := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", u.Vertex().Properties()["sha1"]))
 
 	if len(candidates) > 0 { // there can be only one

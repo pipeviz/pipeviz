@@ -66,7 +66,7 @@ func (d Environment) UnificationForm() []system.UnifyInstructionForm {
 	return ret
 }
 
-func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	matches := g.VerticesWith(q.Qbv(system.VType("environment")))
 
 	for _, e := range matches {

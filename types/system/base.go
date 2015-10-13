@@ -20,12 +20,12 @@ type ProtoVertex interface {
 	Type() VType
 	Properties() RawProps
 	// The CoreGraph, and the defined scoping edge specs (if any)
-	//Unify(g CoreGraph, se []EdgeSpec) int
+	//Unify(g CoreGraph, se []EdgeSpec) uint64
 }
 
 // VertexTuple is the base storage object used by the graph engine.
 type VertexTuple struct {
-	ID       int
+	ID       uint64
 	Vertex   StdVertex
 	InEdges  ps.Map
 	OutEdges ps.Map
@@ -40,12 +40,12 @@ type VertexTupleVector []VertexTuple
 
 // IDs returns a slice containing the numerical identifiers for all the tuples in the vector.
 // FIXME pointer receiver for this? not sure if this being slice-based makes it weird
-func (vtv VertexTupleVector) IDs() []int {
+func (vtv VertexTupleVector) IDs() []uint64 {
 	if len(vtv) == 0 {
 		return nil
 	}
 
-	ret := make([]int, len(vtv))
+	ret := make([]uint64, len(vtv))
 	for k, vt := range vtv {
 		ret[k] = vt.ID
 	}

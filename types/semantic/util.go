@@ -16,7 +16,7 @@ func pp(k string, v interface{}) system.PropPair {
 // uif is a standard struct that expresses a types.UnifyInstructionForm
 type uif struct {
 	v  system.ProtoVertex
-	u  func(system.CoreGraph, system.UnifyInstructionForm) int
+	u  func(system.CoreGraph, system.UnifyInstructionForm) uint64
 	e  []system.EdgeSpec
 	se []system.EdgeSpec
 }
@@ -25,7 +25,7 @@ func (u uif) Vertex() system.ProtoVertex {
 	return u.v
 }
 
-func (u uif) Unify(g system.CoreGraph, u2 system.UnifyInstructionForm) int {
+func (u uif) Unify(g system.CoreGraph, u2 system.UnifyInstructionForm) uint64 {
 	// TODO u2 should be redundant, should always be same as u
 	return u.u(g, u2)
 }
@@ -55,7 +55,7 @@ func (p pv) Properties() system.RawProps {
 // Searches the given vertex's out-edges to find its environment's vertex id.
 //
 // Also conveniently initializes a StandardEdge to the standard zero-state for an envlink.
-func findEnv(g system.CoreGraph, vt system.VertexTuple) (vid int, edge system.StdEdge, success bool) {
+func findEnv(g system.CoreGraph, vt system.VertexTuple) (vid uint64, edge system.StdEdge, success bool) {
 	edge = system.StdEdge{
 		Source: vt.ID,
 		Props:  ps.NewMap(),
@@ -86,7 +86,7 @@ func emptyVT(v system.ProtoVertex) system.VertexTuple {
 	}
 }
 
-func findMatchingEnvId(g system.CoreGraph, edge system.StdEdge, vtv system.VertexTupleVector) int {
+func findMatchingEnvId(g system.CoreGraph, edge system.StdEdge, vtv system.VertexTupleVector) uint64 {
 	for _, candidate := range vtv {
 		for _, edge2 := range g.OutWith(candidate.ID, q.Qbe(system.EType("envlink"))) {
 			if edge2.Target == edge.Target {
@@ -124,7 +124,7 @@ func assignAddress(mid uint64, a Address, m ps.Map, excl bool) ps.Map {
 	return m
 }
 
-func findEnvironment(g system.CoreGraph, props ps.Map) (envid int, success bool) {
+func findEnvironment(g system.CoreGraph, props ps.Map) (envid uint64, success bool) {
 	rv := g.VerticesWith(q.Qbv(system.VType("environment")))
 	for _, vt := range rv {
 		if maputil.AnyMatch(props, vt.Vertex.Props(), "hostname", "ipv4", "ipv6", "nick") {
@@ -135,7 +135,7 @@ func findEnvironment(g system.CoreGraph, props ps.Map) (envid int, success bool)
 	return
 }
 
-func findDataset(g system.CoreGraph, envid int, name []string) (id int, success bool) {
+func findDataset(g system.CoreGraph, envid uint64, name []string) (id uint64, success bool) {
 	// first time through use the parent type
 	vtype := system.VType("parent-dataset")
 	id = envid

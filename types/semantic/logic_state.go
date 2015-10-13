@@ -74,7 +74,7 @@ func (d LogicState) UnificationForm() []system.UnifyInstructionForm {
 	return []system.UnifyInstructionForm{uif{v: v, u: lsUnify, e: edges, se: []system.EdgeSpec{d.Environment}}}
 }
 
-func lsUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func lsUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
@@ -186,7 +186,7 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 	if !isLocal {
 		// First, find the environment vertex
 		rv = g.VerticesWith(q.Qbv(system.VType("environment")))
-		var envid int
+		var envid uint64
 		for _, vt := range rv {
 			if maputil.AnyMatch(e.Props, vt.Vertex.Properties, "hostname", "ipv4", "ipv6") {
 				envid = vt.ID

@@ -42,7 +42,7 @@ func (d CommitMeta) UnificationForm() []system.UnifyInstructionForm {
 	return ret
 }
 
-func commitMetaUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func commitMetaUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// the commit is the only scoping edge
 	spec := u.ScopingSpecs()[0].(specCommit)
 	_, success := spec.Resolve(g, 0, emptyVT(u.Vertex()))

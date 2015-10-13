@@ -3,7 +3,7 @@ package system
 import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type flatVTuple struct {
-	Id       int        `json:"id"`
+	Id       uint64     `json:"id"`
 	V        flatVertex `json:"vertex"`
 	InEdges  []flatEdge `json:"inEdges"`
 	OutEdges []flatEdge `json:"outEdges"`
@@ -15,9 +15,9 @@ type flatVertex struct {
 }
 
 type flatEdge struct {
-	Id     int                 `json:"id"`
-	Source int                 `json:"source"`
-	Target int                 `json:"target"`
+	Id     uint64              `json:"id"`
+	Source uint64              `json:"source"`
+	Target uint64              `json:"target"`
 	EType  EType               `json:"etype"`
 	Props  map[string]Property `json:"properties"`
 }

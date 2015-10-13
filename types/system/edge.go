@@ -3,11 +3,9 @@ package system
 import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type StdEdge struct {
-	ID     int
-	Source int
-	Target int
-	EType  EType
-	Props  ps.Map
+	ID, Source, Target uint64
+	EType              EType
+	Props              ps.Map
 }
 
 // EdgeVector contains an ordered list of StdEdges. It is the return value of
@@ -16,12 +14,12 @@ type EdgeVector []StdEdge
 
 // IDs returns a slice containing the numerical identifiers for all the edges in the vector.
 // FIXME pointer receiver for this? not sure if this being slice-based makes it weird
-func (ev EdgeVector) IDs() []int {
+func (ev EdgeVector) IDs() []uint64 {
 	if len(ev) == 0 {
 		return nil
 	}
 
-	ret := make([]int, len(ev))
+	ret := make([]uint64, len(ev))
 	for k, e := range ev {
 		ret[k] = e.ID
 	}
@@ -30,12 +28,12 @@ func (ev EdgeVector) IDs() []int {
 }
 
 // IDs returns a slice containing the numerical identifiers for the target vertex of all edges in the vector.
-func (ev EdgeVector) TargetIDs() []int {
+func (ev EdgeVector) TargetIDs() []uint64 {
 	if len(ev) == 0 {
 		return nil
 	}
 
-	ret := make([]int, len(ev))
+	ret := make([]uint64, len(ev))
 	for k, e := range ev {
 		ret[k] = e.Target
 	}
@@ -44,12 +42,12 @@ func (ev EdgeVector) TargetIDs() []int {
 }
 
 // IDs returns a slice containing the numerical identifiers for the source vertex of all edges in the vector.
-func (ev EdgeVector) SourceIDs() []int {
+func (ev EdgeVector) SourceIDs() []uint64 {
 	if len(ev) == 0 {
 		return nil
 	}
 
-	ret := make([]int, len(ev))
+	ret := make([]uint64, len(ev))
 	for k, e := range ev {
 		ret[k] = e.Source
 	}

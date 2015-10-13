@@ -73,7 +73,7 @@ func (d Process) UnificationForm() []system.UnifyInstructionForm {
 	}}, ret...)
 }
 
-func processUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func processUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
@@ -84,7 +84,7 @@ func processUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
 	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("process"), "pid", u.Vertex().Properties()["pid"])))
 }
 
-func commUnify(g system.CoreGraph, u system.UnifyInstructionForm) int {
+func commUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {

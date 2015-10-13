@@ -12,7 +12,7 @@ import (
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) OutWith(egoId int, ef system.EFilter) (es system.EdgeVector) {
+func (g *coreGraph) OutWith(egoId uint64, ef system.EFilter) (es system.EdgeVector) {
 	return g.arcWith(egoId, ef, false)
 }
 
@@ -20,11 +20,11 @@ func (g *coreGraph) OutWith(egoId int, ef system.EFilter) (es system.EdgeVector)
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) InWith(egoId int, ef system.EFilter) (es system.EdgeVector) {
+func (g *coreGraph) InWith(egoId uint64, ef system.EFilter) (es system.EdgeVector) {
 	return g.arcWith(egoId, ef, true)
 }
 
-func (g *coreGraph) arcWith(egoId int, ef system.EFilter, in bool) (es system.EdgeVector) {
+func (g *coreGraph) arcWith(egoId uint64, ef system.EFilter, in bool) (es system.EdgeVector) {
 	etype, props := ef.EType(), ef.EProps()
 	vt, err := g.Get(egoId)
 	if err != nil {
@@ -76,18 +76,18 @@ func (g *coreGraph) arcWith(egoId int, ef system.EFilter, in bool) (es system.Ed
 // Return a slice of vtTuples that are successors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the successor
 // vertices pass the VertexFilter.
-func (g *coreGraph) SuccessorsWith(egoId int, vef system.VEFilter) (vts system.VertexTupleVector) {
+func (g *coreGraph) SuccessorsWith(egoId uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
 	return g.adjacentWith(egoId, vef, false)
 }
 
 // Return a slice of vtTuples that are predecessors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the predecessor
 // vertices pass the VertexFilter.
-func (g *coreGraph) PredecessorsWith(egoId int, vef system.VEFilter) (vts system.VertexTupleVector) {
+func (g *coreGraph) PredecessorsWith(egoId uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
 	return g.adjacentWith(egoId, vef, true)
 }
 
-func (g *coreGraph) adjacentWith(egoId int, vef system.VEFilter, in bool) (vts system.VertexTupleVector) {
+func (g *coreGraph) adjacentWith(egoId uint64, vef system.VEFilter, in bool) (vts system.VertexTupleVector) {
 	etype, eprops := vef.EType(), vef.EProps()
 	vtype, vprops := vef.VType(), vef.VProps()
 	vt, err := g.Get(egoId)
@@ -98,7 +98,7 @@ func (g *coreGraph) adjacentWith(egoId int, vef system.VEFilter, in bool) (vts s
 
 	// Allow some quick parallelism by continuing to search edges while loading vertices
 	// TODO performance test this to see if it's at all worth it
-	vidchan := make(chan int, 10)
+	vidchan := make(chan uint64, 10)
 
 	var feef func(k string, v ps.Any)
 	// TODO specialize the func for zero-cases
@@ -146,7 +146,7 @@ func (g *coreGraph) adjacentWith(egoId int, vef system.VEFilter, in bool) (vts s
 	}()
 
 	// Keep track of the vertices we've collected, for deduping
-	visited := make(map[int]struct{})
+	visited := make(map[uint64]struct{})
 VertexInspector:
 	for vid := range vidchan {
 		if _, seenit := visited[vid]; seenit {

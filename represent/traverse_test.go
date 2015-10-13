@@ -22,7 +22,7 @@ func tprops(pairs ...interface{}) []system.PropPair {
 
 // utility func to create a vtTuple. puts edges in the right place by
 // checking source/target ids. panics if they don't line up!
-func mkTuple(vid int, vtx system.StdVertex, edges ...system.StdEdge) system.VertexTuple {
+func mkTuple(vid uint64, vtx system.StdVertex, edges ...system.StdEdge) system.VertexTuple {
 	vt := system.VertexTuple{
 		ID:       vid,
 		Vertex:   vtx,
@@ -32,9 +32,9 @@ func mkTuple(vid int, vtx system.StdVertex, edges ...system.StdEdge) system.Vert
 
 	for _, e := range edges {
 		if e.Source == vid {
-			vt.OutEdges = vt.OutEdges.Set(strconv.Itoa(e.ID), e)
+			vt.OutEdges = vt.OutEdges.Set(strconv.FormatUint(e.ID, 10), e)
 		} else if e.Target == vid {
-			vt.InEdges = vt.InEdges.Set(strconv.Itoa(e.ID), e)
+			vt.InEdges = vt.InEdges.Set(strconv.FormatUint(e.ID, 10), e)
 		} else {
 			panic("edge had neither source nor target of vid")
 		}
@@ -44,7 +44,7 @@ func mkTuple(vid int, vtx system.StdVertex, edges ...system.StdEdge) system.Vert
 }
 
 // utility func to create a StandardEdge.
-func mkEdge(id, source, target int, msgid uint64, etype string, props ...interface{}) system.StdEdge {
+func mkEdge(id, source, target uint64, msgid uint64, etype string, props ...interface{}) system.StdEdge {
 	e := system.StdEdge{
 		ID:     id,
 		Source: source,

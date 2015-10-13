@@ -9,7 +9,7 @@ type Unifier interface {
 // to fully unify a discrete datum (and its relationships) within the system.
 type UnifyInstructionForm interface {
 	Vertex() ProtoVertex
-	Unify(CoreGraph, UnifyInstructionForm) int
+	Unify(CoreGraph, UnifyInstructionForm) uint64
 	EdgeSpecs() []EdgeSpec
 	ScopingSpecs() []EdgeSpec
 }

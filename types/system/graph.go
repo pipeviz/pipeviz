@@ -17,27 +17,27 @@ type CoreGraph interface {
 
 	// Enumerates the outgoing edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).
-	OutWith(egoId int, ef EFilter) EdgeVector
+	OutWith(egoId uint64, ef EFilter) EdgeVector
 
 	// Enumerates the incoming edges from the ego vertex, limiting the result set
 	// to those that pass the provided filter (if any).
-	InWith(egoId int, ef EFilter) EdgeVector
+	InWith(egoId uint64, ef EFilter) EdgeVector
 
 	// Enumerates the successors (targets of outgoing edges) from the ego vertex,
 	// limiting the result set to those that pass the provided edge and vertex
 	// filters (if any).
-	SuccessorsWith(egoId int, vef VEFilter) VertexTupleVector
+	SuccessorsWith(egoId uint64, vef VEFilter) VertexTupleVector
 
 	// Enumerates the predecessors (sources of incoming edges) from the ego vertex,
 	// limiting the result set to those that pass the provided edge and vertex
 	// filters (if any).
-	PredecessorsWith(egoId int, vef VEFilter) VertexTupleVector
+	PredecessorsWith(egoId uint64, vef VEFilter) VertexTupleVector
 
 	// Enumerates the vertices that pass the provided vertex filter (if any).
 	VerticesWith(vf VFilter) VertexTupleVector
 
 	// Gets the vertex tuple associated with a given id.
-	Get(id int) (VertexTuple, error)
+	Get(id uint64) (VertexTuple, error)
 
 	// Returns the message id for the current version of the graph. The graph's
 	// contents are guaranteed to represent the state resulting from a correct
