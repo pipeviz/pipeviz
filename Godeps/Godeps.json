@@ -2,7 +2,10 @@
 	"ImportPath": "github.com/tag1consulting/pipeviz",
 	"GoVersion": "go1.4.1",
 	"Packages": [
-		"./..."
+		".",
+		"./clients/cmd/pvc",
+		"./clients/cmd/pvgit",
+		"./cmd/pvutil"
 	],
 	"Deps": [
 		{
@@ -22,6 +25,10 @@
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/kardianos/osext",
+			"Rev": "8fef92e41e22a70e700a96b29f066cda30ea24ef"
 		},
 		{
 			"ImportPath": "github.com/mndrix/ps",

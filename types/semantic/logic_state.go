@@ -10,17 +10,19 @@ import (
 )
 
 type LogicState struct {
-	Datasets    []DataLink `json:"datasets,omitempty"`
-	Environment EnvLink    `json:"environment,omitempty"`
-	ID          struct {
-		CommitStr string `json:"commit,omitempty"`
-		Version   string `json:"version,omitempty"`
-		Semver    string `json:"semver,omitempty"`
-	} `json:"id,omitempty"`
-	Lgroup string `json:"lgroup,omitempty"`
-	Nick   string `json:"nick,omitempty"`
-	Path   string `json:"path,omitempty"`
-	Type   string `json:"type,omitempty"`
+	Datasets    []DataLink      `json:"datasets,omitempty"`
+	Environment EnvLink         `json:"environment,omitempty"`
+	ID          LogicIdentiifer `json:"id,omitempty"`
+	Lgroup      string          `json:"lgroup,omitempty"`
+	Nick        string          `json:"nick,omitempty"`
+	Path        string          `json:"path,omitempty"`
+	Type        string          `json:"type,omitempty"`
+}
+
+type LogicIdentiifer struct {
+	CommitStr string `json:"commit,omitempty"`
+	Version   string `json:"version,omitempty"`
+	Semver    string `json:"semver,omitempty"`
 }
 
 type DataLink struct {

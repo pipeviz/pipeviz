@@ -30,3 +30,6 @@ bower_components
 
 # ignore any boltdb files that may hang around
 *.bolt
+
+# ignore pipeviz binary if it got built to here
+pipeviz
