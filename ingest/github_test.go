@@ -223,6 +223,9 @@ func TestPushToMessageMap(t *testing.T) {
 		Author:     "\"Sam Boyer\" <notareal@email.com>",
 		Date:       "2015-10-12T21:39:52-04:00",
 		Repository: "https://github.com/sdboyer/testrepo",
+		ParentsStr: []string{
+			"5627b4bf954465918bd9ede94a2484be03ddb44b",
+		},
 	}) {
 		t.Error("First commit not as expected")
 	}
@@ -233,6 +236,9 @@ func TestPushToMessageMap(t *testing.T) {
 		Author:     "\"Sam Boyer\" <notareal@email.com>",
 		Date:       "2015-10-12T21:40:18-04:00",
 		Repository: "https://github.com/sdboyer/testrepo",
+		ParentsStr: []string{
+			"b75da01c073384926e782a4371195c851f45b20f",
+		},
 	}) {
 		t.Error("Second commit not as expected")
 	}
