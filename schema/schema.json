@@ -165,7 +165,7 @@
                     "items": { "$ref": "#/definitions/conn-data" }
                 }
             },
-            "required": [ "path", "id" ],
+            "required": [ "path" ],
             "additionalProperties": false
         },
         "conn-data": {
