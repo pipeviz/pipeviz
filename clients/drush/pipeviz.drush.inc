@@ -26,6 +26,12 @@ function drush_pipeviz_report($target) {
     $all = Database::getAllConnectionInfo();
 
     $ls = array();
+
+    $environment = array(
+      'address' => array(
+        'hostname' => gethostname(),
+      ),
+    );
     foreach ($all as $outer => $sets) {
       foreach ($sets as $name => $info) {
         $conn = array(
@@ -41,6 +47,7 @@ function drush_pipeviz_report($target) {
 
         $ls[] = array(
           'path' => DRUPAL_ROOT,
+          'environment' => $environment,
           'datasets' => array(
             array(
               'name' => $outer,
