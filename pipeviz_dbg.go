@@ -12,6 +12,7 @@ import (
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/broker"
+	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/types/system"
 )
 
@@ -25,14 +26,14 @@ func init() {
 
 	// subscribe to the broker in order to report data about current graph
 	c := broker.Get().Subscribe()
-	var g system.CoreGraph
+
+	// Instantiate a real, empty graph to ensure the interface type is never nil when it might be called
+	var g system.CoreGraph = represent.NewGraph()
 	go func() {
 		g = <-c
 	}()
 	expvar.Publish("MsgId", expvar.Func(func() interface{} { return g.MsgId() }))
-}
 
-func initDebugInterfaces() {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()

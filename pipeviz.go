@@ -44,9 +44,6 @@ func init() {
 }
 
 func main() {
-	// If built with debug tag, turns on the http-based profiler and expvars. Otherwise, nop.
-	initDebugInterfaces()
-
 	src, err := schema.Master()
 	if err != nil {
 		log.WithFields(log.Fields{
