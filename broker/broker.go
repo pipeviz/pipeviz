@@ -78,6 +78,7 @@ func (gb *GraphBroker) Fanout(input GraphReceiver) {
 // Subscribe creates a channel that receives all graphs passed into the
 // broker. In general, subscribers should avoid doing a lot of work in the
 // receiving goroutine, as it could block other subscribers.
+// TODO nonblocking impl
 func (gb *GraphBroker) Subscribe() GraphReceiver {
 	gb.lock.Lock()
 

@@ -23,9 +23,12 @@ var (
 )
 
 var (
-	// TODO crappily hardcoded, for now
-	brokerListen broker.GraphReceiver
-	latestGraph  system.CoreGraph
+	// Subscribe to the master broker and store latest locally as it comes
+	brokerListen broker.GraphReceiver = broker.Get().Subscribe()
+	// Initially set the latestGraph to a new, empty one to avoid nil pointer
+	latestGraph system.CoreGraph = represent.NewGraph()
+	// Count of active websocket clients (for expvars)
+	clientCount int64
 )
 
 const (
@@ -43,18 +46,12 @@ var (
 )
 
 func init() {
-	// Subscribe to the master broker and store latest locally as it comes
-	brokerListen = broker.Get().Subscribe()
-	// FIXME spawning a goroutine in init() used to be crappy, is it still?
+	// Kick off goroutine to listen on the graph broker and keep our local pointer up to date
 	go func() {
 		for g := range brokerListen {
 			latestGraph = g
 		}
 	}()
-
-	// Initially set the latestGraph to a new, empty one to avoid nil pointer
-	// TODO fix this now that we have journal persistence
-	latestGraph = represent.NewGraph()
 }
 
 // Creates a Goji *web.Mux that can act as the http muxer for the frontend app.
@@ -130,8 +127,10 @@ func OpenSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	clientCount++
 	go wsWriter(ws)
 	wsReader(ws)
+	clientCount--
 }
 
 func wsReader(ws *websocket.Conn) {
