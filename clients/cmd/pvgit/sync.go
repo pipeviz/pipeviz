@@ -114,6 +114,7 @@ func syncHistory(repo *git.Repository, all bool) {
 		})
 	}
 	//w.Free()
+	recordHead(msg, repo)
 
 	sendMapToPipeviz(msg, repo)
 }
