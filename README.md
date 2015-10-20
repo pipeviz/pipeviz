@@ -31,10 +31,10 @@ This puts the repository in the same place as where `go get` would have dropped 
 
 ```
 cd $GOPATH/src/github.com/tag1consulting/pipeviz
-make install
+make gen && make install
 ```
 
-This will install two binaries into your `$GOPATH/bin` directory: `pvutil`, and `pipeviz` itself.
+This will install two binaries into your `$GOPATH/bin` directory: `pvutil`, and `pipeviz` itself. For the most part, you'll only need to run `make gen` once - in future, you can just run `make install`. Only rerun `make gen` if you're seeing odd compilation errors, or messages getting rejected that shouldn't be.
 
 You're done! You can just run `pipeviz` with no arguments, and it will bind (on loopback only) to port 8008 for the webapp, and 2309 for message ingestion.
 
