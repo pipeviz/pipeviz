@@ -72,13 +72,9 @@ func (v StdVertex) Props() ps.Map {
 // Merge merges another vertex into this vertex. Error is indicated if the
 // dynamic types do not match.
 func (v StdVertex) Merge(v2 StdVertex) (StdVertex, error) {
-	var old, nu ps.Map = v.Props(), v2.Props()
-
-	nu.ForEach(func(key string, val ps.Any) {
-		old.Set(key, val)
+	v2.Properties.ForEach(func(key string, val ps.Any) {
+		v.Properties = v.Properties.Set(key, val)
 	})
-
-	v.Properties = old
 
 	return v, nil
 }

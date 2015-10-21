@@ -110,6 +110,12 @@ func (spec specGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src syst
 	if len(re) > 0 {
 		success = true
 		e.Target = re[0].Target
+		e.Props = re[0].Props
+		// FIXME evidence of a problem here - since we're using pnum as the deduping identifier, there's no
+		// way it could also sensibly change its MsgSrc value. This is very much a product of the intensional/extensional
+		// identity problem: what does it mean to have the identifying data change? is it now a new thing? was it the old thing,
+		// and it underwent a transition into the new thing? or is there no distinction between the old and new thing?
+		e.Props = e.Props.Set("sha1", system.Property{MsgSrc: mid, Value: spec.Sha1})
 		e.ID = re[0].ID
 	} else {
 		rv := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", spec.Sha1))
