@@ -10,8 +10,8 @@ import (
 
 // TODO this is kinda hacked together, give it a once-over check
 
-// NewHttpLogger returns an HttpLogger, suitable for use as http middleware.
-func NewHttpLogger(system string) func(h http.Handler) http.Handler {
+// NewHTTPLogger returns an HTTPLogger, suitable for use as http middleware.
+func NewHTTPLogger(system string) func(h http.Handler) http.Handler {
 	middleware := func(h http.Handler) http.Handler {
 		entry := logrus.WithFields(logrus.Fields{
 			"system": system,

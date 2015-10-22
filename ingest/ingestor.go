@@ -35,14 +35,14 @@ func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan
 	}
 }
 
-// RunHttpIngestor sets up and runs the http listener that receives messages, validates
+// RunHTTPIngestor sets up and runs the http listener that receives messages, validates
 // them against the provided schema, persists those that pass validation, then sends
 // them along to the interpretation layer via the server's interpret channel.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 //
 // Closes the provided interpretation channel if/when the http server terminates.
-func (s *Ingestor) RunHttpIngestor(addr string) error {
+func (s *Ingestor) RunHTTPIngestor(addr string) error {
 	err := graceful.ListenAndServe(addr, s.buildIngestorMux())
 	if err != nil {
 
@@ -59,7 +59,7 @@ func (s *Ingestor) RunHttpIngestor(addr string) error {
 func (s *Ingestor) buildIngestorMux() *web.Mux {
 	mb := web.New()
 	// TODO use more appropriate logger
-	mb.Use(log.NewHttpLogger("ingestor"))
+	mb.Use(log.NewHTTPLogger("ingestor"))
 	// Add middleware limiting body length to MaxMessageSize
 	mb.Use(func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {

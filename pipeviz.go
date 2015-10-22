@@ -103,7 +103,7 @@ func main() {
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
 	go func() {
-		err := srv.RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
+		err := srv.RunHTTPIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
 		if err != nil {
 			log.WithFields(log.Fields{
 				"system": "main",

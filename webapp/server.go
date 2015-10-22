@@ -58,7 +58,7 @@ func init() {
 func NewMux() *web.Mux {
 	m := web.New()
 
-	m.Use(log.NewHttpLogger("webapp"))
+	m.Use(log.NewHTTPLogger("webapp"))
 	m.Get("/sock", openSocket)
 	m.Get("/message/:mid", getMessage)
 	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
@@ -77,7 +77,7 @@ func graphToJSON(g system.CoreGraph) ([]byte, error) {
 		Id       uint64        `json:"id"`
 		Vertices []interface{} `json:"vertices"`
 	}{
-		Id:       g.MsgId(),
+		Id:       g.MsgID(),
 		Vertices: vertices,
 	})
 }

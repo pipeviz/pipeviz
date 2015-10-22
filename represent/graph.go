@@ -53,7 +53,7 @@ func (g *coreGraph) clone() *coreGraph {
 	return &cp
 }
 
-func (g *coreGraph) MsgId() uint64 {
+func (g *coreGraph) MsgID() uint64 {
 	return g.msgid
 }
 
