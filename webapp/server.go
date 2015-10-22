@@ -24,9 +24,9 @@ var (
 
 var (
 	// Subscribe to the master broker and store latest locally as it comes
-	brokerListen broker.GraphReceiver = broker.Get().Subscribe()
+	brokerListen = broker.Get().Subscribe()
 	// Initially set the latestGraph to a new, empty one to avoid nil pointer
-	latestGraph system.CoreGraph = represent.NewGraph()
+	latestGraph = represent.NewGraph()
 	// Count of active websocket clients (for expvars)
 	clientCount int64
 )

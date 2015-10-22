@@ -110,8 +110,7 @@ func (gpe githubPushEvent) ToMessage() *Message {
 			continue
 		}
 
-		// reset to empty slice, but reuse same array
-		parents := make([]string, 0)
+		var parents []string
 		for _, iparent := range jmap.(map[string]interface{})["parents"].([]interface{}) {
 			parent := iparent.(map[string]interface{})
 			parents = append(parents, parent["sha"].(string))

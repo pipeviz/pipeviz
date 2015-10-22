@@ -27,7 +27,7 @@ func (m Message) UnificationForm() []system.UnifyInstructionForm {
 		"system": "interpet",
 	})
 
-	ret := make([]system.UnifyInstructionForm, 0)
+	var ret []system.UnifyInstructionForm
 
 	for _, e := range m.Env {
 		logEntry.WithField("vtype", "environment").Debug("Preparing to translate into UnifyInstructionForm")
