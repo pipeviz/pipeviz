@@ -73,7 +73,7 @@ func Qbv(v ...interface{}) vertexFilter {
 		var v2 interface{}
 		for len(v) > 1 {
 			k, v2, v = v[0].(string), v[1], v[2:]
-			vf.props = append(vf.props, system.PropPair{k, v2})
+			vf.props = append(vf.props, system.PropPair{K: k, V: v2})
 		}
 
 		return vf
@@ -95,7 +95,7 @@ func Qbe(v ...interface{}) edgeFilter {
 		var v2 interface{}
 		for len(v) > 1 {
 			k, v2, v = v[0].(string), v[1], v[2:]
-			ef.props = append(ef.props, system.PropPair{k, v2})
+			ef.props = append(ef.props, system.PropPair{K: k, V: v2})
 		}
 
 		return ef
