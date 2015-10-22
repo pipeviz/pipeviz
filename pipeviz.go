@@ -32,8 +32,8 @@ const (
 )
 
 var (
-	bindAll *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath  *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+	bindAll = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath  = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
 )
 
 func init() {
@@ -102,7 +102,15 @@ func main() {
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
-	go srv.RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
+	go func() {
+		err := srv.RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
+		if err != nil {
+			log.WithFields(log.Fields{
+				"system": "main",
+				"err":    err,
+			}).Fatal("Error while starting the ingestion http server")
+		}
+	}()
 
 	// Kick off the intermediary interpretation goroutine that receives persisted
 	// messages from the ingestor, merges them into the state graph, then passes
@@ -136,9 +144,15 @@ func RunWebapp(addr string, f journal.RecordGetter) {
 	}
 
 	mf.Use(mw)
-
 	mf.Compile()
-	graceful.ListenAndServe(addr, mf)
+
+	err := graceful.ListenAndServe(addr, mf)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"system": "main",
+			"err":    err,
+		}).Fatal("Error while starting the ingestion http server")
+	}
 }
 
 // Rebuilds the graph from the extant entries in a journal.
