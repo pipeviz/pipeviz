@@ -14,6 +14,8 @@ import (
 	"github.com/tag1consulting/pipeviz/types/semantic"
 )
 
+const gitDateFormat = "Mon Jan 2 2006 15:04:05 -0700"
+
 type githubPushEvent struct {
 	Ref        string            `json:"ref"`
 	Head       string            `json:"head"`
@@ -144,12 +146,21 @@ func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
 			parents = append(parents, parent["sha"].(string))
 		}
 
+		t, err := time.Parse(time.RFC3339, c.Timestamp)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"system":     "ingestor",
+				"err":        err,
+				"datestring": c.Timestamp,
+				"sha1":       c.Sha,
+			}).Warn("Error on parsing date field in github payload; commit dropped.")
+		}
+
 		msg.Add(semantic.Commit{
-			Sha1Str: c.Sha,
-			Subject: c.Message[:subjlen],
-			Author:  fmt.Sprintf("%q <%s>", c.Author.Name, c.Author.Email),
-			// TODO fix this once other branch is merged in - reuse date fmt
-			Date:       c.Timestamp,
+			Sha1Str:    c.Sha,
+			Subject:    c.Message[:subjlen],
+			Author:     fmt.Sprintf("%q <%s>", c.Author.Name, c.Author.Email),
+			Date:       t.Format(gitDateFormat),
 			Repository: gpe.Repository.Ident,
 			ParentsStr: parents,
 		})

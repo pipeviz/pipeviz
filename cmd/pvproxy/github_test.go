@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 	"github.com/tag1consulting/pipeviz/types/semantic"
 )
 
@@ -203,37 +204,33 @@ func TestPushToMessageMap(t *testing.T) {
 	gpe := githubPushEvent{}
 	json.Unmarshal([]byte(ghPushPayload), &gpe)
 	// FIXME mock this somehow; we don't want to actually reach out
-	m := gpe.ToMessage()
+	m := gpe.ToMessage("")
 
 	if len(m.C) != 2 {
 		t.Errorf("Commits array should have two elements, got %d\n", len(m.C))
 	}
 
-	if !reflect.DeepEqual(m.C[0], semantic.Commit{
+	assert.Equal(t, m.C[0], semantic.Commit{
 		Sha1Str:    "b75da01c073384926e782a4371195c851f45b20f",
 		Subject:    "one commit, will it show?",
 		Author:     "\"Sam Boyer\" <notareal@email.com>",
-		Date:       "2015-10-12T21:39:52-04:00",
+		Date:       "Mon Oct 12 2015 21:39:52 -0400",
 		Repository: "https://github.com/sdboyer/testrepo",
 		ParentsStr: []string{
 			"5627b4bf954465918bd9ede94a2484be03ddb44b",
 		},
-	}) {
-		t.Error("First commit not as expected")
-	}
+	})
 
-	if !reflect.DeepEqual(m.C[1], semantic.Commit{
+	assert.Equal(t, m.C[1], semantic.Commit{
 		Sha1Str:    "4d59fb584b15a94d7401e356d2875c472d76ef45",
 		Subject:    "second commit, should show both",
 		Author:     "\"Sam Boyer\" <notareal@email.com>",
-		Date:       "2015-10-12T21:40:18-04:00",
+		Date:       "Mon Oct 12 2015 21:40:18 -0400",
 		Repository: "https://github.com/sdboyer/testrepo",
 		ParentsStr: []string{
 			"b75da01c073384926e782a4371195c851f45b20f",
 		},
-	}) {
-		t.Error("Second commit not as expected")
-	}
+	})
 
 	if len(m.Cm) != 1 {
 		t.Errorf("Should be one item in commit meta, found %d\n", len(m.Cm))
