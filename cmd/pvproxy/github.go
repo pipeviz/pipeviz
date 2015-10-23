@@ -1,7 +1,6 @@
-package ingest
+package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/types/semantic"
 )
 
@@ -37,39 +37,39 @@ type githubCommitObj struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func githubIngestor(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+func githubIngestor(c client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
 
-	// TODO this is all pretty sloppy
-	bod, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		// Too long, or otherwise malformed request body
-		w.WriteHeader(400)
-		w.Write([]byte(err.Error()))
-		return
+		// TODO this is all pretty sloppy
+		bod, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			// Too long, or otherwise malformed request body
+			w.WriteHeader(400)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		gpe := githubPushEvent{}
+		err = json.Unmarshal(bod, &gpe)
+		if err != nil {
+			w.WriteHeader(400)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		err = c.send(gpe.ToMessage())
+		if err != nil {
+			w.WriteHeader(502) // 502, bad gateway
+		} else {
+			// tell github it's all OK
+			w.WriteHeader(202)
+		}
 	}
-
-	gpe := githubPushEvent{}
-	err = json.Unmarshal(bod, &gpe)
-	if err != nil {
-		w.WriteHeader(400)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	m := gpe.ToMessage()
-	tf, err := json.Marshal(m)
-
-	client := http.Client{Timeout: 2 * time.Second}
-	// TODO inject local url somehow, don't hardcode
-	client.Post("http://localhost:2309", "application/json", bytes.NewReader(tf))
-
-	// tell github it's all OK
-	w.WriteHeader(202)
 }
 
-func (gpe githubPushEvent) ToMessage() *Message {
-	msg := new(Message)
+func (gpe githubPushEvent) ToMessage() *ingest.Message {
+	msg := new(ingest.Message)
 	client := http.Client{Timeout: 2 * time.Second}
 
 	for _, c := range gpe.Commits {
@@ -85,6 +85,7 @@ func (gpe githubPushEvent) ToMessage() *Message {
 		}
 
 		// github doesn't include parent commit list in push payload (UGHHHH). so, call out for it.
+		// TODO spawn a goroutine per commit to do these in parallel
 		resp, err := client.Get(strings.Replace(gpe.Repository.GitCommitsURL, "{/sha}", "/"+c.Sha, 1))
 		if err != nil {
 			// just drop the problematic commit

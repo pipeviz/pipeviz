@@ -1,4 +1,4 @@
-package ingest
+package main
 
 import (
 	"encoding/json"
@@ -202,6 +202,7 @@ const ghPushPayload = `{
 func TestPushToMessageMap(t *testing.T) {
 	gpe := githubPushEvent{}
 	json.Unmarshal([]byte(ghPushPayload), &gpe)
+	// FIXME mock this somehow; we don't want to actually reach out
 	m := gpe.ToMessage()
 
 	if len(m.C) != 2 {
