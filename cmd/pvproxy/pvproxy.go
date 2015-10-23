@@ -64,7 +64,7 @@ func (c client) send(m *ingest.Message) error {
 		return err
 	}
 
-	resp, err := c.c.Do(req)
+	resp, err := c.c.Post(c.target, "application/json", bytes.NewReader(j))
 	if err != nil {
 		return err
 	}
@@ -81,13 +81,12 @@ func (s *srv) Run(cmd *cobra.Command, args []string) {
 	mux := web.New()
 	cl := newClient(s.target, 5*time.Second)
 
-	gho := cmd.Flags().Lookup("github-oauth").Value.String()
-	if gho != "" {
-		cl.h.Set("Authentication", "token "+gho)
-	}
-
 	mux.Use(log.NewHttpLogger("pvproxy"))
-	mux.Post("/github/push", githubIngestor(cl))
+	mux.Post("/github/push", githubIngestor(cl, cmd))
 
 	graceful.ListenAndServe(s.bind+":"+strconv.Itoa(s.port), mux)
+}
+
+func statusIsOK(r *http.Response) bool {
+	return r.StatusCode >= 200 && r.StatusCode < 300
 }

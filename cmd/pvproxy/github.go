@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/types/semantic"
 )
@@ -37,7 +38,8 @@ type githubCommitObj struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func githubIngestor(c client) http.HandlerFunc {
+func githubIngestor(c client, cmd *cobra.Command) http.HandlerFunc {
+	gho := cmd.Flags().Lookup("github-oauth").Value.String()
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
@@ -58,7 +60,7 @@ func githubIngestor(c client) http.HandlerFunc {
 			return
 		}
 
-		err = c.send(gpe.ToMessage())
+		err = c.send(gpe.ToMessage(gho))
 		if err != nil {
 			w.WriteHeader(502) // 502, bad gateway
 		} else {
@@ -68,7 +70,7 @@ func githubIngestor(c client) http.HandlerFunc {
 	}
 }
 
-func (gpe githubPushEvent) ToMessage() *ingest.Message {
+func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
 	msg := new(ingest.Message)
 	client := http.Client{Timeout: 2 * time.Second}
 
@@ -86,7 +88,22 @@ func (gpe githubPushEvent) ToMessage() *ingest.Message {
 
 		// github doesn't include parent commit list in push payload (UGHHHH). so, call out for it.
 		// TODO spawn a goroutine per commit to do these in parallel
-		resp, err := client.Get(strings.Replace(gpe.Repository.GitCommitsURL, "{/sha}", "/"+c.Sha, 1))
+		url := strings.Replace(gpe.Repository.GitCommitsURL, "{/sha}", "/"+c.Sha, 1)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"system": "ingestor",
+				"err":    err,
+				"sha1":   c.Sha,
+			}).Warn("Error while creating request for additional information from github; skipping commit.")
+			continue
+		}
+
+		if token != "" {
+			req.Header.Set("Authentication", "token "+token)
+		}
+
+		resp, err := client.Do(req)
 		if err != nil {
 			// just drop the problematic commit
 			logrus.WithFields(logrus.Fields{
@@ -94,6 +111,15 @@ func (gpe githubPushEvent) ToMessage() *ingest.Message {
 				"err":    err,
 				"sha1":   c.Sha,
 			}).Warn("Request to github to retrieve commit parent info failed; commit dropped.")
+			continue
+		}
+
+		if !statusIsOK(resp) {
+			logrus.WithFields(logrus.Fields{
+				"system": "ingestor",
+				"status": resp.StatusCode,
+				"sha1":   c.Sha,
+			}).Warn("Github responded with non-2xx response when requesting parent commit data.")
 			continue
 		}
 
