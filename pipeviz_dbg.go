@@ -30,7 +30,9 @@ func init() {
 	// Instantiate a real, empty graph to ensure the interface type is never nil when it might be called
 	var g system.CoreGraph = represent.NewGraph()
 	go func() {
-		g = <-c
+		for latest := range c {
+			g = latest
+		}
 	}()
 	expvar.Publish("MsgId", expvar.Func(func() interface{} { return g.MsgId() }))
 

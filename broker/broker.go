@@ -61,7 +61,20 @@ func (gb *GraphBroker) Fanout(input GraphReceiver) {
 
 		for in := range input {
 			// for now we just iterate straight through and send in one goroutine
+			log.WithFields(log.Fields{
+				"system":    "broker",
+				"broker-id": gb.id,
+				"msgid":     in.MsgId(),
+			}).Debug("Received new graph, sending to all subscribers")
+
+			i := 1
 			for k, c := range gb.subs {
+				log.WithFields(log.Fields{
+					"system":    "broker",
+					"broker-id": gb.id,
+					"subnum":    i,
+					"msgid":     in.MsgId(),
+				}).Debug("Sending graph to subscriber")
 				// take a read lock at each stage of the loop. this guarantees that a
 				// sub/unsub can interrupt at each point; mostly this is crucial because
 				// otherwise we run the risk of sending on a closed channel.
@@ -70,6 +83,7 @@ func (gb *GraphBroker) Fanout(input GraphReceiver) {
 					c <- in
 				}
 				gb.lock.RUnlock()
+				i++
 			}
 		}
 	}()
