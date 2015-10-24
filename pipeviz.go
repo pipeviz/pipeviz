@@ -32,18 +32,15 @@ const (
 )
 
 var (
-	bindAll *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath  *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+	bindAll   *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath    *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+	useSyslog *bool   = pflag.Bool("syslog", false, "Write logs to local syslog")
 )
 
-func init() {
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp:  true,
-		DisableSorting: true,
-	})
-}
-
 func main() {
+	pflag.Parse()
+	setUpLogging()
+
 	src, err := schema.Master()
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -66,7 +63,6 @@ func main() {
 	// gets behind.
 	interpretChan := make(chan *journal.Record, 1000)
 
-	pflag.Parse()
 	var listenAt string
 	if *bindAll == false {
 		listenAt = "127.0.0.1:"

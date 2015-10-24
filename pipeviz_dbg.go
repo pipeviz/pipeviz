@@ -5,20 +5,20 @@ package main
 import (
 	"expvar"
 	"log"
+	"log/syslog"
 	"net/http"
 	_ "net/http/pprof"
 	"runtime"
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	logrus_syslog "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus/hooks/syslog"
 	"github.com/tag1consulting/pipeviz/broker"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 func init() {
-	logrus.SetLevel(logrus.DebugLevel)
-
 	startTime := time.Now().UTC()
 	expvar.Publish("Uptime", expvar.Func(func() interface{} { return int64(time.Since(startTime)) }))
 
@@ -39,4 +39,26 @@ func init() {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
+}
+
+func setUpLogging() {
+	logrus.SetLevel(logrus.DebugLevel)
+
+	// For now, either log to syslog OR stdout
+	if *useSyslog {
+		hook, err := logrus_syslog.NewSyslogHook("udp", "localhost:514", syslog.LOG_DEBUG, "")
+		if err != nil {
+			logrus.AddHook(hook)
+		} else {
+			logrus.WithFields(logrus.Fields{
+				"system": "main",
+				"err":    err,
+			}).Fatal("Could not connect to syslog, exiting")
+		}
+	} else {
+		logrus.SetFormatter(&logrus.TextFormatter{
+			FullTimestamp:  true,
+			DisableSorting: true,
+		})
+	}
 }
