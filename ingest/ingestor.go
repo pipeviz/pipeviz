@@ -8,13 +8,13 @@ import (
 	"strings"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/unrolled/secure"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/types/system"
-	"github.com/unrolled/secure"
 )
 
 type Ingestor struct {

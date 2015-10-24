@@ -2,10 +2,7 @@
 	"ImportPath": "github.com/tag1consulting/pipeviz",
 	"GoVersion": "go1.4.1",
 	"Packages": [
-		".",
-		"./clients/cmd/pvc",
-		"./clients/cmd/pvgit",
-		"./cmd/pvutil"
+		"./..."
 	],
 	"Deps": [
 		{
@@ -54,6 +51,10 @@
 			"ImportPath": "github.com/tinylib/msgp/msgp",
 			"Comment": "v1.0-alpha-43-gcd4fb15",
 			"Rev": "cd4fb1548c31d88af25205dc021be20935aec720"
+		},
+		{
+			"ImportPath": "github.com/unrolled/secure",
+			"Rev": "9b725bb5ee80564334176a116a99dd926cab63a1"
 		},
 		{
 			"ImportPath": "github.com/xeipuuv/gojsonpointer",

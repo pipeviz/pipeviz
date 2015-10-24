@@ -7,6 +7,7 @@ import (
 
 	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/unrolled/secure"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
@@ -18,7 +19,6 @@ import (
 	"github.com/tag1consulting/pipeviz/schema"
 	"github.com/tag1consulting/pipeviz/types/system"
 	"github.com/tag1consulting/pipeviz/webapp"
-	"github.com/unrolled/secure"
 )
 
 // Pipeviz uses two separate HTTP ports - one for input into the logic
