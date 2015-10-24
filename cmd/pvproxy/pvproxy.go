@@ -26,14 +26,19 @@ func main() {
 	root.Flags().StringVarP(&s.target, "target", "t", "http://localhost:2309", "Address of the target pipeviz daemon. Default to http://localhost:2309")
 	root.Flags().IntVarP(&s.port, "port", "p", 2906, "Port to listen on")
 	root.Flags().StringVarP(&s.bind, "bind", "b", "127.0.0.1", "Address to bind on")
+	root.Flags().BoolVar(&s.useSyslog, "syslog", false, "Write log output to syslog.")
+	root.Flags().StringVar(&s.syslogAddr, "syslog-addr", "localhost:514", "The address of the syslog server with which to communicate.")
+	root.Flags().StringVar(&s.syslogProto, "syslog-proto", "udp", "The protocol over which to send syslog messages.")
 
 	root.Flags().String("github-oauth", "", "OAuth token for retrieving data from Github")
 	root.Execute()
 }
 
 type srv struct {
-	port         int
-	bind, target string
+	port                    int
+	bind, target            string
+	useSyslog               bool
+	syslogAddr, syslogProto string
 }
 
 type client struct {
@@ -78,6 +83,8 @@ func (c client) send(m *ingest.Message) error {
 
 // Run sets up and runs the proxying HTTP server, then blocks.
 func (s *srv) Run(cmd *cobra.Command, args []string) {
+	setUpLogging(s)
+
 	mux := web.New()
 	cl := newClient(s.target, 5*time.Second)
 
