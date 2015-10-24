@@ -32,9 +32,11 @@ const (
 )
 
 var (
-	bindAll   *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath    *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
-	useSyslog *bool   = pflag.Bool("syslog", false, "Write logs to local syslog")
+	bindAll     *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath      *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+	useSyslog   *bool   = pflag.Bool("syslog", false, "Write log output to syslog.")
+	syslogAddr  *string = pflag.String("syslog-addr", "localhost:514", "The address of the syslog server with which to communicate.")
+	syslogProto *string = pflag.String("syslog-proto", "udp", "The protocol over which to send syslog messages.")
 )
 
 func main() {

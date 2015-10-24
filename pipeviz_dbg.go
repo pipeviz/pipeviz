@@ -46,13 +46,15 @@ func setUpLogging() {
 
 	// For now, either log to syslog OR stdout
 	if *useSyslog {
-		hook, err := logrus_syslog.NewSyslogHook("udp", "localhost:514", syslog.LOG_DEBUG, "")
+		hook, err := logrus_syslog.NewSyslogHook(*syslogProto, *syslogAddr, syslog.LOG_DEBUG, "")
 		if err != nil {
 			logrus.AddHook(hook)
 		} else {
 			logrus.WithFields(logrus.Fields{
-				"system": "main",
-				"err":    err,
+				"system":       "main",
+				"err":          err,
+				"syslog-addr":  *syslogAddr,
+				"syslog-proto": *syslogProto,
 			}).Fatal("Could not connect to syslog, exiting")
 		}
 	} else {
