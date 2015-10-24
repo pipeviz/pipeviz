@@ -37,6 +37,10 @@ var (
 	useSyslog   *bool   = pflag.Bool("syslog", false, "Write log output to syslog.")
 	syslogAddr  *string = pflag.String("syslog-addr", "localhost:514", "The address of the syslog server with which to communicate.")
 	syslogProto *string = pflag.String("syslog-proto", "udp", "The protocol over which to send syslog messages.")
+	ingestKey   *string = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
+	ingestCert  *string = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	webappKey   *string = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
+	webappCert  *string = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
 )
 
 func main() {
@@ -100,7 +104,10 @@ func main() {
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
-	go srv.RunHttpIngestor(listenAt + strconv.Itoa(DefaultIngestionPort))
+	if *ingestKey != "" && *ingestCert == "" {
+		*ingestCert = *ingestKey + ".crt"
+	}
+	go srv.RunHttpIngestor(listenAt+strconv.Itoa(DefaultIngestionPort), *ingestKey, *ingestCert)
 
 	// Kick off the intermediary interpretation goroutine that receives persisted
 	// messages from the ingestor, merges them into the state graph, then passes
@@ -109,7 +116,10 @@ func main() {
 
 	// And finally, kick off the webapp.
 	// TODO let config/params control address
-	go RunWebapp(listenAt+strconv.Itoa(DefaultAppPort), j.Get)
+	if *webappKey != "" && *webappCert == "" {
+		*webappCert = *webappKey + ".crt"
+	}
+	go RunWebapp(listenAt+strconv.Itoa(DefaultAppPort), *webappKey, *webappCert, j.Get)
 
 	// Block on goji's graceful waiter, allowing the http connections to shut down nicely.
 	// FIXME using this should be unnecessary if we're crash-only
@@ -119,7 +129,7 @@ func main() {
 // RunWebapp runs the pipeviz http frontend webapp on the specified address.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func RunWebapp(addr string, f journal.RecordGetter) {
+func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 	mf := webapp.NewMux()
 
 	// A middleware to attach the journal-getting func to the env for later use.
@@ -136,7 +146,20 @@ func RunWebapp(addr string, f journal.RecordGetter) {
 	mf.Use(mw)
 
 	mf.Compile()
-	graceful.ListenAndServe(addr, mf)
+
+	var err error
+	if key != "" && cert != "" {
+		err = graceful.ListenAndServeTLS(addr, cert, key, mf)
+	} else {
+		err = graceful.ListenAndServe(addr, mf)
+	}
+
+	if err != nil {
+		log.WithFields(log.Fields{
+			"system": "webapp",
+			"err":    err,
+		}).Fatal("ListenAndServe returned with an error")
+	}
 }
 
 // Rebuilds the graph from the extant entries in a journal.

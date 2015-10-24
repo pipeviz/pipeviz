@@ -42,10 +42,15 @@ func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 //
 // Closes the provided interpretation channel if/when the http server terminates.
-func (s *Ingestor) RunHttpIngestor(addr string) error {
-	err := graceful.ListenAndServe(addr, s.buildIngestorMux())
-	if err != nil {
+func (s *Ingestor) RunHttpIngestor(addr, key, cert string) error {
+	var err error
+	if key != "" && cert != "" {
+		err = graceful.ListenAndServeTLS(addr, cert, key, s.buildIngestorMux())
+	} else {
+		err = graceful.ListenAndServe(addr, s.buildIngestorMux())
+	}
 
+	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"system": "ingestor",
 			"err":    err,
