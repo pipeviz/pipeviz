@@ -18,6 +18,7 @@ import (
 	"github.com/tag1consulting/pipeviz/schema"
 	"github.com/tag1consulting/pipeviz/types/system"
 	"github.com/tag1consulting/pipeviz/webapp"
+	"github.com/unrolled/secure"
 )
 
 // Pipeviz uses two separate HTTP ports - one for input into the logic
@@ -131,9 +132,29 @@ func main() {
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 	mf := webapp.NewMux()
+	useTLS := key != "" && cert != ""
+
+	if useTLS {
+		sec := secure.New(secure.Options{
+			AllowedHosts:         nil,                                             // TODO allow a way to declare these
+			SSLRedirect:          true,                                            // if using TLS, then enforce TLS
+			SSLHost:              "",                                              // use the same host to redirect from HTTP to HTTPS
+			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
+			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
+			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
+			STSPreload:           false,                                           // can't know if this is correct for general case TODO allow config
+			ForceSTSHeader:       false,                                           // only need to send it if HTTP
+			FrameDeny:            false,                                           // pipeviz is exactly the kind of thing where embedding is appropriate
+			ContentTypeNosniff:   true,                                            // shouldn't be an issue for pipeviz, but doesn't hurt...probably?
+			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
+		})
+
+		// TODO consider using a custom handler in order to log errors
+		mf.Use(sec.Handler)
+	}
 
 	// A middleware to attach the journal-getting func to the env for later use.
-	mw := func(c *web.C, h http.Handler) http.Handler {
+	mf.Use(func(c *web.C, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if c.Env == nil {
 				c.Env = make(map[interface{}]interface{})
@@ -141,14 +162,12 @@ func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 			c.Env["journalGet"] = f
 			h.ServeHTTP(w, r)
 		})
-	}
-
-	mf.Use(mw)
+	})
 
 	mf.Compile()
 
 	var err error
-	if key != "" && cert != "" {
+	if useTLS {
 		err = graceful.ListenAndServeTLS(addr, cert, key, mf)
 	} else {
 		err = graceful.ListenAndServe(addr, mf)

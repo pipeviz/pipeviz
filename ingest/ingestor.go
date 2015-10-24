@@ -14,6 +14,7 @@ import (
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
 	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/unrolled/secure"
 )
 
 type Ingestor struct {
@@ -44,10 +45,46 @@ func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan
 // Closes the provided interpretation channel if/when the http server terminates.
 func (s *Ingestor) RunHttpIngestor(addr, key, cert string) error {
 	var err error
-	if key != "" && cert != "" {
-		err = graceful.ListenAndServeTLS(addr, cert, key, s.buildIngestorMux())
+	mb := web.New()
+	useTLS := key != "" && cert != ""
+
+	// TODO use more appropriate logger
+	mb.Use(log.NewHttpLogger("ingestor"))
+
+	if useTLS {
+		sec := secure.New(secure.Options{
+			AllowedHosts:         nil,                                             // TODO allow a way to declare these
+			SSLRedirect:          true,                                            // if using TLS, then enforce TLS
+			SSLHost:              "",                                              // use the same host to redirect from HTTP to HTTPS
+			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
+			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
+			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
+			STSPreload:           false,                                           // can't know if this is correct for general case TODO allow config
+			ForceSTSHeader:       false,                                           // only need to send it if HTTP
+			FrameDeny:            true,                                            // could never make sense on the ingestion side
+			ContentTypeNosniff:   true,                                            // shouldn't be an issue for pipeviz, but doesn't hurt...probably?
+			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
+		})
+
+		// TODO consider using a custom handler in order to log errors
+		mb.Use(sec.Handler)
+	}
+
+	// Middleware to limit body length to MaxMessageSize
+	mb.Use(func(h http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, s.maxMessageSize)
+			h.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	})
+
+	mb.Post("/", s.handleMessage)
+
+	if useTLS {
+		err = graceful.ListenAndServeTLS(addr, cert, key, mb)
 	} else {
-		err = graceful.ListenAndServe(addr, s.buildIngestorMux())
+		err = graceful.ListenAndServe(addr, mb)
 	}
 
 	if err != nil {
@@ -61,72 +98,56 @@ func (s *Ingestor) RunHttpIngestor(addr, key, cert string) error {
 	return err
 }
 
-func (s *Ingestor) buildIngestorMux() *web.Mux {
-	mb := web.New()
-	// TODO use more appropriate logger
-	mb.Use(log.NewHttpLogger("ingestor"))
-	// Add middleware limiting body length to MaxMessageSize
-	mb.Use(func(h http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			r.Body = http.MaxBytesReader(w, r.Body, s.maxMessageSize)
-			h.ServeHTTP(w, r)
-		}
-		return http.HandlerFunc(fn)
-	})
+func (s *Ingestor) handleMessage(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 
-	mb.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+	// pulling this out of buffer is incorrect: http://jmoiron.net/blog/crossing-streams-a-love-letter-to-ioreader/
+	// but for now gojsonschema leaves us no choice
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		// Too long, or otherwise malformed request body
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
-		// pulling this out of buffer is incorrect: http://jmoiron.net/blog/crossing-streams-a-love-letter-to-ioreader/
-		// but for now gojsonschema leaves us no choice
-		b, err := ioutil.ReadAll(r.Body)
+	result, err := s.schema.Validate(gjs.NewStringLoader(string(b)))
+	if err != nil {
+		// Malformed JSON, likely
+		// TODO add a body
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	if result.Valid() {
+		// Index of message gets written by the LogStore
+		record, err := s.journal.NewEntry(b, r.RemoteAddr)
 		if err != nil {
-			// Too long, or otherwise malformed request body
-			w.WriteHeader(400)
-			w.Write([]byte(err.Error()))
+			w.WriteHeader(500)
+			// should we tell the client this?
+			w.Write([]byte("Failed to persist message to journal"))
 			return
 		}
 
-		result, err := s.schema.Validate(gjs.NewStringLoader(string(b)))
-		if err != nil {
-			// Malformed JSON, likely
-			// TODO add a body
-			w.WriteHeader(400)
-			w.Write([]byte(err.Error()))
-			return
+		// super-sloppy write back to client, but does the trick
+		w.WriteHeader(202) // use 202 because it's a little more correct
+		w.Write([]byte(strconv.FormatUint(record.Index, 10)))
+
+		// FIXME passing directly from here means it's possible for messages to arrive
+		// at the interpretation layer in a different order than they went into the log
+		// ...especially if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
+
+		s.interpretChan <- record
+	} else {
+		// Invalid results, so write back 422 for malformed entity
+		w.WriteHeader(422)
+		var resp []string
+		for _, desc := range result.Errors() {
+			resp = append(resp, desc.String())
 		}
-
-		if result.Valid() {
-			// Index of message gets written by the LogStore
-			record, err := s.journal.NewEntry(b, r.RemoteAddr)
-			if err != nil {
-				w.WriteHeader(500)
-				// should we tell the client this?
-				w.Write([]byte("Failed to persist message to journal"))
-				return
-			}
-
-			// super-sloppy write back to client, but does the trick
-			w.WriteHeader(202) // use 202 because it's a little more correct
-			w.Write([]byte(strconv.FormatUint(record.Index, 10)))
-
-			// FIXME passing directly from here means it's possible for messages to arrive
-			// at the interpretation layer in a different order than they went into the log
-			// ...especially if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
-
-			s.interpretChan <- record
-		} else {
-			// Invalid results, so write back 422 for malformed entity
-			w.WriteHeader(422)
-			var resp []string
-			for _, desc := range result.Errors() {
-				resp = append(resp, desc.String())
-			}
-			w.Write([]byte(strings.Join(resp, "\n")))
-		}
-	})
-
-	return mb
+		w.Write([]byte(strings.Join(resp, "\n")))
+	}
 }
 
 // The main message interpret/merge loop. This receives messages that have been
