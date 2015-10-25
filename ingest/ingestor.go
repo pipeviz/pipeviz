@@ -54,29 +54,43 @@ func (s *Ingestor) RunHttpIngestor(addr, key, cert string) error {
 	if useTLS {
 		sec := secure.New(secure.Options{
 			AllowedHosts:         nil,                                             // TODO allow a way to declare these
-			SSLRedirect:          true,                                            // if using TLS, then enforce TLS
+			SSLRedirect:          false,                                           // we have just one port to work with, so an internal redirect can't work
+			SSLTemporaryRedirect: false,                                           // Use 301, not 302
 			SSLHost:              "",                                              // use the same host to redirect from HTTP to HTTPS
 			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
 			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
 			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
 			STSPreload:           false,                                           // can't know if this is correct for general case TODO allow config
-			ForceSTSHeader:       false,                                           // only need to send it if HTTP
 			FrameDeny:            true,                                            // could never make sense on the ingestion side
 			ContentTypeNosniff:   true,                                            // shouldn't be an issue for pipeviz, but doesn't hurt...probably?
 			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
 		})
 
 		// TODO consider using a custom handler in order to log errors
-		mb.Use(sec.Handler)
+		mb.Use(func(h http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				err := sec.Process(w, r)
+
+				// If there was an error, do not continue.
+				if err != nil {
+					logrus.WithFields(logrus.Fields{
+						"system": "webapp",
+						"err":    err,
+					}).Warn("Error from security middleware, dropping message")
+					return
+				}
+
+				h.ServeHTTP(w, r)
+			})
+		})
 	}
 
 	// Middleware to limit body length to MaxMessageSize
 	mb.Use(func(h http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			r.Body = http.MaxBytesReader(w, r.Body, s.maxMessageSize)
 			h.ServeHTTP(w, r)
-		}
-		return http.HandlerFunc(fn)
+		})
 	})
 
 	mb.Post("/", s.handleMessage)

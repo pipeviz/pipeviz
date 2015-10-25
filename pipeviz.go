@@ -131,26 +131,42 @@ func main() {
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
-	mf := webapp.NewMux()
+	mf := web.New()
 	useTLS := key != "" && cert != ""
+	//useTLS = false
 
 	if useTLS {
 		sec := secure.New(secure.Options{
 			AllowedHosts:         nil,                                             // TODO allow a way to declare these
-			SSLRedirect:          true,                                            // if using TLS, then enforce TLS
+			SSLRedirect:          false,                                           // we have just one port to work with, so an internal redirect can't work
+			SSLTemporaryRedirect: false,                                           // Use 301, not 302
 			SSLHost:              "",                                              // use the same host to redirect from HTTP to HTTPS
 			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
 			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
 			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
 			STSPreload:           false,                                           // can't know if this is correct for general case TODO allow config
-			ForceSTSHeader:       false,                                           // only need to send it if HTTP
 			FrameDeny:            false,                                           // pipeviz is exactly the kind of thing where embedding is appropriate
 			ContentTypeNosniff:   true,                                            // shouldn't be an issue for pipeviz, but doesn't hurt...probably?
 			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
 		})
 
 		// TODO consider using a custom handler in order to log errors
-		mf.Use(sec.Handler)
+		mf.Use(func(h http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				err := sec.Process(w, r)
+
+				// If there was an error, do not continue.
+				if err != nil {
+					log.WithFields(log.Fields{
+						"system": "webapp",
+						"err":    err,
+					}).Warn("Error from security middleware, dropping request")
+					return
+				}
+
+				h.ServeHTTP(w, r)
+			})
+		})
 	}
 
 	// A middleware to attach the journal-getting func to the env for later use.
@@ -163,6 +179,8 @@ func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 			h.ServeHTTP(w, r)
 		})
 	})
+
+	webapp.RegisterToMux(mf)
 
 	mf.Compile()
 
