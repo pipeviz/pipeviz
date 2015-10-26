@@ -33,15 +33,13 @@ const (
 )
 
 var (
-	bindAll     *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath      *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
-	useSyslog   *bool   = pflag.Bool("syslog", false, "Write log output to syslog.")
-	syslogAddr  *string = pflag.String("syslog-addr", "localhost:514", "The address of the syslog server with which to communicate.")
-	syslogProto *string = pflag.String("syslog-proto", "udp", "The protocol over which to send syslog messages.")
-	ingestKey   *string = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
-	ingestCert  *string = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	webappKey   *string = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
-	webappCert  *string = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	bindAll    *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath     *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+	useSyslog  *bool   = pflag.Bool("syslog", false, "Write log output to syslog.")
+	ingestKey  *string = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
+	ingestCert *string = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	webappKey  *string = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
+	webappCert *string = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
 )
 
 func main() {

@@ -14,15 +14,13 @@ func setUpLogging(s *srv) {
 
 	// For now, either log to syslog OR stdout
 	if s.useSyslog {
-		hook, err := logrus_syslog.NewSyslogHook(s.syslogProto, s.syslogAddr, syslog.LOG_DEBUG, "")
+		hook, err := logrus_syslog.NewSyslogHook("", "", syslog.LOG_DEBUG, "")
 		if err != nil {
 			logrus.AddHook(hook)
 		} else {
 			logrus.WithFields(logrus.Fields{
-				"system":       "main",
-				"err":          err,
-				"syslog-addr":  s.syslogAddr,
-				"syslog-proto": s.syslogProto,
+				"system": "main",
+				"err":    err,
 			}).Fatal("Could not connect to syslog, exiting")
 		}
 	} else {

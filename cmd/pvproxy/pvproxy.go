@@ -31,8 +31,6 @@ func main() {
 	root.Flags().BoolVar(&s.useSyslog, "syslog", false, "Write log output to syslog.")
 	root.Flags().StringVar(&s.key, "tls-key", "", "Path to an x509 key to use for TLS. If no cert is provided, unsecured HTTP will be used.")
 	root.Flags().StringVar(&s.cert, "tls-cert", "", "Path to an x508 certificate to use for TLS. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	root.Flags().StringVar(&s.syslogAddr, "syslog-addr", "localhost:514", "The address of the syslog server with which to communicate.")
-	root.Flags().StringVar(&s.syslogProto, "syslog-proto", "udp", "The protocol over which to send syslog messages.")
 
 	root.Flags().String("github-oauth", "", "OAuth token for retrieving data from Github")
 	root.Execute()
