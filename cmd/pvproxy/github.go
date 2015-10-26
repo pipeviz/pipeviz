@@ -94,7 +94,7 @@ func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
-				"system": "ingestor",
+				"system": "pvproxy",
 				"err":    err,
 				"sha1":   c.Sha,
 			}).Warn("Error while creating request for additional information from github; skipping commit.")
@@ -109,7 +109,7 @@ func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
 		if err != nil {
 			// just drop the problematic commit
 			logrus.WithFields(logrus.Fields{
-				"system": "ingestor",
+				"system": "pvproxy",
 				"err":    err,
 				"sha1":   c.Sha,
 			}).Warn("Request to github to retrieve commit parent info failed; commit dropped.")
@@ -118,7 +118,7 @@ func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
 
 		if !statusIsOK(resp) {
 			logrus.WithFields(logrus.Fields{
-				"system": "ingestor",
+				"system": "pvproxy",
 				"status": resp.StatusCode,
 				"sha1":   c.Sha,
 			}).Warn("Github responded with non-2xx response when requesting parent commit data.")
@@ -132,7 +132,7 @@ func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
 		err = json.Unmarshal(bod, &jmap)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
-				"system": "ingestor",
+				"system": "pvproxy",
 				"err":    err,
 				"sha1":   c.Sha,
 			}).Warn("Bad JSON response from github when requesting commit parent info; commit dropped.")
@@ -149,7 +149,7 @@ func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
 		t, err := time.Parse(time.RFC3339, c.Timestamp)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
-				"system":     "ingestor",
+				"system":     "pvproxy",
 				"err":        err,
 				"datestring": c.Timestamp,
 				"sha1":       c.Sha,

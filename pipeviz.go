@@ -133,14 +133,12 @@ func main() {
 func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 	mf := web.New()
 	useTLS := key != "" && cert != ""
-	//useTLS = false
 
 	if useTLS {
 		sec := secure.New(secure.Options{
 			AllowedHosts:         nil,                                             // TODO allow a way to declare these
 			SSLRedirect:          false,                                           // we have just one port to work with, so an internal redirect can't work
 			SSLTemporaryRedirect: false,                                           // Use 301, not 302
-			SSLHost:              "",                                              // use the same host to redirect from HTTP to HTTPS
 			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
 			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
 			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
@@ -150,7 +148,6 @@ func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
 		})
 
-		// TODO consider using a custom handler in order to log errors
 		mf.Use(func(h http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				err := sec.Process(w, r)
