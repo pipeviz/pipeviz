@@ -66,6 +66,14 @@ func NewMux() *web.Mux {
 	return m
 }
 
+// RegisterToMux adds all necessary pieces to an injected mux.
+func RegisterToMux(m *web.Mux) {
+	m.Use(log.NewHttpLogger("webapp"))
+	m.Get("/sock", OpenSocket)
+	m.Get("/message/:mid", GetMessage)
+	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
+}
+
 func graphToJson(g system.CoreGraph) ([]byte, error) {
 	var vertices []interface{}
 	for _, v := range g.VerticesWith(q.Qbv(system.VTypeNone)) {

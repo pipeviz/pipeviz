@@ -138,7 +138,7 @@ module.exports = {
    * Open socket.
    */
   openSocket: function () {
-    this.socket = new WebSocket("ws://" + config.server + config.path);
+    this.socket = new WebSocket((window.location.protocol === "https:" ? "wss://" : "ws://") + config.server + config.path);
     return this.socket;
   },
 

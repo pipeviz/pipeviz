@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/unrolled/secure"
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
@@ -42,10 +43,65 @@ func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 //
 // Closes the provided interpretation channel if/when the http server terminates.
-func (s *Ingestor) RunHttpIngestor(addr string) error {
-	err := graceful.ListenAndServe(addr, s.buildIngestorMux())
-	if err != nil {
+func (s *Ingestor) RunHttpIngestor(addr, key, cert string) error {
+	var err error
+	mb := web.New()
+	useTLS := key != "" && cert != ""
 
+	// TODO use more appropriate logger
+	mb.Use(log.NewHttpLogger("ingestor"))
+
+	if useTLS {
+		sec := secure.New(secure.Options{
+			AllowedHosts:         nil,                                             // TODO allow a way to declare these
+			SSLRedirect:          false,                                           // we have just one port to work with, so an internal redirect can't work
+			SSLTemporaryRedirect: false,                                           // Use 301, not 302
+			SSLHost:              "",                                              // use the same host to redirect from HTTP to HTTPS
+			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
+			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
+			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
+			STSPreload:           false,                                           // can't know if this is correct for general case TODO allow config
+			FrameDeny:            true,                                            // could never make sense on the ingestion side
+			ContentTypeNosniff:   true,                                            // shouldn't be an issue for pipeviz, but doesn't hurt...probably?
+			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
+		})
+
+		// TODO consider using a custom handler in order to log errors
+		mb.Use(func(h http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				err := sec.Process(w, r)
+
+				// If there was an error, do not continue.
+				if err != nil {
+					logrus.WithFields(logrus.Fields{
+						"system": "webapp",
+						"err":    err,
+					}).Warn("Error from security middleware, dropping message")
+					return
+				}
+
+				h.ServeHTTP(w, r)
+			})
+		})
+	}
+
+	// Middleware to limit body length to MaxMessageSize
+	mb.Use(func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, s.maxMessageSize)
+			h.ServeHTTP(w, r)
+		})
+	})
+
+	mb.Post("/", s.handleMessage)
+
+	if useTLS {
+		err = graceful.ListenAndServeTLS(addr, cert, key, mb)
+	} else {
+		err = graceful.ListenAndServe(addr, mb)
+	}
+
+	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"system": "ingestor",
 			"err":    err,
@@ -56,72 +112,56 @@ func (s *Ingestor) RunHttpIngestor(addr string) error {
 	return err
 }
 
-func (s *Ingestor) buildIngestorMux() *web.Mux {
-	mb := web.New()
-	// TODO use more appropriate logger
-	mb.Use(log.NewHttpLogger("ingestor"))
-	// Add middleware limiting body length to MaxMessageSize
-	mb.Use(func(h http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			r.Body = http.MaxBytesReader(w, r.Body, s.maxMessageSize)
-			h.ServeHTTP(w, r)
-		}
-		return http.HandlerFunc(fn)
-	})
+func (s *Ingestor) handleMessage(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 
-	mb.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+	// pulling this out of buffer is incorrect: http://jmoiron.net/blog/crossing-streams-a-love-letter-to-ioreader/
+	// but for now gojsonschema leaves us no choice
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		// Too long, or otherwise malformed request body
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
-		// pulling this out of buffer is incorrect: http://jmoiron.net/blog/crossing-streams-a-love-letter-to-ioreader/
-		// but for now gojsonschema leaves us no choice
-		b, err := ioutil.ReadAll(r.Body)
+	result, err := s.schema.Validate(gjs.NewStringLoader(string(b)))
+	if err != nil {
+		// Malformed JSON, likely
+		// TODO add a body
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	if result.Valid() {
+		// Index of message gets written by the LogStore
+		record, err := s.journal.NewEntry(b, r.RemoteAddr)
 		if err != nil {
-			// Too long, or otherwise malformed request body
-			w.WriteHeader(400)
-			w.Write([]byte(err.Error()))
+			w.WriteHeader(500)
+			// should we tell the client this?
+			w.Write([]byte("Failed to persist message to journal"))
 			return
 		}
 
-		result, err := s.schema.Validate(gjs.NewStringLoader(string(b)))
-		if err != nil {
-			// Malformed JSON, likely
-			// TODO add a body
-			w.WriteHeader(400)
-			w.Write([]byte(err.Error()))
-			return
+		// super-sloppy write back to client, but does the trick
+		w.WriteHeader(202) // use 202 because it's a little more correct
+		w.Write([]byte(strconv.FormatUint(record.Index, 10)))
+
+		// FIXME passing directly from here means it's possible for messages to arrive
+		// at the interpretation layer in a different order than they went into the log
+		// ...especially if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
+
+		s.interpretChan <- record
+	} else {
+		// Invalid results, so write back 422 for malformed entity
+		w.WriteHeader(422)
+		var resp []string
+		for _, desc := range result.Errors() {
+			resp = append(resp, desc.String())
 		}
-
-		if result.Valid() {
-			// Index of message gets written by the LogStore
-			record, err := s.journal.NewEntry(b, r.RemoteAddr)
-			if err != nil {
-				w.WriteHeader(500)
-				// should we tell the client this?
-				w.Write([]byte("Failed to persist message to journal"))
-				return
-			}
-
-			// super-sloppy write back to client, but does the trick
-			w.WriteHeader(202) // use 202 because it's a little more correct
-			w.Write([]byte(strconv.FormatUint(record.Index, 10)))
-
-			// FIXME passing directly from here means it's possible for messages to arrive
-			// at the interpretation layer in a different order than they went into the log
-			// ...especially if go scheduler changes become less cooperative https://groups.google.com/forum/#!topic/golang-nuts/DbmqfDlAR0U (...?)
-
-			s.interpretChan <- record
-		} else {
-			// Invalid results, so write back 422 for malformed entity
-			w.WriteHeader(422)
-			var resp []string
-			for _, desc := range result.Errors() {
-				resp = append(resp, desc.String())
-			}
-			w.Write([]byte(strings.Join(resp, "\n")))
-		}
-	})
-
-	return mb
+		w.Write([]byte(strings.Join(resp, "\n")))
+	}
 }
 
 // The main message interpret/merge loop. This receives messages that have been
