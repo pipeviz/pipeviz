@@ -47,7 +47,7 @@ func setUpLogging() {
 	// For now, either log to syslog OR stdout
 	if *useSyslog {
 		hook, err := logrus_syslog.NewSyslogHook("", "", syslog.LOG_DEBUG, "")
-		if err != nil {
+		if err == nil {
 			logrus.AddHook(hook)
 		} else {
 			logrus.WithFields(logrus.Fields{

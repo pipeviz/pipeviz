@@ -37,11 +37,10 @@ func main() {
 }
 
 type srv struct {
-	port                    int
-	bind, target            string
-	key, cert               string
-	useSyslog               bool
-	syslogAddr, syslogProto string
+	port         int
+	bind, target string
+	key, cert    string
+	useSyslog    bool
 }
 
 type client struct {
