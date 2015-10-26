@@ -17,8 +17,9 @@ import (
 	"github.com/tag1consulting/pipeviz/types/system"
 )
 
+// Ingestor brings together the required components to run a pipeviz ingestion HTTP server.
 type Ingestor struct {
-	journal        journal.JournalStore
+	journal        journal.Store
 	schema         *gjs.Schema
 	interpretChan  chan *journal.Record
 	brokerChan     chan system.CoreGraph
@@ -26,7 +27,7 @@ type Ingestor struct {
 }
 
 // New creates a new pipeviz ingestor mux, ready to be kicked off.
-func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan system.CoreGraph, max int64) *Ingestor {
+func New(j journal.Store, s *gjs.Schema, ic chan *journal.Record, bc chan system.CoreGraph, max int64) *Ingestor {
 	return &Ingestor{
 		journal:        j,
 		schema:         s,
@@ -146,7 +147,13 @@ func (s *Ingestor) handleMessage(w http.ResponseWriter, r *http.Request) {
 
 		// super-sloppy write back to client, but does the trick
 		w.WriteHeader(202) // use 202 because it's a little more correct
-		w.Write([]byte(strconv.FormatUint(record.Index, 10)))
+		_, err = w.Write([]byte(strconv.FormatUint(record.Index, 10)))
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"system": "ingestor",
+				"err":    err,
+			}).Warn("Failed to write msgid back to client; continuing anyway.")
+		}
 
 		// FIXME passing directly from here means it's possible for messages to arrive
 		// at the interpretation layer in a different order than they went into the log
@@ -164,9 +171,9 @@ func (s *Ingestor) handleMessage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// The main message interpret/merge loop. This receives messages that have been
-// validated and persisted, merges them into the graph, then sends the new
-// graph along to listeners, workers, etc.
+// Interpret is the main message interpret/merge loop. It receives messages that
+// have been validated and persisted, merges them into the graph, then sends the
+// new graph along to listeners, workers, etc.
 //
 // The provided CoreGraph operates as the initial state into which received
 // messages will be successively merged.

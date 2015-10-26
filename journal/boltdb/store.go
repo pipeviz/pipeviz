@@ -18,7 +18,7 @@ var (
 	bucketName = []byte("journal")
 )
 
-// Represents a single BoltDB file storage backend for the append-only log.
+// BoltStore represents a single BoltDB storage backend for the append-only log.
 // Bolt, a pure Go implementation inspired by LMDB, is a k/v store and thus
 // provides more than we actually need, but it's an easy starting point.
 type BoltStore struct {
@@ -27,7 +27,7 @@ type BoltStore struct {
 }
 
 // NewBoltStore creates a handle to a BoltDB-backed log store
-func NewBoltStore(path string) (journal.JournalStore, error) {
+func NewBoltStore(path string) (journal.Store, error) {
 	// Allow 1s timeout on obtaining a file lock
 	b, err := bolt.Open(path, fileMode, &bolt.Options{Timeout: time.Second})
 	if err != nil {
@@ -41,7 +41,8 @@ func NewBoltStore(path string) (journal.JournalStore, error) {
 
 	// initialize the one bucket we use
 	if err := store.init(); err != nil {
-		store.conn.Close()
+		// an err here doesn't matter
+		_ = store.conn.Close()
 		return nil, err
 	}
 
@@ -57,7 +58,8 @@ func (b *BoltStore) init() error {
 
 	// Create all the buckets
 	if _, err := tx.CreateBucketIfNotExists(bucketName); err != nil {
-		tx.Rollback()
+		// already failed, error doesn't matter
+		_ = tx.Rollback()
 		return err
 	}
 
@@ -126,7 +128,7 @@ func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*journal.Record
 
 // Count reports the number of items in the journal by opening a db cursor to
 // grab the last item from the bucket. Because we're append-only, this is
-// guaranteed to be the last one, and thus its index is the count..
+// guaranteed to be the last one, and thus its index is the count.
 func (b *BoltStore) Count() (uint64, error) {
 	tx, err := b.conn.Begin(false)
 	if err != nil {
@@ -135,9 +137,10 @@ func (b *BoltStore) Count() (uint64, error) {
 	defer tx.Rollback()
 
 	curs := tx.Bucket(bucketName).Cursor()
-	if last, _ := curs.Last(); last == nil {
+	var last []byte
+	if last, _ = curs.Last(); last == nil {
 		return 0, nil
-	} else {
-		return binary.BigEndian.Uint64(last), nil
 	}
+
+	return binary.BigEndian.Uint64(last), nil
 }

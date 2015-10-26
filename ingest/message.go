@@ -8,7 +8,15 @@ import (
 	"github.com/tag1consulting/pipeviz/types/system"
 )
 
-// Not actually used right now, but this interface must be satisfied by all types
+// Message represents a valid pipeviz message. It is, currently, intended for use both
+// in encoding messages to be sent to a pipeviz server by clients, and decoding messages
+// by the server once they have arrived.
+//
+// This symmetry will not necessarily always be the case. As message definitions become
+// more compositional over time, the encode/decode cases will likely diverge.
+//
+// The decode/serverside case, however, will always respond to the UnificationForm()
+// method, as that is how the message contents are translated to their next interpreted form.
 type Message struct {
 	Env []semantic.Environment   `json:"environments,omitempty"`
 	Ls  []semantic.LogicState    `json:"logic-states,omitempty"`

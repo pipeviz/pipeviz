@@ -10,7 +10,7 @@ import (
 )
 
 func tprops(pairs ...interface{}) []system.PropPair {
-	ret := make([]system.PropPair, 0)
+	var ret []system.PropPair
 	for k, v := range pairs {
 		if k%2 != 0 {
 			continue

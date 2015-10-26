@@ -30,7 +30,7 @@ func init() {
 		}
 
 		MsgJSON = append(MsgJSON, f)
-		err = json.Unmarshal(f, m)
+		_ = json.Unmarshal(f, m)
 		Msgs = append(Msgs, m)
 	}
 

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Log is a single log entry in the journal.
+// Record is a single entry in the journal.
 type Record struct {
 	// The index of the log item in the journal.
 	Index uint64 `msg:"index"`

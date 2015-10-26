@@ -13,8 +13,9 @@ func TestNewBoltStore(t *testing.T) {
 	ls, err := NewBoltStore("test.boltdb")
 	b := ls.(*BoltStore)
 	defer func() {
-		b.conn.Close()
-		os.Remove("test.boltdb")
+		// errs are insignificant here
+		_ = b.conn.Close()
+		_ = os.Remove("test.boltdb")
 	}()
 
 	if err != nil {
@@ -38,8 +39,9 @@ func TestNewEntryGetCount(t *testing.T) {
 	ls, err := NewBoltStore("test.boltdb")
 	b := ls.(*BoltStore)
 	defer func() {
-		b.conn.Close()
-		os.Remove("test.boltdb")
+		// errs are insignificant here
+		_ = b.conn.Close()
+		_ = os.Remove("test.boltdb")
 	}()
 
 	if err != nil {

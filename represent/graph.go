@@ -1,7 +1,6 @@
 package represent
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -22,6 +21,7 @@ type coreGraph struct {
 	orphans        edgeSpecSet // FIXME breaks immut
 }
 
+// NewGraph creates a new in-memory coreGraph and returns it as a system.CoreGraph.
 func NewGraph() system.CoreGraph {
 	log.WithFields(log.Fields{
 		"system": "engine",
@@ -277,5 +277,5 @@ func (g *coreGraph) Get(id uint64) (system.VertexTuple, error) {
 		return vtx.(system.VertexTuple), nil
 	}
 
-	return system.VertexTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
+	return system.VertexTuple{}, fmt.Errorf("No vertex exists with id %d at the present revision of the graph", id)
 }

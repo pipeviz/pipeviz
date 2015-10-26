@@ -29,7 +29,7 @@ func init() {
 }
 
 func TestClone(t *testing.T) {
-	var g *coreGraph = &coreGraph{vtuples: ps.NewMap(), vserial: 0}
+	g := &coreGraph{vtuples: ps.NewMap(), vserial: 0}
 	g.vserial = 2
 	g.vtuples = g.vtuples.Set("foo", "val")
 
@@ -46,7 +46,7 @@ func TestClone(t *testing.T) {
 }
 
 func BenchmarkMergeMessageOne(b *testing.B) {
-	var g system.CoreGraph = &coreGraph{vtuples: ps.NewMap()}
+	g := &coreGraph{vtuples: ps.NewMap()}
 	for i := 0; i < b.N; i++ {
 		g.Merge(0, msgs[0].UnificationForm())
 	}
