@@ -1,6 +1,6 @@
-// Provides a broker between the main state machine event loop and the
-// listeners/consumers of that data. Package is kept separate in part to avoid
-// cyclic dependencies.
+// Package broker provides a broker between the main state machine event loop
+// and the listeners/consumers of that data. Package is kept separate in part
+// to avoid cyclic dependencies.
 //
 // Logic here is also responsible for providing any necessary fanout to
 // the various listeners.
@@ -15,11 +15,11 @@ import (
 )
 
 // TODO switch to doing this all with DI instead, i think
-var singletonBroker *GraphBroker = New()
+var singletonBroker = New()
 
 // Package-level var to count the total number of brokers that have been created.
 // Purely for instrumentation, logging purposes.
-var brokerCount uint64 = 0
+var brokerCount uint64
 
 // Get returns the singleton graph broker that (is assumed to) consume from the
 // main state machine's processing loop.
@@ -27,16 +27,24 @@ func Get() *GraphBroker {
 	return singletonBroker
 }
 
-type GraphSender chan<- system.CoreGraph
-type GraphReceiver <-chan system.CoreGraph
-
-type GraphBroker struct {
-	// synchronizes access to the channel list
-	// TODO be lock-free
-	lock sync.RWMutex
-	subs map[GraphReceiver]GraphSender
-	id   uint64 // internal id, just for instrumentation
-}
+type (
+	// GraphSender is a channel over which graphs can be sent. They are
+	// the input end to a fanout broker.
+	GraphSender chan<- system.CoreGraph
+	// GraphReceiver is a channel over which graphs are received. They are the
+	// output end of a fanout broker.
+	GraphReceiver <-chan system.CoreGraph
+	// GraphBroker acts as a broker between a single sending channel and
+	// multiple receiving channels,ensuring that a single message sent on the
+	// input side is propagated to all the channels on the receiving side.
+	GraphBroker struct {
+		// synchronizes access to the channel list
+		// TODO be lock-free
+		lock sync.RWMutex
+		subs map[GraphReceiver]GraphSender
+		id   uint64 // internal id, just for instrumentation
+	}
+)
 
 // New creates a pointer to a new, fully initialized GraphBroker.
 func New() *GraphBroker {
@@ -64,7 +72,7 @@ func (gb *GraphBroker) Fanout(input GraphReceiver) {
 			log.WithFields(log.Fields{
 				"system":    "broker",
 				"broker-id": gb.id,
-				"msgid":     in.MsgId(),
+				"msgid":     in.MsgID(),
 			}).Debug("Received new graph, sending to all subscribers")
 
 			i := 1
@@ -73,7 +81,7 @@ func (gb *GraphBroker) Fanout(input GraphReceiver) {
 					"system":    "broker",
 					"broker-id": gb.id,
 					"subnum":    i,
-					"msgid":     in.MsgId(),
+					"msgid":     in.MsgID(),
 				}).Debug("Sending graph to subscriber")
 				// take a read lock at each stage of the loop. this guarantees that a
 				// sub/unsub can interrupt at each point; mostly this is crucial because

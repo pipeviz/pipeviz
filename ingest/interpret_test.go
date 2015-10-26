@@ -13,9 +13,11 @@ import (
 	"github.com/tag1consulting/pipeviz/schema"
 )
 
-var masterSchema *gjs.Schema
-
-var Msgs []*ingest.Message
+var (
+	masterSchema *gjs.Schema
+	Msgs         []*ingest.Message
+	MsgJSON      [][]byte
+)
 
 func init() {
 	for i := range make([]struct{}, 8) {
@@ -27,6 +29,7 @@ func init() {
 			panic("json fnf: " + path)
 		}
 
+		MsgJSON = append(MsgJSON, f)
 		err = json.Unmarshal(f, m)
 		Msgs = append(Msgs, m)
 	}
@@ -95,8 +98,8 @@ func BenchmarkUnmarshalMessageTwo(b *testing.B) {
 }
 
 func BenchmarkUnmarshalMessageOneAndTwo(b *testing.B) {
-	d1, _ := fixtures.Asset("1.json")
-	d2, _ := fixtures.Asset("2.json")
+	d1 := MsgJSON[0]
+	d2 := MsgJSON[1]
 
 	for i := 0; i < b.N; i++ {
 		m1 := &ingest.Message{}
@@ -108,7 +111,7 @@ func BenchmarkUnmarshalMessageOneAndTwo(b *testing.B) {
 }
 
 func BenchmarkValidateMessageOne(b *testing.B) {
-	d, _ := fixtures.Asset("1.json")
+	d := MsgJSON[0]
 	msg := gjs.NewStringLoader(string(d))
 
 	for i := 0; i < b.N; i++ {
@@ -117,7 +120,7 @@ func BenchmarkValidateMessageOne(b *testing.B) {
 }
 
 func BenchmarkValidateMessageTwo(b *testing.B) {
-	d, _ := fixtures.Asset("1.json")
+	d := MsgJSON[0]
 	msg := gjs.NewStringLoader(string(d))
 
 	for i := 0; i < b.N; i++ {
@@ -126,8 +129,8 @@ func BenchmarkValidateMessageTwo(b *testing.B) {
 }
 
 func BenchmarkValidateMessageOneAndTwo(b *testing.B) {
-	d1, _ := fixtures.Asset("1.json")
-	d2, _ := fixtures.Asset("2.json")
+	d1 := MsgJSON[0]
+	d2 := MsgJSON[1]
 	msg1 := gjs.NewStringLoader(string(d1))
 	msg2 := gjs.NewStringLoader(string(d2))
 

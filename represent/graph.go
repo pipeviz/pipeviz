@@ -53,7 +53,7 @@ func (g *coreGraph) clone() *coreGraph {
 	return &cp
 }
 
-func (g *coreGraph) MsgId() uint64 {
+func (g *coreGraph) MsgID() uint64 {
 	return g.msgid
 }
 
@@ -118,7 +118,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 	var ec, lec, pass int
 	var specs []system.EdgeSpec
 	for ec = ess.EdgeCount(); ec != 0 && ec != lec; ec = ess.EdgeCount() {
-		pass += 1
+		pass++
 		lec = ec
 		l2 := logEntry.WithFields(log.Fields{
 			"pass":       pass,
@@ -216,7 +216,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 			OutEdges: ps.NewMap(),
 		}
 
-		g.vserial += 1
+		g.vserial++
 		final.ID = g.vserial
 		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
 
@@ -226,7 +226,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 			edge, success := spec.Resolve(g, msgid, final)
 			if success { // could fail if corresponding env not yet declared
 				logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
-				g.vserial += 1
+				g.vserial++
 				edge.ID = g.vserial
 				final.OutEdges = final.OutEdges.Set(i2a(edge.ID), edge)
 
@@ -269,13 +269,13 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 // Gets the vtTuple for a given vertex id.
 func (g *coreGraph) Get(id uint64) (system.VertexTuple, error) {
 	if id > g.vserial {
-		return system.VertexTuple{}, errors.New(fmt.Sprintf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id))
+		return system.VertexTuple{}, fmt.Errorf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id)
 	}
 
 	vtx, exists := g.vtuples.Lookup(i2a(id))
 	if exists {
 		return vtx.(system.VertexTuple), nil
-	} else {
-		return system.VertexTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
 	}
+
+	return system.VertexTuple{}, errors.New(fmt.Sprintf("No vertex exists with id %d at the present revision of the graph", id))
 }

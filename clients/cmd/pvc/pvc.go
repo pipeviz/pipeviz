@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 
@@ -59,7 +58,7 @@ func toJSONBytes(v interface{}) ([]byte, error) {
 
 	msg, err := json.Marshal(m)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("\nError while marshaling data to JSON for validation: %s\n", err.Error()))
+		return nil, fmt.Errorf("\nError while marshaling data to JSON for validation: %s\n", err.Error())
 	}
 
 	return msg, nil

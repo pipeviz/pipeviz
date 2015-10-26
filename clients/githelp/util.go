@@ -1,5 +1,5 @@
 /*
-Package git contains shared helpers for git-related operations done by clients.
+Package githelp contains shared helpers for git-related operations done by clients.
 
 It is dependent on libgit2, via git2go. That means CGo.
 */

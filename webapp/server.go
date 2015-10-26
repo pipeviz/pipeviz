@@ -24,9 +24,9 @@ var (
 
 var (
 	// Subscribe to the master broker and store latest locally as it comes
-	brokerListen broker.GraphReceiver = broker.Get().Subscribe()
+	brokerListen = broker.Get().Subscribe()
 	// Initially set the latestGraph to a new, empty one to avoid nil pointer
-	latestGraph system.CoreGraph = represent.NewGraph()
+	latestGraph = represent.NewGraph()
 	// Count of active websocket clients (for expvars)
 	clientCount int64
 )
@@ -58,9 +58,9 @@ func init() {
 func NewMux() *web.Mux {
 	m := web.New()
 
-	m.Use(log.NewHttpLogger("webapp"))
-	m.Get("/sock", OpenSocket)
-	m.Get("/message/:mid", GetMessage)
+	m.Use(log.NewHTTPLogger("webapp"))
+	m.Get("/sock", openSocket)
+	m.Get("/message/:mid", getMessage)
 	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
 
 	return m
@@ -68,13 +68,13 @@ func NewMux() *web.Mux {
 
 // RegisterToMux adds all necessary pieces to an injected mux.
 func RegisterToMux(m *web.Mux) {
-	m.Use(log.NewHttpLogger("webapp"))
-	m.Get("/sock", OpenSocket)
-	m.Get("/message/:mid", GetMessage)
+	m.Use(log.NewHTTPLogger("webapp"))
+	m.Get("/sock", openSocket)
+	m.Get("/message/:mid", getMessage)
 	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
 }
 
-func graphToJson(g system.CoreGraph) ([]byte, error) {
+func graphToJSON(g system.CoreGraph) ([]byte, error) {
 	var vertices []interface{}
 	for _, v := range g.VerticesWith(q.Qbv(system.VTypeNone)) {
 		vertices = append(vertices, v.Flat())
@@ -85,12 +85,12 @@ func graphToJson(g system.CoreGraph) ([]byte, error) {
 		Id       uint64        `json:"id"`
 		Vertices []interface{} `json:"vertices"`
 	}{
-		Id:       g.MsgId(),
+		Id:       g.MsgID(),
 		Vertices: vertices,
 	})
 }
 
-func GetMessage(c web.C, w http.ResponseWriter, r *http.Request) {
+func getMessage(c web.C, w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(c.URLParams["mid"], 10, 64)
 	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
@@ -119,7 +119,7 @@ func GetMessage(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Write(rec.Message)
 }
 
-func OpenSocket(w http.ResponseWriter, r *http.Request) {
+func openSocket(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		entry := logrus.WithFields(logrus.Fields{
@@ -182,7 +182,7 @@ func wsWriter(ws *websocket.Conn) {
 }
 
 func graphToSock(ws *websocket.Conn, g system.CoreGraph) {
-	j, err := graphToJson(g)
+	j, err := graphToJSON(g)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"system": "webapp",

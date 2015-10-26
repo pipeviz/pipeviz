@@ -42,7 +42,8 @@ func runFixr(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
 		log.Fatalf("Must provide at least one directory argument to fixr.")
 	}
-	files := make([]fileInfo, 0)
+
+	var files []fileInfo
 	for _, dir := range args {
 		fl, err := ioutil.ReadDir(dir)
 		if err != nil {

@@ -42,5 +42,5 @@ type CoreGraph interface {
 	// Returns the message id for the current version of the graph. The graph's
 	// contents are guaranteed to represent the state resulting from a correct
 	// in-order interpretation of the messages up to the id, inclusive.
-	MsgId() uint64
+	MsgID() uint64
 }

@@ -94,7 +94,7 @@ func (s *srv) Run(cmd *cobra.Command, args []string) {
 	mux := web.New()
 	cl := newClient(s.target, 5*time.Second)
 
-	mux.Use(log.NewHttpLogger("pvproxy"))
+	mux.Use(log.NewHTTPLogger("pvproxy"))
 
 	if s.key != "" && s.cert == "" {
 		s.cert = s.key + ".crt"

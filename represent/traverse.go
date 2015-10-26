@@ -12,21 +12,21 @@ import (
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) OutWith(egoId uint64, ef system.EFilter) (es system.EdgeVector) {
-	return g.arcWith(egoId, ef, false)
+func (g *coreGraph) OutWith(egoID uint64, ef system.EFilter) (es system.EdgeVector) {
+	return g.arcWith(egoID, ef, false)
 }
 
 // Inspects the indicated vertex's set of in-edges, returning a slice of
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
-func (g *coreGraph) InWith(egoId uint64, ef system.EFilter) (es system.EdgeVector) {
-	return g.arcWith(egoId, ef, true)
+func (g *coreGraph) InWith(egoID uint64, ef system.EFilter) (es system.EdgeVector) {
+	return g.arcWith(egoID, ef, true)
 }
 
-func (g *coreGraph) arcWith(egoId uint64, ef system.EFilter, in bool) (es system.EdgeVector) {
+func (g *coreGraph) arcWith(egoID uint64, ef system.EFilter, in bool) (es system.EdgeVector) {
 	etype, props := ef.EType(), ef.EProps()
-	vt, err := g.Get(egoId)
+	vt, err := g.Get(egoID)
 	if err != nil {
 		// vertex doesn't exist
 		return
@@ -76,21 +76,21 @@ func (g *coreGraph) arcWith(egoId uint64, ef system.EFilter, in bool) (es system
 // Return a slice of vtTuples that are successors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the successor
 // vertices pass the VertexFilter.
-func (g *coreGraph) SuccessorsWith(egoId uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
-	return g.adjacentWith(egoId, vef, false)
+func (g *coreGraph) SuccessorsWith(egoID uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
+	return g.adjacentWith(egoID, vef, false)
 }
 
 // Return a slice of vtTuples that are predecessors of the given vid, constraining the list
 // to those that are connected by edges that pass the EdgeFilter, and the predecessor
 // vertices pass the VertexFilter.
-func (g *coreGraph) PredecessorsWith(egoId uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
-	return g.adjacentWith(egoId, vef, true)
+func (g *coreGraph) PredecessorsWith(egoID uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
+	return g.adjacentWith(egoID, vef, true)
 }
 
-func (g *coreGraph) adjacentWith(egoId uint64, vef system.VEFilter, in bool) (vts system.VertexTupleVector) {
+func (g *coreGraph) adjacentWith(egoID uint64, vef system.VEFilter, in bool) (vts system.VertexTupleVector) {
 	etype, eprops := vef.EType(), vef.EProps()
 	vtype, vprops := vef.VType(), vef.VProps()
-	vt, err := g.Get(egoId)
+	vt, err := g.Get(egoID)
 	if err != nil {
 		// vertex doesn't exist
 		return

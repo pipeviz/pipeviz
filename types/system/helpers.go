@@ -3,7 +3,7 @@ package system
 import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type flatVTuple struct {
-	Id       uint64     `json:"id"`
+	ID       uint64     `json:"id"`
 	V        flatVertex `json:"vertex"`
 	InEdges  []flatEdge `json:"inEdges"`
 	OutEdges []flatEdge `json:"outEdges"`
@@ -15,7 +15,7 @@ type flatVertex struct {
 }
 
 type flatEdge struct {
-	Id     uint64              `json:"id"`
+	ID     uint64              `json:"id"`
 	Source uint64              `json:"source"`
 	Target uint64              `json:"target"`
 	EType  EType               `json:"etype"`
@@ -34,7 +34,7 @@ func vtoflat(v StdVertex) (flat flatVertex) {
 
 func etoflat(e StdEdge) (flat flatEdge) {
 	flat = flatEdge{
-		Id:     e.ID,
+		ID:     e.ID,
 		Source: e.Source,
 		Target: e.Target,
 		EType:  e.EType,
@@ -51,7 +51,7 @@ func etoflat(e StdEdge) (flat flatEdge) {
 // flatten the persistent structures in the vtTuple down into conventional ones (typically for easy printing).
 // TODO if this is gonna be exported, it's gotta be cleaned up
 func (vt VertexTuple) Flat() (flat flatVTuple) {
-	flat.Id = vt.ID
+	flat.ID = vt.ID
 	flat.V = vtoflat(vt.Vertex)
 
 	vt.InEdges.ForEach(func(k string, v ps.Any) {

@@ -36,20 +36,20 @@ func New(j journal.JournalStore, s *gjs.Schema, ic chan *journal.Record, bc chan
 	}
 }
 
-// RunHttpIngestor sets up and runs the http listener that receives messages, validates
+// RunHTTPIngestor sets up and runs the http listener that receives messages, validates
 // them against the provided schema, persists those that pass validation, then sends
 // them along to the interpretation layer via the server's interpret channel.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 //
 // Closes the provided interpretation channel if/when the http server terminates.
-func (s *Ingestor) RunHttpIngestor(addr, key, cert string) error {
+func (s *Ingestor) RunHTTPIngestor(addr, key, cert string) error {
 	var err error
 	mb := web.New()
 	useTLS := key != "" && cert != ""
 
 	// TODO use more appropriate logger
-	mb.Use(log.NewHttpLogger("ingestor"))
+	mb.Use(log.NewHTTPLogger("ingestor"))
 
 	if useTLS {
 		sec := secure.New(secure.Options{

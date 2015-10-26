@@ -33,13 +33,13 @@ const (
 )
 
 var (
-	bindAll    *bool   = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath     *string = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
-	useSyslog  *bool   = pflag.Bool("syslog", false, "Write log output to syslog.")
-	ingestKey  *string = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
-	ingestCert *string = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	webappKey  *string = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
-	webappCert *string = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	bindAll    = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath     = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+	useSyslog  = pflag.Bool("syslog", false, "Write log output to syslog.")
+	ingestKey  = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
+	ingestCert = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	webappKey  = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
+	webappCert = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
 )
 
 func main() {
@@ -103,10 +103,18 @@ func main() {
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address
-	if *ingestKey != "" && *ingestCert == "" {
-		*ingestCert = *ingestKey + ".crt"
-	}
-	go srv.RunHttpIngestor(listenAt+strconv.Itoa(DefaultIngestionPort), *ingestKey, *ingestCert)
+	go func() {
+		if *ingestKey != "" && *ingestCert == "" {
+			*ingestCert = *ingestKey + ".crt"
+		}
+		err := srv.RunHTTPIngestor(listenAt+strconv.Itoa(DefaultIngestionPort), *ingestKey, *ingestCert)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"system": "main",
+				"err":    err,
+			}).Fatal("Error while starting the ingestion http server")
+		}
+	}()
 
 	// Kick off the intermediary interpretation goroutine that receives persisted
 	// messages from the ingestor, merges them into the state graph, then passes
