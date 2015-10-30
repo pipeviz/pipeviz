@@ -13,9 +13,9 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
 	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/journal"
-	"github.com/tag1consulting/pipeviz/journal/boltdb"
-	"github.com/tag1consulting/pipeviz/journal/mem"
+	"github.com/tag1consulting/pipeviz/mlog"
+	"github.com/tag1consulting/pipeviz/mlog/boltdb"
+	"github.com/tag1consulting/pipeviz/mlog/mem"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/schema"
 	"github.com/tag1consulting/pipeviz/types/system"
@@ -68,7 +68,7 @@ func main() {
 	// Channel to receive persisted messages from HTTP workers. 1000 cap to allow
 	// some wiggle room if there's a sudden burst of messages and the interpreter
 	// gets behind.
-	interpretChan := make(chan *journal.Record, 1000)
+	interpretChan := make(chan *mlog.Record, 1000)
 
 	var listenAt string
 	if *bindAll == false {
@@ -77,7 +77,7 @@ func main() {
 		listenAt = ":"
 	}
 
-	var j journal.Store
+	var j mlog.Store
 	switch *jstor {
 	case "bolt":
 		j, err = boltdb.NewBoltStore(*dbPath + "/journal.bolt")
@@ -149,7 +149,7 @@ func main() {
 // RunWebapp runs the pipeviz http frontend webapp on the specified address.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
+func RunWebapp(addr, key, cert string, f mlog.RecordGetter) {
 	mf := web.New()
 	useTLS := key != "" && cert != ""
 
@@ -216,10 +216,10 @@ func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 }
 
 // Rebuilds the graph from the extant entries in a journal.
-func restoreGraph(j journal.Store) (system.CoreGraph, error) {
+func restoreGraph(j mlog.Store) (system.CoreGraph, error) {
 	g := represent.NewGraph()
 
-	var item *journal.Record
+	var item *mlog.Record
 	tot, err := j.Count()
 	if err != nil {
 		// journal failed to report a count for some reason, bail out

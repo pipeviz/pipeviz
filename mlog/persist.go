@@ -1,5 +1,5 @@
 // Package journal contains interface and general piece for pipeviz's append-only journal.
-package journal
+package mlog
 
 // Store describes a storage backend for Pipeviz's append-only log.
 // Based largely on the LogStorage interface in github.com/hashicorp/raft.

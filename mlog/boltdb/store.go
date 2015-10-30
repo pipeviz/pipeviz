@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
-	"github.com/tag1consulting/pipeviz/journal"
+	"github.com/tag1consulting/pipeviz/mlog"
 )
 
 const (
@@ -27,7 +27,7 @@ type BoltStore struct {
 }
 
 // NewBoltStore creates a handle to a BoltDB-backed log store
-func NewBoltStore(path string) (journal.Store, error) {
+func NewBoltStore(path string) (mlog.Store, error) {
 	// Allow 1s timeout on obtaining a file lock
 	b, err := bolt.Open(path, fileMode, &bolt.Options{Timeout: time.Second})
 	if err != nil {
@@ -67,7 +67,7 @@ func (b *BoltStore) init() error {
 }
 
 // Get returns the item associated with the given index.
-func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
+func (b *BoltStore) Get(idx uint64) (*mlog.Record, error) {
 	tx, err := b.conn.Begin(false)
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
 		return nil, errors.New("index not found")
 	}
 
-	l := &journal.Record{}
+	l := &mlog.Record{}
 	if _, err := l.UnmarshalMsg(val); err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
 
 // NewEntry creates a record from the provided data, appends that record onto
 // the end of the journal, then returns the created record.
-func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*journal.Record, error) {
+func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*mlog.Record, error) {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*journal.Record
 	// no need to sync b/c the conn.Begin(true) call will block
 	bucket := tx.Bucket(bucketName)
 
-	record := journal.NewRecord(message, remoteAddr)
+	record := mlog.NewRecord(message, remoteAddr)
 	record.Index, err = bucket.NextSequence()
 	if err != nil {
 		return nil, err

@@ -1,7 +1,7 @@
 //go:generate msgp
 //msgp:tuple Record
 
-package journal
+package mlog
 
 import (
 	"net"

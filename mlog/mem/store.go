@@ -9,18 +9,18 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/tag1consulting/pipeviz/journal"
+	"github.com/tag1consulting/pipeviz/mlog"
 )
 
 type memJournal struct {
-	j    []*journal.Record
+	j    []*mlog.Record
 	lock sync.RWMutex
 }
 
 // NewMemStore initializes a new memory-backed journal.
-func NewMemStore() journal.Store {
+func NewMemStore() mlog.Store {
 	s := &memJournal{
-		j: make([]*journal.Record, 0),
+		j: make([]*mlog.Record, 0),
 	}
 
 	return s
@@ -32,7 +32,7 @@ func (s *memJournal) Count() (uint64, error) {
 }
 
 // Get returns the journal entry at the provided index.
-func (s *memJournal) Get(index uint64) (*journal.Record, error) {
+func (s *memJournal) Get(index uint64) (*mlog.Record, error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -46,10 +46,10 @@ func (s *memJournal) Get(index uint64) (*journal.Record, error) {
 
 // NewEntry creates a record from the provided data, appends that record onto
 // the end of the journal, then returns the created record.
-func (s *memJournal) NewEntry(message []byte, remoteAddr string) (*journal.Record, error) {
+func (s *memJournal) NewEntry(message []byte, remoteAddr string) (*mlog.Record, error) {
 	s.lock.Lock()
 
-	record := journal.NewRecord(message, remoteAddr)
+	record := mlog.NewRecord(message, remoteAddr)
 	record.Index = uint64(len(s.j) + 1)
 
 	s.j = append(s.j, record)

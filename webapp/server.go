@@ -11,8 +11,8 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
-	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
+	"github.com/tag1consulting/pipeviz/mlog"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/represent/q"
 	"github.com/tag1consulting/pipeviz/types/system"
@@ -97,12 +97,12 @@ func getMessage(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var getter journal.RecordGetter
+	var getter mlog.RecordGetter
 	var ok bool
 	if fun, exists := c.Env["journalGet"]; !exists {
 		http.Error(w, "Could not access log store", 500)
 		return
-	} else if getter, ok = fun.(journal.RecordGetter); !ok {
+	} else if getter, ok = fun.(mlog.RecordGetter); !ok {
 		http.Error(w, "Could not access log store", 500)
 		return
 	}
