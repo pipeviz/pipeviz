@@ -15,6 +15,7 @@ import (
 	"github.com/tag1consulting/pipeviz/ingest"
 	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/journal/boltdb"
+	"github.com/tag1consulting/pipeviz/journal/mem"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/schema"
 	"github.com/tag1consulting/pipeviz/types/system"
@@ -40,6 +41,7 @@ var (
 	ingestCert = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
 	webappKey  = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
 	webappCert = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	jstor      = pflag.StringP("journal-storage", "", "bolt", "Storage backend to use for the journal. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
 )
 
 func main() {
@@ -75,12 +77,23 @@ func main() {
 		listenAt = ":"
 	}
 
-	j, err := boltdb.NewBoltStore(*dbPath + "/journal.bolt")
-	if err != nil {
+	var j journal.Store
+	switch *jstor {
+	case "bolt":
+		j, err = boltdb.NewBoltStore(*dbPath + "/journal.bolt")
+		if err != nil {
+			log.WithFields(log.Fields{
+				"system": "main",
+				"err":    err,
+			}).Fatal("Error while setting up journal store, exiting")
+		}
+	case "memory":
+		j = mem.NewMemStore()
+	default:
 		log.WithFields(log.Fields{
-			"system": "main",
-			"err":    err,
-		}).Fatal("Error while setting up journal store, exiting")
+			"system":  "main",
+			"storage": *jstor,
+		}).Fatal("Invalid storage type requested for journal, exiting")
 	}
 
 	// Restore the graph from the journal (or start from nothing if journal is empty)

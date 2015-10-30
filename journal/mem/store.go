@@ -2,8 +2,8 @@ package mem
 
 // Provides a memory-backed store for pipeviz's append-only journal.
 //
-// Clearly, this is only for testing and debugging purposes. A memory-backed
-// journal is about as useful as waterproof teabags.
+// Clearly, this is only for development, testing, and debugging purposes.
+// A memory-backed journal is about as useful as waterproof teabags.
 
 import (
 	"errors"
