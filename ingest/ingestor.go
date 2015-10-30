@@ -19,7 +19,7 @@ import (
 
 // Ingestor brings together the required components to run a pipeviz ingestion HTTP server.
 type Ingestor struct {
-	journal        mlog.Store
+	mlog           mlog.Store
 	schema         *gjs.Schema
 	interpretChan  chan *mlog.Record
 	brokerChan     chan system.CoreGraph
@@ -29,7 +29,7 @@ type Ingestor struct {
 // New creates a new pipeviz ingestor mux, ready to be kicked off.
 func New(j mlog.Store, s *gjs.Schema, ic chan *mlog.Record, bc chan system.CoreGraph, max int64) *Ingestor {
 	return &Ingestor{
-		journal:        j,
+		mlog:           j,
 		schema:         s,
 		interpretChan:  ic,
 		brokerChan:     bc,
@@ -137,11 +137,11 @@ func (s *Ingestor) handleMessage(w http.ResponseWriter, r *http.Request) {
 
 	if result.Valid() {
 		// Index of message gets written by the LogStore
-		record, err := s.journal.NewEntry(b, r.RemoteAddr)
+		record, err := s.mlog.NewEntry(b, r.RemoteAddr)
 		if err != nil {
 			w.WriteHeader(500)
 			// should we tell the client this?
-			w.Write([]byte("Failed to persist message to journal"))
+			w.Write([]byte("Failed to persist message to mlog"))
 			return
 		}
 

@@ -1,9 +1,8 @@
-package mem
-
-// Provides a memory-backed store for pipeviz's append-only journal.
+// Package mem provides memory-backed storage for pipeviz's append-only message log.
 //
-// Clearly, this is only for development, testing, and debugging purposes.
-// A memory-backed journal is about as useful as waterproof teabags.
+// Clearly, this is only for development, testing, and debugging purposes;
+// in general, a memory-backed mlog is about as useful as waterproof teabags.
+package mem
 
 import (
 	"errors"
@@ -12,27 +11,27 @@ import (
 	"github.com/tag1consulting/pipeviz/mlog"
 )
 
-type memJournal struct {
+type memMessageLog struct {
 	j    []*mlog.Record
 	lock sync.RWMutex
 }
 
-// NewMemStore initializes a new memory-backed journal.
+// NewMemStore initializes a new memory-backed mlog.
 func NewMemStore() mlog.Store {
-	s := &memJournal{
+	s := &memMessageLog{
 		j: make([]*mlog.Record, 0),
 	}
 
 	return s
 }
 
-// Count returns the number of items in the journal.
-func (s *memJournal) Count() (uint64, error) {
+// Count returns the number of items in the mlog.
+func (s *memMessageLog) Count() (uint64, error) {
 	return uint64(len(s.j)), nil
 }
 
-// Get returns the journal entry at the provided index.
-func (s *memJournal) Get(index uint64) (*mlog.Record, error) {
+// Get returns the mlog entry at the provided index.
+func (s *memMessageLog) Get(index uint64) (*mlog.Record, error) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -45,8 +44,8 @@ func (s *memJournal) Get(index uint64) (*mlog.Record, error) {
 }
 
 // NewEntry creates a record from the provided data, appends that record onto
-// the end of the journal, then returns the created record.
-func (s *memJournal) NewEntry(message []byte, remoteAddr string) (*mlog.Record, error) {
+// the end of the mlog, then returns the created record.
+func (s *memMessageLog) NewEntry(message []byte, remoteAddr string) (*mlog.Record, error) {
 	s.lock.Lock()
 
 	record := mlog.NewRecord(message, remoteAddr)

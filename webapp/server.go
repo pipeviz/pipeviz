@@ -99,11 +99,11 @@ func getMessage(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	var getter mlog.RecordGetter
 	var ok bool
-	if fun, exists := c.Env["journalGet"]; !exists {
-		http.Error(w, "Could not access log store", 500)
+	if fun, exists := c.Env["mlogGet"]; !exists {
+		http.Error(w, "Could not access mlog storage", 500)
 		return
 	} else if getter, ok = fun.(mlog.RecordGetter); !ok {
-		http.Error(w, "Could not access log store", 500)
+		http.Error(w, "Could not access mlog storage", 500)
 		return
 	}
 

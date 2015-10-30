@@ -1,3 +1,5 @@
+// Package boltdb provides disk-backed storage for pipeviz's append-only message log
+// via boltdb.
 package boltdb
 
 import (
@@ -15,7 +17,7 @@ const (
 
 var (
 	// The name of the bucket to use.
-	bucketName = []byte("journal")
+	bucketName = []byte("mlog")
 )
 
 // BoltStore represents a single BoltDB storage backend for the append-only log.
@@ -49,7 +51,7 @@ func NewBoltStore(path string) (mlog.Store, error) {
 	return store, nil
 }
 
-// init sets up the journal bucket in the boltdb backend.
+// init sets up the mlog bucket in the boltdb backend.
 func (b *BoltStore) init() error {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
@@ -91,7 +93,7 @@ func (b *BoltStore) Get(idx uint64) (*mlog.Record, error) {
 }
 
 // NewEntry creates a record from the provided data, appends that record onto
-// the end of the journal, then returns the created record.
+// the end of the mlog, then returns the created record.
 func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*mlog.Record, error) {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
@@ -126,7 +128,7 @@ func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*mlog.Record, e
 	return record, nil
 }
 
-// Count reports the number of items in the journal by opening a db cursor to
+// Count reports the number of items in the mlog by opening a db cursor to
 // grab the last item from the bucket. Because we're append-only, this is
 // guaranteed to be the last one, and thus its index is the count.
 func (b *BoltStore) Count() (uint64, error) {

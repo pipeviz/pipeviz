@@ -8,7 +8,7 @@ import (
 	"github.com/tag1consulting/pipeviz/mlog"
 )
 
-// Ensure initializing the bolt journal works as expected
+// Ensure initializing the bolt mlog works as expected
 func TestNewBoltStore(t *testing.T) {
 	ls, err := NewBoltStore("test.boltdb")
 	b := ls.(*BoltStore)
