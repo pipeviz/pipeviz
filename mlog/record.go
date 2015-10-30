@@ -1,16 +1,16 @@
 //go:generate msgp
 //msgp:tuple Record
 
-package journal
+package mlog
 
 import (
 	"net"
 	"time"
 )
 
-// Record is a single entry in the journal.
+// Record represents a single entry in the mlog.
 type Record struct {
-	// The index of the log item in the journal.
+	// The index of the record in the mlog.
 	Index uint64 `msg:"index"`
 
 	// A system-local timestamp, split into seconds and nanoseconds, indicating
@@ -39,7 +39,7 @@ func NewRecord(message []byte, RemoteAddr string) *Record {
 }
 
 // Time returns a standard Go time.Time object composed from the timestamp
-// indicating when the record was persisted to the journal.
+// indicating when the record was persisted to the mlog.
 func (r Record) Time() time.Time {
 	return time.Unix(r.TimeSec, r.TimeNSec)
 }

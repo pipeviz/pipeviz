@@ -1,5 +1,6 @@
-// Package journal contains interface and general piece for pipeviz's append-only journal.
-package journal
+// Package mlog contains interfaces and shared components for pipeviz's
+// append-only message log.
+package mlog
 
 // Store describes a storage backend for Pipeviz's append-only log.
 // Based largely on the LogStorage interface in github.com/hashicorp/raft.
@@ -11,9 +12,9 @@ type Store interface {
 	Get(index uint64) (*Record, error)
 
 	// NewEntry creates a record from the provided data, appends it onto the
-	// end of the journal, and returns the created record.
+	// end of the mlog, and returns the created record.
 	NewEntry(message []byte, remoteAddr string) (*Record, error)
 }
 
-// RecordGetter is a function type that gets records out of a journal.
+// RecordGetter is a function type that gets records out of a mlog.
 type RecordGetter func(index uint64) (*Record, error)

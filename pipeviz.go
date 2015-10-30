@@ -13,9 +13,9 @@ import (
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/tag1consulting/pipeviz/broker"
 	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/journal"
-	"github.com/tag1consulting/pipeviz/journal/boltdb"
-	"github.com/tag1consulting/pipeviz/journal/mem"
+	"github.com/tag1consulting/pipeviz/mlog"
+	"github.com/tag1consulting/pipeviz/mlog/boltdb"
+	"github.com/tag1consulting/pipeviz/mlog/mem"
 	"github.com/tag1consulting/pipeviz/represent"
 	"github.com/tag1consulting/pipeviz/schema"
 	"github.com/tag1consulting/pipeviz/types/system"
@@ -35,13 +35,13 @@ const (
 
 var (
 	bindAll    = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath     = pflag.StringP("data-dir", "d", ".", "The base directory to use for persistent storage.")
+	dbPath     = pflag.StringP("data-dir", "d", ".", "The base directory to use for all persistent storage.")
 	useSyslog  = pflag.Bool("syslog", false, "Write log output to syslog.")
 	ingestKey  = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
 	ingestCert = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
 	webappKey  = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
 	webappCert = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	jstor      = pflag.StringP("journal-storage", "", "bolt", "Storage backend to use for the journal. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
+	mlstore    = pflag.StringP("mlog-storage", "", "bolt", "Storage backend to use for the message log. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
 )
 
 func main() {
@@ -68,7 +68,7 @@ func main() {
 	// Channel to receive persisted messages from HTTP workers. 1000 cap to allow
 	// some wiggle room if there's a sudden burst of messages and the interpreter
 	// gets behind.
-	interpretChan := make(chan *journal.Record, 1000)
+	interpretChan := make(chan *mlog.Record, 1000)
 
 	var listenAt string
 	if *bindAll == false {
@@ -77,33 +77,33 @@ func main() {
 		listenAt = ":"
 	}
 
-	var j journal.Store
-	switch *jstor {
+	var j mlog.Store
+	switch *mlstore {
 	case "bolt":
-		j, err = boltdb.NewBoltStore(*dbPath + "/journal.bolt")
+		j, err = boltdb.NewBoltStore(*dbPath + "/mlog.bolt")
 		if err != nil {
 			log.WithFields(log.Fields{
 				"system": "main",
 				"err":    err,
-			}).Fatal("Error while setting up journal store, exiting")
+			}).Fatal("Error while setting up bolt mlog storage, exiting")
 		}
 	case "memory":
 		j = mem.NewMemStore()
 	default:
 		log.WithFields(log.Fields{
 			"system":  "main",
-			"storage": *jstor,
-		}).Fatal("Invalid storage type requested for journal, exiting")
+			"storage": *mlstore,
+		}).Fatal("Invalid storage type requested for mlog, exiting")
 	}
 
-	// Restore the graph from the journal (or start from nothing if journal is empty)
+	// Restore the graph from the mlog (or start from nothing if mlog is empty)
 	// TODO move this down to after ingestor is started
 	g, err := restoreGraph(j)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"system": "main",
 			"err":    err,
-		}).Fatal("Error while rebuilding the graph from the journal")
+		}).Fatal("Error while rebuilding the graph from the mlog")
 	}
 
 	// Kick off fanout on the master/singleton graph broker. This will bridge between
@@ -149,7 +149,7 @@ func main() {
 // RunWebapp runs the pipeviz http frontend webapp on the specified address.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
+func RunWebapp(addr, key, cert string, f mlog.RecordGetter) {
 	mf := web.New()
 	useTLS := key != "" && cert != ""
 
@@ -185,13 +185,13 @@ func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 		})
 	}
 
-	// A middleware to attach the journal-getting func to the env for later use.
+	// A middleware to attach the mlog-getting func to the env for later use.
 	mf.Use(func(c *web.C, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if c.Env == nil {
 				c.Env = make(map[interface{}]interface{})
 			}
-			c.Env["journalGet"] = f
+			c.Env["mlogGet"] = f
 			h.ServeHTTP(w, r)
 		})
 	})
@@ -215,14 +215,14 @@ func RunWebapp(addr, key, cert string, f journal.RecordGetter) {
 	}
 }
 
-// Rebuilds the graph from the extant entries in a journal.
-func restoreGraph(j journal.Store) (system.CoreGraph, error) {
+// Rebuilds the graph from the extant entries in a mlog.
+func restoreGraph(j mlog.Store) (system.CoreGraph, error) {
 	g := represent.NewGraph()
 
-	var item *journal.Record
+	var item *mlog.Record
 	tot, err := j.Count()
 	if err != nil {
-		// journal failed to report a count for some reason, bail out
+		// mlog failed to report a count for some reason, bail out
 		return g, err
 	} else if tot > 0 {
 		// we manually iterate to the count because we assume that any messages

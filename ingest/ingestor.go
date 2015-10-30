@@ -12,24 +12,24 @@ import (
 	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
-	"github.com/tag1consulting/pipeviz/journal"
 	"github.com/tag1consulting/pipeviz/log"
+	"github.com/tag1consulting/pipeviz/mlog"
 	"github.com/tag1consulting/pipeviz/types/system"
 )
 
 // Ingestor brings together the required components to run a pipeviz ingestion HTTP server.
 type Ingestor struct {
-	journal        journal.Store
+	mlog           mlog.Store
 	schema         *gjs.Schema
-	interpretChan  chan *journal.Record
+	interpretChan  chan *mlog.Record
 	brokerChan     chan system.CoreGraph
 	maxMessageSize int64
 }
 
 // New creates a new pipeviz ingestor mux, ready to be kicked off.
-func New(j journal.Store, s *gjs.Schema, ic chan *journal.Record, bc chan system.CoreGraph, max int64) *Ingestor {
+func New(j mlog.Store, s *gjs.Schema, ic chan *mlog.Record, bc chan system.CoreGraph, max int64) *Ingestor {
 	return &Ingestor{
-		journal:        j,
+		mlog:           j,
 		schema:         s,
 		interpretChan:  ic,
 		brokerChan:     bc,
@@ -137,11 +137,11 @@ func (s *Ingestor) handleMessage(w http.ResponseWriter, r *http.Request) {
 
 	if result.Valid() {
 		// Index of message gets written by the LogStore
-		record, err := s.journal.NewEntry(b, r.RemoteAddr)
+		record, err := s.mlog.NewEntry(b, r.RemoteAddr)
 		if err != nil {
 			w.WriteHeader(500)
 			// should we tell the client this?
-			w.Write([]byte("Failed to persist message to journal"))
+			w.Write([]byte("Failed to persist message to mlog"))
 			return
 		}
 

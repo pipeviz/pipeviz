@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/journal"
+	"github.com/tag1consulting/pipeviz/mlog"
 )
 
-// Ensure initializing the bolt journal works as expected
+// Ensure initializing the bolt mlog works as expected
 func TestNewBoltStore(t *testing.T) {
 	ls, err := NewBoltStore("test.boltdb")
 	b := ls.(*BoltStore)
@@ -53,7 +53,7 @@ func TestNewEntryGetCount(t *testing.T) {
 	m2 := []byte("msg2")
 	a2 := "127.0.0.1"
 
-	var item1, item2 *journal.Record
+	var item1, item2 *mlog.Record
 
 	item1, err = b.NewEntry(m1, a1)
 	if err != nil {

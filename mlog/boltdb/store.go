@@ -1,3 +1,5 @@
+// Package boltdb provides disk-backed storage for pipeviz's append-only message log
+// via boltdb.
 package boltdb
 
 import (
@@ -6,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
-	"github.com/tag1consulting/pipeviz/journal"
+	"github.com/tag1consulting/pipeviz/mlog"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 
 var (
 	// The name of the bucket to use.
-	bucketName = []byte("journal")
+	bucketName = []byte("mlog")
 )
 
 // BoltStore represents a single BoltDB storage backend for the append-only log.
@@ -27,7 +29,7 @@ type BoltStore struct {
 }
 
 // NewBoltStore creates a handle to a BoltDB-backed log store
-func NewBoltStore(path string) (journal.Store, error) {
+func NewBoltStore(path string) (mlog.Store, error) {
 	// Allow 1s timeout on obtaining a file lock
 	b, err := bolt.Open(path, fileMode, &bolt.Options{Timeout: time.Second})
 	if err != nil {
@@ -49,7 +51,7 @@ func NewBoltStore(path string) (journal.Store, error) {
 	return store, nil
 }
 
-// init sets up the journal bucket in the boltdb backend.
+// init sets up the mlog bucket in the boltdb backend.
 func (b *BoltStore) init() error {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
@@ -67,7 +69,7 @@ func (b *BoltStore) init() error {
 }
 
 // Get returns the item associated with the given index.
-func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
+func (b *BoltStore) Get(idx uint64) (*mlog.Record, error) {
 	tx, err := b.conn.Begin(false)
 	if err != nil {
 		return nil, err
@@ -83,7 +85,7 @@ func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
 		return nil, errors.New("index not found")
 	}
 
-	l := &journal.Record{}
+	l := &mlog.Record{}
 	if _, err := l.UnmarshalMsg(val); err != nil {
 		return nil, err
 	}
@@ -91,8 +93,8 @@ func (b *BoltStore) Get(idx uint64) (*journal.Record, error) {
 }
 
 // NewEntry creates a record from the provided data, appends that record onto
-// the end of the journal, then returns the created record.
-func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*journal.Record, error) {
+// the end of the mlog, then returns the created record.
+func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*mlog.Record, error) {
 	tx, err := b.conn.Begin(true)
 	if err != nil {
 		return nil, err
@@ -102,7 +104,7 @@ func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*journal.Record
 	// no need to sync b/c the conn.Begin(true) call will block
 	bucket := tx.Bucket(bucketName)
 
-	record := journal.NewRecord(message, remoteAddr)
+	record := mlog.NewRecord(message, remoteAddr)
 	record.Index, err = bucket.NextSequence()
 	if err != nil {
 		return nil, err
@@ -126,7 +128,7 @@ func (b *BoltStore) NewEntry(message []byte, remoteAddr string) (*journal.Record
 	return record, nil
 }
 
-// Count reports the number of items in the journal by opening a db cursor to
+// Count reports the number of items in the mlog by opening a db cursor to
 // grab the last item from the bucket. Because we're append-only, this is
 // guaranteed to be the last one, and thus its index is the count.
 func (b *BoltStore) Count() (uint64, error) {
