@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/tag1consulting/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/pipeviz/pipeviz/ingest"
 )
 
 func postCheckoutHookCommand() *cobra.Command {

@@ -3,9 +3,9 @@ package maputil_test
 import (
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/maputil"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/maputil"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 func TestAnyMatch(t *testing.T) {

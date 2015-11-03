@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	flag "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
+	flag "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
 )
 
 // Example 1: A single string flag called "species" with default value "gopher".

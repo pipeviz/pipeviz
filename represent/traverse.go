@@ -3,9 +3,9 @@ package represent
 import (
 	"bytes"
 
-	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/types/system"
+	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 // Inspects the indicated vertex's set of out-edges, returning a slice of

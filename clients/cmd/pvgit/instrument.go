@@ -6,9 +6,9 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/kardianos/osext"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/tag1consulting/pipeviz/clients/githelp"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/kardianos/osext"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/pipeviz/pipeviz/clients/githelp"
 )
 
 type instrumentCmd struct {

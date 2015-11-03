@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt/cmd/bolt"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt/cmd/bolt"
 )
 
 // Ensure the "info" command can print information about a database.

@@ -30,7 +30,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonreference"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonreference"
 	"io/ioutil"
 	"net/http"
 	"strings"

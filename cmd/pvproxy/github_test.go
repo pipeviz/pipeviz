@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
-	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/pipeviz/pipeviz/types/semantic"
 )
 
 // Real/sample data from github v3 api

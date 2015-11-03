@@ -7,19 +7,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
-	"github.com/tag1consulting/pipeviz/broker"
-	"github.com/tag1consulting/pipeviz/log"
-	"github.com/tag1consulting/pipeviz/mlog"
-	"github.com/tag1consulting/pipeviz/represent"
-	"github.com/tag1consulting/pipeviz/represent/q"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
+	"github.com/pipeviz/pipeviz/broker"
+	"github.com/pipeviz/pipeviz/log"
+	"github.com/pipeviz/pipeviz/mlog"
+	"github.com/pipeviz/pipeviz/represent"
+	"github.com/pipeviz/pipeviz/represent/q"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 var (
-	publicDir = filepath.Join(defaultBase("github.com/tag1consulting/pipeviz/webapp/"), "public")
+	publicDir = filepath.Join(defaultBase("github.com/pipeviz/pipeviz/webapp/"), "public")
 )
 
 var (

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/mutil"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web/mutil"
 )
 
 // TODO this is kinda hacked together, give it a once-over check

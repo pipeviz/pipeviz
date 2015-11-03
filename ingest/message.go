@@ -3,9 +3,9 @@ package ingest
 import (
 	"errors"
 
-	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/types/semantic"
-	"github.com/tag1consulting/pipeviz/types/system"
+	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 // Message represents a valid pipeviz message. It is, currently, intended for use both

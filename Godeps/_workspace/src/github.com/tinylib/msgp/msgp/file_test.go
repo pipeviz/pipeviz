@@ -5,7 +5,7 @@ package msgp_test
 import (
 	"bytes"
 	"crypto/rand"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
 	prand "math/rand"
 	"os"
 	"testing"

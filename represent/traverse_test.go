@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/represent/q"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/represent/q"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 func tprops(pairs ...interface{}) []system.PropPair {

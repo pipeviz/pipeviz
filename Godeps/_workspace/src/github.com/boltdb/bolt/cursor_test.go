@@ -9,7 +9,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 // Ensure that a cursor can return a reference to the bucket that created it.

@@ -11,11 +11,11 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	logrus_syslog "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus/hooks/syslog"
-	"github.com/tag1consulting/pipeviz/broker"
-	"github.com/tag1consulting/pipeviz/represent"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	logrus_syslog "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus/hooks/syslog"
+	"github.com/pipeviz/pipeviz/broker"
+	"github.com/pipeviz/pipeviz/represent"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 func init() {

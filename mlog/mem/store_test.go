@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/mlog"
+	"github.com/pipeviz/pipeviz/mlog"
 )
 
 // Test that appending messages, then subsequently getting them, works as expected

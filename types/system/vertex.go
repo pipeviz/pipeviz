@@ -3,7 +3,7 @@ package system
 import (
 	"errors"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 )
 
 // StdVertex is used to represent a vertex object by the graph engine. They exist

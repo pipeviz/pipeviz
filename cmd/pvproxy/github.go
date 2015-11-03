@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/pipeviz/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/types/semantic"
 )
 
 const gitDateFormat = "Mon Jan 2 2006 15:04:05 -0700"

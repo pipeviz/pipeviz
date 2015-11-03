@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/mlog"
+	"github.com/pipeviz/pipeviz/mlog"
 )
 
 // Ensure initializing the bolt mlog works as expected

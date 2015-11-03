@@ -2,7 +2,7 @@ package logrus_syslog
 
 import (
 	"fmt"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"log/syslog"
 	"os"
 )

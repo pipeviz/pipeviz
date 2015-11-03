@@ -1,8 +1,8 @@
 package represent
 
 import (
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 // Just reuse types.PropPair

@@ -19,7 +19,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 var (

@@ -27,7 +27,7 @@ package gojsonreference
 
 import (
 	"errors"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonpointer"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonpointer"
 	"net/url"
 	"strings"
 )

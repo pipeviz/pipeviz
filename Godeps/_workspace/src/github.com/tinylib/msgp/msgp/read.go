@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/philhofer/fwd"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/philhofer/fwd"
 )
 
 // where we keep old *Readers

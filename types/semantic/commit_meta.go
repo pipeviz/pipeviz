@@ -3,8 +3,8 @@ package semantic
 import (
 	"encoding/hex"
 
-	"github.com/tag1consulting/pipeviz/represent/q"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/represent/q"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 type CommitMeta struct {

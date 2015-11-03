@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 // Ensure two functions can perform updates in a single batch.

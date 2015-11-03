@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful/listener"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful/listener"
 )
 
 // Middleware provides functionality similar to net/http.Server's

@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/clients/githelp"
-	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/clients/githelp"
+	"github.com/pipeviz/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/types/semantic"
 
 	"gopkg.in/libgit2/git2go.v22"
 )

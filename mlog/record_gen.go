@@ -4,7 +4,7 @@ package mlog
 // MSGP CODE GENERATION TOOL (github.com/tinylib/msgp)
 // DO NOT EDIT
 
-import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
+import "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
 
 // DecodeMsg implements msgp.Decodable
 func (z *Record) DecodeMsg(dc *msgp.Reader) (err error) {

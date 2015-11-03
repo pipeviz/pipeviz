@@ -10,8 +10,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/types/system"
+	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 // TODO switch to doing this all with DI instead, i think

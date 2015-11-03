@@ -3,10 +3,10 @@ package semantic
 import (
 	"encoding/hex"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/maputil"
-	"github.com/tag1consulting/pipeviz/represent/q"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/maputil"
+	"github.com/pipeviz/pipeviz/represent/q"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 type LogicState struct {
@@ -252,7 +252,7 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 		dataset = rv[0]
 	}
 
-	// FIXME only recording the final target id is totally broken; see https://github.com/tag1consulting/pipeviz/issues/37
+	// FIXME only recording the final target id is totally broken; see https://github.com/pipeviz/pipeviz/issues/37
 
 	// Aaaand we found our target.
 	success = true

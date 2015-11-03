@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/tag1consulting/pipeviz/clients/githelp"
-	"github.com/tag1consulting/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/pipeviz/pipeviz/clients/githelp"
+	"github.com/pipeviz/pipeviz/ingest"
 )
 
 func postCommitHookCommand() *cobra.Command {

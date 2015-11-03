@@ -8,7 +8,7 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"io"
 	"log"
 	"net/http"

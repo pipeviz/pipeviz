@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
-	log "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/maputil"
-	"github.com/tag1consulting/pipeviz/types/system"
+	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/maputil"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 var i2a = func(i uint64) string {

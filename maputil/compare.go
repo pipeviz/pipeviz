@@ -3,8 +3,8 @@ package maputil
 import (
 	"bytes"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 // AnyMatch performs simple equality comparisons between two maps on

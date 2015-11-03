@@ -1,6 +1,6 @@
 package system
 
-import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+import "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type (
 	// A value indicating a vertex's type. For now, done as a string.

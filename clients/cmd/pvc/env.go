@@ -15,10 +15,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
-	"github.com/tag1consulting/pipeviz/schema"
-	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	gjs "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/pipeviz/pipeviz/schema"
+	"github.com/pipeviz/pipeviz/types/semantic"
 )
 
 var schemaMaster *gjs.Schema

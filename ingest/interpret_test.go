@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	gjs "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
-	"github.com/tag1consulting/pipeviz/fixtures"
-	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/schema"
+	gjs "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/pipeviz/pipeviz/fixtures"
+	"github.com/pipeviz/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/schema"
 )
 
 var (

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
-	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/pipeviz/pipeviz/types/semantic"
 )
 
 type menuLevel interface {

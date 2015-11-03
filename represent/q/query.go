@@ -1,6 +1,6 @@
 package q
 
-import "github.com/tag1consulting/pipeviz/types/system"
+import "github.com/pipeviz/pipeviz/types/system"
 
 type edgeFilter struct {
 	etype system.EType

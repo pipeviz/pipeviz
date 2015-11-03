@@ -3,8 +3,8 @@ package q
 import (
 	"testing"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
-	"github.com/tag1consulting/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/pipeviz/pipeviz/types/system"
 )
 
 func TestQbv(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/tag1consulting/pipeviz/mlog"
+	"github.com/pipeviz/pipeviz/mlog"
 )
 
 type memMessageLog struct {

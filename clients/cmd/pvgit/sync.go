@@ -4,10 +4,10 @@ import (
 	"encoding/hex"
 	"log"
 
-	"github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/tag1consulting/pipeviz/clients/githelp"
-	"github.com/tag1consulting/pipeviz/ingest"
-	"github.com/tag1consulting/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/pipeviz/pipeviz/clients/githelp"
+	"github.com/pipeviz/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/types/semantic"
 	"gopkg.in/libgit2/git2go.v22"
 )
 

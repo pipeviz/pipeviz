@@ -1,6 +1,6 @@
 package system
 
-import "github.com/tag1consulting/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+import "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type flatVTuple struct {
 	ID       uint64     `json:"id"`
