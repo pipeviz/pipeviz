@@ -1,4 +1,4 @@
-default: install
+default: gen
 
 deps:
 	go get -d ./...
