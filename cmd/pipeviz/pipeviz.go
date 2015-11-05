@@ -41,7 +41,7 @@ var (
 	ingestCert = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
 	webappKey  = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
 	webappCert = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	mlstore    = pflag.StringP("mlog-storage", "", "bolt", "Storage backend to use for the message log. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
+	mlstore    = pflag.String("mlog-storage", "bolt", "Storage backend to use for the message log. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
 )
 
 func main() {
