@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	publicDir = pflag.String("webapp-dir", filepath.Join(defaultBase("github.com/pipeviz/pipeviz/webapp/"), "public"), "Path to the 'public' directory containing javascript application files.")
+	publicDir = pflag.String("webapp-dir", filepath.Join(defaultBase("github.com/pipeviz/webapp/"), "public"), "Path to the 'public' directory containing javascript application files.")
 )
 
 var (
