@@ -9,7 +9,6 @@ gen: deps
 	go generate -x ./schema
 
 install:
-	go install
 	go install ./cmd/...
 
 client-deps:
