@@ -2,9 +2,9 @@ default: gen
 VERSION := $(shell git describe --always --dirty --tags)
 
 deps:
-	go get -u github.com/jteeuwen/go-bindata/...
-	go get -u github.com/tinylib/msgp
-	go get -u github.com/mitchellh/gox
+	go get -u -f github.com/jteeuwen/go-bindata/...
+	go get -u -f github.com/tinylib/msgp
+	go get -u -f github.com/mitchellh/gox
 
 clean:
 	rm -f cmd/pipeviz/pipeviz cmd/pipeviz/pipeviz.test
