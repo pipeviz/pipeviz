@@ -1,6 +1,3 @@
-machine:
-    timezone:
-        America/New_York
 dependencies:
     pre:
         - make deps
