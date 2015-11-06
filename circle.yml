@@ -1,6 +1,6 @@
 checkout:
     post:
-        - mkdir -p "$HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME"
+        - mkdir -pv "$HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME"
         - ln -Tsf "$HOME/$CIRCLE_PROJECT_REPONAME" ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
 dependencies:
     pre:
