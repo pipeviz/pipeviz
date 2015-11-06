@@ -3,6 +3,7 @@ machine:
         IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
 checkout:
     post:
+        - mkdir -p ".go_workspace/src/$CIRCLE_PROJECT_USERNAME"
         - ln -sf "${CIRCLE_PROJECT_REPONAME}" ".go_workspace/src/$IMPORT_PATH"
 dependencies:
     pre:
