@@ -9,4 +9,4 @@ dependencies:
 test:
     override:
         - make gen
-        - make install
+        - make test
