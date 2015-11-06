@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stvp/go-udp-testing"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/stvp/go-udp-testing"
 )
 
 func TestWritingToUDP(t *testing.T) {

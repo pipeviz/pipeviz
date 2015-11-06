@@ -17,7 +17,7 @@ import (
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/types/semantic"
 
-	"gopkg.in/libgit2/git2go.v22"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/gopkg.in/libgit2/git2go.v22"
 )
 
 func getRepoOrExit(paths ...string) *git.Repository {

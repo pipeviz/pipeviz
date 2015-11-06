@@ -8,7 +8,7 @@ package githelp
 import (
 	"errors"
 
-	"gopkg.in/libgit2/git2go.v22"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/gopkg.in/libgit2/git2go.v22"
 )
 
 // The (version of?) the RFC2822 format git uses to format its date output,
