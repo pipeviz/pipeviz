@@ -15,4 +15,4 @@ deployment:
         branch: master
         commands:
             # tip the script
-            - ssh -T -p 33261 pipeviz.sdboyer.io
+            - ssh -T -p 33261 sdboyer@pipeviz.sdboyer.io
