@@ -61,7 +61,7 @@ func (s *WebAppServer) wsWriter(ws *websocket.Conn) {
 	}()
 
 	// write the current graph state first, before entering loop
-	graphToSock(ws, latestGraph)
+	graphToSock(ws, s.latest)
 	var g system.CoreGraph
 	for {
 		select {

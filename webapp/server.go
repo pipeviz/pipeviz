@@ -6,7 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/unrolled/secure"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/pipeviz/pipeviz/broker"
 	"github.com/pipeviz/pipeviz/log"
@@ -16,18 +18,8 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
-var (
-	publicDir = pflag.String("webapp-dir", "webapp/public", "Path to the 'public' directory containing javascript application files.")
-)
-
-var (
-	// Subscribe to the master broker and store latest locally as it comes
-	brokerListen = broker.Get().Subscribe()
-	// Initially set the latestGraph to a new, empty one to avoid nil pointer
-	latestGraph = represent.NewGraph()
-	// Count of active websocket clients (for expvars)
-	clientCount int64
-)
+// Count of active websocket clients (for expvars)
+var clientCount int64
 
 const (
 	// Time allowed to write data to the client.
@@ -38,18 +30,10 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 )
 
-func init() {
-	// Kick off goroutine to listen on the graph broker and keep our local pointer up to date
-	go func() {
-		for g := range brokerListen {
-			latestGraph = g
-		}
-	}()
-}
-
 // WebAppServer acts as an HTTP server, and contains the necessary state to serve the viz frontend.
 type WebAppServer struct {
 	latest     system.CoreGraph
+	unsub      func(broker.GraphReceiver)
 	receiver   broker.GraphReceiver
 	cancel     <-chan struct{}
 	mlogGetter mlog.RecordGetter
@@ -57,9 +41,10 @@ type WebAppServer struct {
 }
 
 // New creates a new webapp server, ready to be kicked off.
-func New(receiver broker.GraphReceiver, cancel <-chan struct{}, f mlog.RecordGetter, version string) *WebAppServer {
+func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel <-chan struct{}, f mlog.RecordGetter, version string) *WebAppServer {
 	return &WebAppServer{
 		receiver:   receiver,
+		unsub:      unsub,
 		latest:     represent.NewGraph(),
 		cancel:     cancel,
 		mlogGetter: f,
@@ -71,15 +56,79 @@ func New(receiver broker.GraphReceiver, cancel <-chan struct{}, f mlog.RecordGet
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
 func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert string) {
+	mf := web.New()
+	useTLS := key != "" && cert != ""
 
-}
+	mf.Use(log.NewHTTPLogger("webapp"))
 
-// RegisterToMux adds all necessary pieces to an injected mux.
-func RegisterToMux(m *web.Mux) {
-	m.Use(log.NewHTTPLogger("webapp"))
-	m.Get("/sock", openSocket)
-	m.Get("/message/:mid", getMessage)
-	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(*publicDir))))
+	if useTLS {
+		sec := secure.New(secure.Options{
+			AllowedHosts:         nil,                                             // TODO allow a way to declare these
+			SSLRedirect:          false,                                           // we have just one port to work with, so an internal redirect can't work
+			SSLTemporaryRedirect: false,                                           // Use 301, not 302
+			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
+			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
+			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
+			STSPreload:           false,                                           // can't know if this is correct for general case TODO allow config
+			FrameDeny:            false,                                           // pipeviz is exactly the kind of thing where embedding is appropriate
+			ContentTypeNosniff:   true,                                            // shouldn't be an issue for pipeviz, but doesn't hurt...probably?
+			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
+		})
+
+		mf.Use(func(h http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				err := sec.Process(w, r)
+
+				// If there was an error, do not continue.
+				if err != nil {
+					logrus.WithFields(logrus.Fields{
+						"system": "webapp",
+						"err":    err,
+					}).Warn("Error from security middleware, dropping request")
+					return
+				}
+
+				h.ServeHTTP(w, r)
+			})
+		})
+	}
+
+	mf.Get("/sock", s.openSocket)
+	mf.Get("/message/:mid", s.getMessage)
+	mf.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(pubdir))))
+
+	mf.Compile()
+
+	// kick off a goroutine to grab the latest graph and listen for cancel
+	go func() {
+		var g system.CoreGraph
+		for {
+			select {
+			case <-s.cancel:
+				s.unsub(s.receiver)
+				return
+
+			case g = <-s.receiver:
+				s.latest = g
+			}
+		}
+	}()
+
+	var err error
+	if useTLS {
+		err = graceful.ListenAndServeTLS(addr, cert, key, mf)
+	} else {
+		err = graceful.ListenAndServe(addr, mf)
+	}
+
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"system": "webapp",
+			"err":    err,
+		}).Fatal("ListenAndServe returned with an error")
+	}
+
+	// TODO allow returning err
 }
 
 func graphToJSON(g system.CoreGraph) ([]byte, error) {
@@ -105,17 +154,12 @@ func (s *WebAppServer) getMessage(c web.C, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var getter mlog.RecordGetter
-	var ok bool
-	if fun, exists := c.Env["mlogGet"]; !exists {
-		http.Error(w, "Could not access mlog storage", 500)
-		return
-	} else if getter, ok = fun.(mlog.RecordGetter); !ok {
+	if s.mlogGetter == nil {
 		http.Error(w, "Could not access mlog storage", 500)
 		return
 	}
 
-	rec, err := getter(id)
+	rec, err := s.mlogGetter(id)
 	if err != nil {
 		// TODO Might be something other than not found, but oh well for now
 		http.Error(w, http.StatusText(404), 404)
