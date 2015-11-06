@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -34,6 +35,8 @@ const (
 )
 
 var (
+	version    = "dev"
+	vflag      = pflag.BoolP("version", "v", false, "Print version")
 	bindAll    = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
 	dbPath     = pflag.StringP("data-dir", "d", ".", "The base directory to use for all persistent storage.")
 	useSyslog  = pflag.Bool("syslog", false, "Write log output to syslog.")
@@ -46,6 +49,11 @@ var (
 
 func main() {
 	pflag.Parse()
+	if *vflag {
+		fmt.Println("pipeviz version", version)
+		return
+	}
+
 	setUpLogging()
 
 	src, err := schema.Master()

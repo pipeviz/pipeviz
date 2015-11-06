@@ -24,9 +24,8 @@ func dotDumperCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dotdump [-o|--output <path>] <dir>...",
 		Short: "Dumps a graphviz-generated png of some/all of the JSON fixtures.",
-		Long: `This tool generates a dot representation of a pipeviz core graph,
-		having constructed that graph by merging in all JSON fixtures found in all the specified directories, in lexicographic order.`,
-		Run: runDotDumper,
+		Long:  `This tool generates a dot representation of a pipeviz core graph, having constructed that graph by merging in all JSON fixtures found in all the specified directories, in lexicographic order.`,
+		Run:   runDotDumper,
 	}
 
 	var all bool
