@@ -1,9 +1,7 @@
-machine:
-    environment:
-        IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
 checkout:
     post:
-        - ln -sf "${CIRCLE_PROJECT_REPONAME}" ".go_workspace/src/$IMPORT_PATH"
+        - mkdir -pv "$HOME/.go_workspace/src/github.com/pipeviz"
+        - ln -Tsf "$HOME/pipeviz" "$HOME/.go_workspace/src/github.com/pipeviz/pipeviz"
 dependencies:
     pre:
         - make deps
@@ -11,4 +9,4 @@ dependencies:
 test:
     override:
         - make gen
-        - make install
+        - make test
