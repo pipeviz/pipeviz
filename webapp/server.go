@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/pipeviz/pipeviz/broker"
 	"github.com/pipeviz/pipeviz/log"
@@ -17,7 +18,7 @@ import (
 )
 
 var (
-	publicDir = filepath.Join(defaultBase("github.com/pipeviz/pipeviz/webapp/"), "public")
+	publicDir = pflag.String("webapp-dir", filepath.Join(defaultBase("github.com/pipeviz/webapp/"), "public"), "Path to the 'public' directory containing javascript application files.")
 )
 
 var (
@@ -47,24 +48,12 @@ func init() {
 	}()
 }
 
-// Creates a Goji *web.Mux that can act as the http muxer for the frontend app.
-func NewMux() *web.Mux {
-	m := web.New()
-
-	m.Use(log.NewHTTPLogger("webapp"))
-	m.Get("/sock", openSocket)
-	m.Get("/message/:mid", getMessage)
-	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
-
-	return m
-}
-
 // RegisterToMux adds all necessary pieces to an injected mux.
 func RegisterToMux(m *web.Mux) {
 	m.Use(log.NewHTTPLogger("webapp"))
 	m.Get("/sock", openSocket)
 	m.Get("/message/:mid", getMessage)
-	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
+	m.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(*publicDir))))
 }
 
 func graphToJSON(g system.CoreGraph) ([]byte, error) {

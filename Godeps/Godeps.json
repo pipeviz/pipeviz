@@ -1,6 +1,6 @@
 {
-	"ImportPath": "github.com/tag1consulting/pipeviz",
-	"GoVersion": "go1.4.1",
+	"ImportPath": "github.com/pipeviz/pipeviz",
+	"GoVersion": "go1.5.1",
 	"Packages": [
 		"./..."
 	],
@@ -14,6 +14,11 @@
 			"ImportPath": "github.com/boltdb/bolt",
 			"Comment": "v1.0-115-gc2745b3",
 			"Rev": "c2745b3c62985affcf08d0522135f4747e9b81f3"
+		},
+		{
+			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
+			"Comment": "v1.0.4",
+			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
@@ -36,12 +41,21 @@
 			"Rev": "4dbda5e2904d044d23cc4bef84e8360c458caf7f"
 		},
 		{
+			"ImportPath": "github.com/russross/blackfriday",
+			"Comment": "v1.3-32-g510be64",
+			"Rev": "510be64de022c25096c6f476b7b7c240a8eca1a5"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
+			"Rev": "10ef21a441db47d8b13ebcc5fd2310f636973c77"
+		},
+		{
 			"ImportPath": "github.com/spf13/cobra",
-			"Rev": "ebb2d55f56cfec37ad899ad410b823805cc38e3c"
+			"Rev": "2e6a42892123dda608922f8af8ce85c3bff19575"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "beb8d730f2afc6c3fe75312ad6f61a3dc47a64aa"
+			"Rev": "08b1a584251b5b62f458943640fc8ebd4d50aaa5"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
@@ -77,6 +91,10 @@
 			"ImportPath": "github.com/zenazn/goji/web",
 			"Comment": "v0.9.0",
 			"Rev": "845982030542a0fd9c8e8cbf76a84c7482cb3755"
+		},
+		{
+			"ImportPath": "gopkg.in/libgit2/git2go.v22",
+			"Rev": "41ad00f868e7dfcdb04c7538f27350d400f710a3"
 		}
 	]
 }

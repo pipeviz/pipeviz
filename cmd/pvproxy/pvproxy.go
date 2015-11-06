@@ -17,6 +17,8 @@ import (
 	"github.com/pipeviz/pipeviz/log"
 )
 
+var version = "dev"
+
 func main() {
 	s := &srv{}
 	root := &cobra.Command{
@@ -29,6 +31,7 @@ func main() {
 	root.Flags().IntVarP(&s.port, "port", "p", 2906, "Port to listen on") // 2906, because Viv
 	root.Flags().StringVarP(&s.bind, "bind", "b", "127.0.0.1", "Address to bind on")
 	root.Flags().BoolVar(&s.useSyslog, "syslog", false, "Write log output to syslog.")
+	root.Flags().BoolVarP(&s.vflag, "version", "v", false, "Print version")
 	root.Flags().StringVar(&s.key, "tls-key", "", "Path to an x509 key to use for TLS. If no cert is provided, unsecured HTTP will be used.")
 	root.Flags().StringVar(&s.cert, "tls-cert", "", "Path to an x508 certificate to use for TLS. If key is provided, will try to find a certificate of the same name plus .crt extension.")
 
@@ -37,10 +40,10 @@ func main() {
 }
 
 type srv struct {
-	port         int
-	bind, target string
-	key, cert    string
-	useSyslog    bool
+	port             int
+	bind, target     string
+	key, cert        string
+	useSyslog, vflag bool
 }
 
 type client struct {
@@ -89,6 +92,11 @@ func (c client) send(m *ingest.Message) error {
 
 // Run sets up and runs the proxying HTTP server, then blocks.
 func (s *srv) Run(cmd *cobra.Command, args []string) {
+	if s.vflag {
+		fmt.Println("pvproxy version", version)
+		return
+	}
+
 	setUpLogging(s)
 
 	mux := web.New()
