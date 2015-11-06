@@ -3,7 +3,6 @@ package webapp
 import (
 	"encoding/json"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -18,7 +17,7 @@ import (
 )
 
 var (
-	publicDir = pflag.String("webapp-dir", filepath.Join(defaultBase("github.com/pipeviz/webapp/"), "public"), "Path to the 'public' directory containing javascript application files.")
+	publicDir = pflag.String("webapp-dir", "webapp/public", "Path to the 'public' directory containing javascript application files.")
 )
 
 var (
