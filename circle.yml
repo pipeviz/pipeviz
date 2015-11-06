@@ -1,7 +1,7 @@
 machine:
     timezone:
         America/New_York
-    golang:
+    go:
         version:
             1.4
 dependencies:
