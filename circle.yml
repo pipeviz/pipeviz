@@ -10,3 +10,9 @@ dependencies:
 test:
     override:
         - make test
+deployment:
+    production:
+        branch: master
+        commands:
+            # tip the script
+            - ssh -T -p 33261 pipeviz.sdboyer.io
