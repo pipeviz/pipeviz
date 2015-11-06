@@ -1,0 +1,13 @@
+machine:
+    timezone:
+        America/New_York
+    golang:
+        version:
+            1.4
+dependencies:
+    pre:
+        - make deps
+test:
+    override:
+        - make gen
+        - make install
