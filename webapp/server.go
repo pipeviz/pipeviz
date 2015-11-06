@@ -47,6 +47,33 @@ func init() {
 	}()
 }
 
+// WebAppServer acts as an HTTP server, and contains the necessary state to serve the viz frontend.
+type WebAppServer struct {
+	latest     system.CoreGraph
+	receiver   broker.GraphReceiver
+	cancel     <-chan struct{}
+	mlogGetter mlog.RecordGetter
+	version    string
+}
+
+// New creates a new webapp server, ready to be kicked off.
+func New(receiver broker.GraphReceiver, cancel <-chan struct{}, f mlog.RecordGetter, version string) *WebAppServer {
+	return &WebAppServer{
+		receiver:   receiver,
+		latest:     represent.NewGraph(),
+		cancel:     cancel,
+		mlogGetter: f,
+		version:    version,
+	}
+}
+
+// ListenAndServe initiates the webapp http listener.
+//
+// This blocks on the http listening loop, so it should typically be called in its own goroutine.
+func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert string) {
+
+}
+
 // RegisterToMux adds all necessary pieces to an injected mux.
 func RegisterToMux(m *web.Mux) {
 	m.Use(log.NewHTTPLogger("webapp"))
@@ -71,7 +98,7 @@ func graphToJSON(g system.CoreGraph) ([]byte, error) {
 	})
 }
 
-func getMessage(c web.C, w http.ResponseWriter, r *http.Request) {
+func (s *WebAppServer) getMessage(c web.C, w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(c.URLParams["mid"], 10, 64)
 	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
