@@ -4,7 +4,7 @@ machine:
 checkout:
     post:
         - mkdir -p ".go_workspace/src/$CIRCLE_PROJECT_USERNAME"
-        - ln -sf "${CIRCLE_PROJECT_REPONAME}" ".go_workspace/src/$IMPORT_PATH"
+        - ln -sf "$CIRCLE_PROJECT_REPONAME" ".go_workspace/src/$IMPORT_PATH"
 dependencies:
     pre:
         - make deps
