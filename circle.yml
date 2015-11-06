@@ -1,7 +1,7 @@
 checkout:
     post:
-        - mkdir -pv "$HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME"
-        - ln -Tsf "$HOME/$CIRCLE_PROJECT_REPONAME" ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+        - mkdir -pv "$HOME/.go_workspace/src/github.com/pipeviz"
+        - ln -Tsf "$HOME/pipeviz" "$HOME/.go_workspace/src/github.com/pipeviz/pipeviz"
 dependencies:
     pre:
         - make deps
