@@ -2,11 +2,17 @@ checkout:
     post:
         - mkdir -pv "$HOME/.go_workspace/src/github.com/pipeviz"
         - ln -Tsf "$HOME/pipeviz" "$HOME/.go_workspace/src/github.com/pipeviz/pipeviz"
+# TODO cache these more smartly? per https://circleci.com/docs/installing-custom-software#caching
 dependencies:
     pre:
-        - make deps
+        - make tools
           #- go vet ./...
 test:
     override:
-        - make gen
         - make test
+deployment:
+    production:
+        branch: master
+        commands:
+            # tip the script
+            - ssh -T -p 33261 sdboyer@pipeviz.sdboyer.io

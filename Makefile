@@ -1,23 +1,24 @@
 default: gen
 VERSION := $(shell git describe --always --dirty --tags)
 
-deps:
-	go get -u -f github.com/jteeuwen/go-bindata/...
-	go get -u -f github.com/tinylib/msgp
-	go get -u -f github.com/mitchellh/gox
+tools:
+	go get github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox
+
+tools-update:
+	go get -u -f github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox
 
 clean:
 	rm -f cmd/pipeviz/pipeviz cmd/pipeviz/pipeviz.test
 	rm -f cmd/pvutil/pvutil cmd/pvutil/pvutil.test
 	rm -f cmd/pvproxy/pvproxy cmd/pvproxy/pvproxy.test
 
-test:
+test: gen
 	go test ./...
 
-gen: deps
+gen: tools
 	go generate -x ./schema
 
-install:
+install: gen
 	go install -ldflags "-X main.version=${VERSION}" ./cmd/...
 
 build-all: gen
@@ -27,4 +28,4 @@ build-all: gen
 	-arch="amd64" \
 	-output="dist/{{.OS}}-{{.Arch}}/{{.Dir}}" ./cmd/...
 
-.PHONY: deps gen install clean
+.PHONY: tools tools-update gen install clean build-all

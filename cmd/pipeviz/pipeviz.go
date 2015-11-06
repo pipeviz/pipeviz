@@ -3,15 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/unrolled/secure"
 	gjs "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/pipeviz/pipeviz/broker"
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/mlog"
@@ -35,16 +32,18 @@ const (
 )
 
 var (
-	version    = "dev"
-	vflag      = pflag.BoolP("version", "v", false, "Print version")
-	bindAll    = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath     = pflag.StringP("data-dir", "d", ".", "The base directory to use for all persistent storage.")
-	useSyslog  = pflag.Bool("syslog", false, "Write log output to syslog.")
-	ingestKey  = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
-	ingestCert = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	webappKey  = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
-	webappCert = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	mlstore    = pflag.String("mlog-storage", "bolt", "Storage backend to use for the message log. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
+	version     = "dev"
+	vflag       = pflag.BoolP("version", "v", false, "Print version")
+	bindAll     = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath      = pflag.StringP("data-dir", "d", ".", "The base directory to use for all persistent storage.")
+	useSyslog   = pflag.Bool("syslog", false, "Write log output to syslog.")
+	ingestKey   = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
+	ingestCert  = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	webappKey   = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
+	webappCert  = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	mlstore     = pflag.String("mlog-storage", "bolt", "Storage backend to use for the message log. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
+	publicDir   = pflag.String("webapp-dir", "webapp/public", "Path to the 'public' directory containing javascript application files.")
+	showVersion = pflag.Bool("webapp-version", false, "Report the version of the pipeviz server via response headers")
 )
 
 func main() {
@@ -143,84 +142,16 @@ func main() {
 	go srv.Interpret(g)
 
 	// And finally, kick off the webapp.
+	frontend := webapp.New(broker.Get().Subscribe(), broker.Get().Unsubscribe, make(chan struct{}), j.Get)
 	// TODO let config/params control address
 	if *webappKey != "" && *webappCert == "" {
 		*webappCert = *webappKey + ".crt"
 	}
-	go RunWebapp(listenAt+strconv.Itoa(DefaultAppPort), *webappKey, *webappCert, j.Get)
+	go frontend.ListenAndServe(listenAt+strconv.Itoa(DefaultAppPort), *publicDir, *webappKey, *webappCert, "pipeviz/"+version, *showVersion)
 
 	// Block on goji's graceful waiter, allowing the http connections to shut down nicely.
 	// FIXME using this should be unnecessary if we're crash-only
 	graceful.Wait()
-}
-
-// RunWebapp runs the pipeviz http frontend webapp on the specified address.
-//
-// This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func RunWebapp(addr, key, cert string, f mlog.RecordGetter) {
-	mf := web.New()
-	useTLS := key != "" && cert != ""
-
-	if useTLS {
-		sec := secure.New(secure.Options{
-			AllowedHosts:         nil,                                             // TODO allow a way to declare these
-			SSLRedirect:          false,                                           // we have just one port to work with, so an internal redirect can't work
-			SSLTemporaryRedirect: false,                                           // Use 301, not 302
-			SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"}, // list of headers that indicate we're using TLS (which would have been set by TLS-terminating proxy)
-			STSSeconds:           315360000,                                       // 1yr HSTS time, as is generally recommended
-			STSIncludeSubdomains: false,                                           // don't include subdomains; it may not be correct in general case TODO allow config
-			STSPreload:           false,                                           // can't know if this is correct for general case TODO allow config
-			FrameDeny:            false,                                           // pipeviz is exactly the kind of thing where embedding is appropriate
-			ContentTypeNosniff:   true,                                            // shouldn't be an issue for pipeviz, but doesn't hurt...probably?
-			BrowserXssFilter:     false,                                           // really shouldn't be necessary for pipeviz
-		})
-
-		mf.Use(func(h http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				err := sec.Process(w, r)
-
-				// If there was an error, do not continue.
-				if err != nil {
-					log.WithFields(log.Fields{
-						"system": "webapp",
-						"err":    err,
-					}).Warn("Error from security middleware, dropping request")
-					return
-				}
-
-				h.ServeHTTP(w, r)
-			})
-		})
-	}
-
-	// A middleware to attach the mlog-getting func to the env for later use.
-	mf.Use(func(c *web.C, h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if c.Env == nil {
-				c.Env = make(map[interface{}]interface{})
-			}
-			c.Env["mlogGet"] = f
-			h.ServeHTTP(w, r)
-		})
-	})
-
-	webapp.RegisterToMux(mf)
-
-	mf.Compile()
-
-	var err error
-	if useTLS {
-		err = graceful.ListenAndServeTLS(addr, cert, key, mf)
-	} else {
-		err = graceful.ListenAndServe(addr, mf)
-	}
-
-	if err != nil {
-		log.WithFields(log.Fields{
-			"system": "webapp",
-			"err":    err,
-		}).Fatal("ListenAndServe returned with an error")
-	}
 }
 
 // Rebuilds the graph from the extant entries in a mlog.
