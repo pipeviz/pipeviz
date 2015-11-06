@@ -1,12 +1,10 @@
 machine:
     timezone:
         America/New_York
-    go:
-        version:
-            1.4
 dependencies:
     pre:
         - make deps
+        - go vet ./...
 test:
     override:
         - make gen
