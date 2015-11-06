@@ -37,25 +37,23 @@ type WebAppServer struct {
 	receiver   broker.GraphReceiver
 	cancel     <-chan struct{}
 	mlogGetter mlog.RecordGetter
-	version    string
 }
 
 // New creates a new webapp server, ready to be kicked off.
-func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel <-chan struct{}, f mlog.RecordGetter, version string) *WebAppServer {
+func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel <-chan struct{}, f mlog.RecordGetter) *WebAppServer {
 	return &WebAppServer{
 		receiver:   receiver,
 		unsub:      unsub,
 		latest:     represent.NewGraph(),
 		cancel:     cancel,
 		mlogGetter: f,
-		version:    version,
 	}
 }
 
 // ListenAndServe initiates the webapp http listener.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert string) {
+func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert, version string, showVersion bool) {
 	mf := web.New()
 	useTLS := key != "" && cert != ""
 
@@ -88,6 +86,16 @@ func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert string) {
 					return
 				}
 
+				h.ServeHTTP(w, r)
+			})
+		})
+	}
+
+	// If showing version, add a middleware to do it automatically for everything
+	if showVersion {
+		mf.Use(func(h http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Server", version)
 				h.ServeHTTP(w, r)
 			})
 		})

@@ -32,17 +32,18 @@ const (
 )
 
 var (
-	version    = "dev"
-	vflag      = pflag.BoolP("version", "v", false, "Print version")
-	bindAll    = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
-	dbPath     = pflag.StringP("data-dir", "d", ".", "The base directory to use for all persistent storage.")
-	useSyslog  = pflag.Bool("syslog", false, "Write log output to syslog.")
-	ingestKey  = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
-	ingestCert = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	webappKey  = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
-	webappCert = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
-	mlstore    = pflag.String("mlog-storage", "bolt", "Storage backend to use for the message log. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
-	publicDir  = pflag.String("webapp-dir", "webapp/public", "Path to the 'public' directory containing javascript application files.")
+	version     = "dev"
+	vflag       = pflag.BoolP("version", "v", false, "Print version")
+	bindAll     = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
+	dbPath      = pflag.StringP("data-dir", "d", ".", "The base directory to use for all persistent storage.")
+	useSyslog   = pflag.Bool("syslog", false, "Write log output to syslog.")
+	ingestKey   = pflag.String("ingest-key", "", "Path to an x509 key to use for TLS on the ingestion port. If no cert is provided, unsecured HTTP will be used.")
+	ingestCert  = pflag.String("ingest-cert", "", "Path to an x509 certificate to use for TLS on the ingestion port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	webappKey   = pflag.String("webapp-key", "", "Path to an x509 key to use for TLS on the webapp port. If no cert is provided, unsecured HTTP will be used.")
+	webappCert  = pflag.String("webapp-cert", "", "Path to an x509 certificate to use for TLS on the webapp port. If key is provided, will try to find a certificate of the same name plus .crt extension.")
+	mlstore     = pflag.String("mlog-storage", "bolt", "Storage backend to use for the message log. Valid options: 'memory' or 'bolt'. Defaults to bolt.")
+	publicDir   = pflag.String("webapp-dir", "webapp/public", "Path to the 'public' directory containing javascript application files.")
+	showVersion = pflag.Bool("webapp-version", false, "Report the version of the pipeviz server via response headers")
 )
 
 func main() {
@@ -141,12 +142,12 @@ func main() {
 	go srv.Interpret(g)
 
 	// And finally, kick off the webapp.
-	frontend := webapp.New(broker.Get().Subscribe(), broker.Get().Unsubscribe, make(chan struct{}), j.Get, version)
+	frontend := webapp.New(broker.Get().Subscribe(), broker.Get().Unsubscribe, make(chan struct{}), j.Get)
 	// TODO let config/params control address
 	if *webappKey != "" && *webappCert == "" {
 		*webappCert = *webappKey + ".crt"
 	}
-	go frontend.ListenAndServe(listenAt+strconv.Itoa(DefaultAppPort), *publicDir, *webappKey, *webappCert)
+	go frontend.ListenAndServe(listenAt+strconv.Itoa(DefaultAppPort), *publicDir, *webappKey, *webappCert, "pipeviz/"+version, *showVersion)
 
 	// Block on goji's graceful waiter, allowing the http connections to shut down nicely.
 	// FIXME using this should be unnecessary if we're crash-only
