@@ -20,4 +20,11 @@ gen: deps
 install:
 	go install -ldflags "-X main.version=${VERSION}" ./cmd/...
 
+build-all: gen
+	gox -verbose \
+	-ldflags "-X main.version=${VERSION}" \
+	-os="linux darwin freebsd" \
+	-arch="amd64" \
+	-output="dist/{{.OS}}-{{.Arch}}/{{.Dir}}" ./cmd/...
+
 .PHONY: deps gen install clean
