@@ -29,7 +29,8 @@ func main() {
 
 	root.Flags().StringVarP(&s.target, "target", "t", "http://localhost:2309", "Address of the target pipeviz daemon. Default to http://localhost:2309")
 	root.Flags().IntVarP(&s.port, "port", "p", 2906, "Port to listen on") // 2906, because Viv
-	root.Flags().StringVarP(&s.bind, "bind", "b", "127.0.0.1", "Address to bind on")
+	root.Flags().StringVar(&s.bind, "bind", "127.0.0.1", "Interface to bind on; ignored if --bind-all is passed")
+	root.Flags().BoolVarP(&s.bindAll, "bind-all", "b", false, "Bind on all local interfaces")
 	root.Flags().BoolVar(&s.useSyslog, "syslog", false, "Write log output to syslog.")
 	root.Flags().BoolVarP(&s.vflag, "version", "v", false, "Print version")
 	root.Flags().StringVar(&s.key, "tls-key", "", "Path to an x509 key to use for TLS. If no cert is provided, unsecured HTTP will be used.")
@@ -40,10 +41,10 @@ func main() {
 }
 
 type srv struct {
-	port             int
-	bind, target     string
-	key, cert        string
-	useSyslog, vflag bool
+	port                      int
+	bind, target              string
+	key, cert                 string
+	useSyslog, vflag, bindAll bool
 }
 
 type client struct {
@@ -127,11 +128,18 @@ func (s *srv) Run(cmd *cobra.Command, args []string) {
 
 	mux.Post("/github/push", githubIngestor(cl, cmd))
 
+	var addr string
+	if s.bindAll {
+		addr = ":" + strconv.Itoa(s.port)
+	} else {
+		addr = s.bind + ":" + strconv.Itoa(s.port)
+	}
+
 	var err error
 	if useTLS {
-		err = graceful.ListenAndServeTLS(s.bind+":"+strconv.Itoa(s.port), s.cert, s.key, mux)
+		err = graceful.ListenAndServeTLS(addr, s.cert, s.key, mux)
 	} else {
-		err = graceful.ListenAndServe(s.bind+":"+strconv.Itoa(s.port), mux)
+		err = graceful.ListenAndServe(addr, mux)
 	}
 
 	if err != nil {
