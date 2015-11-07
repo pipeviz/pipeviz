@@ -127,10 +127,18 @@ func (s *srv) Run(cmd *cobra.Command, args []string) {
 
 	mux.Post("/github/push", githubIngestor(cl, cmd))
 
+	var err error
 	if useTLS {
-		graceful.ListenAndServeTLS(s.bind+":"+strconv.Itoa(s.port), s.cert, s.key, mux)
+		err = graceful.ListenAndServeTLS(s.bind+":"+strconv.Itoa(s.port), s.cert, s.key, mux)
 	} else {
-		graceful.ListenAndServe(s.bind+":"+strconv.Itoa(s.port), mux)
+		err = graceful.ListenAndServe(s.bind+":"+strconv.Itoa(s.port), mux)
+	}
+
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"system": "pvproxy",
+			"err":    err,
+		}).Fatal("pvproxy httpd terminated")
 	}
 }
 
