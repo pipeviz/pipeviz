@@ -26,7 +26,7 @@ build-all: gen
 	gox -verbose \
 	-ldflags "-X main.version ${VERSION}" \
 	-os="linux darwin freebsd" \
-	-arch="amd64" \
+	-arch="amd64 386" \
 	-output="dist/{{.OS}}-{{.Arch}}/{{.Dir}}" ./cmd/...
 
 .PHONY: tools tools-update gen install clean build-all
