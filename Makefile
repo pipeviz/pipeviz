@@ -1,11 +1,12 @@
 default: gen
 VERSION := $(shell git describe --always --dirty --tags)
+TOOLS := github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox github.com/aktau/github-release
 
 tools:
-	go get github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox
+	go get ${TOOLS}
 
 tools-update:
-	go get -u -f github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox
+	go get -u -f ${TOOLS}
 
 clean:
 	rm -f cmd/pipeviz/pipeviz cmd/pipeviz/pipeviz.test
