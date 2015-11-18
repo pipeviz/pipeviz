@@ -70,7 +70,7 @@ func AnyMatch(l, r ps.Map, keys ...string) bool {
 // all of the values are equal (including the case where both maps are missing
 // a particular key), and false otherwise.
 //
-// types.Properties values are transformed into their contained Value in the
+// Properties values are transformed into their contained Value in the
 // same manner as in AnyMatch.
 func AllMatch(l, r ps.Map, keys ...string) bool {
 	// keep track of our both-missing count
