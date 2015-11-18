@@ -58,7 +58,7 @@ func (g *coreGraph) MsgID() uint64 {
 }
 
 // the method to merge a message into the graph
-func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) system.CoreGraph {
+func (g *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) system.CoreGraph {
 	// TODO use a buffering pool to minimize allocs
 	var ess edgeSpecSet
 
@@ -69,13 +69,13 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 
 	logEntry.Infof("Merging message %d into graph", msgid)
 
-	g := og.clone()
-	g.msgid = msgid
+	ng := g.clone()
+	ng.msgid = msgid
 
 	// Ensure vertices, then record into intermediate, orphan-enabling container
 	for _, uif := range uifs {
 		ess = append(ess, &veProcessingInfo{
-			vt:  g.ensureVertex(msgid, uif),
+			vt:  ng.ensureVertex(msgid, uif),
 			uif: uif,
 			// copy out the edges for later bookkeeping
 			e:     append(uif.ScopingSpecs(), uif.EdgeSpecs()...),
@@ -83,17 +83,17 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 		})
 	}
 
-	logEntry.Infof("Adding %d orphan edge spec sets from previous merges", len(g.orphans))
+	logEntry.Infof("Adding %d orphan edge spec sets from previous merges", len(ng.orphans))
 	// Reinclude the held-over set of orphans for edge (re-)resolutions
 	var ess2 edgeSpecSet
 	// TODO lots of things very wrong with this approach, but works for first pass
-	for _, orphan := range g.orphans {
+	for _, orphan := range ng.orphans {
 		// vertex ident failed; try again now that new vertices are present
 		if orphan.vt.ID == 0 {
-			orphan.vt = g.ensureVertex(orphan.msgid, orphan.uif)
+			orphan.vt = ng.ensureVertex(orphan.msgid, orphan.uif)
 		} else {
 			// ensure we have latest version of vt
-			vt, err := g.Get(orphan.vt.ID)
+			vt, err := ng.Get(orphan.vt.ID)
 			if err != nil {
 				// but if that vid has gone away, forget about it completely
 				logEntry.Infof("Orphan vid %d went away, discarding from orphan list", orphan.vt.ID)
@@ -132,13 +132,13 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 				"vtype": info.vt.Vertex.Typ(),
 			})
 			// Ensure our local copy of the tuple is up to date
-			info.vt, _ = g.Get(info.vt.ID)
+			info.vt, _ = ng.Get(info.vt.ID)
 
 			// Zero-alloc filtering technique
 			specs, info.e = info.e, info.e[:0]
 			for _, spec := range specs {
 				l3.Debugf("Resolving EdgeSpec of type %T", spec)
-				edge, success := spec.Resolve(g, msgid, info.vt)
+				edge, success := spec.Resolve(ng, msgid, info.vt)
 				if success {
 					l4 := l3.WithFields(log.Fields{
 						"target-vid": edge.Target,
@@ -150,21 +150,21 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 					edge.Source = info.vt.ID
 					if edge.ID == 0 {
 						// new edge, allocate a new id for it
-						g.vserial++
-						edge.ID = g.vserial
+						ng.vserial++
+						edge.ID = ng.vserial
 						l4.WithField("edge-id", edge.ID).Debug("New edge created")
 					} else {
 						l4.WithField("edge-id", edge.ID).Debug("Edge will merge over existing edge")
 					}
 
 					info.vt.OutEdges = info.vt.OutEdges.Set(i2a(edge.ID), edge)
-					g.vtuples = g.vtuples.Set(i2a(info.vt.ID), info.vt)
+					ng.vtuples = ng.vtuples.Set(i2a(info.vt.ID), info.vt)
 
-					any, _ := g.vtuples.Lookup(i2a(edge.Target))
+					any, _ := ng.vtuples.Lookup(i2a(edge.Target))
 					tvt := any.(system.VertexTuple)
 
 					tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
-					g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
+					ng.vtuples = ng.vtuples.Set(i2a(tvt.ID), tvt)
 				} else {
 					l3.Debug("Unsuccessful edge resolution; reattempt on next pass")
 					// FIXME mem leaks if done this way...?
@@ -177,17 +177,17 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 	}
 	logEntry.WithField("passes", pass).Info("Edge resolution complete")
 
-	g.orphans = g.orphans[:0]
+	ng.orphans = ng.orphans[:0]
 	for _, info := range ess {
 		if len(info.e) == 0 {
 			continue
 		}
 
-		g.orphans = append(g.orphans, info)
+		ng.orphans = append(ng.orphans, info)
 	}
-	logEntry.Infof("Adding %d orphan edge spec sets from previous merges", len(g.orphans))
+	logEntry.Infof("Adding %d orphan edge spec sets from previous merges", len(ng.orphans))
 
-	return g
+	return ng
 }
 
 // Ensures the vertex is present. Merges according to type-specific logic if
