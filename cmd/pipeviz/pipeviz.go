@@ -17,6 +17,7 @@ import (
 	"github.com/pipeviz/pipeviz/represent"
 	"github.com/pipeviz/pipeviz/schema"
 	"github.com/pipeviz/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/version"
 	"github.com/pipeviz/pipeviz/webapp"
 )
 
@@ -32,7 +33,6 @@ const (
 )
 
 var (
-	version     = "dev"
 	vflag       = pflag.BoolP("version", "v", false, "Print version")
 	bindAll     = pflag.BoolP("bind-all", "b", false, "Listen on all interfaces. Applies both to ingestor and webapp.")
 	dbPath      = pflag.StringP("data-dir", "d", ".", "The base directory to use for all persistent storage.")
@@ -49,7 +49,7 @@ var (
 func main() {
 	pflag.Parse()
 	if *vflag {
-		fmt.Println("pipeviz version", version)
+		fmt.Println("pipeviz version", version.Version())
 		return
 	}
 
@@ -147,7 +147,7 @@ func main() {
 	if *webappKey != "" && *webappCert == "" {
 		*webappCert = *webappKey + ".crt"
 	}
-	go frontend.ListenAndServe(listenAt+strconv.Itoa(DefaultAppPort), *publicDir, *webappKey, *webappCert, "pipeviz/"+version, *showVersion)
+	go frontend.ListenAndServe(listenAt+strconv.Itoa(DefaultAppPort), *publicDir, *webappKey, *webappCert, *showVersion)
 
 	// Block on goji's graceful waiter, allowing the http connections to shut down nicely.
 	// FIXME using this should be unnecessary if we're crash-only

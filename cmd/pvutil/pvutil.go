@@ -6,22 +6,20 @@ import (
 	"os"
 
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/pipeviz/pipeviz/version"
 )
 
 // shared stderr logger, for those that need it
 var erro = log.New(os.Stderr, "", 0)
 
-var (
-	version = "dev"
-	vflag   bool
-)
+var vflag bool
 
 func main() {
 	root := &cobra.Command{
 		Use: "pvutil",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if vflag {
-				fmt.Println("pvutil", cmd.Name(), "version", version)
+				fmt.Println("pvutil", cmd.Name(), "version", version.Version())
 				os.Exit(0)
 			}
 		},

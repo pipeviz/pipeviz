@@ -16,6 +16,7 @@ import (
 	"github.com/pipeviz/pipeviz/represent"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
+	"github.com/pipeviz/pipeviz/version"
 )
 
 // Count of active websocket clients (for expvars)
@@ -53,7 +54,7 @@ func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel
 // ListenAndServe initiates the webapp http listener.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert, version string, showVersion bool) {
+func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert string, showVersion bool) {
 	mf := web.New()
 	useTLS := key != "" && cert != ""
 
@@ -95,7 +96,7 @@ func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert, version string, s
 	if showVersion {
 		mf.Use(func(h http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Server", version)
+				w.Header().Set("Server", version.Version())
 				h.ServeHTTP(w, r)
 			})
 		})

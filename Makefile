@@ -20,11 +20,11 @@ gen: tools
 	go generate -x ./schema
 
 install: gen
-	go install -ldflags "-X main.version ${VERSION}" ./cmd/...
+	go install -ldflags "-X github.com/pipeviz/pipeviz/version.v ${VERSION}" ./cmd/...
 
 build-all: gen
 	gox -verbose \
-	-ldflags "-X main.version ${VERSION}" \
+	-ldflags "-X github.com/pipeviz/pipeviz/.v ${VERSION}" \
 	-os="linux darwin freebsd" \
 	-arch="amd64 386" \
 	-output="dist/{{.OS}}-{{.Arch}}/{{.Dir}}" ./cmd/...

@@ -15,9 +15,8 @@ import (
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/web"
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/log"
+	"github.com/pipeviz/pipeviz/version"
 )
-
-var version = "dev"
 
 func main() {
 	s := &srv{}
@@ -94,7 +93,7 @@ func (c client) send(m *ingest.Message) error {
 // Run sets up and runs the proxying HTTP server, then blocks.
 func (s *srv) Run(cmd *cobra.Command, args []string) {
 	if s.vflag {
-		fmt.Println("pvproxy version", version)
+		fmt.Println("pvproxy version", version.Version())
 		return
 	}
 
