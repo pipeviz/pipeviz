@@ -5,12 +5,12 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"strings"
-	"os"
-	"time"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
 func bindata_read(data []byte, name string) ([]byte, error) {
@@ -36,9 +36,9 @@ type asset struct {
 }
 
 type bindata_file_info struct {
-	name string
-	size int64
-	mode os.FileMode
+	name    string
+	size    int64
+	mode    os.FileMode
 	modTime time.Time
 }
 
@@ -77,7 +77,7 @@ func _1_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "1.json", size: 897, mode: os.FileMode(420), modTime: time.Unix(1431118616, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -97,7 +97,7 @@ func _2_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "2.json", size: 3780, mode: os.FileMode(420), modTime: time.Unix(1431118616, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -117,7 +117,7 @@ func _3_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "3.json", size: 11229, mode: os.FileMode(420), modTime: time.Unix(1431985517, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -137,7 +137,7 @@ func _4_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "4.json", size: 355, mode: os.FileMode(420), modTime: time.Unix(1431118616, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -157,7 +157,7 @@ func _5_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "5.json", size: 1928, mode: os.FileMode(420), modTime: time.Unix(1431118616, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -177,7 +177,7 @@ func _6_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "6.json", size: 3229, mode: os.FileMode(420), modTime: time.Unix(1431118616, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -197,7 +197,7 @@ func _7_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "7.json", size: 1558, mode: os.FileMode(420), modTime: time.Unix(1431118616, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -217,7 +217,7 @@ func _8_json() (*asset, error) {
 	}
 
 	info := bindata_file_info{name: "8.json", size: 5834, mode: os.FileMode(420), modTime: time.Unix(1431118616, 0)}
-	a := &asset{bytes: bytes, info:  info}
+	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
@@ -308,71 +308,63 @@ func AssetDir(name string) ([]string, error) {
 }
 
 type _bintree_t struct {
-	Func func() (*asset, error)
+	Func     func() (*asset, error)
 	Children map[string]*_bintree_t
 }
+
 var _bintree = &_bintree_t{nil, map[string]*_bintree_t{
-	"1.json": &_bintree_t{_1_json, map[string]*_bintree_t{
-	}},
-	"2.json": &_bintree_t{_2_json, map[string]*_bintree_t{
-	}},
-	"3.json": &_bintree_t{_3_json, map[string]*_bintree_t{
-	}},
-	"4.json": &_bintree_t{_4_json, map[string]*_bintree_t{
-	}},
-	"5.json": &_bintree_t{_5_json, map[string]*_bintree_t{
-	}},
-	"6.json": &_bintree_t{_6_json, map[string]*_bintree_t{
-	}},
-	"7.json": &_bintree_t{_7_json, map[string]*_bintree_t{
-	}},
-	"8.json": &_bintree_t{_8_json, map[string]*_bintree_t{
-	}},
+	"1.json": &_bintree_t{_1_json, map[string]*_bintree_t{}},
+	"2.json": &_bintree_t{_2_json, map[string]*_bintree_t{}},
+	"3.json": &_bintree_t{_3_json, map[string]*_bintree_t{}},
+	"4.json": &_bintree_t{_4_json, map[string]*_bintree_t{}},
+	"5.json": &_bintree_t{_5_json, map[string]*_bintree_t{}},
+	"6.json": &_bintree_t{_6_json, map[string]*_bintree_t{}},
+	"7.json": &_bintree_t{_7_json, map[string]*_bintree_t{}},
+	"8.json": &_bintree_t{_8_json, map[string]*_bintree_t{}},
 }}
 
 // Restore an asset under the given directory
 func RestoreAsset(dir, name string) error {
-        data, err := Asset(name)
-        if err != nil {
-                return err
-        }
-        info, err := AssetInfo(name)
-        if err != nil {
-                return err
-        }
-        err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
-        if err != nil {
-                return err
-        }
-        err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
-        if err != nil {
-                return err
-        }
-        err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
-        if err != nil {
-                return err
-        }
-        return nil
+	data, err := Asset(name)
+	if err != nil {
+		return err
+	}
+	info, err := AssetInfo(name)
+	if err != nil {
+		return err
+	}
+	err = os.MkdirAll(_filePath(dir, path.Dir(name)), os.FileMode(0755))
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
+	if err != nil {
+		return err
+	}
+	err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Restore assets under the given directory recursively
 func RestoreAssets(dir, name string) error {
-        children, err := AssetDir(name)
-        if err != nil { // File
-                return RestoreAsset(dir, name)
-        } else { // Dir
-                for _, child := range children {
-                        err = RestoreAssets(dir, path.Join(name, child))
-                        if err != nil {
-                                return err
-                        }
-                }
-        }
-        return nil
+	children, err := AssetDir(name)
+	if err != nil { // File
+		return RestoreAsset(dir, name)
+	} else { // Dir
+		for _, child := range children {
+			err = RestoreAssets(dir, path.Join(name, child))
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func _filePath(dir, name string) string {
-        cannonicalName := strings.Replace(name, "\\", "/", -1)
-        return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
+	cannonicalName := strings.Replace(name, "\\", "/", -1)
+	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-
