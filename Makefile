@@ -24,7 +24,7 @@ install: gen
 
 build-all: gen
 	gox -verbose \
-	-ldflags "-X github.com/pipeviz/pipeviz/.v=${VERSION}" \
+	-ldflags "-X github.com/pipeviz/pipeviz/version.v=${VERSION}" \
 	-os="linux darwin freebsd" \
 	-arch="amd64 386" \
 	-output="dist/{{.OS}}-{{.Arch}}/{{.Dir}}" ./cmd/...
