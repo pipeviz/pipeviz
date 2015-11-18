@@ -1,3 +1,6 @@
+machine:
+    environment:
+        GO15VENDOREXPERIMENT: 1
 checkout:
     post:
         - mkdir -pv "$HOME/.go_workspace/src/github.com/pipeviz"
@@ -5,6 +8,10 @@ checkout:
 # TODO cache these more smartly? per https://circleci.com/docs/installing-custom-software#caching
 dependencies:
     pre:
+        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+        - chmod +x ~/bin/gimme
+        - gimme 1.5.1
+        - source ~/.gimme/envs/go1.5.1.env
         - make tools
           #- go vet ./...
 test:
