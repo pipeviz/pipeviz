@@ -2,74 +2,31 @@ package ingest_test
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"strings"
+	"sort"
 	"testing"
 
-	gjs "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/pipeviz/pipeviz/fixtures"
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/schema"
 )
 
-var (
-	Msgs    []*ingest.Message
-	MsgJSON [][]byte
-)
+var msgJSON [][]byte
 
 func init() {
-	for i := range make([]struct{}, 8) {
-		m := &ingest.Message{}
-
-		path := fmt.Sprintf("../fixtures/ein/%v.json", i+1)
-		f, err := ioutil.ReadFile(path)
-		if err != nil {
-			panic("json fnf: " + path)
-		}
-
-		MsgJSON = append(MsgJSON, f)
-		_ = json.Unmarshal(f, m)
-		Msgs = append(Msgs, m)
-	}
-}
-
-// Reads all message fixtures from fixtures/ein and validates them
-// against the master message schema (schema.json).
-func TestMessageValidity(t *testing.T) {
-	files, err := ioutil.ReadDir("../fixtures/ein/")
+	assets, err := fixtures.AssetDir("ein")
 	if err != nil {
-		t.Error("Failed to scan message fixtures dir:", err.Error())
-		t.FailNow()
+		panic("Could not load assets; has code generation (`make gen`) been done?")
 	}
 
-	for _, f := range files {
-		if testing.Verbose() {
-			t.Log("Beginning validation on", f.Name())
-		}
-
-		src, _ := ioutil.ReadFile("../fixtures/ein/" + f.Name())
-		msg := gjs.NewStringLoader(string(src))
-		result, err := schema.Master().Validate(msg)
-
-		if err != nil {
-			panic(err.Error())
-		}
-
-		if result.Valid() {
-			if testing.Verbose() {
-				t.Log(f.Name(), "passed validation")
-			}
-		} else {
-			for _, desc := range result.Errors() {
-				t.Errorf("%s\n", strings.Replace(desc.String(), "root", f.Name(), 1))
-			}
-		}
+	sort.Strings(assets)
+	for _, name := range assets {
+		msgJSON = append(msgJSON, fixtures.MustAsset("ein/"+name))
 	}
 }
 
 func BenchmarkUnmarshalMessageOne(b *testing.B) {
-	d, _ := fixtures.Asset("ein/1.json")
+	d := msgJSON[0]
 
 	for i := 0; i < b.N; i++ {
 		m := &ingest.Message{}
@@ -78,7 +35,7 @@ func BenchmarkUnmarshalMessageOne(b *testing.B) {
 }
 
 func BenchmarkUnmarshalMessageTwo(b *testing.B) {
-	d, _ := fixtures.Asset("ein/2.json")
+	d := msgJSON[1]
 
 	for i := 0; i < b.N; i++ {
 		m := &ingest.Message{}
@@ -87,8 +44,7 @@ func BenchmarkUnmarshalMessageTwo(b *testing.B) {
 }
 
 func BenchmarkUnmarshalMessageOneAndTwo(b *testing.B) {
-	d1 := MsgJSON[0]
-	d2 := MsgJSON[1]
+	d1, d2 := msgJSON[0], msgJSON[1]
 
 	for i := 0; i < b.N; i++ {
 		m1 := &ingest.Message{}
@@ -100,8 +56,8 @@ func BenchmarkUnmarshalMessageOneAndTwo(b *testing.B) {
 }
 
 func BenchmarkValidateMessageOne(b *testing.B) {
-	d := MsgJSON[0]
-	msg := gjs.NewStringLoader(string(d))
+	d := msgJSON[0]
+	msg := gojsonschema.NewStringLoader(string(d))
 
 	for i := 0; i < b.N; i++ {
 		schema.Master().Validate(msg)
@@ -109,8 +65,8 @@ func BenchmarkValidateMessageOne(b *testing.B) {
 }
 
 func BenchmarkValidateMessageTwo(b *testing.B) {
-	d := MsgJSON[0]
-	msg := gjs.NewStringLoader(string(d))
+	d := msgJSON[0]
+	msg := gojsonschema.NewStringLoader(string(d))
 
 	for i := 0; i < b.N; i++ {
 		schema.Master().Validate(msg)
@@ -118,10 +74,10 @@ func BenchmarkValidateMessageTwo(b *testing.B) {
 }
 
 func BenchmarkValidateMessageOneAndTwo(b *testing.B) {
-	d1 := MsgJSON[0]
-	d2 := MsgJSON[1]
-	msg1 := gjs.NewStringLoader(string(d1))
-	msg2 := gjs.NewStringLoader(string(d2))
+	d1 := msgJSON[0]
+	d2 := msgJSON[1]
+	msg1 := gojsonschema.NewStringLoader(string(d1))
+	msg2 := gojsonschema.NewStringLoader(string(d2))
 
 	for i := 0; i < b.N; i++ {
 		schema.Master().Validate(msg1)
