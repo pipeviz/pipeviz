@@ -31,6 +31,15 @@ func validateCommand() *cobra.Command {
 func runValidate(cmd *cobra.Command, args []string) {
 	var errors int
 	for _, dir := range args {
+		finfo, err := os.Stat(dir)
+		if err != nil {
+			fmt.Printf("Could not stat '%s' with error: %s\n", dir, err)
+			continue
+		}
+		if !finfo.IsDir() {
+			continue
+		}
+
 		fl, err := ioutil.ReadDir(dir)
 		if err != nil {
 			fmt.Printf("Failed to read directory '%v' with error %v\n", dir, err)
@@ -59,7 +68,7 @@ func runValidate(cmd *cobra.Command, args []string) {
 						fmt.Printf("\t%s\n", desc)
 					}
 				} else {
-					fmt.Printf("%v/%v successfully validated\n", dir, f.Name())
+					fmt.Printf("%v/%v passed validation\n", dir, f.Name())
 				}
 			}
 		}
