@@ -25,9 +25,6 @@ _testmain.go
 # delve leaves these around
 .dbg_history
 
-# ignore js things
-bower_components
-
 # ignore any boltdb files that may hang around
 *.bolt
 

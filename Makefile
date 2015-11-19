@@ -18,6 +18,7 @@ test: gen
 
 gen: tools
 	go generate -x ./schema
+	go-bindata -o fixtures/bindata_fixtures.go -prefix="fixtures" -pkg=fixtures fixtures/*/*.json
 
 install: gen
 	go install -ldflags "-X github.com/pipeviz/pipeviz/version.v=${VERSION}" ./cmd/...

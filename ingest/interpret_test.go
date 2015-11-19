@@ -80,7 +80,7 @@ func TestMessageValidity(t *testing.T) {
 }
 
 func BenchmarkUnmarshalMessageOne(b *testing.B) {
-	d, _ := fixtures.Asset("1.json")
+	d, _ := fixtures.Asset("ein/1.json")
 
 	for i := 0; i < b.N; i++ {
 		m := &ingest.Message{}
@@ -89,7 +89,7 @@ func BenchmarkUnmarshalMessageOne(b *testing.B) {
 }
 
 func BenchmarkUnmarshalMessageTwo(b *testing.B) {
-	d, _ := fixtures.Asset("2.json")
+	d, _ := fixtures.Asset("ein/2.json")
 
 	for i := 0; i < b.N; i++ {
 		m := &ingest.Message{}
