@@ -29,16 +29,6 @@ func validateCommand() *cobra.Command {
 }
 
 func runValidate(cmd *cobra.Command, args []string) {
-	raw, err := schema.Master()
-	if err != nil {
-		panic(fmt.Sprint("Failed to open master schema file, test must abort. message:", err.Error()))
-	}
-
-	schemaMaster, err := gjs.NewSchema(gjs.NewStringLoader(string(raw)))
-	if err != nil {
-		panic("bad schema...?")
-	}
-
 	var errors int
 	for _, dir := range args {
 		fl, err := ioutil.ReadDir(dir)
@@ -55,7 +45,7 @@ func runValidate(cmd *cobra.Command, args []string) {
 					continue
 				}
 
-				result, err := schemaMaster.Validate(gjs.NewStringLoader(string(src)))
+				result, err := schema.Master().Validate(gjs.NewStringLoader(string(src)))
 				if err != nil {
 					errors |= ValidationError
 					fmt.Printf("Validation process terminated with errors for %v/%v. Error: \n%v\n", dir, f.Name(), err.Error())

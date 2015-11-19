@@ -7,7 +7,6 @@ import (
 
 	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
-	gjs "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
 	"github.com/pipeviz/pipeviz/broker"
 	"github.com/pipeviz/pipeviz/ingest"
@@ -55,23 +54,6 @@ func main() {
 
 	setUpLogging()
 
-	src, err := schema.Master()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"system": "main",
-			"err":    err,
-		}).Fatal("Could not locate master schema file, exiting")
-	}
-
-	// The master JSON schema used for validating all incoming messages
-	masterSchema, err := gjs.NewSchema(gjs.NewStringLoader(string(src)))
-	if err != nil {
-		log.WithFields(log.Fields{
-			"system": "main",
-			"err":    err,
-		}).Fatal("Error while creating a schema object from the master schema file, exiting")
-	}
-
 	// Channel to receive persisted messages from HTTP workers. 1000 cap to allow
 	// some wiggle room if there's a sudden burst of messages and the interpreter
 	// gets behind.
@@ -85,6 +67,7 @@ func main() {
 	}
 
 	var j mlog.Store
+	var err error
 	switch *mlstore {
 	case "bolt":
 		j, err = boltdb.NewBoltStore(*dbPath + "/mlog.bolt")
@@ -119,7 +102,7 @@ func main() {
 	broker.Get().Fanout(brokerChan)
 	brokerChan <- g
 
-	srv := ingest.New(j, masterSchema, interpretChan, brokerChan, MaxMessageSize)
+	srv := ingest.New(j, schema.Master(), interpretChan, brokerChan, MaxMessageSize)
 
 	// Kick off the http message ingestor.
 	// TODO let config/params control address

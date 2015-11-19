@@ -38,15 +38,6 @@ func dotDumperCommand() *cobra.Command {
 
 func runDotDumper(cmd *cobra.Command, args []string) {
 	g := represent.NewGraph()
-	raw, err := schema.Master()
-	if err != nil {
-		panic(fmt.Sprint("Failed to open master schema file, test must abort. message:", err.Error()))
-	}
-
-	schemaMaster, err := gjs.NewSchema(gjs.NewStringLoader(string(raw)))
-	if err != nil {
-		panic("bad schema...?")
-	}
 
 	if len(args) < 1 {
 		log.Fatalf("Must provide at least one directory argument to dotdumper.")
@@ -67,7 +58,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 					continue
 				}
 
-				result, err := schemaMaster.Validate(gjs.NewStringLoader(string(src)))
+				result, err := schema.Master().Validate(gjs.NewStringLoader(string(src)))
 				if err != nil {
 					erro.Printf("Validation process terminated with errors for %v/%v. Error: \n%v\n", dir, f.Name(), err.Error())
 					continue
