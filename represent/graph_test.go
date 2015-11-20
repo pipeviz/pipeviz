@@ -28,7 +28,7 @@ func init() {
 }
 
 func TestClone(t *testing.T) {
-	g := &coreGraph{vtuples: newIntMap(), vserial: 0}
+	g := &coreGraph{vtuples: newIntMapV(), vserial: 0}
 	g.vserial = 2
 	g.vtuples = g.vtuples.Set(42, system.VertexTuple{
 		Vertex: system.StdVertex{
@@ -57,7 +57,7 @@ func TestClone(t *testing.T) {
 }
 
 func BenchmarkMergeMessageOne(b *testing.B) {
-	g := &coreGraph{vtuples: newIntMap()}
+	g := &coreGraph{vtuples: newIntMapV()}
 	m := msgs[0]
 
 	for i := 0; i < b.N; i++ {
@@ -66,7 +66,7 @@ func BenchmarkMergeMessageOne(b *testing.B) {
 }
 
 func BenchmarkMergeMessageOneAndTwo(b *testing.B) {
-	var g system.CoreGraph = &coreGraph{vtuples: newIntMap()}
+	var g system.CoreGraph = &coreGraph{vtuples: newIntMapV()}
 	m1 := msgs[0]
 	m2 := msgs[1]
 

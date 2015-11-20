@@ -64,7 +64,7 @@ func mkEdge(id, source, target uint64, msgid uint64, etype string, props ...inte
 }
 
 func getGraphFixture() *coreGraph {
-	g := &coreGraph{vtuples: newIntMap(), vserial: 0}
+	g := &coreGraph{vtuples: newIntMapV(), vserial: 0}
 
 	// Manually populate the graph with some dummy vertices and edges.
 	// These don't necessarily line up with any real schemas, on purpose.
