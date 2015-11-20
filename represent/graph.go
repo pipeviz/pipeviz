@@ -14,11 +14,44 @@ var i2a = func(i uint64) string {
 	return strconv.FormatUint(i, 10)
 }
 
+type intMap struct {
+	ps.Map
+}
+
+// newIntMap creates a new intMap for use.
+func newIntMap() intMap {
+	return intMap{ps.NewMap()}
+}
+
+// Set takes a uint64 key and a VertexTuple, sets the VertexTuple as the value for
+// that key and returns a new intMap pointer (ish...since this is a fake wrapper atm)
+func (m intMap) Set(key uint64, value system.VertexTuple) intMap {
+	return intMap{m.Map.Set(strconv.FormatUint(key, 10), value)}
+}
+
+// Get takes a uint64 key and returns the VertexTuple at that key, or an empty
+// VertexTuple and false.
+func (m intMap) Get(key uint64) (system.VertexTuple, bool) {
+	vt, exists := m.Map.Lookup(strconv.FormatUint(key, 10))
+
+	if exists {
+		return vt.(system.VertexTuple), true
+	} else {
+		return system.VertexTuple{}, false
+	}
+}
+
+// Delete takes a uint64 key and deletes the key from the map. It returns a
+// pointer (ish) to a new intMap.
+func (m intMap) Delete(key uint64, value ps.Any) intMap {
+	return intMap{m.Map.Delete(strconv.FormatUint(key, 10))}
+}
+
 // the main graph construct
 type coreGraph struct {
-	msgid, vserial uint64
-	vtuples        ps.Map
-	orphans        edgeSpecSet // FIXME breaks immut
+	msgid, vserial    uint64
+	vtuples, porphans intMap
+	orphans           edgeSpecSet // FIXME breaks immut
 }
 
 // NewGraph creates a new in-memory coreGraph and returns it as a system.CoreGraph.
@@ -27,7 +60,7 @@ func NewGraph() system.CoreGraph {
 		"system": "engine",
 	}).Debug("New coreGraph created")
 
-	return &coreGraph{vtuples: ps.NewMap(), vserial: 0}
+	return &coreGraph{vtuples: newIntMap(), porphans: newIntMap(), vserial: 0}
 }
 
 type veProcessingInfo struct {
@@ -158,13 +191,12 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 					}
 
 					info.vt.OutEdges = info.vt.OutEdges.Set(i2a(edge.ID), edge)
-					g.vtuples = g.vtuples.Set(i2a(info.vt.ID), info.vt)
+					g.vtuples = g.vtuples.Set(info.vt.ID, info.vt)
 
-					any, _ := g.vtuples.Lookup(i2a(edge.Target))
-					tvt := any.(system.VertexTuple)
+					tvt, _ := g.vtuples.Get(edge.Target)
 
 					tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
-					g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
+					g.vtuples = g.vtuples.Set(tvt.ID, tvt)
 				} else {
 					l3.Debug("Unsuccessful edge resolution; reattempt on next pass")
 					// FIXME mem leaks if done this way...?
@@ -244,16 +276,15 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 				logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
 
 				// set edge in reverse direction, too
-				any, _ := g.vtuples.Lookup(i2a(edge.Target))
-				tvt := any.(system.VertexTuple)
+				tvt, _ := g.vtuples.Get(edge.Target)
 				tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
 
-				g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
+				g.vtuples = g.vtuples.Set(tvt.ID, tvt)
 			} else {
 				logEntry.Debug("Early resolve failed")
 			}
 
-			g.vtuples = g.vtuples.Set(i2a(final.ID), final)
+			g.vtuples = g.vtuples.Set(final.ID, final)
 		}
 	} else {
 		logEntry.WithField("vid", vid).Debug("Unification resulted in match")
@@ -274,7 +305,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 		}
 
 		final = system.VertexTuple{ID: vid, InEdges: vt.InEdges, OutEdges: vt.OutEdges, Vertex: nu}
-		g.vtuples = g.vtuples.Set(i2a(vid), final)
+		g.vtuples = g.vtuples.Set(vid, final)
 	}
 
 	return
@@ -286,9 +317,9 @@ func (g *coreGraph) Get(id uint64) (system.VertexTuple, error) {
 		return system.VertexTuple{}, fmt.Errorf("Graph has only %d elements, no vertex yet exists with id %d", g.vserial, id)
 	}
 
-	vtx, exists := g.vtuples.Lookup(i2a(id))
+	vtx, exists := g.vtuples.Get(id)
 	if exists {
-		return vtx.(system.VertexTuple), nil
+		return vtx, nil
 	}
 
 	return system.VertexTuple{}, fmt.Errorf("No vertex exists with id %d at the present revision of the graph", id)

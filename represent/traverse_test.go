@@ -64,7 +64,7 @@ func mkEdge(id, source, target uint64, msgid uint64, etype string, props ...inte
 }
 
 func getGraphFixture() *coreGraph {
-	g := &coreGraph{vtuples: ps.NewMap(), vserial: 0}
+	g := &coreGraph{vtuples: newIntMap(), vserial: 0}
 
 	// Manually populate the graph with some dummy vertices and edges.
 	// These don't necessarily line up with any real schemas, on purpose.
@@ -80,23 +80,23 @@ func getGraphFixture() *coreGraph {
 
 	// vid 1, type "env". two props - "prop1": "bar", "prop2": 42. msgid 1
 	vt1 := mkTuple(1, system.NewVertex("env", 1, tprops("prop1", "foo", "prop2", 42)...), edge10, edge11) // one in, one out
-	g.vtuples = g.vtuples.Set(strconv.Itoa(1), vt1)
+	g.vtuples = g.vtuples.Set(1, vt1)
 
 	// vid 2, type "env". , "one prop - "prop1", "foo". msgid 2
 	vt2 := mkTuple(2, system.NewVertex("env", 2, tprops("prop1", "bar")...), edge10) // one in
-	g.vtuples = g.vtuples.Set(strconv.Itoa(2), vt2)
+	g.vtuples = g.vtuples.Set(2, vt2)
 
 	// vid 3, type "vt2". two props - "prop1", "bar", "bowser", "moo". msgid 3
 	vt3 := mkTuple(3, system.NewVertex("vt2", 3, tprops("prop1", "bar", "bowser", "moo")...), edge11, edge12, edge13) // three out
-	g.vtuples = g.vtuples.Set(strconv.Itoa(3), vt3)
+	g.vtuples = g.vtuples.Set(3, vt3)
 
 	// vid 4, type "vt3". three props - "prop1", "baz", "prop2", 42, "prop3", "qux". msgid 4
 	vt4 := mkTuple(4, system.NewVertex("vt3", 4, tprops("prop1", "baz", "prop2", 42, "prop3", "qux")...), edge12, edge13) // two in, same origin
-	g.vtuples = g.vtuples.Set(strconv.Itoa(4), vt4)
+	g.vtuples = g.vtuples.Set(4, vt4)
 
 	// vid 5, type "vt3". no props, no edges. msgid 5
 	vt5 := mkTuple(5, system.NewVertex("vt3", 5)) // none in or out
-	g.vtuples = g.vtuples.Set(strconv.Itoa(5), vt5)
+	g.vtuples = g.vtuples.Set(5, vt5)
 	g.vserial = 13
 
 	return g
