@@ -29,18 +29,17 @@ func validateCommand() *cobra.Command {
 }
 
 func runValidate(cmd *cobra.Command, args []string) {
-	raw, err := schema.Master()
-	if err != nil {
-		panic(fmt.Sprint("Failed to open master schema file, test must abort. message:", err.Error()))
-	}
-
-	schemaMaster, err := gjs.NewSchema(gjs.NewStringLoader(string(raw)))
-	if err != nil {
-		panic("bad schema...?")
-	}
-
 	var errors int
 	for _, dir := range args {
+		finfo, err := os.Stat(dir)
+		if err != nil {
+			fmt.Printf("Could not stat '%s' with error: %s\n", dir, err)
+			continue
+		}
+		if !finfo.IsDir() {
+			continue
+		}
+
 		fl, err := ioutil.ReadDir(dir)
 		if err != nil {
 			fmt.Printf("Failed to read directory '%v' with error %v\n", dir, err)
@@ -55,7 +54,7 @@ func runValidate(cmd *cobra.Command, args []string) {
 					continue
 				}
 
-				result, err := schemaMaster.Validate(gjs.NewStringLoader(string(src)))
+				result, err := schema.Master().Validate(gjs.NewStringLoader(string(src)))
 				if err != nil {
 					errors |= ValidationError
 					fmt.Printf("Validation process terminated with errors for %v/%v. Error: \n%v\n", dir, f.Name(), err.Error())
@@ -69,7 +68,7 @@ func runValidate(cmd *cobra.Command, args []string) {
 						fmt.Printf("\t%s\n", desc)
 					}
 				} else {
-					fmt.Printf("%v/%v successfully validated\n", dir, f.Name())
+					fmt.Printf("%v/%v passed validation\n", dir, f.Name())
 				}
 			}
 		}
