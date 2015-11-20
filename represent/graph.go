@@ -218,17 +218,30 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 
 		g.vserial++
 		final.ID = g.vserial
-		g.vtuples = g.vtuples.Set(i2a(g.vserial), final)
+		g.vtuples = g.vtuples.Set(g.vserial, final)
 
 		// Resolve scoping edge specs early, here
 		for _, spec := range sd.ScopingSpecs() {
 			logEntry.Debugf("Doing early resolve on EdgeSpec of type %T", spec)
 			edge, success := spec.Resolve(g, msgid, final)
+
+			// Currently, Success -> ¬Incomplete. While the onus should be on the
+			// implementor to maintain this implication, we check here and
+			// register an error if there is a mismatch.
+			if (success && edge.Incomplete) || (!success && !edge.Incomplete) {
+				logEntry.WithFields(log.Fields{
+					"etype":      edge.EType,
+					"success":    success,
+					"incomplete": edge.Incomplete,
+				}).Error("Disagreement between Resolve 'success' return and edge's Incomplete flag")
+			}
+
+			g.vserial++
+			edge.ID = g.vserial
+			final.OutEdges = final.OutEdges.Set(i2a(edge.ID), edge)
+
 			if success { // could fail if corresponding env not yet declared
 				logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
-				g.vserial++
-				edge.ID = g.vserial
-				final.OutEdges = final.OutEdges.Set(i2a(edge.ID), edge)
 
 				// set edge in reverse direction, too
 				any, _ := g.vtuples.Lookup(i2a(edge.Target))
@@ -236,10 +249,11 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 				tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
 
 				g.vtuples = g.vtuples.Set(i2a(tvt.ID), tvt)
-				g.vtuples = g.vtuples.Set(i2a(final.ID), final)
 			} else {
 				logEntry.Debug("Early resolve failed")
 			}
+
+			g.vtuples = g.vtuples.Set(i2a(final.ID), final)
 		}
 	} else {
 		logEntry.WithField("vid", vid).Debug("Unification resulted in match")
