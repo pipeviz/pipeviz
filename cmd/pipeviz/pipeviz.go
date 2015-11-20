@@ -100,8 +100,14 @@ func main() {
 	// the state machine and the listeners interested in the machine's state.
 	brokerChan := make(chan system.CoreGraph, 0)
 	broker.Get().Fanout(brokerChan)
+
+	// Create the frontend server struct. We have to do it early like this so that
+	// the server's broker subscriber is already listening when the first/rebuilt graph is sent.
+	fcancel := make(chan struct{})
+	frontend := webapp.New(broker.Get().Subscribe(), broker.Get().Unsubscribe, fcancel, j.Get)
 	brokerChan <- g
 
+	// Create the ingestion server struct.
 	srv := ingest.New(j, schema.Master(), interpretChan, brokerChan, MaxMessageSize)
 
 	// Kick off the http message ingestor.
@@ -124,8 +130,7 @@ func main() {
 	// them along to the graph broker.
 	go srv.Interpret(g)
 
-	// And finally, kick off the webapp.
-	frontend := webapp.New(broker.Get().Subscribe(), broker.Get().Unsubscribe, make(chan struct{}), j.Get)
+	// And finally, kick off the frontend server.
 	// TODO let config/params control address
 	if *webappKey != "" && *webappCert == "" {
 		*webappCert = *webappKey + ".crt"
