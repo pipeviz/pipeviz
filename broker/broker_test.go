@@ -34,7 +34,7 @@ func TestBroker(t *testing.T) {
 
 	// kick off the tallying channel, the final target
 	go func() {
-		for _ = range tallyChan {
+		for range tallyChan {
 			tally++
 		}
 	}()
