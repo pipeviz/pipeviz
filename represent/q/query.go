@@ -58,7 +58,10 @@ func (ef edgeFilter) And(vf system.VFilter) system.VEFilter {
 	return bothFilter{vf, ef}
 }
 
-// first string is vtype, then pairs after that are props
+// Qbv is a convenience function to construct a VertexFilter.
+//
+// First string is VType; pairs after that are props.
+// Passing an even number of args greater than two will simply drop the last arg.
 func Qbv(v ...interface{}) vertexFilter {
 	switch len(v) {
 	case 0:
@@ -80,7 +83,10 @@ func Qbv(v ...interface{}) vertexFilter {
 	}
 }
 
-// first string is etype, then pairs after that are props
+// Qbe is a convenience function to construct an EdgeFilter.
+//
+// First string is EType; pairs after that are props.
+// Passing an even number of args greater than two will simply drop the last arg.
 func Qbe(v ...interface{}) edgeFilter {
 	switch len(v) {
 	case 0:

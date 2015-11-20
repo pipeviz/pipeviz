@@ -15,7 +15,7 @@ var (
 	upgrader = websocket.Upgrader{ReadBufferSize: 256, WriteBufferSize: 8192}
 )
 
-func (s *WebAppServer) openSocket(w http.ResponseWriter, r *http.Request) {
+func (s *Server) openSocket(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		entry := logrus.WithFields(logrus.Fields{
@@ -37,7 +37,7 @@ func (s *WebAppServer) openSocket(w http.ResponseWriter, r *http.Request) {
 	clientCount--
 }
 
-func (s *WebAppServer) wsReader(ws *websocket.Conn) {
+func (s *Server) wsReader(ws *websocket.Conn) {
 	defer ws.Close()
 	ws.SetReadLimit(512)
 	ws.SetReadDeadline(time.Now().Add(pongWait))
@@ -51,7 +51,7 @@ func (s *WebAppServer) wsReader(ws *websocket.Conn) {
 	}
 }
 
-func (s *WebAppServer) wsWriter(ws *websocket.Conn) {
+func (s *Server) wsWriter(ws *websocket.Conn) {
 	graphIn := broker.Get().Subscribe()
 	pingTicker := time.NewTicker(pingPeriod)
 	defer func() {

@@ -8,7 +8,7 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
-// Inspects the indicated vertex's set of out-edges, returning a slice of
+// OutWith inspects the indicated vertex's set of out-edges, returning a slice of
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
@@ -16,7 +16,7 @@ func (g *coreGraph) OutWith(egoID uint64, ef system.EFilter) (es system.EdgeVect
 	return g.arcWith(egoID, ef, false)
 }
 
-// Inspects the indicated vertex's set of in-edges, returning a slice of
+// InWith inspects the indicated vertex's set of in-edges, returning a slice of
 // those that match on type and properties. ETypeNone and nil can be passed
 // for the last two parameters respectively, in which case the filters will
 // be bypassed.
@@ -41,27 +41,9 @@ func (g *coreGraph) arcWith(egoID uint64, ef system.EFilter, in bool) (es system
 			return
 		}
 
-		for _, p := range props {
-			eprop, exists := edge.Props.Lookup(p.K)
-			if !exists {
-				return
-			}
-
-			deprop := eprop.(system.Property)
-			switch tv := deprop.Value.(type) {
-			default:
-				if tv != p.V {
-					return
-				}
-			case []byte:
-				cmptv, ok := p.V.([]byte)
-				if !ok || !bytes.Equal(tv, cmptv) {
-					return
-				}
-			}
+		if filterCmp(props, edge.Props) {
+			es = append(es, edge)
 		}
-
-		es = append(es, edge)
 	}
 
 	if in {
@@ -73,16 +55,16 @@ func (g *coreGraph) arcWith(egoID uint64, ef system.EFilter, in bool) (es system
 	return
 }
 
-// Return a slice of vtTuples that are successors of the given vid, constraining the list
-// to those that are connected by edges that pass the EdgeFilter, and the successor
-// vertices pass the VertexFilter.
+// SuccessorsWith returns a slice of vtTuples that are successors of the given vid,
+// constraining the list to those that are connected by edges that pass the EdgeFilter,
+// and the successor vertices pass the VertexFilter.
 func (g *coreGraph) SuccessorsWith(egoID uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
 	return g.adjacentWith(egoID, vef, false)
 }
 
-// Return a slice of vtTuples that are predecessors of the given vid, constraining the list
-// to those that are connected by edges that pass the EdgeFilter, and the predecessor
-// vertices pass the VertexFilter.
+// PredecessorsWith returns a slice of vtTuples that are predecessors of the given vid,
+// constraining the list to those that are connected by edges that pass the EdgeFilter,
+// and the predecessor vertices pass the VertexFilter.
 func (g *coreGraph) PredecessorsWith(egoID uint64, vef system.VEFilter) (vts system.VertexTupleVector) {
 	return g.adjacentWith(egoID, vef, true)
 }
@@ -109,31 +91,14 @@ func (g *coreGraph) adjacentWith(egoID uint64, vef system.VEFilter, in bool) (vt
 			return
 		}
 
-		for _, p := range eprops {
-			eprop, exists := edge.Props.Lookup(p.K)
-			if !exists {
-				return
-			}
-
-			deprop := eprop.(system.Property)
-			switch tv := deprop.Value.(type) {
-			default:
-				if tv != p.V {
-					return
-				}
-			case []byte:
-				cmptv, ok := p.V.([]byte)
-				if !ok || !bytes.Equal(tv, cmptv) {
-					return
-				}
+		if filterCmp(eprops, edge.Props) {
+			if in {
+				vidchan <- edge.Source
+			} else {
+				vidchan <- edge.Target
 			}
 		}
 
-		if in {
-			vidchan <- edge.Source
-		} else {
-			vidchan <- edge.Target
-		}
 	}
 
 	go func() {
@@ -170,24 +135,8 @@ VertexInspector:
 			continue
 		}
 
-		for _, p := range vprops {
-			vprop, exists := adjvt.Vertex.Props().Lookup(p.K)
-			if !exists {
-				continue VertexInspector
-			}
-
-			dvprop := vprop.(system.Property)
-			switch tv := dvprop.Value.(type) {
-			default:
-				if tv != p.V {
-					continue VertexInspector
-				}
-			case []byte:
-				cmptv, ok := p.V.([]byte)
-				if !ok || !bytes.Equal(tv, cmptv) {
-					continue VertexInspector
-				}
-			}
+		if !filterCmp(vprops, adjvt.Vertex.Props()) {
+			continue VertexInspector
 		}
 
 		vts = append(vts, adjvt)
@@ -210,28 +159,36 @@ func (g *coreGraph) VerticesWith(vf system.VFilter) (vs system.VertexTupleVector
 			return
 		}
 
-		for _, p := range props {
-			vprop, exists := vt.Vertex.Props().Lookup(p.K)
-			if !exists {
-				return
-			}
-
-			dvprop := vprop.(system.Property)
-			switch tv := dvprop.Value.(type) {
-			default:
-				if tv != p.V {
-					return
-				}
-			case []byte:
-				cmptv, ok := p.V.([]byte)
-				if !ok || !bytes.Equal(tv, cmptv) {
-					return
-				}
-			}
+		if filterCmp(props, vt.Vertex.Props()) {
+			vs = append(vs, vt)
 		}
-
-		vs = append(vs, vt)
 	})
 
 	return vs
+}
+
+// filterCmp compares all the values from the PropPair with values in the ps.Map,
+// and returns true iff they all match. Non-existence is considered a match failure.
+func filterCmp(pp []system.PropPair, m ps.Map) bool {
+	for _, p := range pp {
+		prop, exists := m.Lookup(p.K)
+		if !exists {
+			return false
+		}
+
+		dprop := prop.(system.Property)
+		switch tv := dprop.Value.(type) {
+		default:
+			if tv != p.V {
+				return false
+			}
+		case []byte:
+			cmptv, ok := p.V.([]byte)
+			if !ok || !bytes.Equal(tv, cmptv) {
+				return false
+			}
+		}
+	}
+
+	return true
 }

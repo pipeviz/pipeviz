@@ -23,7 +23,7 @@ func init() {
 			panic("json fnf: " + path)
 		}
 
-		err = json.Unmarshal(f, &m)
+		_ = json.Unmarshal(f, &m)
 		msgs = append(msgs, m)
 	}
 }
@@ -33,7 +33,7 @@ func TestClone(t *testing.T) {
 	g.vserial = 2
 	g.vtuples = g.vtuples.Set("foo", "val")
 
-	var g2 *coreGraph = g.clone()
+	g2 := g.clone()
 	g2.vserial = 4
 	g2.vtuples = g2.vtuples.Set("foo", "newval")
 

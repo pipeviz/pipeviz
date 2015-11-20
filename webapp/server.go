@@ -31,8 +31,8 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 )
 
-// WebAppServer acts as an HTTP server, and contains the necessary state to serve the viz frontend.
-type WebAppServer struct {
+// Server acts as an HTTP server, and contains the necessary state to serve the viz frontend.
+type Server struct {
 	latest     system.CoreGraph
 	unsub      func(broker.GraphReceiver)
 	receiver   broker.GraphReceiver
@@ -41,8 +41,8 @@ type WebAppServer struct {
 }
 
 // New creates a new webapp server, ready to be kicked off.
-func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel <-chan struct{}, f mlog.RecordGetter) *WebAppServer {
-	return &WebAppServer{
+func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel <-chan struct{}, f mlog.RecordGetter) *Server {
+	return &Server{
 		receiver:   receiver,
 		unsub:      unsub,
 		latest:     represent.NewGraph(),
@@ -54,7 +54,7 @@ func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel
 // ListenAndServe initiates the webapp http listener.
 //
 // This blocks on the http listening loop, so it should typically be called in its own goroutine.
-func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert string, showVersion bool) {
+func (s *Server) ListenAndServe(addr, pubdir, key, cert string, showVersion bool) {
 	mf := web.New()
 	useTLS := key != "" && cert != ""
 
@@ -148,15 +148,15 @@ func graphToJSON(g system.CoreGraph) ([]byte, error) {
 
 	// TODO use something that lets us write to a reusable byte buffer instead
 	return json.Marshal(struct {
-		Id       uint64        `json:"id"`
+		ID       uint64        `json:"id"`
 		Vertices []interface{} `json:"vertices"`
 	}{
-		Id:       g.MsgID(),
+		ID:       g.MsgID(),
 		Vertices: vertices,
 	})
 }
 
-func (s *WebAppServer) getMessage(c web.C, w http.ResponseWriter, r *http.Request) {
+func (s *Server) getMessage(c web.C, w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(c.URLParams["mid"], 10, 64)
 	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
@@ -177,5 +177,5 @@ func (s *WebAppServer) getMessage(c web.C, w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	w.Write(rec.Message)
+	_, _ = w.Write(rec.Message)
 }
