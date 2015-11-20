@@ -40,15 +40,49 @@ type WebAppServer struct {
 	mlogGetter mlog.RecordGetter
 }
 
-// New creates a new webapp server, ready to be kicked off.
+// New creates a new webapp server, ready to ListenAndServe.
+//
+// Note: this spawns a goroutine to watch the broker and cancel channels.
 func New(receiver broker.GraphReceiver, unsub func(broker.GraphReceiver), cancel <-chan struct{}, f mlog.RecordGetter) *WebAppServer {
-	return &WebAppServer{
+	s := &WebAppServer{
 		receiver:   receiver,
 		unsub:      unsub,
 		latest:     represent.NewGraph(),
 		cancel:     cancel,
 		mlogGetter: f,
 	}
+
+	// Used to ensure we don't exit this func until the goroutine is running.
+	// This is unnecessary as long as we're using a simple channel model for
+	// the broker subscriber; broker sends will either block or enqueue on the
+	// in the broker receiver until drained in the goroutine's select statement.
+	//
+	// However, doing this doesn't hurt, and given that we want to move to a
+	// pub-sub/fire-and-forget channel pattern where it WILL be important to ensure
+	// that control is not returned from this function until the loop is running,
+	// it's worth having in now if only as a reminder/guard against that future.
+	running := make(chan struct{})
+
+	// kick off a goroutine to grab the latest graph and listen for cancel
+	go func() {
+		var g system.CoreGraph
+		for {
+			select {
+			case running <- struct{}{}:
+				// nil-ing the channel effectively takes it out of rotation in the select loop.
+				running = nil
+			case <-s.cancel:
+				s.unsub(s.receiver)
+				return
+
+			case g = <-s.receiver:
+				s.latest = g
+			}
+		}
+	}()
+
+	<-running
+	return s
 }
 
 // ListenAndServe initiates the webapp http listener.
@@ -107,21 +141,6 @@ func (s *WebAppServer) ListenAndServe(addr, pubdir, key, cert string, showVersio
 	mf.Get("/*", http.StripPrefix("/", http.FileServer(http.Dir(pubdir))))
 
 	mf.Compile()
-
-	// kick off a goroutine to grab the latest graph and listen for cancel
-	go func() {
-		var g system.CoreGraph
-		for {
-			select {
-			case <-s.cancel:
-				s.unsub(s.receiver)
-				return
-
-			case g = <-s.receiver:
-				s.latest = g
-			}
-		}
-	}()
 
 	var err error
 	if useTLS {
