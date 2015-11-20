@@ -25,10 +25,11 @@ type ProtoVertex interface {
 
 // VertexTuple is the base storage object used by the graph engine.
 type VertexTuple struct {
-	ID       uint64
-	Vertex   StdVertex
-	InEdges  ps.Map
-	OutEdges ps.Map
+	ID         uint64
+	Incomplete bool
+	InEdges    ps.Map
+	OutEdges   ps.Map
+	Vertex     StdVertex
 }
 
 // VertexTupleVector contains an ordered list of VertexTuples. It is the return

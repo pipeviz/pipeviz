@@ -9,8 +9,8 @@ import (
 // StdVertex is used to represent a vertex object by the graph engine. They exist
 // within VertexTuples.
 type StdVertex struct {
-	Type       VType  `json:"type"`
 	Properties ps.Map `json:"properties"`
+	Type       VType  `json:"type"`
 }
 
 // NewVertex creates a new Vertex object, assigning each PropPair to Props
