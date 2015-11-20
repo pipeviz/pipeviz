@@ -6,11 +6,14 @@ import (
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 )
 
+// A Property is a single discrete value, associated with a vertex. Its MsgSrc
+// indicates the ID of the message that last modified it.
 type Property struct {
 	MsgSrc uint64      `json:"msgsrc"`
 	Value  interface{} `json:"value"`
 }
 
+// PropPair is a helper shorthand struct for creating key/value pairs.
 type PropPair struct {
 	K string
 	V interface{}
@@ -60,7 +63,7 @@ func (m RawProps) ForEach(f func(key string, val ps.Any)) {
 }
 
 func (m RawProps) Keys() (ret []string) {
-	for k, _ := range m {
+	for k := range m {
 		ret = append(ret, k)
 	}
 
@@ -68,6 +71,6 @@ func (m RawProps) Keys() (ret []string) {
 }
 
 func (m RawProps) String() string {
-	// not sure if this is the right way to pass through, but...
-	return fmt.Sprintf("%v", m)
+	// Convert back to base map type so to avoid recursion
+	return fmt.Sprintf("%s", map[string]interface{}(m))
 }
