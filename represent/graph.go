@@ -232,14 +232,15 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 					"etype":      edge.EType,
 					"success":    success,
 					"incomplete": edge.Incomplete,
-				}).Error("Disagreement between Resolve 'success' return and edge's Incomplete flag")
+				}).Error("Disagreement between Resolve 'success' return and edge's Incomplete flag; trusting return")
 			}
 
 			g.vserial++
 			edge.ID = g.vserial
 			final.OutEdges = final.OutEdges.Set(i2a(edge.ID), edge)
 
-			if success { // could fail if corresponding env not yet declared
+			if success {
+				edge.Incomplete = false // normalize based on Resolve's return
 				logEntry.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
 
 				// set edge in reverse direction, too
@@ -248,6 +249,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 
 				g.vtuples = g.vtuples.Set(tvt.ID, tvt)
 			} else {
+				edge.Incomplete = true // normalize based on Resolve's return
 				logEntry.Debug("Early resolve failed")
 			}
 
