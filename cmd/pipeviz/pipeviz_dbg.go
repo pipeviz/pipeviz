@@ -34,7 +34,7 @@ func init() {
 			g = latest
 		}
 	}()
-	expvar.Publish("MsgId", expvar.Func(func() interface{} { return g.MsgId() }))
+	expvar.Publish("MsgID", expvar.Func(func() interface{} { return g.MsgID() }))
 
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
