@@ -7,6 +7,7 @@ import (
 	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
+	"github.com/pipeviz/pipeviz/types/semantic"
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
@@ -74,8 +75,14 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 
 	// Ensure vertices, then record into intermediate, orphan-enabling container
 	for _, uif := range uifs {
+		vt, err := g.ensureVertex(msgid, uif)
+		if err != nil {
+			// Error was already logged in ensureVertex, so here we can just skip the bugger
+			continue
+		}
+
 		ess = append(ess, &veProcessingInfo{
-			vt:  g.ensureVertex(msgid, uif),
+			vt:  vt,
 			uif: uif,
 			// copy out the edges for later bookkeeping
 			e:     append(uif.ScopingSpecs(), uif.EdgeSpecs()...),
@@ -90,7 +97,8 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 	for _, orphan := range g.orphans {
 		// vertex ident failed; try again now that new vertices are present
 		if orphan.vt.ID == 0 {
-			orphan.vt = g.ensureVertex(orphan.msgid, orphan.uif)
+			// this is temporary anyway, but there's no way an err could come back on an existing orphan
+			orphan.vt, _ = g.ensureVertex(orphan.msgid, orphan.uif)
 		} else {
 			// ensure we have latest version of vt
 			vt, err := g.Get(orphan.vt.ID)
@@ -138,7 +146,17 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 			specs, info.e = info.e, info.e[:0]
 			for _, spec := range specs {
 				l3.Debugf("Resolving EdgeSpec of type %T", spec)
-				edge, success := spec.Resolve(g, msgid, info.vt)
+				edge, success, err := semantic.Resolve(spec, g, msgid, info.vt)
+
+				// non-nil err indicates a type that has not registered its resolver correctly
+				if err != nil {
+					l3.WithFields(log.Fields{
+						"spec-type": fmt.Sprintf("%T", spec),
+						"err":       err,
+					}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
+					continue
+				}
+
 				if success {
 					l4 := l3.WithFields(log.Fields{
 						"target-vid": edge.Target,
@@ -193,7 +211,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 // it is present, otherwise adds the vertex.
 //
 // Either way, return value is the vid for the vertex.
-func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (final system.VertexTuple) {
+func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (final system.VertexTuple, err error) {
 	logEntry := log.WithFields(log.Fields{
 		"system": "engine",
 		"msgid":  msgid,
@@ -201,7 +219,15 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 	})
 
 	logEntry.Debug("Performing vertex unification")
-	vid := sd.Unify(g, sd)
+	vid, err := semantic.Unify(g, sd)
+	if err != nil {
+		logEntry.WithFields(log.Fields{
+			"vtx-type": sd.Vertex().Type(),
+			"err":      err,
+		}).Errorf("Unify returned err, indicating unify func was not correctly registered for vtx type. Discarding vtx")
+		// At this point, all we can do is return an err
+		return
+	}
 
 	if vid == 0 {
 		logEntry.Debug("No match on unification, creating new vertex")
@@ -222,7 +248,19 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 		// Resolve scoping edge specs early, here
 		for _, spec := range sd.ScopingSpecs() {
 			logEntry.Debugf("Doing early resolve on EdgeSpec of type %T", spec)
-			edge, success := spec.Resolve(g, msgid, final)
+			edge, success, err := semantic.Resolve(spec, g, msgid, final)
+
+			if err != nil {
+				logEntry.WithFields(log.Fields{
+					"spec-type": fmt.Sprintf("%T", spec),
+					"err":       err,
+				}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
+				// If a scoping spec is registered incorrectly, this vertex will literally never work.
+				// This really is a *huge* integrity problem, but there's little we can sanely do to keep
+				// a marker around, so we just skip this edge entirely with the expectation that the user
+				// will have to make a fix to the semantic system for anything to make sense anyway.
+				continue
+			}
 
 			// Currently, Success -> ¬Incomplete. While the onus should be on the
 			// implementor to maintain this implication, we check here and
@@ -277,7 +315,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 		g.vtuples = g.vtuples.Set(vid, final)
 	}
 
-	return
+	return final, nil
 }
 
 // Gets the vtTuple for a given vertex id.
