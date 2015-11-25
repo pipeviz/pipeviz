@@ -3,7 +3,7 @@ package represent
 import (
 	"fmt"
 
-	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/types/semantic"
@@ -15,7 +15,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 	// TODO use a buffering pool to minimize allocs
 	var ess edgeSpecSet
 
-	logEntry := log.WithFields(log.Fields{
+	logEntry := logrus.WithFields(logrus.Fields{
 		"system": "engine",
 		"msgid":  msgid,
 	})
@@ -80,14 +80,14 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 	for ec = ess.EdgeCount(); ec != 0 && ec != lec; ec = ess.EdgeCount() {
 		pass++
 		lec = ec
-		l2 := logEntry.WithFields(log.Fields{
+		l2 := logEntry.WithFields(logrus.Fields{
 			"pass":       pass,
 			"edge-count": ec,
 		})
 
 		l2.Debug("Beginning edge resolution pass")
 		for infokey, info := range ess {
-			l3 := logEntry.WithFields(log.Fields{
+			l3 := logEntry.WithFields(logrus.Fields{
 				"vid":   info.vt.ID,
 				"vtype": info.vt.Vertex.Typ(),
 			})
@@ -102,7 +102,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 
 				// non-nil err indicates a type that has not registered its resolver correctly
 				if err != nil {
-					l3.WithFields(log.Fields{
+					l3.WithFields(logrus.Fields{
 						"spec-type": fmt.Sprintf("%T", spec),
 						"err":       err,
 					}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
@@ -110,7 +110,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 				}
 
 				if success {
-					l4 := l3.WithFields(log.Fields{
+					l4 := l3.WithFields(logrus.Fields{
 						"target-vid": edge.Target,
 						"etype":      edge.EType,
 					})
@@ -164,7 +164,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 //
 // Either way, return value is the vid for the vertex.
 func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (final system.VertexTuple, err error) {
-	logEntry := log.WithFields(log.Fields{
+	logEntry := logrus.WithFields(logrus.Fields{
 		"system": "engine",
 		"msgid":  msgid,
 		"vtype":  sd.Vertex().Type,
@@ -173,7 +173,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 	logEntry.Debug("Performing vertex unification")
 	vid, err := semantic.Unify(g, sd)
 	if err != nil {
-		logEntry.WithFields(log.Fields{
+		logEntry.WithFields(logrus.Fields{
 			"vtx-type": sd.Vertex().Type(),
 			"err":      err,
 		}).Errorf("Unify returned err, indicating unify func was not correctly registered for vtx type. Discarding vtx")
@@ -203,7 +203,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 			edge, success, err := semantic.Resolve(spec, g, msgid, final)
 
 			if err != nil {
-				logEntry.WithFields(log.Fields{
+				logEntry.WithFields(logrus.Fields{
 					"spec-type": fmt.Sprintf("%T", spec),
 					"err":       err,
 				}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
@@ -219,7 +219,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 			// implementor to maintain this implication, we check here and
 			// register an error if there is a mismatch.
 			if (success && edge.Incomplete) || (!success && !edge.Incomplete) {
-				logEntry.WithFields(log.Fields{
+				logEntry.WithFields(logrus.Fields{
 					"etype":      edge.EType,
 					"success":    success,
 					"incomplete": edge.Incomplete,
@@ -259,7 +259,7 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 		})
 
 		if err != nil {
-			logEntry.WithFields(log.Fields{
+			logEntry.WithFields(logrus.Fields{
 				"vid": vid,
 				"err": err,
 			}).Warn("Merge of vertex properties returned an error; vertex will continue update into graph anyway")

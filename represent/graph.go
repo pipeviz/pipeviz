@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/types/system"
 )
@@ -23,7 +23,7 @@ type coreGraph struct {
 
 // NewGraph creates a new in-memory coreGraph and returns it as a system.CoreGraph.
 func NewGraph() system.CoreGraph {
-	log.WithFields(log.Fields{
+	logrus.WithFields(logrus.Fields{
 		"system": "engine",
 	}).Debug("New coreGraph created")
 
