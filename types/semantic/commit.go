@@ -9,6 +9,15 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("commit", commitUnify); err != nil {
+		panic("commit vertex already registered")
+	}
+	if err := registerResolver("parent-commit", resolveSpecGitCommitParent); err != nil {
+		panic("parent-commit edge already registered")
+	}
+}
+
 type Commit struct {
 	Author     string   `json:"author,omitempty"`
 	Date       string   `json:"date,omitempty"`
@@ -97,6 +106,10 @@ func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 type specGitCommitParent struct {
 	Sha1      Sha1
 	ParentNum int
+}
+
+func resolveSpecGitCommitParent(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specGitCommitParent).Resolve(g, mid, src)
 }
 
 func (spec specGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {

@@ -3,12 +3,28 @@ package semantic
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
 )
+
+func init() {
+	if err := registerUnifier("dataset", datasetUnify); err != nil {
+		panic("dataset vertex already registered")
+	}
+	if err := registerUnifier("parent-dataset", parentDatasetUnify); err != nil {
+		panic("parent-dataset vertex already registered")
+	}
+	if err := registerResolver("dataset-hierarchy", resolveSpecDatasetHierarchy); err != nil {
+		panic("dataset-hierarchy edge already registered")
+	}
+	if err := registerResolver("dataset-provenance", resolveDataProvenance); err != nil {
+		panic("dataset-provenance edge already registered")
+	}
+}
 
 // FIXME this metaset/set design is not recursive, but it will need to be
 type ParentDataset struct {
@@ -148,6 +164,10 @@ type specDatasetHierarchy struct {
 	NamePath    []string // path through the series of names that arrives at the final dataset
 }
 
+func resolveSpecDatasetHierarchy(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specDatasetHierarchy).Resolve(g, mid, src)
+}
+
 func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
@@ -182,6 +202,16 @@ func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src sys
 // Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
 func (spec specDatasetHierarchy) Type() system.EType {
 	return "dataset-hierarchy"
+}
+
+func resolveDataProvenance(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	switch typ := e.(type) {
+	case DataProvenance, DataAlpha:
+		return typ.Resolve(g, mid, src)
+	default:
+		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveDataProvenance"))
+	}
 }
 
 func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {

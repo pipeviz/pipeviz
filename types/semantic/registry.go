@@ -8,11 +8,11 @@ import (
 )
 
 var (
-	unifyMap   = make(map[string]system.UnifyFunc)
-	resolveMap = make(map[string]system.ResolveFunc)
+	unifyMap   = make(map[system.VType]system.UnifyFunc)
+	resolveMap = make(map[system.EType]system.ResolveFunc)
 )
 
-func registerUnifier(typ string, f system.UnifyFunc) error {
+func registerUnifier(typ system.VType, f system.UnifyFunc) error {
 	if _, exists := unifyMap[typ]; exists {
 		logrus.WithFields(logrus.Fields{
 			"system": "semantic",
@@ -29,7 +29,7 @@ func registerUnifier(typ string, f system.UnifyFunc) error {
 // system for the type of vertex contained in the UIF. An error is returned iff no UnifyFunc was
 // registered for the vertex type.
 func Unify(g system.CoreGraph, uif system.UnifyInstructionForm) (uint64, error) {
-	typ := uif.Vertex().Type().String()
+	typ := uif.Vertex().Type()
 	if f, exists := unifyMap[typ]; exists {
 		return f(g, uif), nil
 	} else {
@@ -37,8 +37,8 @@ func Unify(g system.CoreGraph, uif system.UnifyInstructionForm) (uint64, error) 
 	}
 }
 
-func registerResolver(typ string, f system.ResolveFunc) error {
-	if _, exists := unifyMap[typ]; exists {
+func registerResolver(typ system.EType, f system.ResolveFunc) error {
+	if _, exists := resolveMap[typ]; exists {
 		logrus.WithFields(logrus.Fields{
 			"system": "semantic",
 			"type":   typ,
@@ -54,7 +54,7 @@ func registerResolver(typ string, f system.ResolveFunc) error {
 // preregistered by the semantic system for the type of edge contained in the UIF. An error is
 // returned iff no ResolveFunc was registered for the edge type.
 func Resolve(e system.EdgeSpec, g system.CoreGraph, msgid uint64, vt system.VertexTuple) (system.StdEdge, bool, error) {
-	typ := e.Type().String()
+	typ := e.Type()
 	if f, exists := resolveMap[typ]; exists {
 		id, succ := f(e, g, msgid, vt)
 		return id, succ, nil

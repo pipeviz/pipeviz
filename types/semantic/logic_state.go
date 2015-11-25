@@ -9,6 +9,18 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("logic-state", lsUnify); err != nil {
+		panic("logic-state vertex already registered")
+	}
+	if err := registerResolver("version", resolveSpecCommit); err != nil {
+		panic("version edge already registered")
+	}
+	if err := registerResolver("datalink", resolveDataLink); err != nil {
+		panic("datalink edge already registered")
+	}
+}
+
 type LogicState struct {
 	Datasets    []DataLink      `json:"datasets,omitempty"`
 	Environment EnvLink         `json:"environment,omitempty"`
@@ -89,6 +101,10 @@ type specCommit struct {
 	Sha1 Sha1
 }
 
+func resolveSpecCommit(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specCommit).Resolve(g, mid, src)
+}
+
 func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
@@ -125,6 +141,10 @@ func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.Vertex
 // Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
 func (spec specCommit) Type() system.EType {
 	return "version"
+}
+
+func resolveDataLink(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(DataLink).Resolve(g, mid, src)
 }
 
 func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {

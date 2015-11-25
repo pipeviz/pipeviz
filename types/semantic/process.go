@@ -1,10 +1,30 @@
 package semantic
 
 import (
+	"fmt"
+
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
 )
+
+func init() {
+	if err := registerUnifier("process", processUnify); err != nil {
+		panic("process vertex already registered")
+	}
+	if err := registerUnifier("comm", commUnify); err != nil {
+		panic("comm vertex already registered")
+	}
+	if err := registerResolver("listening", resolveListening); err != nil {
+		panic("version edge already registered")
+	}
+	if err := registerResolver("logic-link", resolveSpecLocalLogic); err != nil {
+		panic("logic-link edge already registered")
+	}
+	if err := registerResolver("dataset-gateway", resolveSpecParentDataset); err != nil {
+		panic("dataset-gateway edge already registered")
+	}
+}
 
 type Process struct {
 	Pid         int          `json:"pid,omitempty"`
@@ -111,6 +131,10 @@ type specLocalLogic struct {
 	Path string
 }
 
+func resolveSpecLocalLogic(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specLocalLogic).Resolve(g, mid, src)
+}
+
 func (spec specLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
@@ -145,6 +169,10 @@ func (spec specLocalLogic) Type() system.EType {
 
 type specParentDataset struct {
 	Name string
+}
+
+func resolveSpecParentDataset(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specParentDataset).Resolve(g, mid, src)
 }
 
 func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
@@ -183,6 +211,16 @@ func (spec specParentDataset) Type() system.EType {
 type specNetListener struct {
 	Port  int
 	Proto string
+}
+
+func resolveListening(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	switch typ := e.(type) {
+	case specNetListener, specUnixDomainListener:
+		return typ.Resolve(g, mid, src)
+	default:
+		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveListening"))
+	}
 }
 
 func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {

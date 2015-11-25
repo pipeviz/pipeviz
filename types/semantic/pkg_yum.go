@@ -5,6 +5,12 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("pkg-yum", pkgYumUnify); err != nil {
+		panic("pkg-yum vertex already registered")
+	}
+}
+
 type PkgYum struct {
 	Name       string `json:"name,omitempty"`
 	Repository string `json:"repository,omitempty"`

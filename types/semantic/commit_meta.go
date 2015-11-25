@@ -7,6 +7,18 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("git-tag", commitUnify); err != nil {
+		panic("git-tag vertex already registered")
+	}
+	if err := registerUnifier("git-branch", commitUnify); err != nil {
+		panic("git-branch vertex already registered")
+	}
+	if err := registerUnifier("git-result", commitUnify); err != nil {
+		panic("git-result vertex already registered")
+	}
+}
+
 type CommitMeta struct {
 	Sha1Str   string   `json:"sha1,omitempty"`
 	Tags      []string `json:"tags,omitempty"`

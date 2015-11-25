@@ -6,6 +6,15 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("environment", envUnify); err != nil {
+		panic("environment vertex already registered")
+	}
+	if err := registerResolver("envlink", resolveEnvLink); err != nil {
+		panic("envlink edge already registered")
+	}
+}
+
 type Environment struct {
 	Address     Address         `json:"address,omitempty"`
 	OS          string          `json:"os,omitempty"`
@@ -81,6 +90,10 @@ func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 type EnvLink struct {
 	Address Address `json:"address,omitempty"`
 	Nick    string  `json:"nick,omitempty"`
+}
+
+func resolveEnvLink(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(EnvLink).Resolve(g, mid, src)
 }
 
 func (spec EnvLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
