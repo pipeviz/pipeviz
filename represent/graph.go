@@ -255,10 +255,11 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 					"spec-type": fmt.Sprintf("%T", spec),
 					"err":       err,
 				}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
-				// If a scoping spec is registered incorrectly, this vertex will literally never work.
+				// If a scoping spec is registered incorrectly, this vertex can never be complete.
 				// This really is a *huge* integrity problem, but there's little we can sanely do to keep
 				// a marker around, so we just skip this edge entirely with the expectation that the user
 				// will have to make a fix to the semantic system for anything to make sense anyway.
+				final.Incomplete = true
 				continue
 			}
 
@@ -287,7 +288,8 @@ func (g *coreGraph) ensureVertex(msgid uint64, sd system.UnifyInstructionForm) (
 
 				g.vtuples = g.vtuples.Set(tvt.ID, tvt)
 			} else {
-				edge.Incomplete = true // normalize based on Resolve's return
+				edge.Incomplete = true  // normalize based on Resolve's return
+				final.Incomplete = true // if a scoping edge is incomplete, so is the vertex
 				logEntry.Debug("Early resolve failed")
 			}
 
