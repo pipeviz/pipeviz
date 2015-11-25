@@ -129,3 +129,8 @@ func (spec specGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src syst
 
 	return
 }
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specGitCommitParent) Type() system.EType {
+	return "parent-commit"
+}

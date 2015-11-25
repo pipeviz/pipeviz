@@ -27,7 +27,7 @@ type LogicIdentiifer struct {
 
 type DataLink struct {
 	Name        string   `json:"name,omitempty"`
-	Type        string   `json:"type,omitempty"`
+	Typ         string   `json:"type,omitempty"`
 	Subset      string   `json:"subset,omitempty"`
 	Interaction string   `json:"interaction,omitempty"`
 	ConnUnix    ConnUnix `json:"connUnix,omitempty"`
@@ -122,6 +122,11 @@ func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.Vertex
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specCommit) Type() system.EType {
+	return "version"
+}
+
 func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
 		Source: src.ID,
@@ -142,8 +147,8 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 		}
 	}
 
-	if spec.Type != "" {
-		e.Props = e.Props.Set("type", system.Property{MsgSrc: mid, Value: spec.Type})
+	if spec.Typ != "" {
+		e.Props = e.Props.Set("type", system.Property{MsgSrc: mid, Value: spec.Typ})
 	}
 	if spec.Subset != "" {
 		e.Props = e.Props.Set("subset", system.Property{MsgSrc: mid, Value: spec.Subset})
@@ -258,4 +263,9 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 	success = true
 	e.Target = dataset.ID
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec DataLink) Type() system.EType {
+	return "datalink"
 }

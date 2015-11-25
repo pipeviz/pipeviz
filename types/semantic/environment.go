@@ -111,3 +111,8 @@ func (spec EnvLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTup
 
 	return
 }
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec EnvLink) Type() system.EType {
+	return "envlink"
+}

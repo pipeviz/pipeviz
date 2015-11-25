@@ -179,6 +179,11 @@ func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src sys
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specDatasetHierarchy) Type() system.EType {
+	return "dataset-hierarchy"
+}
+
 func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	// FIXME this presents another weird case where "success" is not binary. We *could*
 	// find an already-existing data-provenance edge, but then have some net-addr params
@@ -220,6 +225,11 @@ func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec DataProvenance) Type() system.EType {
+	return "data-provenance"
+}
+
 func (spec DataAlpha) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	// TODO this makes a loop...are we cool with that?
 	success = true // impossible to fail here
@@ -236,4 +246,9 @@ func (spec DataAlpha) Resolve(g system.CoreGraph, mid uint64, src system.VertexT
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec DataAlpha) Type() system.EType {
+	return "data-provenance"
 }

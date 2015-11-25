@@ -138,6 +138,11 @@ func (spec specLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specLocalLogic) Type() system.EType {
+	return "logic-link"
+}
+
 type specParentDataset struct {
 	Name string
 }
@@ -168,6 +173,11 @@ func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specParentDataset) Type() system.EType {
+	return "dataset-gateway"
 }
 
 type specNetListener struct {
@@ -203,6 +213,11 @@ func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.V
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specNetListener) Type() system.EType {
+	return "listening"
+}
+
 type specUnixDomainListener struct {
 	Path string
 }
@@ -232,4 +247,9 @@ func (spec specUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src s
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specUnixDomainListener) Type() system.EType {
+	return "listening"
 }
