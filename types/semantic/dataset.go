@@ -21,8 +21,8 @@ func init() {
 	if err := registerResolver("dataset-hierarchy", resolveSpecDatasetHierarchy); err != nil {
 		panic("dataset-hierarchy edge already registered")
 	}
-	if err := registerResolver("dataset-provenance", resolveDataProvenance); err != nil {
-		panic("dataset-provenance edge already registered")
+	if err := registerResolver("data-provenance", resolveDataProvenance); err != nil {
+		panic("data-provenance edge already registered")
 	}
 }
 
