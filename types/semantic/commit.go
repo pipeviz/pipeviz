@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	if err := registerUnifier("commit", commitUnify); err != nil {
+	if err := registerUnifier("commit", unifyCommit); err != nil {
 		panic("commit vertex already registered")
 	}
 	if err := registerResolver("parent-commit", resolveSpecGitCommitParent); err != nil {
@@ -90,10 +90,10 @@ func (d Commit) UnificationForm() []system.UnifyInstructionForm {
 		edges = append(edges, specGitCommitParent{Sha1: sha1, ParentNum: k + 1})
 	}
 
-	return []system.UnifyInstructionForm{uif{v: v, u: commitUnify, e: edges}}
+	return []system.UnifyInstructionForm{uif{v: v, u: unifyCommit, e: edges}}
 }
 
-func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyCommit(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	candidates := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", u.Vertex().Properties()["sha1"]))
 
 	if len(candidates) > 0 { // there can be only one

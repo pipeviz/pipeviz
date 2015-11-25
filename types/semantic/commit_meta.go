@@ -8,13 +8,13 @@ import (
 )
 
 func init() {
-	if err := registerUnifier("git-tag", commitUnify); err != nil {
+	if err := registerUnifier("git-tag", unifyCommit); err != nil {
 		panic("git-tag vertex already registered")
 	}
-	if err := registerUnifier("git-branch", commitUnify); err != nil {
+	if err := registerUnifier("git-branch", unifyCommit); err != nil {
 		panic("git-branch vertex already registered")
 	}
-	if err := registerUnifier("git-result", commitUnify); err != nil {
+	if err := registerUnifier("git-result", unifyCommit); err != nil {
 		panic("git-result vertex already registered")
 	}
 }

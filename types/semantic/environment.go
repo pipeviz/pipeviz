@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	if err := registerUnifier("environment", envUnify); err != nil {
+	if err := registerUnifier("environment", unifyEnvironment); err != nil {
 		panic("environment vertex already registered")
 	}
 	if err := registerResolver("envlink", resolveEnvLink); err != nil {
@@ -44,7 +44,7 @@ func (d Environment) UnificationForm() []system.UnifyInstructionForm {
 			"ipv4":     d.Address.Ipv4,
 			"ipv6":     d.Address.Ipv6,
 		}},
-		u: envUnify,
+		u: unifyEnvironment,
 	}}
 
 	envlink := EnvLink{Address: Address{}}
@@ -75,7 +75,7 @@ func (d Environment) UnificationForm() []system.UnifyInstructionForm {
 	return ret
 }
 
-func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyEnvironment(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	matches := g.VerticesWith(q.Qbv(system.VType("environment")))
 
 	for _, e := range matches {

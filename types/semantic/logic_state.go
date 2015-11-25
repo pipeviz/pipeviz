@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	if err := registerUnifier("logic-state", lsUnify); err != nil {
+	if err := registerUnifier("logic-state", unifyLogicState); err != nil {
 		panic("logic-state vertex already registered")
 	}
 	if err := registerResolver("version", resolveSpecCommit); err != nil {
@@ -83,10 +83,10 @@ func (d LogicState) UnificationForm() []system.UnifyInstructionForm {
 		edges = append(edges, dl)
 	}
 
-	return []system.UnifyInstructionForm{uif{v: v, u: lsUnify, e: edges, se: []system.EdgeSpec{d.Environment}}}
+	return []system.UnifyInstructionForm{uif{v: v, u: unifyLogicState, e: edges, se: []system.EdgeSpec{d.Environment}}}
 }
 
-func lsUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyLogicState(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {

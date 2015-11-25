@@ -12,10 +12,10 @@ import (
 )
 
 func init() {
-	if err := registerUnifier("dataset", datasetUnify); err != nil {
+	if err := registerUnifier("dataset", unifyDataset); err != nil {
 		panic("dataset vertex already registered")
 	}
-	if err := registerUnifier("parent-dataset", parentDatasetUnify); err != nil {
+	if err := registerUnifier("parent-dataset", unifyParentDataset); err != nil {
 		panic("parent-dataset vertex already registered")
 	}
 	if err := registerResolver("dataset-hierarchy", resolveSpecDatasetHierarchy); err != nil {
@@ -71,7 +71,7 @@ func (d Dataset) UnificationForm() []system.UnifyInstructionForm {
 
 	return []system.UnifyInstructionForm{uif{
 		v: v,
-		u: datasetUnify,
+		u: unifyDataset,
 		se: []system.EdgeSpec{specDatasetHierarchy{
 			Environment: d.Environment,
 			NamePath:    []string{d.Parent},
@@ -108,7 +108,7 @@ func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
 	return err
 }
 
-func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyDataset(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	vtv := g.VerticesWith(q.Qbv(system.VType("dataset"), "name", u.Vertex().Properties()["name"]))
 	if len(vtv) == 0 {
 		return 0
@@ -134,7 +134,7 @@ func (d ParentDataset) UnificationForm() []system.UnifyInstructionForm {
 			"name": d.Name,
 			"path": d.Path,
 		}},
-		u:  parentDatasetUnify,
+		u:  unifyParentDataset,
 		se: []system.EdgeSpec{d.Environment},
 	}}
 
@@ -148,7 +148,7 @@ func (d ParentDataset) UnificationForm() []system.UnifyInstructionForm {
 	return ret
 }
 
-func parentDatasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyParentDataset(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
 		// FIXME scoping edge resolution failure does not mean no match - there could be an orphan

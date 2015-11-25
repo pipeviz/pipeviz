@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	if err := registerUnifier("pkg-yum", pkgYumUnify); err != nil {
+	if err := registerUnifier("pkg-yum", unifyPkgYum); err != nil {
 		panic("pkg-yum vertex already registered")
 	}
 }
@@ -30,11 +30,11 @@ func (d PkgYum) UnificationForm() []system.UnifyInstructionForm {
 			"release": d.Release,
 			"arch":    d.Arch,
 		}},
-		u: pkgYumUnify,
+		u: unifyPkgYum,
 	}}
 }
 
-func pkgYumUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyPkgYum(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	props := u.Vertex().Properties()
 	vtv := g.VerticesWith(q.Qbv(system.VType("pkg-yum"),
 		"name", props["name"],
