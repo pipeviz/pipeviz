@@ -18,7 +18,7 @@ var i2a = func(i uint64) string {
 // the main graph construct
 type coreGraph struct {
 	msgid, vserial    uint64
-	vtuples, porphans intMapV
+	vtuples, partials intMapV
 	orphans           edgeSpecSet // FIXME breaks immut
 }
 
@@ -28,7 +28,7 @@ func NewGraph() system.CoreGraph {
 		"system": "engine",
 	}).Debug("New coreGraph created")
 
-	return &coreGraph{vtuples: newIntMapV(), porphans: newIntMapV(), vserial: 0}
+	return &coreGraph{vtuples: newIntMapV(), partials: newIntMapV(), vserial: 0}
 }
 
 type veProcessingInfo struct {
