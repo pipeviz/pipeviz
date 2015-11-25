@@ -8,13 +8,13 @@ import (
 )
 
 func init() {
-	if err := registerUnifier("git-tag", unifyCommit); err != nil {
+	if err := registerUnifier("git-tag", unifyCommitMeta); err != nil {
 		panic("git-tag vertex already registered")
 	}
-	if err := registerUnifier("git-branch", unifyCommit); err != nil {
+	if err := registerUnifier("git-branch", unifyCommitMeta); err != nil {
 		panic("git-branch vertex already registered")
 	}
-	if err := registerUnifier("git-result", unifyCommit); err != nil {
+	if err := registerUnifier("git-result", unifyCommitMeta); err != nil {
 		panic("git-result vertex already registered")
 	}
 }
@@ -38,23 +38,23 @@ func (d CommitMeta) UnificationForm() []system.UnifyInstructionForm {
 
 	for _, tag := range d.Tags {
 		v := pv{typ: "git-tag", props: system.RawProps{"name": tag}}
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
+		ret = append(ret, uif{v: v, u: unifyCommitMeta, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	for _, branch := range d.Branches {
 		v := pv{typ: "git-branch", props: system.RawProps{"name": branch}}
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
+		ret = append(ret, uif{v: v, u: unifyCommitMeta, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	if d.TestState != "" {
 		v := pv{typ: "git-result", props: system.RawProps{"result": d.TestState}}
-		ret = append(ret, uif{v: v, u: commitMetaUnify, se: []system.EdgeSpec{specCommit{commit}}})
+		ret = append(ret, uif{v: v, u: unifyCommitMeta, se: []system.EdgeSpec{specCommit{commit}}})
 	}
 
 	return ret
 }
 
-func commitMetaUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyCommitMeta(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// the commit is the only scoping edge
 	spec := u.ScopingSpecs()[0].(specCommit)
 	_, success := spec.Resolve(g, 0, emptyVT(u.Vertex()))
