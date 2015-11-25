@@ -71,7 +71,6 @@ func (d Dataset) UnificationForm() []system.UnifyInstructionForm {
 
 	return []system.UnifyInstructionForm{uif{
 		v: v,
-		u: unifyDataset,
 		se: []system.EdgeSpec{specDatasetHierarchy{
 			Environment: d.Environment,
 			NamePath:    []string{d.Parent},
@@ -134,7 +133,6 @@ func (d ParentDataset) UnificationForm() []system.UnifyInstructionForm {
 			"name": d.Name,
 			"path": d.Path,
 		}},
-		u:  unifyParentDataset,
 		se: []system.EdgeSpec{d.Environment},
 	}}
 

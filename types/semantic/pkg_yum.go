@@ -30,7 +30,6 @@ func (d PkgYum) UnificationForm() []system.UnifyInstructionForm {
 			"release": d.Release,
 			"arch":    d.Arch,
 		}},
-		u: unifyPkgYum,
 	}}
 }
 

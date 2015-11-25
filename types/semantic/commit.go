@@ -90,7 +90,7 @@ func (d Commit) UnificationForm() []system.UnifyInstructionForm {
 		edges = append(edges, specGitCommitParent{Sha1: sha1, ParentNum: k + 1})
 	}
 
-	return []system.UnifyInstructionForm{uif{v: v, u: unifyCommit, e: edges}}
+	return []system.UnifyInstructionForm{uif{v: v, e: edges}}
 }
 
 func unifyCommit(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {

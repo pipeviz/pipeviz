@@ -16,18 +16,12 @@ func pp(k string, v interface{}) system.PropPair {
 // uif is a standard struct that expresses a types.UnifyInstructionForm
 type uif struct {
 	v  system.ProtoVertex
-	u  func(system.CoreGraph, system.UnifyInstructionForm) uint64
 	e  []system.EdgeSpec
 	se []system.EdgeSpec
 }
 
 func (u uif) Vertex() system.ProtoVertex {
 	return u.v
-}
-
-func (u uif) Unify(g system.CoreGraph, u2 system.UnifyInstructionForm) uint64 {
-	// TODO u2 should be redundant, should always be same as u
-	return u.u(g, u2)
 }
 
 func (u uif) EdgeSpecs() []system.EdgeSpec {

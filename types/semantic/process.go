@@ -82,12 +82,11 @@ func (d Process) UnificationForm() []system.UnifyInstructionForm {
 			}
 			v2.props["port"] = listen.Port
 		}
-		ret = append(ret, uif{v: v2, u: unifyComm, se: []system.EdgeSpec{d.Environment}})
+		ret = append(ret, uif{v: v2, se: []system.EdgeSpec{d.Environment}})
 	}
 
 	return append([]system.UnifyInstructionForm{uif{
 		v:  v,
-		u:  unifyProcess,
 		e:  edges,
 		se: []system.EdgeSpec{d.Environment},
 	}}, ret...)

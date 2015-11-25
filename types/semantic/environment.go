@@ -44,7 +44,6 @@ func (d Environment) UnificationForm() []system.UnifyInstructionForm {
 			"ipv4":     d.Address.Ipv4,
 			"ipv6":     d.Address.Ipv6,
 		}},
-		u: unifyEnvironment,
 	}}
 
 	envlink := EnvLink{Address: Address{}}

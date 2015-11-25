@@ -83,7 +83,7 @@ func (d LogicState) UnificationForm() []system.UnifyInstructionForm {
 		edges = append(edges, dl)
 	}
 
-	return []system.UnifyInstructionForm{uif{v: v, u: unifyLogicState, e: edges, se: []system.EdgeSpec{d.Environment}}}
+	return []system.UnifyInstructionForm{uif{v: v, e: edges, se: []system.EdgeSpec{d.Environment}}}
 }
 
 func unifyLogicState(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
