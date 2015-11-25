@@ -219,7 +219,7 @@ func resolveListening(e system.EdgeSpec, g system.CoreGraph, mid uint64, src sys
 		return typ.Resolve(g, mid, src)
 	default:
 		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
-		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveListening"))
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveListening", e))
 	}
 }
 

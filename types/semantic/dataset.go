@@ -210,7 +210,7 @@ func resolveDataProvenance(e system.EdgeSpec, g system.CoreGraph, mid uint64, sr
 		return typ.Resolve(g, mid, src)
 	default:
 		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
-		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveDataProvenance"))
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveDataProvenance", e))
 	}
 }
 
