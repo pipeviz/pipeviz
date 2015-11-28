@@ -167,7 +167,7 @@ func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system
 	logEntry := logrus.WithFields(logrus.Fields{
 		"system": "engine",
 		"msgid":  msgid,
-		"vtype":  sd.Vertex().Type,
+		"vtype":  sd.Vertex().Type(),
 	})
 
 	// TODO this is where resolving of scoping edges should have to be done
