@@ -90,7 +90,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 		for infokey, info := range ess {
 			l3 := logEntry.WithFields(logrus.Fields{
 				"vid":   info.vt.ID,
-				"vtype": info.vt.Vertex.Typ(),
+				"vtype": info.vt.Vertex.Type,
 			})
 			// Ensure our local copy of the tuple is up to date
 			info.vt, _ = g.Get(info.vt.ID)
@@ -183,6 +183,22 @@ func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system
 		return system.VertexTuple{}, err
 	}
 
+	// FIXME
+	// There is a 2x2 matrix resulting in four possible (main) paths:
+	//
+	// - Unification succeeded and the UIF has no scoping specs
+	// - Unification failed and the UIF has no scoping specs
+	// - Unification succeeded and the UIF has some scoping specs
+	// - Unification failed and the UIF has some scoping specs
+	//
+	// Things are generally clearer in the first two cases (no scoping specs)
+	// because there's no icky circular dependency feeling. In the third case,
+	// there's a particularly big potential gap due to the fact that the vtx Unify
+	// *could* come back with one vertex, but then actually resolving the
+	// scoping specs could be resolved to point to some different scope. What on
+	// earth would that even mean? No idea. This is case in point why we need
+	// unification as a separate process for edges.
+
 	if vid != 0 {
 		return toExistingTuple(g, vid, msgid, sd, logEntry), nil
 	} else {
@@ -191,7 +207,7 @@ func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system
 }
 
 func toNewTuple(g *coreGraph, msgid uint64, uif system.UnifyInstructionForm, log *logrus.Entry) system.VertexTuple {
-	log.Debug("No match on unification, creating new vertex")
+	log.Debug("No match on unification, creating a new vertex")
 
 	final := system.VertexTuple{
 		Vertex: system.StdVertex{
@@ -258,15 +274,57 @@ func toNewTuple(g *coreGraph, msgid uint64, uif system.UnifyInstructionForm, log
 		g.vtuples = g.vtuples.Set(final.ID, final)
 	}
 
+	for _, spec := range uif.EdgeSpecs() {
+		edge, success, err := semantic.Resolve(spec, g, msgid, final)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"spec-type": fmt.Sprintf("%T", spec),
+				"err":       err,
+			}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
+			// Not nearly as big a deal to miss one of these as to miss a scoping spec, but still log the error.
+			continue
+		}
+
+		if (success && edge.Incomplete) || (!success && !edge.Incomplete) {
+			log.WithFields(logrus.Fields{
+				"etype":      edge.EType,
+				"success":    success,
+				"incomplete": edge.Incomplete,
+			}).Error("Disagreement between Resolve 'success' return and edge's Incomplete flag; trusting return")
+		}
+
+		g.vserial++
+		edge.ID = g.vserial
+		final.OutEdges = final.OutEdges.Set(i2a(edge.ID), edge)
+
+		if success {
+			edge.Incomplete = false // normalize based on Resolve's return
+			log.WithField("target-vid", edge.Target).Debug("Initial resolve successful")
+
+			// set edge in reverse direction, too
+			tvt, _ := g.vtuples.Get(edge.Target)
+			tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
+
+			g.vtuples = g.vtuples.Set(tvt.ID, tvt)
+		} else {
+			edge.Incomplete = true // normalize based on Resolve's return
+			log.Debug("Early resolve failed")
+		}
+
+		g.vtuples = g.vtuples.Set(final.ID, final)
+	}
+
 	return final
 }
 
 func toExistingTuple(g *coreGraph, vid, msgid uint64, uif system.UnifyInstructionForm, log *logrus.Entry) system.VertexTuple {
+	var err error
+
 	log.WithField("vid", vid).Debug("Unification resulted in match")
 	vt, _ := g.vtuples.Get(vid)
 
 	// TODO ugh, pointless stupid duplicating/copy
-	nu, err := vt.Vertex.Merge(system.StdVertex{
+	vt.Vertex, err = vt.Vertex.Merge(system.StdVertex{
 		Type:       uif.Vertex().Type(),
 		Properties: maputil.RawMapToPropPMap(msgid, false, uif.Vertex().Properties()),
 	})
@@ -278,10 +336,107 @@ func toExistingTuple(g *coreGraph, vid, msgid uint64, uif system.UnifyInstructio
 		}).Warn("Merge of vertex properties returned an error; vertex will continue update into graph anyway")
 	}
 
-	// TODO resolve all others edges and check for partials
+	for _, spec := range uif.ScopingSpecs() {
+		log.Debugf("Re-resolving on EdgeSpec of type %T", spec)
+		edge, success, err := semantic.Resolve(spec, g, msgid, vt)
 
-	final := system.VertexTuple{ID: vid, InEdges: vt.InEdges, OutEdges: vt.OutEdges, Vertex: nu}
-	g.vtuples = g.vtuples.Set(vid, final)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"spec-type": fmt.Sprintf("%T", spec),
+				"err":       err,
+			}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
+			// FIXME marking the vertex incomplete, but with no recourse to completeness...SO wrong.
+			// TBH this should maybe panic, this state is absolutely nonsensical.
+			vt.Incomplete = true
+			continue
+		}
 
-	return final
+		// Currently, Success -> ¬Incomplete. While the onus should be on the
+		// implementor to maintain this implication, we check here and
+		// register an error if there is a mismatch.
+		if (success && edge.Incomplete) || (!success && !edge.Incomplete) {
+			log.WithFields(logrus.Fields{
+				"etype":      edge.EType,
+				"success":    success,
+				"incomplete": edge.Incomplete,
+			}).Error("Disagreement between Resolve 'success' return and edge's Incomplete flag; trusting return")
+		}
+
+		// The edge may or may not be new.
+		// TODO reorganize once edge unification is split out
+		if edge.ID == 0 {
+			g.vserial++
+			edge.ID = g.vserial
+		}
+
+		vt.OutEdges = vt.OutEdges.Set(i2a(edge.ID), edge)
+
+		if success {
+			edge.Incomplete = false // normalize based on Resolve's return
+			log.WithField("target-vid", edge.Target).Debug("Early resolve succeeded")
+
+			// set edge in reverse direction, too
+			tvt, _ := g.vtuples.Get(edge.Target)
+			tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
+
+			g.vtuples = g.vtuples.Set(tvt.ID, tvt)
+		} else {
+			edge.Incomplete = true // normalize based on Resolve's return
+			vt.Incomplete = true   // if a scoping edge is incomplete, so is the vertex
+			log.Debug("Early resolve failed")
+		}
+
+		g.vtuples = g.vtuples.Set(vt.ID, vt)
+	}
+
+	for _, spec := range uif.EdgeSpecs() {
+		edge, success, err := semantic.Resolve(spec, g, msgid, vt)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"spec-type": fmt.Sprintf("%T", spec),
+				"err":       err,
+			}).Errorf("Resolve returned err, indicating resolve func was not correctly registered for spec type. Discarding spec")
+			// Not nearly as big a deal to miss one of these as to miss a scoping spec, but still log the error.
+			continue
+		}
+
+		// A weird possibility exists here: unify with an existing, complete edge, but become incomplete.
+		if (success && edge.Incomplete) || (!success && !edge.Incomplete) {
+			log.WithFields(logrus.Fields{
+				"etype":      edge.EType,
+				"success":    success,
+				"incomplete": edge.Incomplete,
+			}).Error("Disagreement between Resolve 'success' return and edge's Incomplete flag; trusting return")
+		}
+
+		// The edge may or may not be new.
+		// TODO reorganize once edge unification is split out
+		if edge.ID == 0 {
+			g.vserial++
+			edge.ID = g.vserial
+		}
+
+		vt.OutEdges = vt.OutEdges.Set(i2a(edge.ID), edge)
+
+		if success {
+			edge.Incomplete = false // normalize based on Resolve's return
+			log.WithField("target-vid", edge.Target).Debug("Initial resolve successful")
+
+			// set edge in reverse direction, too
+			tvt, _ := g.vtuples.Get(edge.Target)
+			tvt.InEdges = tvt.InEdges.Set(i2a(edge.ID), edge)
+
+			g.vtuples = g.vtuples.Set(tvt.ID, tvt)
+		} else {
+			edge.Incomplete = true // normalize based on Resolve's return
+			log.Debug("Early resolve failed")
+		}
+
+		g.vtuples = g.vtuples.Set(vt.ID, vt)
+	}
+	// TODO check for partials
+
+	g.vtuples = g.vtuples.Set(vid, vt)
+
+	return vt
 }
