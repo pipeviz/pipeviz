@@ -107,9 +107,10 @@ func resolveSpecCommit(e system.EdgeSpec, g system.CoreGraph, mid uint64, src sy
 
 func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "version",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "version",
 	}
 	e.Props = e.Props.Set("sha1", system.Property{MsgSrc: mid, Value: spec.Sha1})
 
@@ -118,19 +119,19 @@ func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.Vertex
 		sha1, _ := re[0].Props.Lookup("sha1")
 		e.ID = re[0].ID // FIXME setting the id to non-0 AND failing is currently unhandled
 		if sha1.(system.Property).Value == spec.Sha1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = re[0].Target
 		} else {
 			rv := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", spec.Sha1))
 			if len(rv) == 1 {
-				success = true
+				e.Incomplete, success = false, true
 				e.Target = rv[0].ID
 			}
 		}
 	} else {
 		rv := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", spec.Sha1))
 		if len(rv) == 1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}
@@ -149,9 +150,10 @@ func resolveDataLink(e system.EdgeSpec, g system.CoreGraph, mid uint64, src syst
 
 func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "datalink",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "datalink",
 	}
 
 	// DataLinks have a 'name' field that is expected to be unique for the source, if present
@@ -162,7 +164,8 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 
 		re := g.OutWith(src.ID, q.Qbe(system.EType("datalink"), "name", spec.Name))
 		if len(re) == 1 {
-			success = true
+			// FIXME this is wrong; matching on name means we unify, but does not mean success/completeness
+			e.Incomplete, success = false, true
 			e = re[0]
 		}
 	}
@@ -280,7 +283,7 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 	// FIXME only recording the final target id is totally broken; see https://github.com/pipeviz/pipeviz/issues/37
 
 	// Aaaand we found our target.
-	success = true
+	e.Incomplete, success = false, true
 	e.Target = dataset.ID
 	return
 }

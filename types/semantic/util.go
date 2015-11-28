@@ -63,6 +63,7 @@ func findEnv(g system.CoreGraph, vt system.VertexTuple) (vid uint64, edge system
 		}
 	}
 
+	edge.Incomplete = !success
 	return
 }
 

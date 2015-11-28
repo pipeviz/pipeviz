@@ -136,9 +136,10 @@ func resolveSpecLocalLogic(e system.EdgeSpec, g system.CoreGraph, mid uint64, sr
 
 func (spec specLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "logic-link",
+		Source:     src.ID,
+		Props:      ps.NewMap(),
+		Incomplete: true,
+		EType:      "logic-link",
 	}
 
 	// search for existing link
@@ -154,7 +155,7 @@ func (spec specLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	envid, _, _ := findEnv(g, src)
 	rv := g.PredecessorsWith(envid, q.Qbv(system.VType("logic-state"), "path", spec.Path))
 	if len(rv) == 1 {
-		success = true
+		e.Incomplete, success = false, true
 		e.Target = rv[0].ID
 	}
 
@@ -176,16 +177,17 @@ func resolveSpecParentDataset(e system.EdgeSpec, g system.CoreGraph, mid uint64,
 
 func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "dataset-gateway",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "dataset-gateway",
 	}
 	e.Props = e.Props.Set("name", system.Property{MsgSrc: mid, Value: spec.Name})
 
 	// check for existing link - there can be only be one
 	re := g.OutWith(src.ID, q.Qbe(system.EType("dataset-gateway")))
 	if len(re) == 1 {
-		success = true
+		e.Incomplete, success = false, true
 		e = re[0]
 		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
 	} else {
@@ -194,7 +196,7 @@ func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system
 		envid, _, _ := findEnv(g, src)
 		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("parent-dataset"), "name", spec.Name))
 		if len(rv) != 0 { // >1 shouldn't be possible
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}
@@ -230,9 +232,10 @@ func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.V
 	}
 
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "listening",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "listening",
 	}
 
 	e.Props = e.Props.Set("port", system.Property{MsgSrc: mid, Value: spec.Port})
@@ -242,7 +245,7 @@ func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.V
 	if hasenv {
 		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("comm"), "type", "port", "port", spec.Port))
 		if len(rv) == 1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}
@@ -267,9 +270,10 @@ func (spec specUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src s
 	}
 
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "listening",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "listening",
 	}
 
 	e.Props = e.Props.Set("path", system.Property{MsgSrc: mid, Value: spec.Path})
@@ -278,7 +282,7 @@ func (spec specUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src s
 	if hasenv {
 		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("comm"), "type", "unix", "path", spec.Path))
 		if len(rv) == 1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}

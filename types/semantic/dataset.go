@@ -168,16 +168,17 @@ func resolveSpecDatasetHierarchy(e system.EdgeSpec, g system.CoreGraph, mid uint
 
 func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "dataset-hierarchy",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "dataset-hierarchy",
 	}
 	e.Props = e.Props.Set("parent", system.Property{MsgSrc: mid, Value: spec.NamePath[0]})
 
 	// check for existing link - there can be only be one
 	re := g.OutWith(src.ID, q.Qbe(system.EType("dataset-hierarchy")))
 	if len(re) == 1 {
-		success = true
+		e.Incomplete, success = false, true
 		e = re[0]
 		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
 		e.Props = e.Props.Set("parent", system.Property{MsgSrc: mid, Value: spec.NamePath[0]})
@@ -220,9 +221,10 @@ func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	// then try again one more time. Maybe it is fine. THINK IT THROUGH.
 
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "data-provenance",
+		Source:     src.ID,
+		Props:      ps.NewMap(),
+		Incomplete: true,
+		EType:      "data-provenance",
 	}
 	e.Props = assignAddress(mid, spec.Address, e.Props, false)
 
@@ -238,6 +240,7 @@ func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 		if reresolve {
 			e.Props = assignAddress(mid, spec.Address, e.Props, true)
 		} else {
+			e.Incomplete = false
 			return e, true
 		}
 	}
@@ -250,6 +253,7 @@ func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	}
 
 	e.Target, success = findDataset(g, envid, spec.Dataset)
+	e.Incomplete = !success
 	return
 }
 

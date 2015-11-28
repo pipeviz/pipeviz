@@ -113,9 +113,8 @@ func (spec EnvLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTup
 
 	rv := g.VerticesWith(q.Qbv(system.VType("environment")))
 	for _, vt := range rv {
-		// TODO this'll be cross-package eventually - reorg needed
 		if maputil.AnyMatch(e.Props, vt.Vertex.Properties, "nick", "hostname", "ipv4", "ipv6") {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = vt.ID
 			break
 		}
