@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	unifyMap   = make(map[system.VType]system.UnifyFunc)
-	resolveMap = make(map[system.EType]system.ResolveFunc)
+	unifyMap     = make(map[system.VType]system.UnifyFunc)
+	unifyEdgeMap = make(map[system.EType]system.UnifyEdgeFunc)
+	resolveMap   = make(map[system.EType]system.ResolveFunc)
 )
 
 func registerUnifier(typ system.VType, f system.UnifyFunc) error {
@@ -18,7 +19,7 @@ func registerUnifier(typ system.VType, f system.UnifyFunc) error {
 			"system": "semantic",
 			"type":   typ,
 		}).Error("Attempt to register UnifyFunc for type more than once")
-		return fmt.Errorf("A UnifyFunc for vertex type %q is already registered", typ)
+		return fmt.Errorf("a UnifyFunc for vertex type %q is already registered", typ)
 	}
 
 	unifyMap[typ] = f
@@ -33,7 +34,29 @@ func Unify(g system.CoreGraph, uif system.UnifyInstructionForm) (uint64, error) 
 	if f, exists := unifyMap[typ]; exists {
 		return f(g, uif), nil
 	} else {
-		return 0, fmt.Errorf("No unifier exists for vertices of type %q", typ)
+		return 0, fmt.Errorf("no unifier exists for vertices of type %q", typ)
+	}
+}
+
+func registerEdgeUnifier(typ system.EType, f system.UnifyEdgeFunc) error {
+	if _, exists := unifyEdgeMap[typ]; exists {
+		logrus.WithFields(logrus.Fields{
+			"system": "semantic",
+			"type":   typ,
+		}).Error("Attempt to register UnifyEdgeFunc for type more than once")
+		return fmt.Errorf("a UnifyEdgeFunc for edge type %q is already registered", typ)
+	}
+
+	unifyEdgeMap[typ] = f
+	return nil
+}
+
+func UnifyEdge(vt system.VertexTuple, e system.EdgeSpec) (uint64, error) {
+	typ := e.Type()
+	if f, exists := unifyEdgeMap[typ]; exists {
+		return f(vt, e), nil
+	} else {
+		return 0, fmt.Errorf("no edge unifier exists for edges of type %q", typ)
 	}
 }
 
@@ -43,7 +66,7 @@ func registerResolver(typ system.EType, f system.ResolveFunc) error {
 			"system": "semantic",
 			"type":   typ,
 		}).Error("Attempt to register ResolverFunc for type more than once")
-		return fmt.Errorf("A ResolverFunc for edge type %q is already registered", typ)
+		return fmt.Errorf("a ResolverFunc for edge type %q is already registered", typ)
 	}
 
 	resolveMap[typ] = f
@@ -59,6 +82,6 @@ func Resolve(e system.EdgeSpec, g system.CoreGraph, msgid uint64, vt system.Vert
 		id, succ := f(e, g, msgid, vt)
 		return id, succ, nil
 	} else {
-		return system.StdEdge{}, false, fmt.Errorf("No resolver exists for edges of type %q", typ)
+		return system.StdEdge{}, false, fmt.Errorf("no resolver exists for edges of type %q", typ)
 	}
 }

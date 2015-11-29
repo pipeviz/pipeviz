@@ -17,6 +17,9 @@ type UnifyInstructionForm interface {
 // TODO second param should become something simpler, less than UIF
 type UnifyFunc func(CoreGraph, UnifyInstructionForm) uint64
 
+// A UnifyEdgeFunc unifies an edge with existing edges in the provided vertex.
+type UnifyEdgeFunc func(VertexTuple, EdgeSpec) uint64
+
 // A ResolveFunc takes an edge spec and its root VertexTuple and resolves a target
 // with respect to the given CoreGraph.
 type ResolveFunc func(EdgeSpec, CoreGraph, uint64, VertexTuple) (StdEdge, bool)

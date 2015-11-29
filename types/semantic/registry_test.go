@@ -45,6 +45,26 @@ func TestUnifierExclusivity(t *testing.T) {
 	}
 }
 
+// TestEdgeUnifierExclusivity attempts to ensure that edge unifier functions are exclusive
+// to a given type. Exceptions are allowed.
+//
+// This has the same possibility of false positives (passes when it shouldn't) as
+// TestUnifierExclusivity.
+//
+// TODO can we test for, or evidence, the case where multiple edge logics are encompassed
+// under a single edge? As in the cases of resolveDataProvenance() and resolveListening()
+func TestEdgeUnifierExclusivity(t *testing.T) {
+	// Loop over the unifyEdgeMap and ensure uniqueness.
+	for typ, f := range unifyEdgeMap {
+		fval := reflect.ValueOf(f).Pointer()
+		for ctyp, cf := range unifyEdgeMap {
+			if typ != ctyp && fval == reflect.ValueOf(cf).Pointer() {
+				t.Errorf("Types %q and %q share unifier function", typ, ctyp)
+			}
+		}
+	}
+}
+
 // TestResolverExclusivity attempts to ensure that resolver functions are exclusive to
 // a given type. Exceptions are allowed.
 //
