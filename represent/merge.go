@@ -10,6 +10,12 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+// partialRecord is a pair of vertex id and edge id. They identify an edge that needs
+// to be resolved.
+type partialRecord struct {
+	vid, eid uint64
+}
+
 // Merge takes a set of input data in UnifyInstructionForms, merges it into
 // the graph and returns a pointer to the new version of the graph.
 func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) system.CoreGraph {
@@ -25,13 +31,17 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 
 	g := og.clone()
 	g.msgid = msgid
+	var newPartials []partialRecord
 
 	// Ensure vertices, then record into intermediate, orphan-enabling container
 	for _, uif := range uifs {
-		vt, err := toTuple(g, msgid, uif)
+		vt, np, err := toTuple(g, msgid, uif)
 		if err != nil {
 			// Error was already logged in toTuple, so here we can just skip the bugger
 			continue
+		}
+		if len(np) != 0 {
+			newPartials = append(newPartials, np...)
 		}
 
 		ess = append(ess, &veProcessingInfo{
@@ -51,7 +61,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 		// vertex ident failed; try again now that new vertices are present
 		if orphan.vt.ID == 0 {
 			// this is temporary anyway, but there's no way an err could come back on an existing orphan
-			orphan.vt, _ = toTuple(g, orphan.msgid, orphan.uif)
+			orphan.vt, _, _ = toTuple(g, orphan.msgid, orphan.uif)
 		} else {
 			// ensure we have latest version of vt
 			vt, err := g.Get(orphan.vt.ID)
@@ -163,7 +173,7 @@ func (og *coreGraph) Merge(msgid uint64, uifs []system.UnifyInstructionForm) sys
 // toTuple performs a single pass over a UIF: it attempts unify the vertex and resolve its edge specs.
 //
 // Returns a fully-formed VertexTuple, or an error iff basic vertex unification failed.
-func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system.VertexTuple, error) {
+func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system.VertexTuple, []partialRecord, error) {
 	logEntry := logrus.WithFields(logrus.Fields{
 		"system": "engine",
 		"msgid":  msgid,
@@ -180,7 +190,7 @@ func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system
 			"err":      err,
 		}).Errorf("Unify returned err, indicating unify func was not correctly registered for vtx type. Discarding vtx")
 		// At this point, all we can do is return an err
-		return system.VertexTuple{}, err
+		return system.VertexTuple{}, nil, err
 	}
 
 	// FIXME
@@ -200,15 +210,18 @@ func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system
 	// unification as a separate process for edges.
 
 	if vid == 0 {
-		return toNewTuple(g, msgid, sd, logEntry), nil
+		v, p := toNewTuple(g, msgid, sd, logEntry)
+		return v, p, nil
 	} else {
-		return toExistingTuple(g, vid, msgid, sd, logEntry), nil
+		v, p := toExistingTuple(g, vid, msgid, sd, logEntry)
+		return v, p, nil
 	}
 }
 
-func toNewTuple(g *coreGraph, msgid uint64, uif system.UnifyInstructionForm, log *logrus.Entry) system.VertexTuple {
+func toNewTuple(g *coreGraph, msgid uint64, uif system.UnifyInstructionForm, log *logrus.Entry) (system.VertexTuple, []partialRecord) {
 	log.Debug("No match on unification, creating a new vertex")
 
+	var partials []partialRecord
 	final := system.VertexTuple{
 		Vertex: system.StdVertex{
 			Type:       uif.Vertex().Type(),
@@ -268,10 +281,12 @@ func toNewTuple(g *coreGraph, msgid uint64, uif system.UnifyInstructionForm, log
 		} else {
 			edge.Incomplete = true  // normalize based on Resolve's return
 			final.Incomplete = true // if a scoping edge is incomplete, so is the vertex
+			partials = append(partials, partialRecord{vid: final.ID, eid: edge.Target})
 			log.Debug("Early resolve failed")
 		}
 
-		g.vtuples = g.vtuples.Set(final.ID, final)
+		// FIXME this can be removed...right?
+		//g.vtuples = g.vtuples.Set(final.ID, final)
 	}
 
 	for _, spec := range uif.EdgeSpecs() {
@@ -308,21 +323,25 @@ func toNewTuple(g *coreGraph, msgid uint64, uif system.UnifyInstructionForm, log
 			g.vtuples = g.vtuples.Set(tvt.ID, tvt)
 		} else {
 			edge.Incomplete = true // normalize based on Resolve's return
+			partials = append(partials, partialRecord{vid: final.ID, eid: edge.Target})
 			log.Debug("Early resolve failed")
 		}
 
-		g.vtuples = g.vtuples.Set(final.ID, final)
+		// FIXME this can be removed...right?
+		//g.vtuples = g.vtuples.Set(final.ID, final)
 	}
 
-	return final
+	g.vtuples = g.vtuples.Set(final.ID, final)
+	return final, partials
 }
 
-func toExistingTuple(g *coreGraph, vid, msgid uint64, uif system.UnifyInstructionForm, log *logrus.Entry) system.VertexTuple {
+func toExistingTuple(g *coreGraph, vid, msgid uint64, uif system.UnifyInstructionForm, log *logrus.Entry) (system.VertexTuple, []partialRecord) {
 	var err error
 
 	log.WithField("vid", vid).Debug("Unification resulted in match")
 	vt, _ := g.vtuples.Get(vid)
 
+	var partials []partialRecord
 	// TODO ugh, pointless stupid duplicating/copy
 	vt.Vertex, err = vt.Vertex.Merge(system.StdVertex{
 		Type:       uif.Vertex().Type(),
@@ -383,10 +402,12 @@ func toExistingTuple(g *coreGraph, vid, msgid uint64, uif system.UnifyInstructio
 		} else {
 			edge.Incomplete = true // normalize based on Resolve's return
 			vt.Incomplete = true   // if a scoping edge is incomplete, so is the vertex
+			partials = append(partials, partialRecord{vid: vt.ID, eid: edge.Target})
 			log.Debug("Early resolve failed")
 		}
 
-		g.vtuples = g.vtuples.Set(vt.ID, vt)
+		// FIXME this can be removed...right?
+		//g.vtuples = g.vtuples.Set(vt.ID, vt)
 	}
 
 	for _, spec := range uif.EdgeSpecs() {
@@ -429,14 +450,14 @@ func toExistingTuple(g *coreGraph, vid, msgid uint64, uif system.UnifyInstructio
 			g.vtuples = g.vtuples.Set(tvt.ID, tvt)
 		} else {
 			edge.Incomplete = true // normalize based on Resolve's return
+			partials = append(partials, partialRecord{vid: vt.ID, eid: edge.Target})
 			log.Debug("Early resolve failed")
 		}
 
-		g.vtuples = g.vtuples.Set(vt.ID, vt)
+		// FIXME this can be removed...right?
+		//g.vtuples = g.vtuples.Set(vt.ID, vt)
 	}
-	// TODO check for partials
 
 	g.vtuples = g.vtuples.Set(vid, vt)
-
-	return vt
+	return vt, partials
 }

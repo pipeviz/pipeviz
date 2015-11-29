@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
@@ -17,7 +16,7 @@ var i2a = func(i uint64) string {
 type coreGraph struct {
 	msgid, vserial uint64
 	vtuples        intMapV
-	partials       ps.Map
+	partials       []partialRecord
 	orphans        edgeSpecSet // FIXME breaks immut
 }
 
@@ -27,7 +26,7 @@ func NewGraph() system.CoreGraph {
 		"system": "engine",
 	}).Debug("New coreGraph created")
 
-	return &coreGraph{vtuples: newIntMapV(), partials: ps.NewMap(), vserial: 0}
+	return &coreGraph{vtuples: newIntMapV(), vserial: 0}
 }
 
 type veProcessingInfo struct {
