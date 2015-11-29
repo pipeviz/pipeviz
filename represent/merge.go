@@ -199,10 +199,10 @@ func toTuple(g *coreGraph, msgid uint64, sd system.UnifyInstructionForm) (system
 	// earth would that even mean? No idea. This is case in point why we need
 	// unification as a separate process for edges.
 
-	if vid != 0 {
-		return toExistingTuple(g, vid, msgid, sd, logEntry), nil
-	} else {
+	if vid == 0 {
 		return toNewTuple(g, msgid, sd, logEntry), nil
+	} else {
+		return toExistingTuple(g, vid, msgid, sd, logEntry), nil
 	}
 }
 
