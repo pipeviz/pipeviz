@@ -1,6 +1,8 @@
 package semantic
 
 import (
+	"bytes"
+
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/represent/q"
@@ -149,4 +151,45 @@ func findDataset(g system.CoreGraph, envid uint64, name []string) (id uint64, su
 	}
 
 	return id, true
+}
+
+// outWith mostly duplicates the OutWith method on CoreGraph. It's here so that
+// UnifyEdgeFuncs can do their job easily without needing the full CoreGraph object.
+func outWith(vt system.VertexTuple, ef system.EFilter) (es system.EdgeVector) {
+	etype, props := ef.EType(), ef.EProps()
+
+	var fef func(k string, v ps.Any)
+	// TODO specialize the func for zero-cases
+	fef = func(k string, v ps.Any) {
+		edge := v.(system.StdEdge)
+		if etype != system.ETypeNone && etype != edge.EType {
+			// etype doesn't match
+			return
+		}
+
+		for _, p := range props {
+			eprop, exists := edge.Props.Lookup(p.K)
+			if !exists {
+				return
+			}
+
+			deprop := eprop.(system.Property)
+			switch tv := deprop.Value.(type) {
+			default:
+				if tv != p.V {
+					return
+				}
+			case []byte:
+				cmptv, ok := p.V.([]byte)
+				if !ok || !bytes.Equal(tv, cmptv) {
+					return
+				}
+			}
+		}
+
+		es = append(es, edge)
+	}
+
+	vt.OutEdges.ForEach(fef)
+	return
 }
