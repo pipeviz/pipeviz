@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
@@ -12,6 +13,9 @@ import (
 func init() {
 	if err := registerUnifier("commit", unifyCommit); err != nil {
 		panic("commit vertex already registered")
+	}
+	if err := registerEdgeUnifier("parent-commit", eunifyGitCommitParent); err != nil {
+		panic("parent-commit edge unifier already registered")
 	}
 	if err := registerResolver("parent-commit", resolveSpecGitCommitParent); err != nil {
 		panic("parent-commit edge already registered")
@@ -106,6 +110,23 @@ func unifyCommit(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 type specGitCommitParent struct {
 	Sha1      Sha1
 	ParentNum int
+}
+
+func eunifyGitCommitParent(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	spec := e.(specGitCommitParent)
+	ev := outWith(vt, q.Qbe("parent-commit", "pnum", spec.ParentNum))
+	switch len(ev) {
+	case 0:
+		return 0
+	case 1:
+		return ev[0].ID
+	default:
+		logrus.WithFields(logrus.Fields{
+			"system": "semantic",
+			"pnum":   spec.ParentNum,
+		}).Warn("Invariant violation: more than one git parent commit exists with the same pnum")
+		return ev[0].ID
+	}
 }
 
 func resolveSpecGitCommitParent(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
