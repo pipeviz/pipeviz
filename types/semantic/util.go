@@ -3,6 +3,7 @@ package semantic
 import (
 	"bytes"
 
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/represent/q"
@@ -192,4 +193,24 @@ func outWith(vt system.VertexTuple, ef system.EFilter) (es system.EdgeVector) {
 
 	vt.OutEdges.ForEach(fef)
 	return
+}
+
+// faofEdgeId (first and only first) searches the edges of the provided VertexTuple
+// and returns the ID of the first match. If more than one matches, a warning is logged
+// and the ID of the first result is returned.
+func faofEdgeId(vt system.VertexTuple, ef system.EFilter) uint64 {
+	found := outWith(vt, ef)
+	switch len(found) {
+	case 0:
+		return 0
+	case 1:
+		return found[0].ID
+	default:
+		logrus.WithFields(logrus.Fields{
+			"system": "semantic",
+			"count":  len(found),
+			"etype":  ef.EType(),
+		}).Warn("Invariant violation; more than one match found in edge search")
+		return found[0].ID
+	}
 }

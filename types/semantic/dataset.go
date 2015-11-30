@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/represent/q"
@@ -171,20 +170,7 @@ type specDatasetHierarchy struct {
 
 func eunifySpecDatasetHierarchy(vt system.VertexTuple, e system.EdgeSpec) uint64 {
 	_ = e.(specDatasetHierarchy) // to panic if not the right type
-
-	found := outWith(vt, q.Qbe("dataset-hierarchy"))
-	switch len(found) {
-	case 0:
-		return 0
-	case 1:
-		return found[0].ID
-	default:
-		logrus.WithFields(logrus.Fields{
-			"system": "semantic",
-			"count":  len(found),
-		}).Warn("Invariant violation: multiple dataset hierarchy edges, but datasets cannot exist in more than one dataset hierarchy")
-		return found[0].ID
-	}
+	return faofEdgeId(vt, q.Qbe("dataset-hierarchy"))
 }
 
 func resolveSpecDatasetHierarchy(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
@@ -231,19 +217,7 @@ func (spec specDatasetHierarchy) Type() system.EType {
 func eunifyDataProvenance(vt system.VertexTuple, e system.EdgeSpec) uint64 {
 	switch e.(type) {
 	case DataProvenance, DataAlpha:
-		found := outWith(vt, q.Qbe(system.EType("data-provenance")))
-		switch len(found) {
-		case 0:
-			return 0
-		case 1:
-			return found[0].ID
-		default:
-			logrus.WithFields(logrus.Fields{
-				"system": "semantic",
-				"count":  len(found),
-			}).Warn("Invariant violation: data can have only one provenance")
-			return found[0].ID
-		}
+		return faofEdgeId(vt, q.Qbe(system.EType("data-provenance")))
 	default:
 		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
 		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveDataProvenance", e))

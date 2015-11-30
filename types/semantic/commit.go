@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
@@ -114,19 +113,7 @@ type specGitCommitParent struct {
 
 func eunifyGitCommitParent(vt system.VertexTuple, e system.EdgeSpec) uint64 {
 	spec := e.(specGitCommitParent)
-	ev := outWith(vt, q.Qbe("parent-commit", "pnum", spec.ParentNum))
-	switch len(ev) {
-	case 0:
-		return 0
-	case 1:
-		return ev[0].ID
-	default:
-		logrus.WithFields(logrus.Fields{
-			"system": "semantic",
-			"pnum":   spec.ParentNum,
-		}).Warn("Invariant violation: more than one git parent commit exists with the same pnum")
-		return ev[0].ID
-	}
+	return faofEdgeId(vt, q.Qbe("parent-commit", "pnum", spec.ParentNum))
 }
 
 func resolveSpecGitCommitParent(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
