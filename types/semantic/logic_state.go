@@ -13,8 +13,14 @@ func init() {
 	if err := registerUnifier("logic-state", unifyLogicState); err != nil {
 		panic("logic-state vertex already registered")
 	}
+	if err := registerEdgeUnifier("version", eunifySpecCommit); err != nil {
+		panic("version edge unifier already registered")
+	}
 	if err := registerResolver("version", resolveSpecCommit); err != nil {
 		panic("version edge already registered")
+	}
+	if err := registerEdgeUnifier("datalink", eunifyDataLink); err != nil {
+		panic("datalink edge unifier already registered")
 	}
 	if err := registerResolver("datalink", resolveDataLink); err != nil {
 		panic("datalink edge already registered")
@@ -101,6 +107,11 @@ type specCommit struct {
 	Sha1 Sha1
 }
 
+func eunifySpecCommit(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	_ = e.(specCommit)
+	return faofEdgeId(vt, q.Qbe(system.EType("version")))
+}
+
 func resolveSpecCommit(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
 	return e.(specCommit).Resolve(g, mid, src)
 }
@@ -142,6 +153,11 @@ func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.Vertex
 // Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
 func (spec specCommit) Type() system.EType {
 	return "version"
+}
+
+func eunifyDataLink(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	spec := e.(DataLink)
+	return faofEdgeId(vt, q.Qbe(system.EType("datalink"), "name", spec.Name))
 }
 
 func resolveDataLink(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {

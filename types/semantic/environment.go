@@ -10,6 +10,9 @@ func init() {
 	if err := registerUnifier("environment", unifyEnvironment); err != nil {
 		panic("environment vertex already registered")
 	}
+	if err := registerEdgeUnifier("envlink", eunifyEnvLink); err != nil {
+		panic("parent-commit edge unifier already registered")
+	}
 	if err := registerResolver("envlink", resolveEnvLink); err != nil {
 		panic("envlink edge already registered")
 	}
@@ -89,6 +92,11 @@ func unifyEnvironment(g system.CoreGraph, u system.UnifyInstructionForm) uint64 
 type EnvLink struct {
 	Address Address `json:"address,omitempty"`
 	Nick    string  `json:"nick,omitempty"`
+}
+
+func eunifyEnvLink(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	_ = e.(EnvLink) // to panic if not the right type
+	return faofEdgeId(vt, q.Qbe("envlink"))
 }
 
 func resolveEnvLink(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {

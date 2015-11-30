@@ -15,6 +15,9 @@ func init() {
 	if err := registerUnifier("comm", unifyComm); err != nil {
 		panic("comm vertex already registered")
 	}
+	if err := registerEdgeUnifier("listening", eunifyListening); err != nil {
+		panic("listening edge unifier already registered")
+	}
 	if err := registerResolver("listening", resolveListening); err != nil {
 		panic("version edge already registered")
 	}
@@ -212,6 +215,19 @@ func (spec specParentDataset) Type() system.EType {
 type specNetListener struct {
 	Port  int
 	Proto string
+}
+
+func eunifyListening(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	switch spec := e.(type) {
+	case specNetListener:
+		// TODO needs a name...? unification isn't particularly meaningful without it
+		return faofEdgeId(vt, q.Qbe(system.EType("listening"), "type", "port", "port", spec.Port, "proto", spec.Proto))
+	case specUnixDomainListener:
+		// TODO needs a name...? unification isn't particularly meaningful without it
+		return faofEdgeId(vt, q.Qbe(system.EType("listening"), "type", "unix", "path", spec.Path))
+	default:
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to eunifyListening", e))
+	}
 }
 
 func resolveListening(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
