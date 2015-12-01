@@ -6,6 +6,18 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("environment", unifyEnvironment); err != nil {
+		panic("environment vertex already registered")
+	}
+	if err := registerEdgeUnifier("envlink", eunifyEnvLink); err != nil {
+		panic("parent-commit edge unifier already registered")
+	}
+	if err := registerResolver("envlink", resolveEnvLink); err != nil {
+		panic("envlink edge already registered")
+	}
+}
+
 type Environment struct {
 	Address     Address         `json:"address,omitempty"`
 	OS          string          `json:"os,omitempty"`
@@ -35,7 +47,6 @@ func (d Environment) UnificationForm() []system.UnifyInstructionForm {
 			"ipv4":     d.Address.Ipv4,
 			"ipv6":     d.Address.Ipv6,
 		}},
-		u: envUnify,
 	}}
 
 	envlink := EnvLink{Address: Address{}}
@@ -66,7 +77,7 @@ func (d Environment) UnificationForm() []system.UnifyInstructionForm {
 	return ret
 }
 
-func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyEnvironment(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	matches := g.VerticesWith(q.Qbv(system.VType("environment")))
 
 	for _, e := range matches {
@@ -81,6 +92,15 @@ func envUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 type EnvLink struct {
 	Address Address `json:"address,omitempty"`
 	Nick    string  `json:"nick,omitempty"`
+}
+
+func eunifyEnvLink(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	_ = e.(EnvLink) // to panic if not the right type
+	return faofEdgeId(vt, q.Qbe("envlink"))
+}
+
+func resolveEnvLink(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(EnvLink).Resolve(g, mid, src)
 }
 
 func (spec EnvLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
@@ -101,13 +121,17 @@ func (spec EnvLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTup
 
 	rv := g.VerticesWith(q.Qbv(system.VType("environment")))
 	for _, vt := range rv {
-		// TODO this'll be cross-package eventually - reorg needed
 		if maputil.AnyMatch(e.Props, vt.Vertex.Properties, "nick", "hostname", "ipv4", "ipv6") {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = vt.ID
 			break
 		}
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec EnvLink) Type() system.EType {
+	return "envlink"
 }

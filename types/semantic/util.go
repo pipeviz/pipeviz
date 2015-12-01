@@ -1,6 +1,9 @@
 package semantic
 
 import (
+	"bytes"
+
+	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/represent/q"
@@ -16,18 +19,12 @@ func pp(k string, v interface{}) system.PropPair {
 // uif is a standard struct that expresses a types.UnifyInstructionForm
 type uif struct {
 	v  system.ProtoVertex
-	u  func(system.CoreGraph, system.UnifyInstructionForm) uint64
 	e  []system.EdgeSpec
 	se []system.EdgeSpec
 }
 
 func (u uif) Vertex() system.ProtoVertex {
 	return u.v
-}
-
-func (u uif) Unify(g system.CoreGraph, u2 system.UnifyInstructionForm) uint64 {
-	// TODO u2 should be redundant, should always be same as u
-	return u.u(g, u2)
 }
 
 func (u uif) EdgeSpecs() []system.EdgeSpec {
@@ -69,6 +66,7 @@ func findEnv(g system.CoreGraph, vt system.VertexTuple) (vid uint64, edge system
 		}
 	}
 
+	edge.Incomplete = !success
 	return
 }
 
@@ -154,4 +152,65 @@ func findDataset(g system.CoreGraph, envid uint64, name []string) (id uint64, su
 	}
 
 	return id, true
+}
+
+// outWith mostly duplicates the OutWith method on CoreGraph. It's here so that
+// UnifyEdgeFuncs can do their job easily without needing the full CoreGraph object.
+func outWith(vt system.VertexTuple, ef system.EFilter) (es system.EdgeVector) {
+	etype, props := ef.EType(), ef.EProps()
+
+	var fef func(k string, v ps.Any)
+	// TODO specialize the func for zero-cases
+	fef = func(k string, v ps.Any) {
+		edge := v.(system.StdEdge)
+		if etype != system.ETypeNone && etype != edge.EType {
+			// etype doesn't match
+			return
+		}
+
+		for _, p := range props {
+			eprop, exists := edge.Props.Lookup(p.K)
+			if !exists {
+				return
+			}
+
+			deprop := eprop.(system.Property)
+			switch tv := deprop.Value.(type) {
+			default:
+				if tv != p.V {
+					return
+				}
+			case []byte:
+				cmptv, ok := p.V.([]byte)
+				if !ok || !bytes.Equal(tv, cmptv) {
+					return
+				}
+			}
+		}
+
+		es = append(es, edge)
+	}
+
+	vt.OutEdges.ForEach(fef)
+	return
+}
+
+// faofEdgeId (first and only first) searches the edges of the provided VertexTuple
+// and returns the ID of the first match. If more than one matches, a warning is logged
+// and the ID of the first result is returned.
+func faofEdgeId(vt system.VertexTuple, ef system.EFilter) uint64 {
+	found := outWith(vt, ef)
+	switch len(found) {
+	case 0:
+		return 0
+	case 1:
+		return found[0].ID
+	default:
+		logrus.WithFields(logrus.Fields{
+			"system": "semantic",
+			"count":  len(found),
+			"etype":  ef.EType(),
+		}).Warn("Invariant violation; more than one match found in edge search")
+		return found[0].ID
+	}
 }

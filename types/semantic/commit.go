@@ -9,6 +9,18 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("commit", unifyCommit); err != nil {
+		panic("commit vertex already registered")
+	}
+	if err := registerEdgeUnifier("parent-commit", eunifyGitCommitParent); err != nil {
+		panic("parent-commit edge unifier already registered")
+	}
+	if err := registerResolver("parent-commit", resolveSpecGitCommitParent); err != nil {
+		panic("parent-commit edge already registered")
+	}
+}
+
 type Commit struct {
 	Author     string   `json:"author,omitempty"`
 	Date       string   `json:"date,omitempty"`
@@ -81,10 +93,10 @@ func (d Commit) UnificationForm() []system.UnifyInstructionForm {
 		edges = append(edges, specGitCommitParent{Sha1: sha1, ParentNum: k + 1})
 	}
 
-	return []system.UnifyInstructionForm{uif{v: v, u: commitUnify, e: edges}}
+	return []system.UnifyInstructionForm{uif{v: v, e: edges}}
 }
 
-func commitUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyCommit(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	candidates := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", u.Vertex().Properties()["sha1"]))
 
 	if len(candidates) > 0 { // there can be only one
@@ -99,16 +111,26 @@ type specGitCommitParent struct {
 	ParentNum int
 }
 
+func eunifyGitCommitParent(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	spec := e.(specGitCommitParent)
+	return faofEdgeId(vt, q.Qbe("parent-commit", "pnum", spec.ParentNum))
+}
+
+func resolveSpecGitCommitParent(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specGitCommitParent).Resolve(g, mid, src)
+}
+
 func (spec specGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "parent-commit",
+		Source:     src.ID,
+		Props:      ps.NewMap(),
+		Incomplete: true,
+		EType:      "parent-commit",
 	}
 
 	re := g.OutWith(src.ID, q.Qbe(system.EType("parent-commit"), "pnum", spec.ParentNum))
 	if len(re) > 0 {
-		success = true
+		e.Incomplete, success = false, true
 		e.Target = re[0].Target
 		e.Props = re[0].Props
 		// FIXME evidence of a problem here - since we're using pnum as the deduping identifier, there's no
@@ -120,7 +142,7 @@ func (spec specGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src syst
 	} else {
 		rv := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", spec.Sha1))
 		if len(rv) == 1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 			e.Props = e.Props.Set("pnum", system.Property{MsgSrc: mid, Value: spec.ParentNum})
 			e.Props = e.Props.Set("sha1", system.Property{MsgSrc: mid, Value: spec.Sha1})
@@ -128,4 +150,9 @@ func (spec specGitCommitParent) Resolve(g system.CoreGraph, mid uint64, src syst
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specGitCommitParent) Type() system.EType {
+	return "parent-commit"
 }

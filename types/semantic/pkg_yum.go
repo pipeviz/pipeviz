@@ -5,6 +5,12 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("pkg-yum", unifyPkgYum); err != nil {
+		panic("pkg-yum vertex already registered")
+	}
+}
+
 type PkgYum struct {
 	Name       string `json:"name,omitempty"`
 	Repository string `json:"repository,omitempty"`
@@ -24,11 +30,10 @@ func (d PkgYum) UnificationForm() []system.UnifyInstructionForm {
 			"release": d.Release,
 			"arch":    d.Arch,
 		}},
-		u: pkgYumUnify,
 	}}
 }
 
-func pkgYumUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyPkgYum(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	props := u.Vertex().Properties()
 	vtv := g.VerticesWith(q.Qbv(system.VType("pkg-yum"),
 		"name", props["name"],

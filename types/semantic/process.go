@@ -1,10 +1,33 @@
 package semantic
 
 import (
+	"fmt"
+
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
 )
+
+func init() {
+	if err := registerUnifier("process", unifyProcess); err != nil {
+		panic("process vertex already registered")
+	}
+	if err := registerUnifier("comm", unifyComm); err != nil {
+		panic("comm vertex already registered")
+	}
+	if err := registerEdgeUnifier("listening", eunifyListening); err != nil {
+		panic("listening edge unifier already registered")
+	}
+	if err := registerResolver("listening", resolveListening); err != nil {
+		panic("version edge already registered")
+	}
+	if err := registerResolver("logic-link", resolveSpecLocalLogic); err != nil {
+		panic("logic-link edge already registered")
+	}
+	if err := registerResolver("dataset-gateway", resolveSpecParentDataset); err != nil {
+		panic("dataset-gateway edge already registered")
+	}
+}
 
 type Process struct {
 	Pid         int          `json:"pid,omitempty"`
@@ -62,18 +85,17 @@ func (d Process) UnificationForm() []system.UnifyInstructionForm {
 			}
 			v2.props["port"] = listen.Port
 		}
-		ret = append(ret, uif{v: v2, u: commUnify, se: []system.EdgeSpec{d.Environment}})
+		ret = append(ret, uif{v: v2, se: []system.EdgeSpec{d.Environment}})
 	}
 
 	return append([]system.UnifyInstructionForm{uif{
 		v:  v,
-		u:  processUnify,
 		e:  edges,
 		se: []system.EdgeSpec{d.Environment},
 	}}, ret...)
 }
 
-func processUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyProcess(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
@@ -84,7 +106,7 @@ func processUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	return findMatchingEnvId(g, edge, g.VerticesWith(q.Qbv(system.VType("process"), "pid", u.Vertex().Properties()["pid"])))
 }
 
-func commUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyComm(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
@@ -111,11 +133,16 @@ type specLocalLogic struct {
 	Path string
 }
 
+func resolveSpecLocalLogic(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specLocalLogic).Resolve(g, mid, src)
+}
+
 func (spec specLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "logic-link",
+		Source:     src.ID,
+		Props:      ps.NewMap(),
+		Incomplete: true,
+		EType:      "logic-link",
 	}
 
 	// search for existing link
@@ -131,29 +158,39 @@ func (spec specLocalLogic) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	envid, _, _ := findEnv(g, src)
 	rv := g.PredecessorsWith(envid, q.Qbv(system.VType("logic-state"), "path", spec.Path))
 	if len(rv) == 1 {
-		success = true
+		e.Incomplete, success = false, true
 		e.Target = rv[0].ID
 	}
 
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specLocalLogic) Type() system.EType {
+	return "logic-link"
+}
+
 type specParentDataset struct {
 	Name string
 }
 
+func resolveSpecParentDataset(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specParentDataset).Resolve(g, mid, src)
+}
+
 func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "dataset-gateway",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "dataset-gateway",
 	}
 	e.Props = e.Props.Set("name", system.Property{MsgSrc: mid, Value: spec.Name})
 
 	// check for existing link - there can be only be one
 	re := g.OutWith(src.ID, q.Qbe(system.EType("dataset-gateway")))
 	if len(re) == 1 {
-		success = true
+		e.Incomplete, success = false, true
 		e = re[0]
 		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
 	} else {
@@ -162,7 +199,7 @@ func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system
 		envid, _, _ := findEnv(g, src)
 		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("parent-dataset"), "name", spec.Name))
 		if len(rv) != 0 { // >1 shouldn't be possible
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}
@@ -170,9 +207,37 @@ func (spec specParentDataset) Resolve(g system.CoreGraph, mid uint64, src system
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specParentDataset) Type() system.EType {
+	return "dataset-gateway"
+}
+
 type specNetListener struct {
 	Port  int
 	Proto string
+}
+
+func eunifyListening(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	switch spec := e.(type) {
+	case specNetListener:
+		// TODO needs a name...? unification isn't particularly meaningful without it
+		return faofEdgeId(vt, q.Qbe(system.EType("listening"), "type", "port", "port", spec.Port, "proto", spec.Proto))
+	case specUnixDomainListener:
+		// TODO needs a name...? unification isn't particularly meaningful without it
+		return faofEdgeId(vt, q.Qbe(system.EType("listening"), "type", "unix", "path", spec.Path))
+	default:
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to eunifyListening", e))
+	}
+}
+
+func resolveListening(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	switch typ := e.(type) {
+	case specNetListener, specUnixDomainListener:
+		return typ.Resolve(g, mid, src)
+	default:
+		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveListening", e))
+	}
 }
 
 func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
@@ -183,9 +248,10 @@ func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.V
 	}
 
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "listening",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "listening",
 	}
 
 	e.Props = e.Props.Set("port", system.Property{MsgSrc: mid, Value: spec.Port})
@@ -195,12 +261,17 @@ func (spec specNetListener) Resolve(g system.CoreGraph, mid uint64, src system.V
 	if hasenv {
 		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("comm"), "type", "port", "port", spec.Port))
 		if len(rv) == 1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specNetListener) Type() system.EType {
+	return "listening"
 }
 
 type specUnixDomainListener struct {
@@ -215,9 +286,10 @@ func (spec specUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src s
 	}
 
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "listening",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "listening",
 	}
 
 	e.Props = e.Props.Set("path", system.Property{MsgSrc: mid, Value: spec.Path})
@@ -226,10 +298,15 @@ func (spec specUnixDomainListener) Resolve(g system.CoreGraph, mid uint64, src s
 	if hasenv {
 		rv := g.PredecessorsWith(envid, q.Qbv(system.VType("comm"), "type", "unix", "path", spec.Path))
 		if len(rv) == 1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specUnixDomainListener) Type() system.EType {
+	return "listening"
 }

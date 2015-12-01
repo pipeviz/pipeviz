@@ -3,12 +3,34 @@ package semantic
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
 )
+
+func init() {
+	if err := registerUnifier("dataset", unifyDataset); err != nil {
+		panic("dataset vertex already registered")
+	}
+	if err := registerUnifier("parent-dataset", unifyParentDataset); err != nil {
+		panic("parent-dataset vertex already registered")
+	}
+	if err := registerEdgeUnifier("dataset-hierarchy", eunifySpecDatasetHierarchy); err != nil {
+		panic("dataset-hierarchy edge unifier already registered")
+	}
+	if err := registerResolver("dataset-hierarchy", resolveSpecDatasetHierarchy); err != nil {
+		panic("dataset-hierarchy edge already registered")
+	}
+	if err := registerEdgeUnifier("data-provenance", eunifyDataProvenance); err != nil {
+		panic("data-provenance edge unifier already registered")
+	}
+	if err := registerResolver("data-provenance", resolveDataProvenance); err != nil {
+		panic("data-provenance edge already registered")
+	}
+}
 
 // FIXME this metaset/set design is not recursive, but it will need to be
 type ParentDataset struct {
@@ -55,7 +77,6 @@ func (d Dataset) UnificationForm() []system.UnifyInstructionForm {
 
 	return []system.UnifyInstructionForm{uif{
 		v: v,
-		u: datasetUnify,
 		se: []system.EdgeSpec{specDatasetHierarchy{
 			Environment: d.Environment,
 			NamePath:    []string{d.Parent},
@@ -92,7 +113,7 @@ func (ds *Dataset) UnmarshalJSON(data []byte) (err error) {
 	return err
 }
 
-func datasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyDataset(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	vtv := g.VerticesWith(q.Qbv(system.VType("dataset"), "name", u.Vertex().Properties()["name"]))
 	if len(vtv) == 0 {
 		return 0
@@ -118,7 +139,6 @@ func (d ParentDataset) UnificationForm() []system.UnifyInstructionForm {
 			"name": d.Name,
 			"path": d.Path,
 		}},
-		u:  parentDatasetUnify,
 		se: []system.EdgeSpec{d.Environment},
 	}}
 
@@ -132,7 +152,7 @@ func (d ParentDataset) UnificationForm() []system.UnifyInstructionForm {
 	return ret
 }
 
-func parentDatasetUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyParentDataset(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
 		// FIXME scoping edge resolution failure does not mean no match - there could be an orphan
@@ -148,18 +168,28 @@ type specDatasetHierarchy struct {
 	NamePath    []string // path through the series of names that arrives at the final dataset
 }
 
+func eunifySpecDatasetHierarchy(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	_ = e.(specDatasetHierarchy) // to panic if not the right type
+	return faofEdgeId(vt, q.Qbe("dataset-hierarchy"))
+}
+
+func resolveSpecDatasetHierarchy(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specDatasetHierarchy).Resolve(g, mid, src)
+}
+
 func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "dataset-hierarchy",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "dataset-hierarchy",
 	}
 	e.Props = e.Props.Set("parent", system.Property{MsgSrc: mid, Value: spec.NamePath[0]})
 
 	// check for existing link - there can be only be one
 	re := g.OutWith(src.ID, q.Qbe(system.EType("dataset-hierarchy")))
 	if len(re) == 1 {
-		success = true
+		e.Incomplete, success = false, true
 		e = re[0]
 		// TODO semantics should preclude this from being able to change, but doing it dirty means force-setting it anyway for now
 		e.Props = e.Props.Set("parent", system.Property{MsgSrc: mid, Value: spec.NamePath[0]})
@@ -179,6 +209,31 @@ func (spec specDatasetHierarchy) Resolve(g system.CoreGraph, mid uint64, src sys
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specDatasetHierarchy) Type() system.EType {
+	return "dataset-hierarchy"
+}
+
+func eunifyDataProvenance(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	switch e.(type) {
+	case DataProvenance, DataAlpha:
+		return faofEdgeId(vt, q.Qbe(system.EType("data-provenance")))
+	default:
+		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveDataProvenance", e))
+	}
+}
+
+func resolveDataProvenance(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	switch typ := e.(type) {
+	case DataProvenance, DataAlpha:
+		return typ.Resolve(g, mid, src)
+	default:
+		// Hitting this branch guarantees there's some incorrect hardcoding somewhere
+		panic(fmt.Sprintf("Invalid dynamic type %T passed to resolveDataProvenance", e))
+	}
+}
+
 func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	// FIXME this presents another weird case where "success" is not binary. We *could*
 	// find an already-existing data-provenance edge, but then have some net-addr params
@@ -187,9 +242,10 @@ func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	// then try again one more time. Maybe it is fine. THINK IT THROUGH.
 
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "data-provenance",
+		Source:     src.ID,
+		Props:      ps.NewMap(),
+		Incomplete: true,
+		EType:      "data-provenance",
 	}
 	e.Props = assignAddress(mid, spec.Address, e.Props, false)
 
@@ -205,6 +261,7 @@ func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 		if reresolve {
 			e.Props = assignAddress(mid, spec.Address, e.Props, true)
 		} else {
+			e.Incomplete = false
 			return e, true
 		}
 	}
@@ -217,7 +274,13 @@ func (spec DataProvenance) Resolve(g system.CoreGraph, mid uint64, src system.Ve
 	}
 
 	e.Target, success = findDataset(g, envid, spec.Dataset)
+	e.Incomplete = !success
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec DataProvenance) Type() system.EType {
+	return "data-provenance"
 }
 
 func (spec DataAlpha) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
@@ -236,4 +299,9 @@ func (spec DataAlpha) Resolve(g system.CoreGraph, mid uint64, src system.VertexT
 	}
 
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec DataAlpha) Type() system.EType {
+	return "data-provenance"
 }

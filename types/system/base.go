@@ -9,6 +9,18 @@ type (
 	EType string
 )
 
+// String transforms a VType into a string. For now, this is just a type conversion
+// since VTypes *are* strings.
+func (t VType) String() string {
+	return string(t)
+}
+
+// String transforms an EType into a string. For now, this is just a type conversion
+// since ETypes *are* strings.
+func (t EType) String() string {
+	return string(t)
+}
+
 const (
 	// Constant representing the zero value for VTypes. Reserved; no actual vertex can be this.
 	VTypeNone VType = ""
@@ -19,16 +31,15 @@ const (
 type ProtoVertex interface {
 	Type() VType
 	Properties() RawProps
-	// The CoreGraph, and the defined scoping edge specs (if any)
-	//Unify(g CoreGraph, se []EdgeSpec) uint64
 }
 
 // VertexTuple is the base storage object used by the graph engine.
 type VertexTuple struct {
-	ID       uint64
-	Vertex   StdVertex
-	InEdges  ps.Map
-	OutEdges ps.Map
+	ID         uint64
+	Incomplete bool
+	InEdges    ps.Map
+	OutEdges   ps.Map
+	Vertex     StdVertex
 }
 
 // VertexTupleVector contains an ordered list of VertexTuples. It is the return

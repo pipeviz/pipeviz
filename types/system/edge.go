@@ -4,8 +4,9 @@ import "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
 
 type StdEdge struct {
 	ID, Source, Target uint64
-	EType              EType
+	Incomplete         bool
 	Props              ps.Map
+	EType              EType
 }
 
 // EdgeVector contains an ordered list of StdEdges. It is the return value of

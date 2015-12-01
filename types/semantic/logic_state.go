@@ -9,6 +9,24 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+func init() {
+	if err := registerUnifier("logic-state", unifyLogicState); err != nil {
+		panic("logic-state vertex already registered")
+	}
+	if err := registerEdgeUnifier("version", eunifySpecCommit); err != nil {
+		panic("version edge unifier already registered")
+	}
+	if err := registerResolver("version", resolveSpecCommit); err != nil {
+		panic("version edge already registered")
+	}
+	if err := registerEdgeUnifier("datalink", eunifyDataLink); err != nil {
+		panic("datalink edge unifier already registered")
+	}
+	if err := registerResolver("datalink", resolveDataLink); err != nil {
+		panic("datalink edge already registered")
+	}
+}
+
 type LogicState struct {
 	Datasets    []DataLink      `json:"datasets,omitempty"`
 	Environment EnvLink         `json:"environment,omitempty"`
@@ -27,7 +45,7 @@ type LogicIdentiifer struct {
 
 type DataLink struct {
 	Name        string   `json:"name,omitempty"`
-	Type        string   `json:"type,omitempty"`
+	Typ         string   `json:"type,omitempty"`
 	Subset      string   `json:"subset,omitempty"`
 	Interaction string   `json:"interaction,omitempty"`
 	ConnUnix    ConnUnix `json:"connUnix,omitempty"`
@@ -71,10 +89,10 @@ func (d LogicState) UnificationForm() []system.UnifyInstructionForm {
 		edges = append(edges, dl)
 	}
 
-	return []system.UnifyInstructionForm{uif{v: v, u: lsUnify, e: edges, se: []system.EdgeSpec{d.Environment}}}
+	return []system.UnifyInstructionForm{uif{v: v, e: edges, se: []system.EdgeSpec{d.Environment}}}
 }
 
-func lsUnify(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
+func unifyLogicState(g system.CoreGraph, u system.UnifyInstructionForm) uint64 {
 	// only one scoping edge - the envlink
 	edge, success := u.ScopingSpecs()[0].(EnvLink).Resolve(g, 0, emptyVT(u.Vertex()))
 	if !success {
@@ -89,11 +107,21 @@ type specCommit struct {
 	Sha1 Sha1
 }
 
+func eunifySpecCommit(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	_ = e.(specCommit)
+	return faofEdgeId(vt, q.Qbe(system.EType("version")))
+}
+
+func resolveSpecCommit(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(specCommit).Resolve(g, mid, src)
+}
+
 func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "version",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "version",
 	}
 	e.Props = e.Props.Set("sha1", system.Property{MsgSrc: mid, Value: spec.Sha1})
 
@@ -102,19 +130,19 @@ func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.Vertex
 		sha1, _ := re[0].Props.Lookup("sha1")
 		e.ID = re[0].ID // FIXME setting the id to non-0 AND failing is currently unhandled
 		if sha1.(system.Property).Value == spec.Sha1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = re[0].Target
 		} else {
 			rv := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", spec.Sha1))
 			if len(rv) == 1 {
-				success = true
+				e.Incomplete, success = false, true
 				e.Target = rv[0].ID
 			}
 		}
 	} else {
 		rv := g.VerticesWith(q.Qbv(system.VType("commit"), "sha1", spec.Sha1))
 		if len(rv) == 1 {
-			success = true
+			e.Incomplete, success = false, true
 			e.Target = rv[0].ID
 		}
 	}
@@ -122,11 +150,26 @@ func (spec specCommit) Resolve(g system.CoreGraph, mid uint64, src system.Vertex
 	return
 }
 
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec specCommit) Type() system.EType {
+	return "version"
+}
+
+func eunifyDataLink(vt system.VertexTuple, e system.EdgeSpec) uint64 {
+	spec := e.(DataLink)
+	return faofEdgeId(vt, q.Qbe(system.EType("datalink"), "name", spec.Name))
+}
+
+func resolveDataLink(e system.EdgeSpec, g system.CoreGraph, mid uint64, src system.VertexTuple) (system.StdEdge, bool) {
+	return e.(DataLink).Resolve(g, mid, src)
+}
+
 func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTuple) (e system.StdEdge, success bool) {
 	e = system.StdEdge{
-		Source: src.ID,
-		Props:  ps.NewMap(),
-		EType:  "datalink",
+		Source:     src.ID,
+		Incomplete: true,
+		Props:      ps.NewMap(),
+		EType:      "datalink",
 	}
 
 	// DataLinks have a 'name' field that is expected to be unique for the source, if present
@@ -137,13 +180,14 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 
 		re := g.OutWith(src.ID, q.Qbe(system.EType("datalink"), "name", spec.Name))
 		if len(re) == 1 {
-			success = true
+			// FIXME this is wrong; matching on name means we unify, but does not mean success/completeness
+			e.Incomplete, success = false, true
 			e = re[0]
 		}
 	}
 
-	if spec.Type != "" {
-		e.Props = e.Props.Set("type", system.Property{MsgSrc: mid, Value: spec.Type})
+	if spec.Typ != "" {
+		e.Props = e.Props.Set("type", system.Property{MsgSrc: mid, Value: spec.Typ})
 	}
 	if spec.Subset != "" {
 		e.Props = e.Props.Set("subset", system.Property{MsgSrc: mid, Value: spec.Subset})
@@ -255,7 +299,12 @@ func (spec DataLink) Resolve(g system.CoreGraph, mid uint64, src system.VertexTu
 	// FIXME only recording the final target id is totally broken; see https://github.com/pipeviz/pipeviz/issues/37
 
 	// Aaaand we found our target.
-	success = true
+	e.Incomplete, success = false, true
 	e.Target = dataset.ID
 	return
+}
+
+// Type indicates the EType the EdgeSpec will produce. This is necessarily invariant.
+func (spec DataLink) Type() system.EType {
+	return "datalink"
 }
