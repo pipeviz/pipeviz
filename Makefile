@@ -1,6 +1,6 @@
 default: gen
 VERSION := $(shell git describe --always --dirty --tags)
-TOOLS := github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox github.com/aktau/github-release
+TOOLS := github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox github.com/aktau/github-release github.com/tools/godep
 
 tools:
 	go get ${TOOLS}
