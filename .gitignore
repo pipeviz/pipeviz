@@ -30,3 +30,6 @@ _testmain.go
 
 # ignore dist dir
 dist
+
+# ignore vendor dir
+vendor
