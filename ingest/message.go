@@ -3,7 +3,7 @@ package ingest
 import (
 	"errors"
 
-	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/pipeviz/pipeviz/types/semantic"
 	"github.com/pipeviz/pipeviz/types/system"
 )

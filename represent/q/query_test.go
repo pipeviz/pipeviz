@@ -3,7 +3,7 @@ package q
 import (
 	"testing"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 	"github.com/pipeviz/pipeviz/types/system"
 )
 

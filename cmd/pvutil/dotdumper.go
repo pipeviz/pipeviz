@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	gjs "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/mndrix/ps"
+	"github.com/spf13/cobra"
+	gjs "github.com/xeipuuv/gojsonschema"
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/represent"
 	"github.com/pipeviz/pipeviz/represent/q"

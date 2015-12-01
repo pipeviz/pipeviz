@@ -6,8 +6,8 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
-	gjs "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/spf13/cobra"
+	gjs "github.com/xeipuuv/gojsonschema"
 	"github.com/pipeviz/pipeviz/schema"
 )
 

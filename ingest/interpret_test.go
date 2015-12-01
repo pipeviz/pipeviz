@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/xeipuuv/gojsonschema"
 	"github.com/pipeviz/pipeviz/fixtures"
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/schema"
