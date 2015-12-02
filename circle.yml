@@ -16,10 +16,12 @@ dependencies:
         # Glide 0.7.2
         - wget https://github.com/Masterminds/glide/releases/download/0.7.2/glide-0.7.2-linux-amd64.tar.gz
         - tar -vxz -C $HOME/bin --strip=1 -f glide-0.7.2-linux-amd64.tar.gz
+        # Fetch deps with glide
+        - glide --cache -q -y glide.yaml up
         # Other tools
         - make tools
     cache_directories:
-        - "vendor"
+        - "~/.glide"
 test:
     override:
         - make test

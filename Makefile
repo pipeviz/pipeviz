@@ -1,4 +1,4 @@
-default: gen
+default: deps
 VERSION := $(shell git describe --always --dirty --tags)
 TOOLS := github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox github.com/aktau/github-release
 
@@ -20,13 +20,13 @@ gen: tools
 	go generate -x ./schema
 	go-bindata -o fixtures/bindata_fixtures.go -prefix="fixtures" -pkg=fixtures fixtures/*/*.json
 
-test: gen deps
+test: gen
 	go test $(shell glide nv)
 
-install: gen deps
+install: gen
 	go install -ldflags "-X github.com/pipeviz/pipeviz/version.v=${VERSION}" ./cmd/...
 
-build-all: gen deps
+build-all: gen
 	gox -verbose \
 	-ldflags "-X github.com/pipeviz/pipeviz/version.v=${VERSION}" \
 	-os="linux darwin freebsd" \
