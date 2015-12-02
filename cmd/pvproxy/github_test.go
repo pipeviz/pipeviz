@@ -5,8 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/jarcoal/httpmock"
 	"github.com/pipeviz/pipeviz/types/semantic"
+	"github.com/stretchr/testify/assert"
 )
 
 // Real/sample data from github v3 api
@@ -200,7 +201,73 @@ const ghPushPayload = `{
   }
 }`
 
+var resps = map[string]string{
+	"b75da01c073384926e782a4371195c851f45b20f": `{
+  "sha": "b75da01c073384926e782a4371195c851f45b20f",
+  "url": "https://api.github.com/repos/sdboyer/testrepo/git/commits/b75da01c073384926e782a4371195c851f45b20f",
+  "html_url": "https://github.com/sdboyer/testrepo/commit/b75da01c073384926e782a4371195c851f45b20f",
+  "author": {
+    "name": "Sam Boyer",
+    "email": "tech@samboyer.org",
+    "date": "2015-10-13T01:39:52Z"
+  },
+  "committer": {
+    "name": "Sam Boyer",
+    "email": "tech@samboyer.org",
+    "date": "2015-10-13T01:39:52Z"
+  },
+  "tree": {
+    "sha": "b96d7cd51d0768f956b332d19ab105c63705450b",
+    "url": "https://api.github.com/repos/sdboyer/testrepo/git/trees/b96d7cd51d0768f956b332d19ab105c63705450b"
+  },
+  "message": "one commit, will it show?",
+  "parents": [
+    {
+      "sha": "5627b4bf954465918bd9ede94a2484be03ddb44b",
+      "url": "https://api.github.com/repos/sdboyer/testrepo/git/commits/5627b4bf954465918bd9ede94a2484be03ddb44b",
+      "html_url": "https://github.com/sdboyer/testrepo/commit/5627b4bf954465918bd9ede94a2484be03ddb44b"
+    }
+  ]
+}`,
+	"4d59fb584b15a94d7401e356d2875c472d76ef45": `{
+  "sha": "4d59fb584b15a94d7401e356d2875c472d76ef45",
+  "url": "https://api.github.com/repos/sdboyer/testrepo/git/commits/4d59fb584b15a94d7401e356d2875c472d76ef45",
+  "html_url": "https://github.com/sdboyer/testrepo/commit/4d59fb584b15a94d7401e356d2875c472d76ef45",
+  "author": {
+    "name": "Sam Boyer",
+    "email": "tech@samboyer.org",
+    "date": "2015-10-13T01:40:18Z"
+  },
+  "committer": {
+    "name": "Sam Boyer",
+    "email": "tech@samboyer.org",
+    "date": "2015-10-13T01:40:18Z"
+  },
+  "tree": {
+    "sha": "c6aceb2e07b680615f5660aef9f38671d0a5c11b",
+    "url": "https://api.github.com/repos/sdboyer/testrepo/git/trees/c6aceb2e07b680615f5660aef9f38671d0a5c11b"
+  },
+  "message": "second commit, should show both",
+  "parents": [
+    {
+      "sha": "b75da01c073384926e782a4371195c851f45b20f",
+      "url": "https://api.github.com/repos/sdboyer/testrepo/git/commits/b75da01c073384926e782a4371195c851f45b20f",
+      "html_url": "https://github.com/sdboyer/testrepo/commit/b75da01c073384926e782a4371195c851f45b20f"
+    }
+  ]
+}`,
+}
+
 func TestPushToMessageMap(t *testing.T) {
+	// Set up transport mocker for response
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	for sha, resp := range resps {
+		httpmock.RegisterResponder("GET", "https://api.github.com/repos/sdboyer/testrepo/git/commits/"+sha,
+			httpmock.NewStringResponder(200, resp))
+	}
+
 	gpe := githubPushEvent{}
 	json.Unmarshal([]byte(ghPushPayload), &gpe)
 	// FIXME mock this somehow; we don't want to actually reach out
@@ -210,27 +277,27 @@ func TestPushToMessageMap(t *testing.T) {
 		t.Errorf("Commits array should have two elements, got %d\n", len(m.C))
 	}
 
-	assert.Equal(t, m.C[0], semantic.Commit{
-		Sha1Str:    "b75da01c073384926e782a4371195c851f45b20f",
-		Subject:    "one commit, will it show?",
-		Author:     "\"Sam Boyer\" <notareal@email.com>",
-		Date:       "Mon Oct 12 2015 21:39:52 -0400",
-		Repository: "https://github.com/sdboyer/testrepo",
-		ParentsStr: []string{
-			"5627b4bf954465918bd9ede94a2484be03ddb44b",
+	assert.Equal(t, m.C, []semantic.Commit{
+		{
+			Sha1Str:    "b75da01c073384926e782a4371195c851f45b20f",
+			Subject:    "one commit, will it show?",
+			Author:     "\"Sam Boyer\" <notareal@email.com>",
+			Date:       "Mon Oct 12 2015 21:39:52 -0400",
+			Repository: "https://github.com/sdboyer/testrepo",
+			ParentsStr: []string{
+				"5627b4bf954465918bd9ede94a2484be03ddb44b",
+			},
 		},
-	})
-
-	assert.Equal(t, m.C[1], semantic.Commit{
-		Sha1Str:    "4d59fb584b15a94d7401e356d2875c472d76ef45",
-		Subject:    "second commit, should show both",
-		Author:     "\"Sam Boyer\" <notareal@email.com>",
-		Date:       "Mon Oct 12 2015 21:40:18 -0400",
-		Repository: "https://github.com/sdboyer/testrepo",
-		ParentsStr: []string{
-			"b75da01c073384926e782a4371195c851f45b20f",
-		},
-	})
+		{
+			Sha1Str:    "4d59fb584b15a94d7401e356d2875c472d76ef45",
+			Subject:    "second commit, should show both",
+			Author:     "\"Sam Boyer\" <notareal@email.com>",
+			Date:       "Mon Oct 12 2015 21:40:18 -0400",
+			Repository: "https://github.com/sdboyer/testrepo",
+			ParentsStr: []string{
+				"b75da01c073384926e782a4371195c851f45b20f",
+			},
+		}})
 
 	if len(m.Cm) != 1 {
 		t.Errorf("Should be one item in commit meta, found %d\n", len(m.Cm))
