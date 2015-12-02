@@ -19,7 +19,7 @@ dependencies:
         - "~/.glide"
 test:
     override:
-        - cd $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME make test
+        - cd $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME && make test
 deployment:
     production:
         branch: master
