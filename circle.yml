@@ -1,15 +1,13 @@
-general:
-    build_dir: ".go_workspace/src/github.com/pipeviz/pipeviz"
 machine:
     environment:
         GO15VENDOREXPERIMENT: 1
 checkout:
     post:
-        - mkdir -pv "$HOME/.go_workspace/src/github.com/pipeviz"
-        - ln -Tsf "$HOME/pipeviz" "$HOME/.go_workspace/src/github.com/pipeviz/pipeviz"
 # TODO cache these more smartly? per https://circleci.com/docs/installing-custom-software#caching
 dependencies:
-    pre:
+    override:
+        - mkdir -pv $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME
+        - ln -Tsf $HOME/$CIRCLE_PROJECT_REPONAME $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
         # Glide 0.7.2
         - wget https://github.com/Masterminds/glide/releases/download/0.7.2/glide-0.7.2-linux-amd64.tar.gz
         - tar -vxz -C $HOME/bin --strip=1 -f glide-0.7.2-linux-amd64.tar.gz
@@ -21,7 +19,7 @@ dependencies:
         - "~/.glide"
 test:
     override:
-        - make test
+        - cd $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME make test
 deployment:
     production:
         branch: master
