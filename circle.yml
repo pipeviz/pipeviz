@@ -18,6 +18,8 @@ dependencies:
         - tar -vxz -C $HOME/bin --strip=1 -f glide-0.7.2-linux-amd64.tar.gz
         # Other tools
         - make tools
+    cache_directories:
+        - "vendor"
 test:
     override:
         - make test

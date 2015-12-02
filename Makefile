@@ -3,7 +3,6 @@ VERSION := $(shell git describe --always --dirty --tags)
 TOOLS := github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox github.com/aktau/github-release
 
 deps:
-	# automatically downloading and setting up glide is a little much, so you have to do it yourself
 	glide -q -y glide.yaml up
 
 tools:
@@ -22,7 +21,7 @@ gen: tools
 	go-bindata -o fixtures/bindata_fixtures.go -prefix="fixtures" -pkg=fixtures fixtures/*/*.json
 
 test: gen deps
-	go test ./...
+	go test $(shell glide nv)
 
 install: gen deps
 	go install -ldflags "-X github.com/pipeviz/pipeviz/version.v=${VERSION}" ./cmd/...
