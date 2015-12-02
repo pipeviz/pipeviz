@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/Sirupsen/logrus"
+	"github.com/gorilla/websocket"
 	"github.com/pipeviz/pipeviz/broker"
 	"github.com/pipeviz/pipeviz/types/system"
 )

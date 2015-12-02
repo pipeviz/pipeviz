@@ -3,20 +3,23 @@ machine:
         GO15VENDOREXPERIMENT: 1
 checkout:
     post:
-        - mkdir -pv "$HOME/.go_workspace/src/github.com/pipeviz"
-        - ln -Tsf "$HOME/pipeviz" "$HOME/.go_workspace/src/github.com/pipeviz/pipeviz"
 # TODO cache these more smartly? per https://circleci.com/docs/installing-custom-software#caching
 dependencies:
-    pre:
-        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-        - chmod +x ~/bin/gimme
-        - gimme 1.5.1
-        - source ~/.gimme/envs/go1.5.1.env
+    override:
+        - mkdir -pv $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME
+        - ln -Tsf $HOME/$CIRCLE_PROJECT_REPONAME $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+        # Glide 0.7.2
+        - wget https://github.com/Masterminds/glide/releases/download/0.7.2/glide-0.7.2-linux-amd64.tar.gz
+        - tar -vxz -C $HOME/bin --strip=1 -f glide-0.7.2-linux-amd64.tar.gz
+        # Fetch deps with glide
+        - glide --home $HOME/.glide -y glide.yaml up --cache
+        # Other tools
         - make tools
-          #- go vet ./...
+    cache_directories:
+        - "~/.glide"
 test:
     override:
-        - make test
+        - cd $HOME/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME && make test
 deployment:
     production:
         branch: master

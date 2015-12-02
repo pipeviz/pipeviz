@@ -7,7 +7,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/boltdb/bolt"
 	"github.com/pipeviz/pipeviz/mlog"
 )
 

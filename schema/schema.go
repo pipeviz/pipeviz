@@ -2,8 +2,8 @@
 package schema
 
 import (
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/xeipuuv/gojsonschema"
+	"github.com/Sirupsen/logrus"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 var schema *gojsonschema.Schema

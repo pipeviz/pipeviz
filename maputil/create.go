@@ -3,7 +3,7 @@ package maputil
 import (
 	"errors"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/types/system"
 )
 

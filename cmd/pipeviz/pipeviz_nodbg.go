@@ -5,8 +5,8 @@ package main
 import (
 	"log/syslog"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	logrus_syslog "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus/hooks/syslog"
+	"github.com/Sirupsen/logrus"
+	logrus_syslog "github.com/Sirupsen/logrus/hooks/syslog"
 )
 
 func setUpLogging() {

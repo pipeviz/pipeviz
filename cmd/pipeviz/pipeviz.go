@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 
-	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/pflag"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/zenazn/goji/graceful"
+	log "github.com/Sirupsen/logrus"
+	"github.com/spf13/pflag"
+	"github.com/zenazn/goji/graceful"
 	"github.com/pipeviz/pipeviz/broker"
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/mlog"

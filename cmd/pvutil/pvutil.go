@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 	"github.com/pipeviz/pipeviz/version"
 )
 

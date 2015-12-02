@@ -1,6 +1,9 @@
-default: gen
+default: deps
 VERSION := $(shell git describe --always --dirty --tags)
-TOOLS := github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox github.com/aktau/github-release github.com/tools/godep
+TOOLS := github.com/jteeuwen/go-bindata/go-bindata github.com/tinylib/msgp github.com/mitchellh/gox github.com/aktau/github-release
+
+deps:
+	glide -q -y glide.yaml up
 
 tools:
 	go get ${TOOLS}
@@ -13,12 +16,12 @@ clean:
 	rm -f cmd/pvutil/pvutil cmd/pvutil/pvutil.test
 	rm -f cmd/pvproxy/pvproxy cmd/pvproxy/pvproxy.test
 
-test: gen
-	go test ./...
-
 gen: tools
 	go generate -x ./schema
 	go-bindata -o fixtures/bindata_fixtures.go -prefix="fixtures" -pkg=fixtures fixtures/*/*.json
+
+test: gen
+	go test $(shell glide nv)
 
 install: gen
 	go install -ldflags "-X github.com/pipeviz/pipeviz/version.v=${VERSION}" ./cmd/...
@@ -30,4 +33,4 @@ build-all: gen
 	-arch="amd64 386" \
 	-output="dist/{{.OS}}-{{.Arch}}/{{.Dir}}" ./cmd/...
 
-.PHONY: tools tools-update gen install clean build-all
+.PHONY: deps tools tools-update gen install clean build-all

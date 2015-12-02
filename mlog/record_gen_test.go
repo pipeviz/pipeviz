@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/tinylib/msgp/msgp"
+	"github.com/tinylib/msgp/msgp"
 )
 
 func TestMarshalUnmarshalRecord(t *testing.T) {

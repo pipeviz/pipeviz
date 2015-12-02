@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	log "github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	log "github.com/Sirupsen/logrus"
+	"github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/maputil"
 	"github.com/pipeviz/pipeviz/types/system"
 )

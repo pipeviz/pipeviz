@@ -1,0 +1,51 @@
+package: main
+import:
+- package: github.com/Sirupsen/logrus
+  version: 9c060de643590dae45da9d7c26276463bfc46fa0
+- package: github.com/boltdb/bolt
+  version: c2745b3c62985affcf08d0522135f4747e9b81f3
+- package: github.com/cpuguy83/go-md2man
+  version: 71acacd42f85e5e82f70a55327789582a5200a90
+  subpackages:
+  - md2man
+- package: github.com/gorilla/websocket
+  version: ecff5aabe41f13b4cdf897e3c0c9bbccbe552a29
+- package: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- package: github.com/kardianos/osext
+  version: 8fef92e41e22a70e700a96b29f066cda30ea24ef
+- package: github.com/mndrix/ps
+  version: 33ddf69629c1bcea76b04f4a4e9e00e4cce82eb6
+- package: github.com/philhofer/fwd
+  version: 4dbda5e2904d044d23cc4bef84e8360c458caf7f
+- package: github.com/russross/blackfriday
+  version: 510be64de022c25096c6f476b7b7c240a8eca1a5
+- package: github.com/shurcooL/sanitized_anchor_name
+  version: 10ef21a441db47d8b13ebcc5fd2310f636973c77
+- package: github.com/spf13/cobra
+  version: 2e6a42892123dda608922f8af8ce85c3bff19575
+- package: github.com/spf13/pflag
+  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
+- package: github.com/stretchr/testify
+  version: e4ec8152c15fc46bd5056ce65997a07c7d415325
+  subpackages:
+  - assert
+- package: github.com/tinylib/msgp
+  version: cd4fb1548c31d88af25205dc021be20935aec720
+  subpackages:
+  - msgp
+- package: github.com/unrolled/secure
+  version: 9b725bb5ee80564334176a116a99dd926cab63a1
+- package: github.com/xeipuuv/gojsonpointer
+  version: 636edb2500d21f2ed09ea96a00deb36bbd07cf70
+- package: github.com/xeipuuv/gojsonreference
+  version: 2df3c0c802434c5cb984dbc21425f5960bda4d16
+- package: github.com/xeipuuv/gojsonschema
+  version: 71b85f61a135e79143f3d3238d5175a4f29b6689
+- package: github.com/zenazn/goji
+  version: 845982030542a0fd9c8e8cbf76a84c7482cb3755
+  subpackages:
+  - graceful
+  - web
+- package: gopkg.in/libgit2/git2go.v22
+  version: 41ad00f868e7dfcdb04c7538f27350d400f710a3

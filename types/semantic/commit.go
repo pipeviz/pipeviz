@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/mndrix/ps"
+	"github.com/mndrix/ps"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/types/system"
 )

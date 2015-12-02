@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pipeviz/pipeviz/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 )
 
 func fixrCommand() *cobra.Command {
