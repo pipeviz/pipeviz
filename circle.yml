@@ -13,6 +13,8 @@ dependencies:
         - gimme 1.5.1
         - source ~/.gimme/envs/go1.5.1.env
         - make tools
+        - go get github.com/Masterminds/glide
+        - cd $GOPATH/src/github.com/Masterminds/glide && make bootstrap && make install
           #- go vet ./...
 test:
     override:
