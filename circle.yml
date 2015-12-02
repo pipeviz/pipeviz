@@ -1,3 +1,5 @@
+general:
+    build_dir: "$HOME/.go_workspace/src/github.com/pipeviz"
 machine:
     environment:
         GO15VENDOREXPERIMENT: 1
@@ -8,16 +10,11 @@ checkout:
 # TODO cache these more smartly? per https://circleci.com/docs/installing-custom-software#caching
 dependencies:
     pre:
-        # Go 1.5.1
-        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-        - chmod +x ~/bin/gimme
-        - gimme 1.5.1
-        - source ~/.gimme/envs/go1.5.1.env
         # Glide 0.7.2
         - wget https://github.com/Masterminds/glide/releases/download/0.7.2/glide-0.7.2-linux-amd64.tar.gz
         - tar -vxz -C $HOME/bin --strip=1 -f glide-0.7.2-linux-amd64.tar.gz
         # Fetch deps with glide
-        - glide --cache -q -y glide.yaml up
+        - glide -y glide.yaml up --cache
         # Other tools
         - make tools
     cache_directories:
