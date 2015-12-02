@@ -1,5 +1,5 @@
 general:
-    build_dir: "$HOME/.go_workspace/src/github.com/pipeviz"
+    build_dir: "$HOME/.go_workspace/src/github.com/pipeviz/pipeviz"
 machine:
     environment:
         GO15VENDOREXPERIMENT: 1
