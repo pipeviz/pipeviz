@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
 type tfm struct {
-	list, keepInvalid bool
-	transforms        string
+	list, keepInvalid, quiet bool
+	transforms               string
+	errWriter                io.Writer
 }
 
 // A MessageTransformer takes a message and transforms it into a new message.
@@ -29,19 +32,26 @@ func tfmCommand() *cobra.Command {
 	cmd.Flags().BoolVarP(&t.list, "list", "l", false, "List available transforms")
 	cmd.Flags().StringVarP(&t.transforms, "transforms", "t", "", "A comma-separated list of transforms to apply. At least one transform must be applied.")
 	cmd.Flags().BoolVarP(&t.keepInvalid, "keep-invalid", "k", false, "Keep non-validating results. Normally non-valid results will be discarded (no output if stdin, no write if files); this bypasses that behavior. Note that malformed JSON will *never* be used, regardless of this flag.")
+	cmd.Flags().BoolVarP(&t.quiet, "quiet", "q", false, "Suppress error and informational output.")
 
 	return cmd
 }
 
 // Run executes the tfm command.
 func (t *tfm) Run(cmd *cobra.Command, args []string) {
+	if t.quiet {
+		t.errWriter = ioutil.Discard
+	} else {
+		t.errWriter = os.Stderr
+	}
+
 	if t.list {
 		// TODO list available transforms
 		os.Exit(0)
 	}
 
 	if t.transforms == "" {
-		fmt.Fprintf(os.Stderr, "Must specify at least one transform to apply\n")
+		fmt.Fprintf(t.errWriter, "Must specify at least one transform to apply\n")
 		os.Exit(1)
 	}
 
@@ -58,13 +68,13 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 
 	if hasStdin {
 		if len(args) != 0 {
-			fmt.Fprintf(os.Stderr, "Cannot operate on both stdin and files\n")
+			fmt.Fprintf(t.errWriter, "Cannot operate on both stdin and files\n")
 			os.Exit(1)
 		}
 		t.runStdin(cmd, tf)
 	} else {
 		if len(args) == 0 {
-			fmt.Fprintf(os.Stderr, "Must pass either a set of target files, or some data on stdin\n")
+			fmt.Fprintf(t.errWriter, "Must pass either a set of target files, or some data on stdin\n")
 			os.Exit(1)
 		}
 
