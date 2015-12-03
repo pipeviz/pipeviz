@@ -24,7 +24,7 @@ type tfm struct {
 // A MessageTransformer takes a message and transforms it into a new message.
 type MessageTransformer interface {
 	fmt.Stringer
-	Transform(io.Reader, io.Writer) (changed bool, err error)
+	Transform(io.Reader) (result []byte, changed bool, err error)
 }
 
 type MessageTransformers []MessageTransformer
@@ -109,12 +109,12 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 		}
 
 		var changed bool
-		w := new(bytes.Buffer)
-		w2 := new(bytes.Buffer)
-
+		bb := make([]byte, 0)
+		w := bytes.NewBuffer(bb)
 		io.Copy(w, f)
 		for _, tf := range tfs {
-			didchange, terr := tf.Transform(w, w2)
+			// There is definitely a more elegant way of doing this, probably with an io.Pipe
+			result, didchange, terr := tf.Transform(w)
 			if didchange {
 				changed = true
 			}
@@ -123,18 +123,16 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 				return
 			}
 
-			w, w2 = w2, w
-			w2.Reset()
+			w = bytes.NewBuffer(result)
 		}
-		var finished []byte
-		io.Copy(bytes.NewBuffer(finished), w)
 
+		bb = w.Bytes()
 		if !changed {
 			t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
 			return
 		}
 
-		result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(finished)))
+		result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(bb)))
 		if err != nil {
 			t.errWriter.Printf("Error while validating final transformed result: %s\n", err)
 			return
@@ -155,8 +153,9 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 			}
 		}
 
+		final := new(bytes.Buffer)
 		// Ensure JSON is pretty-printed with proper indentation
-		json.Indent(w2, finished, "", "    ")
+		json.Indent(final, bb, "", "    ")
 
 		err = f.Truncate(0)
 		if err != nil {
@@ -164,7 +163,7 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 			return
 		}
 
-		_, err = io.Copy(f, w2)
+		_, err = io.Copy(f, final)
 		if err != nil {
 			t.errWriter.Printf("Error while writing data to disk %q: %s\n", name, err)
 			return
