@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"sync"
 
@@ -17,7 +18,7 @@ import (
 type tfm struct {
 	list, keepInvalid, quiet bool
 	transforms               string
-	errWriter                io.Writer
+	errWriter                *log.Logger
 }
 
 // A MessageTransformer takes a message and transforms it into a new message.
@@ -48,9 +49,9 @@ func tfmCommand() *cobra.Command {
 // Run executes the tfm command.
 func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	if t.quiet {
-		t.errWriter = ioutil.Discard
+		t.errWriter = log.New(ioutil.Discard, "", 0)
 	} else {
-		t.errWriter = os.Stderr
+		t.errWriter = log.New(os.Stderr, "", 0)
 	}
 
 	if t.list {
@@ -59,7 +60,7 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	}
 
 	if t.transforms == "" {
-		fmt.Fprintf(t.errWriter, "Must specify at least one transform to apply\n")
+		t.errWriter.Printf("Must specify at least one transform to apply\n")
 		os.Exit(1)
 	}
 
@@ -76,13 +77,13 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 
 	if hasStdin {
 		if len(args) != 0 {
-			fmt.Fprintf(t.errWriter, "Cannot operate on both stdin and files\n")
+			t.errWriter.Printf("Cannot operate on both stdin and files\n")
 			os.Exit(1)
 		}
 		t.runStdin(cmd, tf)
 	} else {
 		if len(args) == 0 {
-			fmt.Fprintf(t.errWriter, "Must pass either a set of target files, or some data on stdin\n")
+			t.errWriter.Printf("Must pass either a set of target files, or some data on stdin\n")
 			os.Exit(1)
 		}
 
@@ -103,12 +104,14 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 		f, err := os.OpenFile(name, os.O_RDWR, 0666)
 		defer f.Close()
 		if err != nil {
-			fmt.Fprintf(t.errWriter, "Error while opening file %q: %s\n", name, err)
+			t.errWriter.Printf("Error while opening file %q: %s\n", name, err)
 			return
 		}
 
 		var changed bool
-		var w, w2 *bytes.Buffer
+		w := new(bytes.Buffer)
+		w2 := new(bytes.Buffer)
+
 		io.Copy(w, f)
 		for _, tf := range tfs {
 			didchange, terr := tf.Transform(w, w2)
@@ -116,7 +119,7 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 				changed = true
 			}
 			if terr != nil {
-				fmt.Fprintf(t.errWriter, "Skipping transform of %q due to error while applying transform %q: %s\n", name, tf, terr)
+				t.errWriter.Printf("Skipping transform of %q due to error while applying transform %q: %s\n", name, tf, terr)
 				return
 			}
 
@@ -127,11 +130,16 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 		io.Copy(bytes.NewBuffer(finished), w)
 
 		if !changed {
-			fmt.Fprintf(t.errWriter, "No changes resulted from applying transforms to %q\n", name)
+			t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
 			return
 		}
 
 		result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(finished)))
+		if err != nil {
+			t.errWriter.Printf("Error while validating final transformed result: %s\n", err)
+			return
+		}
+
 		if !result.Valid() {
 			// Buffer so that there's no interleaving of printed output
 			w := bytes.NewBuffer(make([]byte, 0))
@@ -141,7 +149,7 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 				fmt.Fprintf(w, "%s\n", desc)
 			}
 
-			fmt.Fprint(t.errWriter, w)
+			t.errWriter.Print(w)
 			if !t.keepInvalid {
 				return
 			}
@@ -152,13 +160,13 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 
 		err = f.Truncate(0)
 		if err != nil {
-			fmt.Fprintf(t.errWriter, "Error while truncating file before writing %q: %s\n", name, err)
+			t.errWriter.Printf("Error while truncating file before writing %q: %s\n", name, err)
 			return
 		}
 
 		_, err = io.Copy(f, w2)
 		if err != nil {
-			fmt.Fprintf(t.errWriter, "Error while writing data to disk %q: %s\n", name, err)
+			t.errWriter.Printf("Error while writing data to disk %q: %s\n", name, err)
 			return
 		}
 
