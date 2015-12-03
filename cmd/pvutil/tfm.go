@@ -1,12 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"sync"
 
+	"github.com/pipeviz/pipeviz/schema"
 	"github.com/spf13/cobra"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 type tfm struct {
@@ -17,8 +22,11 @@ type tfm struct {
 
 // A MessageTransformer takes a message and transforms it into a new message.
 type MessageTransformer interface {
-	Transform([]byte) (result []byte, changed bool, err error)
+	fmt.Stringer
+	Transform(io.Reader, io.Writer) (changed bool, err error)
 }
+
+type MessageTransformers []MessageTransformer
 
 func tfmCommand() *cobra.Command {
 	t := &tfm{}
@@ -82,19 +90,91 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (t *tfm) runStdin(cmd *cobra.Command, tf []MessageTransformer) {
+func (t *tfm) runStdin(cmd *cobra.Command, tfs MessageTransformers) {
 
 }
 
-func (t *tfm) runFiles(cmd *cobra.Command, tf []MessageTransformer, files []*os.File) {
+func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []string) {
+	var atLeastOne bool
+	var wg sync.WaitGroup
 
+	fn := func(name string) {
+		defer wg.Done()
+		f, err := os.OpenFile(name, os.O_RDWR, 0666)
+		defer f.Close()
+		if err != nil {
+			fmt.Fprintf(t.errWriter, "Error while opening file %q: %s\n", name, err)
+			return
+		}
+
+		var changed bool
+		var w, w2 *bytes.Buffer
+		io.Copy(w, f)
+		for _, tf := range tfs {
+			didchange, terr := tf.Transform(w, w2)
+			if didchange {
+				changed = true
+			}
+			if terr != nil {
+				fmt.Fprintf(t.errWriter, "Skipping transform of %q due to error while applying transform %q: %s\n", name, tf, terr)
+				return
+			}
+
+			w, w2 = w2, w
+			w2.Reset()
+		}
+		var finished []byte
+		io.Copy(bytes.NewBuffer(finished), w)
+
+		if !changed {
+			fmt.Fprintf(t.errWriter, "No changes resulted from applying transforms to %q\n", name)
+			return
+		}
+
+		result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(finished)))
+		if !result.Valid() {
+			// Buffer so that there's no interleaving of printed output
+			w := bytes.NewBuffer(make([]byte, 0))
+
+			fmt.Fprintf(w, "Errors encountered while validating %q:\n", name)
+			for _, desc := range result.Errors() {
+				fmt.Fprintf(w, "%s\n", desc)
+			}
+
+			fmt.Fprint(t.errWriter, w)
+			if !t.keepInvalid {
+				return
+			}
+		}
+
+		// Ensure JSON is pretty-printed with proper indentation
+		json.Indent(w2, finished, "", "    ")
+
+		err = f.Truncate(0)
+		if err != nil {
+			fmt.Fprintf(t.errWriter, "Error while truncating file before writing %q: %s\n", name, err)
+			return
+		}
+
+		_, err = io.Copy(f, w2)
+		if err != nil {
+			fmt.Fprintf(t.errWriter, "Error while writing data to disk %q: %s\n", name, err)
+			return
+		}
+
+		atLeastOne = true
+	}
+
+	// Run all transforms in their own goroutines
+	for _, name := range names {
+		wg.Add(1)
+		go fn(name)
+	}
+
+	wg.Wait()
 }
 
 func getTransfomers(list string) []MessageTransformer {
-	//fmt.Printf("No transform exists with the name %q\n", name)
+	//fmt.Fprintf(t.errWriter, "No transform exists with the name %q\n", name)
 	return make([]MessageTransformer, 0)
-}
-
-func getFiles(args []string) []*os.File {
-	return nil
 }
