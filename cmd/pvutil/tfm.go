@@ -28,7 +28,7 @@ func tfmCommand() *cobra.Command {
 
 	cmd.Flags().BoolVarP(&t.list, "list", "l", false, "List available transforms")
 	cmd.Flags().StringVarP(&t.transforms, "transforms", "t", "", "A comma-separated list of transforms to apply. At least one transform must be applied.")
-	cmd.Flags().BoolVarP(&t.keepInvalid, "keep-invalid", "k", false, "Keep non-validating results. Normally invalid results will be discarded (no output if stdin, no writeback if files); this bypasses that behavior.")
+	cmd.Flags().BoolVarP(&t.keepInvalid, "keep-invalid", "k", false, "Keep non-validating results. Normally non-valid results will be discarded (no output if stdin, no write if files); this bypasses that behavior. Note that malformed JSON will *never* be used, regardless of this flag.")
 
 	return cmd
 }
@@ -41,7 +41,7 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	}
 
 	if t.transforms == "" {
-		fmt.Println("Must specify at least one transform to apply")
+		fmt.Fprintf(os.Stderr, "Must specify at least one transform to apply\n")
 		os.Exit(1)
 	}
 
@@ -58,21 +58,17 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 
 	if hasStdin {
 		if len(args) != 0 {
-			fmt.Println("Cannot operate on both stdin and files")
+			fmt.Fprintf(os.Stderr, "Cannot operate on both stdin and files\n")
 			os.Exit(1)
 		}
 		t.runStdin(cmd, tf)
 	} else {
 		if len(args) == 0 {
-			fmt.Println("Must pass either a set of target files, or some data on stdin")
+			fmt.Fprintf(os.Stderr, "Must pass either a set of target files, or some data on stdin\n")
 			os.Exit(1)
 		}
-		files := getFiles(args)
-		if len(files) == 0 {
-			// Output from getFiles is sufficient, can just exit directly here
-			os.Exit(1)
-		}
-		t.runFiles(cmd, tf, files)
+
+		t.runFiles(cmd, tf, args)
 	}
 }
 
