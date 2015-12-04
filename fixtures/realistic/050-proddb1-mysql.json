@@ -1,45 +1,54 @@
 {
-    "processes": [
+    "client": {
+        "microtime": 1449259922681906,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
+    "datasets": [
         {
-            "logic-states": [ "/usr/libexec/mysqld" ],
-            "user": "mysql",
-            "group": "mysql",
-            "dataset": "/var/lib/mysql",
-            "cwd": "/var/lib/mysql",
-            "pid": 2345,
             "environment": {
                 "address": {
                     "hostname": "prod-db01"
                 }
             },
-            "listen": [
+            "name": "/var/lib/mysql",
+            "path": "/var/lib/mysql",
+            "subsets": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 3306
-                },
-                {
-                    "type": "unix",
-                    "path": "/var/lib/mysql/mysql.sock"
+                    "genesis": "α",
+                    "name": "app_db"
                 }
             ]
         }
     ],
-    "datasets": [
+    "processes": [
         {
-            "name": "/var/lib/mysql",
+            "cwd": "/var/lib/mysql",
+            "dataset": "/var/lib/mysql",
             "environment": {
                 "address": {
                     "hostname": "prod-db01"
                 }
             },
-            "path": "/var/lib/mysql",
-            "subsets": [
+            "group": "mysql",
+            "listen": [
                 {
-                    "name": "app_db",
-                    "genesis": "α"
+                    "port": 3306,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
+                },
+                {
+                    "path": "/var/lib/mysql/mysql.sock",
+                    "type": "unix"
                 }
-            ]
+            ],
+            "logic-states": [
+                "/usr/libexec/mysqld"
+            ],
+            "pid": 2345,
+            "user": "mysql"
         }
     ]
 }

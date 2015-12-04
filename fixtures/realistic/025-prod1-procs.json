@@ -1,23 +1,33 @@
 {
+    "client": {
+        "microtime": 1449259922680263,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "processes": [
         {
-            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
-            "user": "www",
-            "group": "www",
             "cwd": "/var/run/app",
-            "pid": 6212,
             "environment": {
                 "address": {
                     "hostname": "prod-web01"
                 }
             },
+            "group": "www",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 80
+                    "port": 80,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
                 }
-            ]
+            ],
+            "logic-states": [
+                "/var/www/app",
+                "/usr/sbin/httpd"
+            ],
+            "pid": 6212,
+            "user": "www"
         }
     ]
 }

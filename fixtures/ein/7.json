@@ -1,64 +1,69 @@
 {
+    "client": {
+        "microtime": 1449259922680313,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "library",
-            "id": {
-                "version": "5.5.13"
-            },
-            "path": "/etc/httpd/modules/libphp.so",
             "environment": {
                 "address": {
                     "hostname": "prod-web01"
                 }
-            }
-        },
-        {
-            "type": "library",
+            },
             "id": {
                 "version": "5.5.13"
             },
             "path": "/etc/httpd/modules/libphp.so",
+            "type": "library"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "stage"
                 }
-            }
-        },
-        {
-            "type": "library",
+            },
             "id": {
                 "version": "5.5.13"
             },
             "path": "/etc/httpd/modules/libphp.so",
+            "type": "library"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "qa"
                 }
-            }
-        },
-        {
-            "type": "library",
+            },
             "id": {
                 "version": "5.5.13"
             },
             "path": "/etc/httpd/modules/libphp.so",
+            "type": "library"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "dev01"
                 }
-            }
-        },
-        {
-            "type": "library",
+            },
             "id": {
                 "version": "5.5.13"
             },
             "path": "/etc/httpd/modules/libphp.so",
+            "type": "library"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "dev02"
                 }
-            }
+            },
+            "id": {
+                "version": "5.5.13"
+            },
+            "path": "/etc/httpd/modules/libphp.so",
+            "type": "library"
         }
     ]
 }

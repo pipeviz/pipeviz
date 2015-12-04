@@ -1,4 +1,9 @@
 {
+    "client": {
+        "microtime": 1449259922680721,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "commit-meta": [
         {
             "sha1": "34fb01335d0e6341ff92a5753c36b6c9376cf29b",

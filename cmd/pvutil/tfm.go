@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -140,13 +139,11 @@ func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 			final = bytes.NewBuffer(bb)
 		}
 
-		err = f.Truncate(0)
-		if err != nil {
-			t.errWriter.Printf("Error while truncating file before writing %q: %s\n", name, err)
-			return
-		}
+		// Handling errors for these cases is just overkill silliness
+		_ = f.Truncate(0)
+		_, _ = f.Seek(0, 0)
 
-		_, err = io.Copy(f, final)
+		_, err = final.WriteTo(f)
 		if err != nil {
 			t.errWriter.Printf("Error while writing data to disk %q: %s\n", name, err)
 			return

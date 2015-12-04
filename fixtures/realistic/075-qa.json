@@ -1,13 +1,18 @@
 {
+    "client": {
+        "microtime": 1449259922681426,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "environments": [
         {
-            "type": "virtual",
-            "os": "unix",
             "address": {
                 "hostname": "qa",
                 "ipv4": "10.1.1.8"
             },
-            "provider": "digitalocean"
+            "os": "unix",
+            "provider": "digitalocean",
+            "type": "virtual"
         }
     ]
 }

@@ -1,31 +1,36 @@
 {
+    "client": {
+        "microtime": 1449259922681161,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "environments": [
         {
-            "type": "physical",
-            "os": "unix",
             "address": {
                 "hostname": "prod-web01",
                 "ipv4": "10.1.1.1"
             },
-            "provider": "rackspace"
+            "os": "unix",
+            "provider": "rackspace",
+            "type": "physical"
         },
         {
-            "type": "physical",
-            "os": "unix",
             "address": {
                 "hostname": "prod-web02",
                 "ipv4": "10.1.1.2"
             },
-            "provider": "rackspace"
+            "os": "unix",
+            "provider": "rackspace",
+            "type": "physical"
         },
         {
-            "type": "physical",
-            "os": "unix",
             "address": {
                 "hostname": "prod-db01",
                 "ipv4": "10.1.1.3"
             },
-            "provider": "rackspace"
+            "os": "unix",
+            "provider": "rackspace",
+            "type": "physical"
         }
     ]
 }

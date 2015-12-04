@@ -1,7 +1,11 @@
 {
+    "client": {
+        "microtime": 1449259922681687,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "path": "/var/www/app",
             "environment": {
                 "address": {
                     "hostname": "stage"
@@ -9,7 +13,8 @@
             },
             "id": {
                 "commit": "01fea5edf05cb37f28b4f269ef1c1a4ac839df04"
-            }
+            },
+            "path": "/var/www/app"
         }
     ]
 }

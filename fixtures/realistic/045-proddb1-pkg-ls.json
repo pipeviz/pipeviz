@@ -1,16 +1,21 @@
 {
+    "client": {
+        "microtime": 1449259922681679,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "binary",
-            "id": {
-                "version": "5.5.37"
-            },
-            "path": "/usr/libexec/mysqld",
             "environment": {
                 "address": {
                     "hostname": "prod-db01"
                 }
-            }
+            },
+            "id": {
+                "version": "5.5.37"
+            },
+            "path": "/usr/libexec/mysqld",
+            "type": "binary"
         }
     ]
 }

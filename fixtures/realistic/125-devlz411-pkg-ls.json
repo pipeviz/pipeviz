@@ -1,43 +1,48 @@
 {
+    "client": {
+        "microtime": 1449259922680416,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "binary",
-            "id": {
-                "version": "2.2.2"
-            },
-            "path": "/usr/sbin/httpd",
             "environment": {
                 "address": {
                     "hostname": "dev-lz411"
                 }
             },
+            "id": {
+                "version": "2.2.2"
+            },
             "libraries": [
                 "/etc/httpd/modules/libphp.so"
-            ]
+            ],
+            "path": "/usr/sbin/httpd",
+            "type": "binary"
         },
         {
-            "type": "library",
+            "environment": {
+                "address": {
+                    "hostname": "dev-lz411"
+                }
+            },
             "id": {
                 "version": "5.5.7"
             },
             "path": "/etc/httpd/modules/libphp.so",
+            "type": "library"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "dev-lz411"
                 }
-            }
-        },
-        {
-            "type": "binary",
+            },
             "id": {
                 "version": "5.5.31"
             },
             "path": "/usr/libexec/mysqld",
-            "environment": {
-                "address": {
-                    "hostname": "dev-lz411"
-                }
-            }
+            "type": "binary"
         }
     ]
 }

@@ -1,131 +1,136 @@
 {
+    "client": {
+        "microtime": 1449259922679209,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "code",
-            "id": {
-                "commit": "d4c85908b083fceb0d8895c36cb4b450ccb18e3c"
-            },
-            "nick": "ourapp",
-            "lgroup": "prod",
-            "path": "/var/www/app",
-            "environment": {
-                "address": {
-                    "hostname": "prod-web01"
-                }
-            },
             "datasets": [
                 {
-                    "name": "default db",
-                    "type": "mediated",
                     "connNet": {
                         "hostname": "prod-db01",
                         "port": 3306,
                         "proto": "tcp"
                     },
                     "interaction": "rw",
-                    "subset": "app_db"
+                    "name": "default db",
+                    "subset": "app_db",
+                    "type": "mediated"
                 }
-            ]
+            ],
+            "environment": {
+                "address": {
+                    "hostname": "prod-web01"
+                }
+            },
+            "id": {
+                "commit": "d4c85908b083fceb0d8895c36cb4b450ccb18e3c"
+            },
+            "lgroup": "prod",
+            "nick": "ourapp",
+            "path": "/var/www/app",
+            "type": "code"
         },
         {
-            "type": "code",
-            "id": {
-                "commit": "16aa32af1768a4850ba7e250bd5b81dcfeca69f1"
-            },
-            "nick": "ourapp",
-            "lgroup": "stage",
-            "path": "/var/www/app",
+            "datasets": [
+                {
+                    "connUnix": {
+                        "path": "/var/lib/mysql/mysql.sock"
+                    },
+                    "interaction": "rw",
+                    "name": "default db",
+                    "subset": "app_db",
+                    "type": "mediated"
+                }
+            ],
             "environment": {
                 "address": {
                     "hostname": "stage"
                 }
             },
+            "id": {
+                "commit": "16aa32af1768a4850ba7e250bd5b81dcfeca69f1"
+            },
+            "lgroup": "stage",
+            "nick": "ourapp",
+            "path": "/var/www/app",
+            "type": "code"
+        },
+        {
             "datasets": [
                 {
-                    "name": "default db",
-                    "type": "mediated",
                     "connUnix": {
                         "path": "/var/lib/mysql/mysql.sock"
                     },
                     "interaction": "rw",
-                    "subset": "app_db"
+                    "name": "default db",
+                    "subset": "app_db",
+                    "type": "mediated"
                 }
-            ]
-        },
-        {
-            "type": "code",
-            "id": {
-                "commit": "3f7bde72dd71b833378ee839cc6913d44574b793"
-            },
-            "nick": "ourapp",
-            "lgroup": "qa",
-            "path": "/var/www/app",
+            ],
             "environment": {
                 "address": {
                     "hostname": "qa"
                 }
             },
+            "id": {
+                "commit": "3f7bde72dd71b833378ee839cc6913d44574b793"
+            },
+            "lgroup": "qa",
+            "nick": "ourapp",
+            "path": "/var/www/app",
+            "type": "code"
+        },
+        {
             "datasets": [
                 {
-                    "name": "default db",
-                    "type": "mediated",
                     "connUnix": {
                         "path": "/var/lib/mysql/mysql.sock"
                     },
                     "interaction": "rw",
-                    "subset": "app_db"
+                    "name": "default db",
+                    "subset": "app_db",
+                    "type": "mediated"
                 }
-            ]
-        },
-        {
-            "type": "code",
-            "id": {
-                "commit": "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
-            },
-            "nick": "ourapp",
-            "lgroup": "sdb-dev",
-            "path": "/var/www/app",
+            ],
             "environment": {
                 "address": {
                     "hostname": "dev01"
                 }
             },
+            "id": {
+                "commit": "f36becb37b195dcc7dbe191a55ac3b5b65e64f19"
+            },
+            "lgroup": "sdb-dev",
+            "nick": "ourapp",
+            "path": "/var/www/app",
+            "type": "code"
+        },
+        {
             "datasets": [
                 {
-                    "name": "default db",
-                    "type": "mediated",
                     "connUnix": {
                         "path": "/var/lib/mysql/mysql.sock"
                     },
                     "interaction": "rw",
-                    "subset": "app_db"
+                    "name": "default db",
+                    "subset": "app_db",
+                    "type": "mediated"
                 }
-            ]
-        },
-        {
-            "type": "code",
-            "id": {
-                "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a"
-            },
-            "nick": "ourapp",
-            "lgroup": "lz411-dev",
-            "path": "/var/www/app",
+            ],
             "environment": {
                 "address": {
                     "hostname": "dev02"
                 }
             },
-            "datasets": [
-                {
-                    "name": "default db",
-                    "type": "mediated",
-                    "connUnix": {
-                        "path": "/var/lib/mysql/mysql.sock"
-                    },
-                    "interaction": "rw",
-                    "subset": "app_db"
-                }
-            ]
+            "id": {
+                "commit": "58c5329896cc2a623f1dd881d83969f90637bc9a"
+            },
+            "lgroup": "lz411-dev",
+            "nick": "ourapp",
+            "path": "/var/www/app",
+            "type": "code"
         }
     ]
 }
