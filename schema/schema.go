@@ -1,4 +1,4 @@
-//go:generate go-bindata -pkg $GOPACKAGE -o bindata_schema.go schema.json
+//go:generate go-bindata -nometadata -pkg $GOPACKAGE -o bindata_schema.go schema.json
 package schema
 
 import (

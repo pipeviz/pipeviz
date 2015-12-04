@@ -123,7 +123,7 @@ func ein1Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/1.json", size: 897, mode: os.FileMode(420), modTime: time.Unix(1441306141, 0)}
+	info := bindataFileInfo{name: "ein/1.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -143,7 +143,7 @@ func ein2Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/2.json", size: 3780, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "ein/2.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -163,7 +163,7 @@ func ein3Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/3.json", size: 11229, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "ein/3.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -183,7 +183,7 @@ func ein4Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/4.json", size: 355, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "ein/4.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -203,7 +203,7 @@ func ein5Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/5.json", size: 1928, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "ein/5.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -223,7 +223,7 @@ func ein6Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/6.json", size: 3229, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "ein/6.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -243,7 +243,7 @@ func ein7Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/7.json", size: 1558, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "ein/7.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -263,7 +263,7 @@ func ein8Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ein/8.json", size: 5834, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "ein/8.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -283,7 +283,7 @@ func realistic000CommitsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/000-commits.json", size: 227198, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/000-commits.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -303,7 +303,7 @@ func realistic004LabelsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/004-labels.json", size: 1149, mode: os.FileMode(420), modTime: time.Unix(1440178395, 0)}
+	info := bindataFileInfo{name: "realistic/004-labels.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -323,7 +323,7 @@ func realistic007TestStatsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/007-test-stats.json", size: 983, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/007-test-stats.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -343,7 +343,7 @@ func realistic010ProdJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/010-prod.json", size: 726, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/010-prod.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -363,7 +363,7 @@ func realistic015Prod1PkgLsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/015-prod1-pkg-ls.json", size: 725, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/015-prod1-pkg-ls.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -383,7 +383,7 @@ func realistic020Prod1AppJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/020-prod1-app.json", size: 836, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/020-prod1-app.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -403,7 +403,7 @@ func realistic025Prod1ProcsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/025-prod1-procs.json", size: 548, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/025-prod1-procs.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -423,7 +423,7 @@ func realistic030Prod2PkgLsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/030-prod2-pkg-ls.json", size: 725, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/030-prod2-pkg-ls.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -443,7 +443,7 @@ func realistic035Prod2AppJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/035-prod2-app.json", size: 836, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/035-prod2-app.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -463,7 +463,7 @@ func realistic040Prod2ProcsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/040-prod2-procs.json", size: 548, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/040-prod2-procs.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -483,7 +483,7 @@ func realistic045Proddb1PkgLsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/045-proddb1-pkg-ls.json", size: 330, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/045-proddb1-pkg-ls.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -503,7 +503,7 @@ func realistic050Proddb1MysqlJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/050-proddb1-mysql.json", size: 1118, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/050-proddb1-mysql.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -523,7 +523,7 @@ func realistic055StageJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/055-stage.json", size: 260, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/055-stage.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -543,7 +543,7 @@ func realistic060StageAppJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/060-stage-app.json", size: 767, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/060-stage-app.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -563,7 +563,7 @@ func realistic065StagePkgLsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/065-stage-pkg-ls.json", size: 1010, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/065-stage-pkg-ls.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -583,7 +583,7 @@ func realistic070StageProcsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/070-stage-procs.json", size: 1891, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/070-stage-procs.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -603,7 +603,7 @@ func realistic075QaJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/075-qa.json", size: 257, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/075-qa.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -623,7 +623,7 @@ func realistic080QaAppJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/080-qa-app.json", size: 761, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/080-qa-app.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -643,7 +643,7 @@ func realistic085QaPkgLsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/085-qa-pkg-ls.json", size: 1001, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/085-qa-pkg-ls.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -663,7 +663,7 @@ func realistic090QaProcsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/090-qa-procs.json", size: 1882, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/090-qa-procs.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -683,7 +683,7 @@ func realistic095DevsdbJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/095-devsdb.json", size: 221, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/095-devsdb.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -703,7 +703,7 @@ func realistic100DevsdbAppJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/100-devsdb-app.json", size: 771, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/100-devsdb-app.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -723,7 +723,7 @@ func realistic105DevsdbPkgLsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/105-devsdb-pkg-ls.json", size: 1016, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/105-devsdb-pkg-ls.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -743,7 +743,7 @@ func realistic110DevsdbProcsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/110-devsdb-procs.json", size: 1897, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/110-devsdb-procs.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -763,7 +763,7 @@ func realistic115Devlz411Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/115-devlz411.json", size: 223, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/115-devlz411.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -783,7 +783,7 @@ func realistic120Devlz411AppJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/120-devlz411-app.json", size: 775, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/120-devlz411-app.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -803,7 +803,7 @@ func realistic125Devlz411PkgLsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/125-devlz411-pkg-ls.json", size: 1021, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/125-devlz411-pkg-ls.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -823,7 +823,7 @@ func realistic130Devlz411ProcsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/130-devlz411-procs.json", size: 1903, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/130-devlz411-procs.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -843,7 +843,7 @@ func realistic200Devlz411CheckoutJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/200-devlz411-checkout.json", size: 326, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/200-devlz411-checkout.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -863,7 +863,7 @@ func realistic205DevsdbCommitJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/205-devsdb-commit.json", size: 761, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/205-devsdb-commit.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -883,7 +883,7 @@ func realistic210UpdateBranchJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/210-update-branch.json", size: 149, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/210-update-branch.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -903,7 +903,7 @@ func realistic220DeployStageJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/220-deploy-stage.json", size: 322, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/220-deploy-stage.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -923,7 +923,7 @@ func realistic230DeployProdJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "realistic/230-deploy-prod.json", size: 623, mode: os.FileMode(420), modTime: time.Unix(1439230075, 0)}
+	info := bindataFileInfo{name: "realistic/230-deploy-prod.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
