@@ -32,10 +32,15 @@ type InvalidInputMessageError struct {
 	Message string
 }
 
-type NamedTransformer interface {
+func (e InvalidInputMessageError) Error() string {
+	return e.Message
+}
+
+type Transformer interface {
 	// Name returns the name of the transformer. This is human-oriented and
 	// guaranteed to be unique.
 	Name() string
+	// Transform is the main transformation function.
 	Transform(io.Reader) (result []byte, changed bool, err error)
 }
 
@@ -63,8 +68,10 @@ func Register(name string, t TransformerFunc) {
 	tfmap[name] = namedTransformer{name: name, t: t}
 }
 
-// GetTransformers retrieves each transformer given in the
-func GetTransformers(names ...string) (tf []NamedTransformer, missing []string) {
+// Get retrieves the transformer associated with each name in the provided string slice,
+// maintaining the order. Any names that could not be resolved to transformers are returned
+// in the second return value.
+func Get(names ...string) (tf []Transformer, missing []string) {
 	for _, name := range names {
 		if nt, exists := tfmap[name]; exists {
 			tf = append(tf, nt)
@@ -72,5 +79,14 @@ func GetTransformers(names ...string) (tf []NamedTransformer, missing []string) 
 			missing = append(missing, name)
 		}
 	}
+	return
+}
+
+// List enumerates the names of all registered transformers.
+func List() (names []string) {
+	for name := range tfmap {
+		names = append(names, name)
+	}
+	sort.Strings(names)
 	return
 }
