@@ -6,8 +6,11 @@ upgrades, fixes, or other modifications.
 package mtf
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"sort"
+	"strings"
 )
 
 // A TransformerFunc takes an input pipeviz message, applies a transformation,
@@ -42,6 +45,49 @@ type Transformer interface {
 	Name() string
 	// Transform is the main transformation function.
 	Transform(io.Reader) (result []byte, changed bool, err error)
+}
+
+// TransformList is a slice of Transformers, and is itself also (recursively) a
+// Transformer.
+type TransformList []Transformer
+
+// Name returns a list of all the contained Transforms' names, joined with a comma.
+func (tl TransformList) Name() string {
+	// If this ever goes critical path,
+	var names []string
+	for _, t := range tl {
+		names = append(names, t.Name())
+	}
+	return strings.Join(names, ",")
+}
+
+// Transform performs each transform contained in the TransformList on the
+// input and returns the final results.
+func (tl TransformList) Transform(in io.Reader) (result []byte, changed bool, err error) {
+	var didchange bool
+	//bb := make([]byte, 0)
+	var w io.Reader
+	//w := bytes.NewBuffer(bb)
+	w = in
+	for _, t := range tl {
+		// There is definitely a more elegant way of doing this, probably with an io.Pipe
+		result, didchange, err = t.Transform(w)
+		if err != nil {
+			if _, ok := err.(InvalidInputMessageError); ok {
+				// This is the only kind of error we skip
+				continue
+			}
+			return nil, false, fmt.Errorf("transform aborted due to error while applying transform %q: %s\n", t.Name(), err)
+		}
+		if didchange {
+			changed = true
+		}
+
+		w = bytes.NewBuffer(result)
+	}
+
+	//return w.Bytes(), changed, nil
+	return
 }
 
 type namedTransformer struct {
