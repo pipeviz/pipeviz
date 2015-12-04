@@ -61,11 +61,11 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 
 	tf, missing := mtf.Get(strings.Split(t.transforms, ",")...)
 	if len(tf) == 0 {
-		t.errWriter.Printf("None of the specified transforms could be found. See `pvutil tfm -l` for a list.")
+		t.errWriter.Printf("None of the requested transforms could be found. See `pvutil tfm -l` for a list.")
 		os.Exit(1)
 	}
 	if len(missing) != 0 {
-		t.errWriter.Printf("The following specified transforms could not be found: %s\n", strings.Join(missing, ","))
+		t.errWriter.Printf("The following requested transforms could not be found: %s\n", strings.Join(missing, ","))
 	}
 
 	// Figure out if we have something from stdin by checking stdin's fd type.
@@ -78,42 +78,67 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 			t.errWriter.Printf("Cannot operate on both stdin and files\n")
 			os.Exit(1)
 		}
-		t.runStdin(cmd, tf)
+		t.runStdin(tf)
 	} else {
 		if len(args) == 0 {
 			t.errWriter.Printf("Must pass either a set of target files, or some data on stdin\n")
 			os.Exit(1)
 		}
 
-		t.runFiles(cmd, tf, args)
+		t.runFiles(tf, args)
 	}
 }
 
-func (t *tfm) runStdin(cmd *cobra.Command, tl mtf.TransformList) {
+func (t *tfm) runStdin(tl mtf.TransformList) {
+	contents, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		t.errWriter.Printf("Error while reading data from stdin: %s\n", err)
+	}
 
+	bb, _, err := t.transformAndValidate(contents, tl, "")
+	if err != nil {
+		os.Exit(1)
+	}
+
+	final := new(bytes.Buffer)
+	// Try to ensure JSON is pretty-printed with proper indentation
+	err = json.Indent(final, bb, "", "    ")
+	if err != nil {
+		final = bytes.NewBuffer(bb)
+	}
+
+	final.WriteTo(os.Stdout)
 }
 
-func (t *tfm) runFiles(cmd *cobra.Command, tl mtf.TransformList, names []string) {
+func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 	var updated []string
 	var wg sync.WaitGroup
 
 	fn := func(name string) {
-		defer wg.Done()
 		f, err := os.OpenFile(name, os.O_RDWR, 0666)
+		defer wg.Done()
 		defer f.Close()
+
 		if err != nil {
 			t.errWriter.Printf("Error while opening file %q: %s\n", name, err)
 			return
 		}
 
-		bb, err := t.transformAndValidate(f, tl, name)
+		contents, err := ioutil.ReadAll(f)
 		if err != nil {
+			t.errWriter.Printf("Error while reading from file %q: %s\n", name, err)
+		}
+		bb, changed, err := t.transformAndValidate(contents, tl, name)
+		if err != nil || !changed {
 			return
 		}
 
 		final := new(bytes.Buffer)
-		// Ensure JSON is pretty-printed with proper indentation
-		json.Indent(final, bb, "", "    ")
+		// Try to ensure JSON is pretty-printed with proper indentation
+		err = json.Indent(final, bb, "", "    ")
+		if err != nil {
+			final = bytes.NewBuffer(bb)
+		}
 
 		err = f.Truncate(0)
 		if err != nil {
@@ -149,18 +174,18 @@ func (t *tfm) runFiles(cmd *cobra.Command, tl mtf.TransformList, names []string)
 	}
 }
 
-func (t *tfm) transformAndValidate(msg io.Reader, tl mtf.TransformList, name string) (final []byte, err error) {
-	final, changed, err := tl.Transform(msg)
+func (t *tfm) transformAndValidate(msg []byte, tl mtf.TransformList, name string) (final []byte, changed bool, err error) {
+	final, changed, err = tl.Transform(msg)
 	if err != nil {
 		t.errWriter.Printf(err.Error())
 		return
 	}
 	if !changed {
-		if name == "" {
-			t.errWriter.Printf("No changes resulted from applying transforms\n")
-		} else {
-			t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
-		}
+		// if name == "" {
+		// 	t.errWriter.Printf("No changes resulted from applying transforms\n")
+		// } else {
+		// 	t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
+		// }
 		return
 	}
 
@@ -175,18 +200,18 @@ func (t *tfm) transformAndValidate(msg io.Reader, tl mtf.TransformList, name str
 		w := bytes.NewBuffer(make([]byte, 0))
 
 		if name == "" {
-			fmt.Fprintf(w, "Errors encountered during validation\n")
+			fmt.Fprintf(w, "Errors encountered during validation:\n")
 		} else {
 			fmt.Fprintf(w, "Errors encountered while validating %q:\n", name)
 		}
 
 		for _, desc := range result.Errors() {
-			fmt.Fprintf(w, "%s\n", desc)
+			fmt.Fprintf(w, "\t%s\n", desc)
 		}
 
 		t.errWriter.Print(w)
 		if !t.keepInvalid {
-			return final, errors.New("message failed validation, skipping")
+			return final, changed, errors.New("message failed validation, skipping")
 		}
 	}
 

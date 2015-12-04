@@ -6,9 +6,7 @@ upgrades, fixes, or other modifications.
 package mtf
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"sort"
 	"strings"
 )
@@ -32,7 +30,11 @@ import (
 //
 // An error should be returned if the transformation encountered an issue that
 // would leave the output in an unknown state.
-type TransformerFunc func(io.Reader) (result []byte, changed bool, err error)
+//
+// Transformers should attempt to create valid output within the scope of their
+// focus, but should not attempt to verify the message as a whole. Verification
+// is a higher-level concern, and is thus the caller's responsibility.
+type TransformerFunc func(in []byte) (out []byte, changed bool, err error)
 
 // A Transformer is a named TransformFunc; see the docs for TransformFunc.
 type Transformer interface {
@@ -40,7 +42,7 @@ type Transformer interface {
 	// guaranteed to be unique.
 	Name() string
 	// Transform is the main transformation function.
-	Transform(io.Reader) (result []byte, changed bool, err error)
+	Transform(in []byte) (out []byte, changed bool, err error)
 }
 
 // TransformList is a slice of Transformers, and is itself also (recursively) a
@@ -59,15 +61,11 @@ func (tl TransformList) Name() string {
 
 // Transform performs each transform contained in the TransformList on the
 // input and returns the final results.
-func (tl TransformList) Transform(in io.Reader) (result []byte, changed bool, err error) {
+func (tl TransformList) Transform(in []byte) (out []byte, changed bool, err error) {
 	var didchange bool
-	//bb := make([]byte, 0)
-	var w io.Reader
-	//w := bytes.NewBuffer(bb)
-	w = in
 	for _, t := range tl {
 		// There is definitely a more elegant way of doing this, probably with an io.Pipe
-		result, didchange, err = t.Transform(w)
+		out, didchange, err = t.Transform(in)
 		if err != nil {
 			return nil, false, fmt.Errorf("transform aborted due to error while applying transform %q: %s\n", t.Name(), err)
 		}
@@ -75,10 +73,9 @@ func (tl TransformList) Transform(in io.Reader) (result []byte, changed bool, er
 			changed = true
 		}
 
-		w = bytes.NewBuffer(result)
+		in = out
 	}
 
-	//return w.Bytes(), changed, nil
 	return
 }
 
@@ -91,7 +88,7 @@ func (nt namedTransformer) Name() string {
 	return nt.name
 }
 
-func (nt namedTransformer) Transform(in io.Reader) (result []byte, changed bool, err error) {
+func (nt namedTransformer) Transform(in []byte) (out []byte, changed bool, err error) {
 	return nt.t(in)
 }
 
