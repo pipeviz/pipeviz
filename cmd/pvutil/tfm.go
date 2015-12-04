@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -90,7 +91,7 @@ func (t *tfm) runStdin(cmd *cobra.Command, tl mtf.TransformList) {
 }
 
 func (t *tfm) runFiles(cmd *cobra.Command, tl mtf.TransformList, names []string) {
-	var atLeastOne bool
+	var updated []string
 	var wg sync.WaitGroup
 
 	fn := func(name string) {
@@ -102,35 +103,9 @@ func (t *tfm) runFiles(cmd *cobra.Command, tl mtf.TransformList, names []string)
 			return
 		}
 
-		bb, changed, err := tl.Transform(f)
+		bb, err := t.transformAndValidate(f, tl, name)
 		if err != nil {
-			t.errWriter.Printf(err.Error())
 			return
-		}
-		if !changed {
-			t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
-			return
-		}
-
-		result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(bb)))
-		if err != nil {
-			t.errWriter.Printf("Error while validating final transformed result: %s\n", err)
-			return
-		}
-
-		if !result.Valid() {
-			// Buffer so that there's no interleaving of printed output
-			w := bytes.NewBuffer(make([]byte, 0))
-
-			fmt.Fprintf(w, "Errors encountered while validating %q:\n", name)
-			for _, desc := range result.Errors() {
-				fmt.Fprintf(w, "%s\n", desc)
-			}
-
-			t.errWriter.Print(w)
-			if !t.keepInvalid {
-				return
-			}
 		}
 
 		final := new(bytes.Buffer)
@@ -149,7 +124,7 @@ func (t *tfm) runFiles(cmd *cobra.Command, tl mtf.TransformList, names []string)
 			return
 		}
 
-		atLeastOne = true
+		updated = append(updated, name)
 	}
 
 	// Run all transforms in their own goroutines
@@ -159,4 +134,58 @@ func (t *tfm) runFiles(cmd *cobra.Command, tl mtf.TransformList, names []string)
 	}
 
 	wg.Wait()
+
+	if len(updated) == 0 {
+		t.errWriter.Println("\nNo message files were updated.")
+		os.Exit(1)
+	} else {
+		t.errWriter.Println("\nThe following files were updated:")
+		for _, name := range updated {
+			t.errWriter.Printf("\t%s\n", name)
+		}
+	}
+}
+
+func (t *tfm) transformAndValidate(msg io.Reader, tl mtf.TransformList, name string) (final []byte, err error) {
+	final, changed, err := tl.Transform(msg)
+	if err != nil {
+		t.errWriter.Printf(err.Error())
+		return
+	}
+	if !changed {
+		if name == "" {
+			t.errWriter.Printf("No changes resulted from applying transforms\n")
+		} else {
+			t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
+		}
+		return
+	}
+
+	result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(final)))
+	if err != nil {
+		t.errWriter.Printf("Error while validating final transformed result: %s\n", err)
+		return
+	}
+
+	if !result.Valid() {
+		// Buffer so that there's no interleaving of printed output
+		w := bytes.NewBuffer(make([]byte, 0))
+
+		if name == "" {
+			fmt.Fprintf(w, "Errors encountered during validation\n")
+		} else {
+			fmt.Fprintf(w, "Errors encountered while validating %q:\n", name)
+		}
+
+		for _, desc := range result.Errors() {
+			fmt.Fprintf(w, "%s\n", desc)
+		}
+
+		t.errWriter.Print(w)
+		if !t.keepInvalid {
+			return final, errors.New("message failed validation, skipping")
+		}
+	}
+
+	return
 }
