@@ -25,19 +25,14 @@ import (
 // change to a message simply because they have been called. They should first
 // verify a transformation is appropriate; if not, the input data should be
 // passed through unchanged, and false returned for the second parameter.
+
+// If the data is in a format the transformer cannot read or otherwise does not
+// expect, the correct response is to pass the data along unmolested and return
+// false for the second parameter.
 //
-// If the input was invalid/unrecognized by the TransformerFunc, an
-// InvalidInputMessageError should be returned; such an error will not halt the
-// processing pipeline. Any other type of error will halt processing.
+// An error should be returned if the transformation encountered an issue that
+// would leave the output in an unknown state.
 type TransformerFunc func(io.Reader) (result []byte, changed bool, err error)
-
-type InvalidInputMessageError struct {
-	Message string
-}
-
-func (e InvalidInputMessageError) Error() string {
-	return e.Message
-}
 
 type Transformer interface {
 	// Name returns the name of the transformer. This is human-oriented and
@@ -73,10 +68,6 @@ func (tl TransformList) Transform(in io.Reader) (result []byte, changed bool, er
 		// There is definitely a more elegant way of doing this, probably with an io.Pipe
 		result, didchange, err = t.Transform(w)
 		if err != nil {
-			if _, ok := err.(InvalidInputMessageError); ok {
-				// This is the only kind of error we skip
-				continue
-			}
 			return nil, false, fmt.Errorf("transform aborted due to error while applying transform %q: %s\n", t.Name(), err)
 		}
 		if didchange {
