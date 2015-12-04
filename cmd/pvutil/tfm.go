@@ -59,10 +59,13 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	tf, _ := mtf.Get(strings.Split(t.transforms, ",")...)
+	tf, missing := mtf.Get(strings.Split(t.transforms, ",")...)
 	if len(tf) == 0 {
 		t.errWriter.Printf("None of the specified transforms could be found. See `pvutil tfm -l` for a list.")
 		os.Exit(1)
+	}
+	if len(missing) != 0 {
+		t.errWriter.Printf("The following specified transforms could not be found: %s\n", strings.Join(missing, ","))
 	}
 
 	// Figure out if we have something from stdin by checking stdin's fd type.
