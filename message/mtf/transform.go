@@ -34,6 +34,7 @@ import (
 // would leave the output in an unknown state.
 type TransformerFunc func(io.Reader) (result []byte, changed bool, err error)
 
+// A Transformer is a named TransformFunc; see the docs for TransformFunc.
 type Transformer interface {
 	// Name returns the name of the transformer. This is human-oriented and
 	// guaranteed to be unique.

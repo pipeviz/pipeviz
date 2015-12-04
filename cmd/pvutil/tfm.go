@@ -8,8 +8,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
+	"github.com/pipeviz/pipeviz/message/mtf"
 	"github.com/pipeviz/pipeviz/schema"
 	"github.com/spf13/cobra"
 	"github.com/xeipuuv/gojsonschema"
@@ -20,14 +22,6 @@ type tfm struct {
 	transforms               string
 	errWriter                *log.Logger
 }
-
-// A MessageTransformer takes a message and transforms it into a new message.
-type MessageTransformer interface {
-	fmt.Stringer
-	Transform(io.Reader) (result []byte, changed bool, err error)
-}
-
-type MessageTransformers []MessageTransformer
 
 func tfmCommand() *cobra.Command {
 	t := &tfm{}
@@ -55,7 +49,7 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	}
 
 	if t.list {
-		// TODO list available transforms
+		fmt.Printf("%s\n", strings.Join(mtf.List(), "\n"))
 		os.Exit(0)
 	}
 
@@ -64,9 +58,9 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	tf := getTransfomers(t.transforms)
+	tf, _ := mtf.Get(strings.Split(t.transforms, ",")...)
 	if len(tf) == 0 {
-		// Output from getTransformers is sufficient, can just exit directly here
+		t.errWriter.Printf("None of the specified transforms could be found. See `pvutil tfm -l` for a list.")
 		os.Exit(1)
 	}
 
@@ -91,11 +85,11 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (t *tfm) runStdin(cmd *cobra.Command, tfs MessageTransformers) {
+func (t *tfm) runStdin(cmd *cobra.Command, tl mtf.TransformList) {
 
 }
 
-func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []string) {
+func (t *tfm) runFiles(cmd *cobra.Command, tl mtf.TransformList, names []string) {
 	var atLeastOne bool
 	var wg sync.WaitGroup
 
@@ -108,25 +102,11 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 			return
 		}
 
-		var changed bool
-		bb := make([]byte, 0)
-		w := bytes.NewBuffer(bb)
-		io.Copy(w, f)
-		for _, tf := range tfs {
-			// There is definitely a more elegant way of doing this, probably with an io.Pipe
-			result, didchange, terr := tf.Transform(w)
-			if didchange {
-				changed = true
-			}
-			if terr != nil {
-				t.errWriter.Printf("Skipping transform of %q due to error while applying transform %q: %s\n", name, tf, terr)
-				return
-			}
-
-			w = bytes.NewBuffer(result)
+		bb, changed, err := tl.Transform(f)
+		if err != nil {
+			t.errWriter.Printf(err.Error())
+			return
 		}
-
-		bb = w.Bytes()
 		if !changed {
 			t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
 			return
@@ -179,9 +159,4 @@ func (t *tfm) runFiles(cmd *cobra.Command, tfs MessageTransformers, names []stri
 	}
 
 	wg.Wait()
-}
-
-func getTransfomers(list string) []MessageTransformer {
-	//fmt.Fprintf(t.errWriter, "No transform exists with the name %q\n", name)
-	return make([]MessageTransformer, 0)
 }
