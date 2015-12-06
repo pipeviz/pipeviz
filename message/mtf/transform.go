@@ -103,9 +103,9 @@ func Register(name string, t TransformerFunc) {
 	tfmap[name] = namedTransformer{name: name, t: t}
 }
 
-// Get retrieves the transformer associated with each name in the provided string slice,
-// maintaining the order. Any names that could not be resolved to transformers are returned
-// in the second return value.
+// Get retrieves the transformer associated with each name in the provided
+// string slice, maintaining the order. Any names that could not be resolved to
+// transformers are returned in the second return value.
 func Get(names ...string) (tf []Transformer, missing []string) {
 	for _, name := range names {
 		if nt, exists := tfmap[name]; exists {

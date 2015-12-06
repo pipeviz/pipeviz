@@ -20,7 +20,7 @@ import (
 type tfm struct {
 	list, keepInvalid, quiet bool
 	transforms               string
-	errWriter                *log.Logger
+	logger                   *log.Logger
 	exitFunc                 func(int)
 }
 
@@ -42,11 +42,11 @@ func tfmCommand() *cobra.Command {
 }
 
 // Run executes the tfm command.
-func (t *tfm) Run(cmd *cobra.Command, args []string) {
+func (t *tfm) Run(_ *cobra.Command, args []string) {
 	if t.quiet {
-		t.errWriter = log.New(ioutil.Discard, "", 0)
+		t.logger = log.New(ioutil.Discard, "", 0)
 	} else {
-		t.errWriter = log.New(os.Stderr, "", 0)
+		t.logger = log.New(os.Stderr, "", 0)
 	}
 
 	if t.list {
@@ -55,17 +55,17 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	}
 
 	if t.transforms == "" {
-		t.errWriter.Printf("Must specify at least one transform to apply\n")
+		t.logger.Printf("Must specify at least one transform to apply\n")
 		t.exitFunc(1)
 	}
 
 	tf, missing := mtf.Get(strings.Split(t.transforms, ",")...)
 	if len(tf) == 0 {
-		t.errWriter.Printf("None of the requested transforms could be found. See `pvutil tfm -l` for a list.")
+		t.logger.Printf("None of the requested transforms could be found. See `pvutil tfm -l` for a list.")
 		t.exitFunc(1)
 	}
 	if len(missing) != 0 {
-		t.errWriter.Printf("The following requested transforms could not be found: %s\n", strings.Join(missing, ","))
+		t.logger.Printf("The following requested transforms could not be found: %s\n", strings.Join(missing, ","))
 	}
 
 	// Figure out if we have something from stdin by checking stdin's fd type.
@@ -75,13 +75,13 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 
 	if hasStdin {
 		if len(args) != 0 {
-			t.errWriter.Printf("Cannot operate on both stdin and files\n")
+			t.logger.Printf("Cannot operate on both stdin and files\n")
 			t.exitFunc(1)
 		}
 		t.runStdin(tf)
 	} else {
 		if len(args) == 0 {
-			t.errWriter.Printf("Must pass either a set of target files, or some data on stdin\n")
+			t.logger.Printf("Must pass either a set of target files, or some data on stdin\n")
 			t.exitFunc(1)
 		}
 
@@ -92,7 +92,7 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 func (t *tfm) runStdin(tl mtf.TransformList) {
 	contents, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		t.errWriter.Printf("Error while reading data from stdin: %s\n", err)
+		t.logger.Printf("Error while reading data from stdin: %s\n", err)
 	}
 
 	bb, _, err := t.transformAndValidate(contents, tl, "")
@@ -120,13 +120,13 @@ func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 		defer f.Close()
 
 		if err != nil {
-			t.errWriter.Printf("Error while opening file %q: %s\n", name, err)
+			t.logger.Printf("Error while opening file %q: %s\n", name, err)
 			return
 		}
 
 		contents, err := ioutil.ReadAll(f)
 		if err != nil {
-			t.errWriter.Printf("Error while reading from file %q: %s\n", name, err)
+			t.logger.Printf("Error while reading from file %q: %s\n", name, err)
 		}
 		bb, changed, err := t.transformAndValidate(contents, tl, name)
 		if err != nil || !changed {
@@ -146,7 +146,7 @@ func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 
 		_, err = final.WriteTo(f)
 		if err != nil {
-			t.errWriter.Printf("Error while writing data to disk %q: %s\n", name, err)
+			t.logger.Printf("Error while writing data to disk %q: %s\n", name, err)
 			return
 		}
 
@@ -162,12 +162,12 @@ func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 	wg.Wait()
 
 	if len(updated) == 0 {
-		t.errWriter.Println("\nNo message files were updated.")
+		t.logger.Println("\nNo message files were updated.")
 		t.exitFunc(1)
 	} else {
-		t.errWriter.Println("\nThe following files were updated:")
+		t.logger.Println("\nThe following files were updated:")
 		for _, name := range updated {
-			t.errWriter.Printf("\t%s\n", name)
+			t.logger.Printf("\t%s\n", name)
 		}
 	}
 }
@@ -175,21 +175,21 @@ func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 func (t *tfm) transformAndValidate(msg []byte, tl mtf.TransformList, name string) (final []byte, changed bool, err error) {
 	final, changed, err = tl.Transform(msg)
 	if err != nil {
-		t.errWriter.Printf(err.Error())
+		t.logger.Printf(err.Error())
 		return
 	}
 	if !changed {
 		// if name == "" {
-		// 	t.errWriter.Printf("No changes resulted from applying transforms\n")
+		// 	t.logger.Printf("No changes resulted from applying transforms\n")
 		// } else {
-		// 	t.errWriter.Printf("No changes resulted from applying transforms to %q\n", name)
+		// 	t.logger.Printf("No changes resulted from applying transforms to %q\n", name)
 		// }
 		return
 	}
 
 	result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(final)))
 	if err != nil {
-		t.errWriter.Printf("Error while validating final transformed result: %s\n", err)
+		t.logger.Printf("Error while validating final transformed result: %s\n", err)
 		return
 	}
 
@@ -207,7 +207,7 @@ func (t *tfm) transformAndValidate(msg []byte, tl mtf.TransformList, name string
 			fmt.Fprintf(w, "\t%s\n", desc)
 		}
 
-		t.errWriter.Print(w)
+		t.logger.Print(w)
 		if !t.keepInvalid {
 			return final, changed, errors.New("message failed validation, skipping")
 		}
