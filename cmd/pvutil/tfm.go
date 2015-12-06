@@ -21,10 +21,11 @@ type tfm struct {
 	list, keepInvalid, quiet bool
 	transforms               string
 	errWriter                *log.Logger
+	exitFunc                 func(int)
 }
 
 func tfmCommand() *cobra.Command {
-	t := &tfm{}
+	t := &tfm{exitFunc: func(i int) { os.Exit(i) }}
 	cmd := &cobra.Command{
 		Use:   "tfm <files>...",
 		Short: "Transforms older pipeviz messages into newer forms.",
@@ -50,18 +51,18 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 
 	if t.list {
 		fmt.Printf("%s\n", strings.Join(mtf.List(), "\n"))
-		os.Exit(0)
+		t.exitFunc(0)
 	}
 
 	if t.transforms == "" {
 		t.errWriter.Printf("Must specify at least one transform to apply\n")
-		os.Exit(1)
+		t.exitFunc(1)
 	}
 
 	tf, missing := mtf.Get(strings.Split(t.transforms, ",")...)
 	if len(tf) == 0 {
 		t.errWriter.Printf("None of the requested transforms could be found. See `pvutil tfm -l` for a list.")
-		os.Exit(1)
+		t.exitFunc(1)
 	}
 	if len(missing) != 0 {
 		t.errWriter.Printf("The following requested transforms could not be found: %s\n", strings.Join(missing, ","))
@@ -75,13 +76,13 @@ func (t *tfm) Run(cmd *cobra.Command, args []string) {
 	if hasStdin {
 		if len(args) != 0 {
 			t.errWriter.Printf("Cannot operate on both stdin and files\n")
-			os.Exit(1)
+			t.exitFunc(1)
 		}
 		t.runStdin(tf)
 	} else {
 		if len(args) == 0 {
 			t.errWriter.Printf("Must pass either a set of target files, or some data on stdin\n")
-			os.Exit(1)
+			t.exitFunc(1)
 		}
 
 		t.runFiles(tf, args)
@@ -96,7 +97,7 @@ func (t *tfm) runStdin(tl mtf.TransformList) {
 
 	bb, _, err := t.transformAndValidate(contents, tl, "")
 	if err != nil {
-		os.Exit(1)
+		t.exitFunc(1)
 	}
 
 	final := new(bytes.Buffer)
@@ -162,7 +163,7 @@ func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 
 	if len(updated) == 0 {
 		t.errWriter.Println("\nNo message files were updated.")
-		os.Exit(1)
+		t.exitFunc(1)
 	} else {
 		t.errWriter.Println("\nThe following files were updated:")
 		for _, name := range updated {
