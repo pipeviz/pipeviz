@@ -21,11 +21,10 @@ type tfm struct {
 	list, keepInvalid, quiet bool
 	transforms               string
 	logger                   *log.Logger
-	exitFunc                 func(int)
 }
 
 func tfmCommand() *cobra.Command {
-	t := &tfm{exitFunc: func(i int) { os.Exit(i) }}
+	t := &tfm{}
 	cmd := &cobra.Command{
 		Use:   "tfm <files>...",
 		Short: "Transforms older pipeviz messages into newer forms.",
