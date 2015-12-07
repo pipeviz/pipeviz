@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -158,4 +160,14 @@ func TestListTransforms(t *testing.T) {
 			t.Errorf("Expected exit code 0, got %v", exit)
 		}
 	})
+}
+
+func TestOnlyWrongTransformsFails(t *testing.T) {
+	tfm := tfm{}
+	// a random name; won't match anything real
+	tfm.transforms = strconv.Itoa(rand.Int())
+
+	if exit := tfm.Run(nil); exit != 1 {
+		t.Errorf("Expected exit code 1, got %v", exit)
+	}
 }
