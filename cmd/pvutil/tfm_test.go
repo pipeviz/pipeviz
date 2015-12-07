@@ -39,8 +39,10 @@ func newMock(ee int, tst *testing.T) (mock *tfmMock) {
 
 func panicRecover(t *testing.T) {
 	err := recover()
-	if val, ok := err.(int); !ok || val != panicKey {
-		t.Fatalf("Unexpected panic: %s\n", err)
+	if err != nil {
+		if val, ok := err.(int); !ok || val != panicKey {
+			t.Fatalf("Unexpected panic: %s\n", err)
+		}
 	}
 }
 
@@ -131,20 +133,20 @@ func TestEmptyTransforms(t *testing.T) {
 	captureStderr("Must specify at least one transform to aply\n", t, true)
 
 	defer panicRecover(t)
-	m.tfm.Run(nil, nil)
-
-	t.Fatalf("Expected exit from Run call")
+	if exit := m.tfm.Run(nil); exit != 1 {
+		t.Errorf("Expected exit code 1, got %v", exit)
+	}
 }
 
-func TstListTransforms(t *testing.T) {
-	m := newMock(1, t)
+func TestListTransforms(t *testing.T) {
+	m := newMock(0, t)
 	m.tfm.list = true
 
-	// Should err, complaining about no transforms listed
+	// Should write transform list to stdout
 	captureStderr("Must specify at least one transform to apply\n", t, true)
 
 	defer panicRecover(t)
-	m.tfm.Run(nil, nil)
-
-	t.Fatalf("Expected exit from Run call")
+	if exit := m.tfm.Run(nil); exit != 0 {
+		t.Errorf("Expected exit code 0, got %v", exit)
+	}
 }

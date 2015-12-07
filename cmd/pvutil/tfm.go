@@ -30,7 +30,7 @@ func tfmCommand() *cobra.Command {
 		Use:   "tfm <files>...",
 		Short: "Transforms older pipeviz messages into newer forms.",
 		Long:  "tfm takes messages as input and applies the indicated transformations to them, typically with the goal of converting them into a more proper, valid form. It can take messages on stdin (in which case it writes to stdout), or by specifying file name(s) (in which case it writes directly back to the file).",
-		Run:   t.Run,
+		Run:   t.outerRun,
 	}
 
 	cmd.Flags().BoolVarP(&t.list, "list", "l", false, "List available transforms")
@@ -41,8 +41,12 @@ func tfmCommand() *cobra.Command {
 	return cmd
 }
 
+func (t *tfm) outerRun(_ *cobra.Command, args []string) {
+	os.Exit(t.Run(args))
+}
+
 // Run executes the tfm command.
-func (t *tfm) Run(_ *cobra.Command, args []string) {
+func (t *tfm) Run(args []string) int {
 	if t.quiet {
 		t.logger = log.New(ioutil.Discard, "", 0)
 	} else {
@@ -51,18 +55,18 @@ func (t *tfm) Run(_ *cobra.Command, args []string) {
 
 	if t.list {
 		fmt.Printf("%s\n", strings.Join(mtf.List(), "\n"))
-		t.exitFunc(0)
+		return 0
 	}
 
 	if t.transforms == "" {
 		t.logger.Printf("Must specify at least one transform to apply\n")
-		t.exitFunc(1)
+		return 1
 	}
 
 	tf, missing := mtf.Get(strings.Split(t.transforms, ",")...)
 	if len(tf) == 0 {
 		t.logger.Printf("None of the requested transforms could be found. See `pvutil tfm -l` for a list.")
-		t.exitFunc(1)
+		return 1
 	}
 	if len(missing) != 0 {
 		t.logger.Printf("The following requested transforms could not be found: %s\n", strings.Join(missing, ","))
@@ -76,20 +80,22 @@ func (t *tfm) Run(_ *cobra.Command, args []string) {
 	if hasStdin {
 		if len(args) != 0 {
 			t.logger.Printf("Cannot operate on both stdin and files\n")
-			t.exitFunc(1)
+			return 1
 		}
 		t.runStdin(tf)
 	} else {
 		if len(args) == 0 {
 			t.logger.Printf("Must pass either a set of target files, or some data on stdin\n")
-			t.exitFunc(1)
+			return 1
 		}
 
 		t.runFiles(tf, args)
 	}
+
+	return 0
 }
 
-func (t *tfm) runStdin(tl mtf.TransformList) {
+func (t *tfm) runStdin(tl mtf.TransformList) int {
 	contents, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		t.logger.Printf("Error while reading data from stdin: %s\n", err)
@@ -97,7 +103,7 @@ func (t *tfm) runStdin(tl mtf.TransformList) {
 
 	bb, _, err := t.transformAndValidate(contents, tl, "")
 	if err != nil {
-		t.exitFunc(1)
+		return 1
 	}
 
 	final := new(bytes.Buffer)
@@ -108,9 +114,10 @@ func (t *tfm) runStdin(tl mtf.TransformList) {
 	}
 
 	final.WriteTo(os.Stdout)
+	return 0
 }
 
-func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
+func (t *tfm) runFiles(tl mtf.TransformList, names []string) int {
 	var updated []string
 	var wg sync.WaitGroup
 
@@ -163,13 +170,14 @@ func (t *tfm) runFiles(tl mtf.TransformList, names []string) {
 
 	if len(updated) == 0 {
 		t.logger.Println("\nNo message files were updated.")
-		t.exitFunc(1)
+		return 1
 	} else {
 		t.logger.Println("\nThe following files were updated:")
 		for _, name := range updated {
 			t.logger.Printf("\t%s\n", name)
 		}
 	}
+	return 0
 }
 
 func (t *tfm) transformAndValidate(msg []byte, tl mtf.TransformList, name string) (final []byte, changed bool, err error) {
