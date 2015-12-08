@@ -9,13 +9,13 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/log"
+	"github.com/pipeviz/pipeviz/message"
+	"github.com/pipeviz/pipeviz/version"
 	"github.com/spf13/cobra"
 	"github.com/unrolled/secure"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
-	"github.com/pipeviz/pipeviz/ingest"
-	"github.com/pipeviz/pipeviz/log"
-	"github.com/pipeviz/pipeviz/version"
 )
 
 func main() {
@@ -61,7 +61,7 @@ func newClient(target string, timeout time.Duration) client {
 }
 
 // TODO return msgid sent back from pipeviz backend as uint64
-func (c client) send(m *ingest.Message) error {
+func (c client) send(m *message.Message) error {
 	j, err := json.Marshal(m)
 	if err != nil {
 		return err

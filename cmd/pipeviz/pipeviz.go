@@ -6,10 +6,9 @@ import (
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/spf13/pflag"
-	"github.com/zenazn/goji/graceful"
 	"github.com/pipeviz/pipeviz/broker"
 	"github.com/pipeviz/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/message"
 	"github.com/pipeviz/pipeviz/mlog"
 	"github.com/pipeviz/pipeviz/mlog/boltdb"
 	"github.com/pipeviz/pipeviz/mlog/mem"
@@ -18,6 +17,8 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 	"github.com/pipeviz/pipeviz/version"
 	"github.com/pipeviz/pipeviz/webapp"
+	"github.com/spf13/pflag"
+	"github.com/zenazn/goji/graceful"
 )
 
 // Pipeviz uses two separate HTTP ports - one for input into the logic
@@ -160,7 +161,7 @@ func restoreGraph(j mlog.Store) (system.CoreGraph, error) {
 				// TODO returning out here could end us up somwehere weird
 				return g, err
 			}
-			msg := &ingest.Message{}
+			msg := &message.Message{}
 			json.Unmarshal(item.Message, msg)
 			g = g.Merge(item.Index, msg.UnificationForm())
 		}

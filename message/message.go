@@ -1,4 +1,4 @@
-package ingest
+package message
 
 import (
 	"errors"
@@ -36,11 +36,11 @@ type Message struct {
 	Yp     []semantic.PkgYum        `json:"yum-pkg,omitempty"`
 }
 
-// NewMessage returns a new message, complete with required client data.
+// New returns a new message, complete with required client data.
 //
 // This function mostly exists as a reminder for Go-based message producers that
 // the client is required by the spec.
-func NewMessage(c Client) *Message {
+func New(c Client) *Message {
 	return &Message{Client: c}
 }
 

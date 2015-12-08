@@ -11,13 +11,13 @@ import (
 	"strings"
 
 	"github.com/mndrix/ps"
-	"github.com/spf13/cobra"
-	gjs "github.com/xeipuuv/gojsonschema"
-	"github.com/pipeviz/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/message"
 	"github.com/pipeviz/pipeviz/represent"
 	"github.com/pipeviz/pipeviz/represent/q"
 	"github.com/pipeviz/pipeviz/schema"
 	"github.com/pipeviz/pipeviz/types/system"
+	"github.com/spf13/cobra"
+	gjs "github.com/xeipuuv/gojsonschema"
 )
 
 func dotDumperCommand() *cobra.Command {
@@ -70,7 +70,7 @@ func runDotDumper(cmd *cobra.Command, args []string) {
 					}
 				} else {
 					k++
-					m := ingest.Message{}
+					m := message.Message{}
 					json.Unmarshal(src, &m)
 
 					g = g.Merge(k, m.UnificationForm())

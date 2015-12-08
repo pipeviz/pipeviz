@@ -5,10 +5,10 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
 	"github.com/pipeviz/pipeviz/fixtures"
-	"github.com/pipeviz/pipeviz/ingest"
+	"github.com/pipeviz/pipeviz/message"
 	"github.com/pipeviz/pipeviz/schema"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 var msgJSON [][]byte
@@ -29,7 +29,7 @@ func BenchmarkUnmarshalMessageOne(b *testing.B) {
 	d := msgJSON[0]
 
 	for i := 0; i < b.N; i++ {
-		m := &ingest.Message{}
+		m := &message.Message{}
 		json.Unmarshal(d, m)
 	}
 }
@@ -38,7 +38,7 @@ func BenchmarkUnmarshalMessageTwo(b *testing.B) {
 	d := msgJSON[1]
 
 	for i := 0; i < b.N; i++ {
-		m := &ingest.Message{}
+		m := &message.Message{}
 		json.Unmarshal(d, m)
 	}
 }
@@ -47,10 +47,10 @@ func BenchmarkUnmarshalMessageOneAndTwo(b *testing.B) {
 	d1, d2 := msgJSON[0], msgJSON[1]
 
 	for i := 0; i < b.N; i++ {
-		m1 := &ingest.Message{}
+		m1 := &message.Message{}
 		json.Unmarshal(d1, m1)
 
-		m2 := &ingest.Message{}
+		m2 := &message.Message{}
 		json.Unmarshal(d2, m2)
 	}
 }

@@ -8,13 +8,14 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/pipeviz/pipeviz/log"
+	"github.com/pipeviz/pipeviz/message"
+	"github.com/pipeviz/pipeviz/mlog"
+	"github.com/pipeviz/pipeviz/types/system"
 	"github.com/unrolled/secure"
 	gjs "github.com/xeipuuv/gojsonschema"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
-	"github.com/pipeviz/pipeviz/log"
-	"github.com/pipeviz/pipeviz/mlog"
-	"github.com/pipeviz/pipeviz/types/system"
 )
 
 // Ingestor brings together the required components to run a pipeviz ingestion HTTP server.
@@ -183,7 +184,7 @@ func (s *Ingestor) handleMessage(w http.ResponseWriter, r *http.Request) {
 func (s *Ingestor) Interpret(g system.CoreGraph) {
 	for m := range s.interpretChan {
 		// TODO msgid here should be strictly sequential; check, and add error handling if not
-		im := Message{}
+		im := message.Message{}
 		json.Unmarshal(m.Message, &im)
 		g = g.Merge(m.Index, im.UnificationForm())
 
