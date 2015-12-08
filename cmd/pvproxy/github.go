@@ -9,9 +9,10 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/spf13/cobra"
 	"github.com/pipeviz/pipeviz/ingest"
 	"github.com/pipeviz/pipeviz/types/semantic"
+	"github.com/pipeviz/pipeviz/version"
+	"github.com/spf13/cobra"
 )
 
 const gitDateFormat = "Mon Jan 2 2006 15:04:05 -0700"
@@ -73,7 +74,12 @@ func githubIngestor(c client, cmd *cobra.Command) http.HandlerFunc {
 }
 
 func (gpe githubPushEvent) ToMessage(token string) *ingest.Message {
-	msg := new(ingest.Message)
+	msg := ingest.NewMessage(ingest.Client{
+		Name:      "pvproxy-github",
+		Version:   version.Version(),
+		Microtime: time.Now().UnixNano() / 1000,
+	})
+
 	client := http.Client{Timeout: 2 * time.Second}
 
 	for _, c := range gpe.Commits {
