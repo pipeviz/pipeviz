@@ -12,9 +12,7 @@ import (
 	"time"
 )
 
-// StdoutEquals verifies that a string equal to the provided string is emitted
-// during the execution of the provided function.
-func StdoutEquals(t *testing.T, expected string, f func()) bool {
+func stdoutEquals(t *testing.T, expected string, f func()) bool {
 	outC := make(chan string)
 	done := make(chan struct{})
 	captureStdout(outC, done)
@@ -33,7 +31,7 @@ func StdoutEquals(t *testing.T, expected string, f func()) bool {
 	return true
 }
 
-func StderrEquals(t *testing.T, expected string, f func()) bool {
+func stderrEquals(t *testing.T, expected string, f func()) bool {
 	outC := make(chan string)
 	done := make(chan struct{})
 	captureStderr(outC, done)
@@ -140,28 +138,33 @@ func chanFromReader(reader io.Reader, pCap int) <-chan []byte {
 	return outChan
 }
 
+// TestEmptyTransforms ensures that we exit early with err if no transforms are
+// specified.
 func TestEmptyTransforms(t *testing.T) {
 	tfm := tfm{}
 
 	// Should err, complaining about no transforms listed
-	StderrEquals(t, "Must specify at least one transform to apply\n", func() {
+	stderrEquals(t, "Must specify at least one transform to apply\n", func() {
 		if exit := tfm.Run(nil); exit != 1 {
 			t.Errorf("Expected exit code 1, got %v", exit)
 		}
 	})
 }
 
+// TestListTransforms ensures that the list of transforms is as expected.
 func TestListTransforms(t *testing.T) {
 	tfm := tfm{}
 	tfm.list = true
 
-	StdoutEquals(t, "ensure-client\nidentity", func() {
+	stdoutEquals(t, "ensure-client\nidentity", func() {
 		if exit := tfm.Run(nil); exit != 0 {
 			t.Errorf("Expected exit code 0, got %v", exit)
 		}
 	})
 }
 
+// TestOnlyWrongTransformsFails ensure that if only a nonexistent transform name
+// is is passed, the command fails early.
 func TestOnlyWrongTransformsFails(t *testing.T) {
 	tfm := tfm{}
 	// a random name; won't match anything real
