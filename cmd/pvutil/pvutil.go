@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/pipeviz/pipeviz/version"
+	"github.com/spf13/cobra"
 )
 
 // shared stderr logger, for those that need it
@@ -20,6 +20,7 @@ func main() {
 	root.AddCommand(dotDumperCommand())
 	root.AddCommand(fixrCommand())
 	root.AddCommand(validateCommand())
+	root.AddCommand(tfmCommand())
 
 	var vflag bool
 	root.PersistentFlags().BoolVarP(&vflag, "version", "v", false, "Print version")

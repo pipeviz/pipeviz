@@ -1,214 +1,264 @@
 {
+    "client": {
+        "microtime": 1449259922682997,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "processes": [
         {
-            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
-            "user": "www",
-            "group": "www",
             "cwd": "/var/run/app",
-            "pid": 6212,
             "environment": {
                 "address": {
                     "hostname": "prod-web01"
                 }
             },
+            "group": "www",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 80
+                    "port": 80,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
                 }
-            ]
+            ],
+            "logic-states": [
+                "/var/www/app",
+                "/usr/sbin/httpd"
+            ],
+            "pid": 6212,
+            "user": "www"
         },
         {
-            "logic-states": [ "/usr/libexec/mysqld" ],
-            "user": "mysql",
-            "group": "mysql",
             "dataset": "/var/lib/mysql",
-            "pid": 26012,
             "environment": {
                 "address": {
                     "hostname": "prod-db01"
                 }
             },
+            "group": "mysql",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 3306
+                    "port": 3306,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
                 },
                 {
-                    "type": "unix",
-                    "path": "/var/lib/mysql/mysql.sock"
+                    "path": "/var/lib/mysql/mysql.sock",
+                    "type": "unix"
                 }
-            ]
+            ],
+            "logic-states": [
+                "/usr/libexec/mysqld"
+            ],
+            "pid": 26012,
+            "user": "mysql"
         },
         {
-            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
-            "user": "www",
-            "group": "www",
             "cwd": "/var/run/app",
+            "environment": {
+                "address": {
+                    "hostname": "stage"
+                }
+            },
+            "group": "www",
+            "listen": [
+                {
+                    "port": 80,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
+                }
+            ],
+            "logic-states": [
+                "/var/www/app",
+                "/usr/sbin/httpd"
+            ],
             "pid": 34764,
+            "user": "www"
+        },
+        {
+            "dataset": "/var/lib/mysql",
             "environment": {
                 "address": {
                     "hostname": "stage"
                 }
             },
+            "group": "mysql",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 80
+                    "port": 3306,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
+                },
+                {
+                    "path": "/var/lib/mysql/mysql.sock",
+                    "type": "unix"
                 }
-            ]
-        },
-        {
-            "logic-states": [ "/usr/libexec/mysqld" ],
-            "user": "mysql",
-            "group": "mysql",
-            "dataset": "/var/lib/mysql",
+            ],
+            "logic-states": [
+                "/usr/libexec/mysqld"
+            ],
             "pid": 7567,
-            "environment": {
-                "address": {
-                    "hostname": "stage"
-                }
-            },
-            "listen": [
-                {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 3306
-                },
-                {
-                    "type": "unix",
-                    "path": "/var/lib/mysql/mysql.sock"
-                }
-            ]
+            "user": "mysql"
         },
         {
-            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
-            "user": "www",
-            "group": "www",
             "cwd": "/var/run/app",
+            "environment": {
+                "address": {
+                    "hostname": "qa"
+                }
+            },
+            "group": "www",
+            "listen": [
+                {
+                    "port": 80,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
+                }
+            ],
+            "logic-states": [
+                "/var/www/app",
+                "/usr/sbin/httpd"
+            ],
             "pid": 38435,
+            "user": "www"
+        },
+        {
+            "dataset": "/var/lib/mysql",
             "environment": {
                 "address": {
                     "hostname": "qa"
                 }
             },
+            "group": "mysql",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 80
+                    "port": 3306,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
+                },
+                {
+                    "path": "/var/lib/mysql/mysql.sock",
+                    "type": "unix"
                 }
-            ]
-        },
-        {
-            "logic-states": [ "/usr/libexec/mysqld" ],
-            "user": "mysql",
-            "group": "mysql",
-            "dataset": "/var/lib/mysql",
+            ],
+            "logic-states": [
+                "/usr/libexec/mysqld"
+            ],
             "pid": 14891,
-            "environment": {
-                "address": {
-                    "hostname": "qa"
-                }
-            },
-            "listen": [
-                {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 3306
-                },
-                {
-                    "type": "unix",
-                    "path": "/var/lib/mysql/mysql.sock"
-                }
-            ]
+            "user": "mysql"
         },
         {
-            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
-            "user": "www",
-            "group": "www",
             "cwd": "/var/run/app",
+            "environment": {
+                "address": {
+                    "hostname": "dev01"
+                }
+            },
+            "group": "www",
+            "listen": [
+                {
+                    "port": 80,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
+                }
+            ],
+            "logic-states": [
+                "/var/www/app",
+                "/usr/sbin/httpd"
+            ],
             "pid": 25970,
+            "user": "www"
+        },
+        {
+            "dataset": "/var/lib/mysql",
             "environment": {
                 "address": {
                     "hostname": "dev01"
                 }
             },
+            "group": "mysql",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 80
+                    "port": 3306,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
+                },
+                {
+                    "path": "/var/lib/mysql/mysql.sock",
+                    "type": "unix"
                 }
-            ]
-        },
-        {
-            "logic-states": [ "/usr/libexec/mysqld" ],
-            "user": "mysql",
-            "group": "mysql",
-            "dataset": "/var/lib/mysql",
+            ],
+            "logic-states": [
+                "/usr/libexec/mysqld"
+            ],
             "pid": 30032,
-            "environment": {
-                "address": {
-                    "hostname": "dev01"
-                }
-            },
-            "listen": [
-                {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 3306
-                },
-                {
-                    "type": "unix",
-                    "path": "/var/lib/mysql/mysql.sock"
-                }
-            ]
+            "user": "mysql"
         },
         {
-            "logic-states": [ "/var/www/app", "/usr/sbin/httpd" ],
-            "user": "www",
-            "group": "www",
             "cwd": "/var/run/app",
-            "pid": 20216,
             "environment": {
                 "address": {
                     "hostname": "dev02"
                 }
             },
+            "group": "www",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 80
+                    "port": 80,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
                 }
-            ]
+            ],
+            "logic-states": [
+                "/var/www/app",
+                "/usr/sbin/httpd"
+            ],
+            "pid": 20216,
+            "user": "www"
         },
         {
-            "logic-states": [ "/usr/libexec/mysqld" ],
-            "user": "mysql",
-            "group": "mysql",
             "dataset": "/var/lib/mysql",
-            "pid": 37396,
             "environment": {
                 "address": {
                     "hostname": "dev02"
                 }
             },
+            "group": "mysql",
             "listen": [
                 {
-                    "type": "port",
-                    "proto": [ "tcp" ],
-                    "port": 3306
+                    "port": 3306,
+                    "proto": [
+                        "tcp"
+                    ],
+                    "type": "port"
                 },
                 {
-                    "type": "unix",
-                    "path": "/var/lib/mysql/mysql.sock"
+                    "path": "/var/lib/mysql/mysql.sock",
+                    "type": "unix"
                 }
-            ]
+            ],
+            "logic-states": [
+                "/usr/libexec/mysqld"
+            ],
+            "pid": 37396,
+            "user": "mysql"
         }
     ]
 }

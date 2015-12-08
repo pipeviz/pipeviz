@@ -8,6 +8,13 @@ import (
 	"github.com/pipeviz/pipeviz/types/system"
 )
 
+// A Client comprises the client block of data that is required of all messages.
+type Client struct {
+	Name      string `json:"name,omitempty"`
+	Version   string `json:"version,omitempty"`
+	Microtime int64  `json:"microtime,omitempty"`
+}
+
 // Message represents a valid pipeviz message. It is, currently, intended for use both
 // in encoding messages to be sent to a pipeviz server by clients, and decoding messages
 // by the server once they have arrived.
@@ -18,14 +25,23 @@ import (
 // The decode/serverside case, however, will always respond to the UnificationForm()
 // method, as that is how the message contents are translated to their next interpreted form.
 type Message struct {
-	Env []semantic.Environment   `json:"environments,omitempty"`
-	Ls  []semantic.LogicState    `json:"logic-states,omitempty"`
-	Pds []semantic.ParentDataset `json:"datasets,omitempty"`
-	Ds  []semantic.Dataset       `json:"-"`
-	P   []semantic.Process       `json:"processes,omitempty"`
-	C   []semantic.Commit        `json:"commits,omitempty"`
-	Cm  []semantic.CommitMeta    `json:"commit-meta,omitempty"`
-	Yp  []semantic.PkgYum        `json:"yum-pkg,omitempty"`
+	Client Client                   `json:"client,omitempty"`
+	Env    []semantic.Environment   `json:"environments,omitempty"`
+	Ls     []semantic.LogicState    `json:"logic-states,omitempty"`
+	Pds    []semantic.ParentDataset `json:"datasets,omitempty"`
+	Ds     []semantic.Dataset       `json:"-"`
+	P      []semantic.Process       `json:"processes,omitempty"`
+	C      []semantic.Commit        `json:"commits,omitempty"`
+	Cm     []semantic.CommitMeta    `json:"commit-meta,omitempty"`
+	Yp     []semantic.PkgYum        `json:"yum-pkg,omitempty"`
+}
+
+// NewMessage returns a new message, complete with required client data.
+//
+// This function mostly exists as a reminder for Go-based message producers that
+// the client is required by the spec.
+func NewMessage(c Client) *Message {
+	return &Message{Client: c}
 }
 
 // UnificationForm translates all data in the message into the standard

@@ -1,31 +1,36 @@
 {
+    "client": {
+        "microtime": 1449259922681152,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "code",
-            "id": {
-                "commit": "9ab8abe1e2890f53de84122ff37468142614274c"
-            },
-            "nick": "ourapp",
-            "lgroup": "prod",
-            "path": "/var/www/app",
-            "environment": {
-                "address": {
-                    "hostname": "prod-web02"
-                }
-            },
             "datasets": [
                 {
-                    "name": "default db",
-                    "type": "mediated",
                     "connNet": {
                         "hostname": "prod-db01",
                         "port": 3306,
                         "proto": "tcp"
                     },
                     "interaction": "rw",
-                    "subset": "app_db"
+                    "name": "default db",
+                    "subset": "app_db",
+                    "type": "mediated"
                 }
-            ]
+            ],
+            "environment": {
+                "address": {
+                    "hostname": "prod-web02"
+                }
+            },
+            "id": {
+                "commit": "9ab8abe1e2890f53de84122ff37468142614274c"
+            },
+            "lgroup": "prod",
+            "nick": "ourapp",
+            "path": "/var/www/app",
+            "type": "code"
         }
     ]
 }

@@ -1,43 +1,48 @@
 {
+    "client": {
+        "microtime": 1449259922679577,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "binary",
-            "id": {
-                "version": "2.2.4"
-            },
-            "path": "/usr/sbin/httpd",
             "environment": {
                 "address": {
                     "hostname": "stage"
                 }
             },
+            "id": {
+                "version": "2.2.4"
+            },
             "libraries": [
                 "/etc/httpd/modules/libphp.so"
-            ]
+            ],
+            "path": "/usr/sbin/httpd",
+            "type": "binary"
         },
         {
-            "type": "library",
+            "environment": {
+                "address": {
+                    "hostname": "stage"
+                }
+            },
             "id": {
                 "version": "5.5.13"
             },
             "path": "/etc/httpd/modules/libphp.so",
+            "type": "library"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "stage"
                 }
-            }
-        },
-        {
-            "type": "binary",
+            },
             "id": {
                 "version": "5.5.37"
             },
             "path": "/usr/libexec/mysqld",
-            "environment": {
-                "address": {
-                    "hostname": "stage"
-                }
-            }
+            "type": "binary"
         }
     ]
 }

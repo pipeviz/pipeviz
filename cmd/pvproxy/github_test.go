@@ -6,8 +6,10 @@ import (
 	"testing"
 
 	"github.com/jarcoal/httpmock"
+	"github.com/pipeviz/pipeviz/schema"
 	"github.com/pipeviz/pipeviz/types/semantic"
 	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 // Real/sample data from github v3 api
@@ -270,7 +272,6 @@ func TestPushToMessageMap(t *testing.T) {
 
 	gpe := githubPushEvent{}
 	json.Unmarshal([]byte(ghPushPayload), &gpe)
-	// FIXME mock this somehow; we don't want to actually reach out
 	m := gpe.ToMessage("")
 
 	if len(m.C) != 2 {
@@ -308,5 +309,36 @@ func TestPushToMessageMap(t *testing.T) {
 		Branches: []string{"master"},
 	}) {
 		t.Error("Commit meta not as expected")
+	}
+}
+
+func TestPushMessageValidates(t *testing.T) {
+	// Set up transport mocker for response
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	for sha, resp := range resps {
+		httpmock.RegisterResponder("GET", "https://api.github.com/repos/sdboyer/testrepo/git/commits/"+sha,
+			httpmock.NewStringResponder(200, resp))
+	}
+
+	gpe := githubPushEvent{}
+	json.Unmarshal([]byte(ghPushPayload), &gpe)
+	m := gpe.ToMessage("")
+
+	j, err := json.Marshal(m)
+	if err != nil {
+		t.Fatalf("Error marshaling message JSON: %s\n", err)
+	}
+
+	result, err := schema.Master().Validate(gojsonschema.NewStringLoader(string(j)))
+	if err != nil {
+		t.Fatalf("Error during JSON message validation: %s\n", err)
+	}
+
+	if !result.Valid() {
+		for _, desc := range result.Errors() {
+			t.Errorf("Validation error: %s\n", desc)
+		}
 	}
 }

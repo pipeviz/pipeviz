@@ -3,6 +3,9 @@
     "description": "Complete schema for pipeviz messages.",
     "type": "object",
     "properties": {
+        "client": {
+            "$ref": "#/definitions/client"
+        },
         "environments": {
             "type": "array",
             "minItems": 1,
@@ -40,7 +43,29 @@
         }
     },
     "additionalProperties": false,
+    "required": ["client"],
     "definitions": {
+        "client": {
+            "title": "Client information",
+            "description": "A space for each message-producing client to give its name, version, and local timestamp of when a message was created.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of the message producing tool that created the message. Try to be both unique and consistent."
+                },
+                "version": {
+                    "type": "string",
+                    "description": "A version number of the message producing tool."
+                },
+                "microtime": {
+                    "type": "integer",
+                    "description": "Unix time, in microseconds, of when the information described in the message was observed, became true, etc. Most messages are sent immediately, but if not, this time should be creation time, *not* send time."
+                }
+            },
+            "additionalProperties": false,
+            "required": [ "name", "version", "microtime" ]
+        },
         "environment": {
             "title": "Environment",
             "description": "A representation of an environment - physical, virtual, or container.",

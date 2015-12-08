@@ -18,7 +18,7 @@ clean:
 
 gen: tools
 	go generate -x ./schema
-	go-bindata -o fixtures/bindata_fixtures.go -prefix="fixtures" -pkg=fixtures fixtures/*/*.json
+	go-bindata -o fixtures/bindata_fixtures.go -prefix="fixtures" -pkg=fixtures -nometadata fixtures/*/*.json
 
 test: gen
 	go test $(shell glide nv)

@@ -1,79 +1,84 @@
 {
+    "client": {
+        "microtime": 1449259922679038,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "binary",
-            "id": {
-                "version": "2.2.4"
-            },
-            "path": "/usr/sbin/httpd",
             "environment": {
                 "address": {
                     "hostname": "prod-web01"
                 }
             },
+            "id": {
+                "version": "2.2.4"
+            },
             "libraries": [
                 "/etc/httpd/modules/libphp.so"
-            ]
+            ],
+            "path": "/usr/sbin/httpd",
+            "type": "binary"
         },
         {
-            "type": "binary",
-            "id": {
-                "version": "2.2.6"
-            },
-            "path": "/usr/sbin/httpd",
             "environment": {
                 "address": {
                     "hostname": "stage"
                 }
             },
-            "libraries": [
-                "/etc/httpd/modules/libphp.so"
-            ]
-        },
-        {
-            "type": "binary",
             "id": {
                 "version": "2.2.6"
             },
+            "libraries": [
+                "/etc/httpd/modules/libphp.so"
+            ],
             "path": "/usr/sbin/httpd",
+            "type": "binary"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "qa"
                 }
             },
-            "libraries": [
-                "/etc/httpd/modules/libphp.so"
-            ]
-        },
-        {
-            "type": "binary",
             "id": {
                 "version": "2.2.6"
             },
+            "libraries": [
+                "/etc/httpd/modules/libphp.so"
+            ],
             "path": "/usr/sbin/httpd",
+            "type": "binary"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "dev01"
                 }
             },
-            "libraries": [
-                "/etc/httpd/modules/libphp.so"
-            ]
-        },
-        {
-            "type": "binary",
             "id": {
                 "version": "2.2.6"
             },
+            "libraries": [
+                "/etc/httpd/modules/libphp.so"
+            ],
             "path": "/usr/sbin/httpd",
+            "type": "binary"
+        },
+        {
             "environment": {
                 "address": {
                     "hostname": "dev02"
                 }
             },
+            "id": {
+                "version": "2.2.6"
+            },
             "libraries": [
                 "/etc/httpd/modules/libphp.so"
-            ]
+            ],
+            "path": "/usr/sbin/httpd",
+            "type": "binary"
         }
     ]
 }

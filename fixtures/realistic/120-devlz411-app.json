@@ -1,29 +1,34 @@
 {
+    "client": {
+        "microtime": 1449259922679937,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "logic-states": [
         {
-            "type": "code",
-            "id": {
-                "commit": "fa4aba6d130a0dafc01274386a04110a740eef36"
-            },
-            "nick": "ourapp",
-            "lgroup": "dev-lz411",
-            "path": "/var/www/app",
+            "datasets": [
+                {
+                    "connUnix": {
+                        "path": "/var/lib/mysql/mysql.sock"
+                    },
+                    "interaction": "rw",
+                    "name": "default db",
+                    "subset": "app_db",
+                    "type": "mediated"
+                }
+            ],
             "environment": {
                 "address": {
                     "hostname": "dev-lz411"
                 }
             },
-            "datasets": [
-                {
-                    "name": "default db",
-                    "type": "mediated",
-                    "connUnix": {
-                        "path": "/var/lib/mysql/mysql.sock"
-                    },
-                    "interaction": "rw",
-                    "subset": "app_db"
-                }
-            ]
+            "id": {
+                "commit": "fa4aba6d130a0dafc01274386a04110a740eef36"
+            },
+            "lgroup": "dev-lz411",
+            "nick": "ourapp",
+            "path": "/var/www/app",
+            "type": "code"
         }
     ]
 }

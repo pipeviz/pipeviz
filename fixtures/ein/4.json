@@ -1,18 +1,23 @@
 {
+    "client": {
+        "microtime": 1449259922679291,
+        "name": "autogen by EnsureClient",
+        "version": "0.1.1-62-gb4c28e2-dirty"
+    },
     "environments": [
         {
-            "type": "virtual",
             "address": {
                 "hostname": "dev01"
             },
-            "provider": "vagrant"
+            "provider": "vagrant",
+            "type": "virtual"
         },
         {
-            "type": "virtual",
             "address": {
                 "hostname": "dev02"
             },
-            "provider": "vagrant"
+            "provider": "vagrant",
+            "type": "virtual"
         }
     ]
 }
